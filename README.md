@@ -1,169 +1,93 @@
-# ReCircle - Sustainability Rewards Platform
+**ReCircle x VeBetterDAO Submission Package**
 
-[![VeBetterDAO](https://img.shields.io/badge/VeBetterDAO-Integrated-green)](https://www.vebetterdao.org/)
-[![VeChain](https://img.shields.io/badge/VeChain-Thor-blue)](https://www.vechain.org/)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-
-## ♻️ ReCircle Overview
-ReCircle is a gamified sustainability rewards platform built on the VeChain blockchain and fully integrated with VeBetterDAO. The app empowers users to earn B3TR tokens by engaging in real-world, climate-positive actions — specifically through participation in the circular economy.
-
-Unlike other sustainability apps that focus narrowly on recycling or offsetting, ReCircle rewards re-use, one of the most impactful and underrepresented behaviors in climate action. Users earn tokens for verifiably choosing:
-
-👚 Secondhand fashion — shopping at thrift stores and clothing resellers
-
-📚 Used books — from online platforms like ThriftBooks and AbeBooks
-
-🎮 Used games and media — including purchases from GameStop and other pre-owned vendors
-
-🚗 Shared transportation — such as Uber, Lyft, Waymo, public transit, and electric vehicle rentals
-
-🛍️ Adding new secondhand stores to the platform for others to explore
-
-ReCircle uses AI-powered receipt verification, blockchain-backed proof-of-impact, and smart contract reward distribution to automate trust and transparency. The app also includes:
-
-🏆 Achievement badges and streak bonuses for long-term engagement
-
-🌱 Eco-impact dashboards that quantify actions in CO₂ saved and trees planted
-
-🔐 Built-in anti-fraud systems, duplicate protection, and moderation tools
-
-🧠 Seamless integrations with VeWorld, Google Forms, Google Sheets, and OpenAI GPT-4o
-
-With a full-featured frontend and backend now live, ReCircle is not just rewarding sustainability — it's making re-use fun, trackable, and financially incentivized.
-
-## 🚀 Features
-
-### Core Functionality
-- **Receipt Validation**: AI-powered receipt scanning using OpenAI Vision API
-- **Blockchain Rewards**: Automated B3TR token distribution via VeBetterDAO smart contracts
-- **Impact Tracking**: Real-time environmental impact metrics (CO₂ saved, sustainability score)
-- **Store Network**: Community-driven sustainable store verification system
-- **Gamification**: Achievement badges with blockchain verification
-
-### Technical Highlights
-- **VeChain Integration**: Native VeWorld wallet connection with Connex framework
-- **Smart Contract Integration**: VeBetterDAO 70/30 distribution model implementation
-- **Google Sheets Automation**: Seamless receipt validation and approval workflow
-- **Impact Explorer**: Comprehensive sustainability achievement dashboard
-- **Mobile-First Design**: Responsive interface optimized for mobile devices
-
-## 🏗️ Architecture
-
-### Frontend Stack
-- **React** with TypeScript for type-safe development
-- **Vite** for fast development and optimized builds
-- **Tailwind CSS** + shadcn/ui for modern, accessible UI components
-- **Wouter** for client-side routing
-- **TanStack Query** for efficient data fetching and caching
-
-### Backend Stack
-- **Node.js** with Express server
-- **PostgreSQL** with Drizzle ORM for type-safe database operations
-- **OpenAI Vision API** for intelligent receipt analysis
-- **VeChain Thor** blockchain integration
-
-### Blockchain Integration
-- **VeBetterDAO Smart Contracts** for transparent token distribution
-- **VeChain Thor Network** for sustainable blockchain operations
-- **70/30 Distribution Model**: 70% to users, 15% each to creator and app funds
-
-## 📊 Impact Metrics
-
-The platform tracks comprehensive sustainability metrics:
-
-- **Environmental Impact**: CO₂ emissions saved, waste reduction
-- **Community Growth**: Stores added, user engagement
-- **Token Economics**: B3TR distribution, reward tracking
-- **Achievement System**: Blockchain-verified sustainability badges
-
-## 🛠️ Development Setup
-
-### Prerequisites
-- Node.js 18+ 
-- PostgreSQL database
-- OpenAI API key
-- VeChain wallet (VeWorld recommended)
-
-### Environment Variables
-```bash
-DATABASE_URL=your_postgresql_connection_string
-OPENAI_API_KEY=your_openai_api_key
-CREATOR_FUND_WALLET=your_creator_wallet_address
-APP_FUND_WALLET=your_app_fund_wallet_address
-```
-
-### Installation
-```bash
-# Clone the repository
-git clone https://github.com/your-username/recircle.git
-cd recircle
-
-# Install dependencies
-npm install
-
-# Set up database
-npm run db:push
-
-# Start development server
-npm run dev
-```
-
-## 🔗 VeBetterDAO Integration
-
-ReCircle implements the VeBetterDAO standard for transparent, sustainable token distribution:
-
-### Technical Proof
-- **Distribution Model**: 70% user rewards, 15% creator fund, 15% app fund
-- **Smart Contract**: Integrated with VeBetterDAO's verified contract system
-- **Transaction Transparency**: All distributions publicly verifiable on VeChain Explorer
-- **Sustainability Focus**: Aligned with VeBetterDAO's environmental impact mission
-
-### Verified Transactions
-All token distributions are publicly verifiable on VeChain Explorer. Transaction hashes are provided in the application's Impact Explorer for full transparency.
-
-## 📱 Mobile Experience
-
-ReCircle is designed mobile-first with:
-- **Progressive Web App** capabilities
-- **Native camera integration** for receipt scanning
-- **Offline functionality** for core features
-- **Push notifications** for reward updates
-
-## 🤝 Contributing
-
-We welcome contributions from the community! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
-
-### Development Workflow
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🌍 Environmental Impact
-
-ReCircle is committed to environmental sustainability:
-- **Carbon Neutral**: Built on VeChain's energy-efficient blockchain
-- **Circular Economy**: Promoting reuse and sustainable consumption
-- **Community Driven**: Empowering users to make environmental impact
-- **Transparent Tracking**: Real-time sustainability metrics
-  ### Live Blockchain Transaction Example
-![Transaction History](screenshots/blockchain-integration.png)
-
-### Impact Explorer
-![Impact Dashboard](screenshots/impact-explorer-dashboard.png)
-
-
-## 📞 Support
-
-- **Documentation**: [docs/](./docs/)
-- **Issues**: [GitHub Issues](https://github.com/your-username/recircle/issues)
-- **Community**: Join our Discord server
-- **Email**: recircleapp@gmail.com
+**App Name:** ReCircle
+**Developer:** Damian Reyes (LLC in formation)
+**Project Type:** x2Earn Sustainability App
+**VeChain Wallet Integration:** VeWorld
 
 ---
 
-Built with ❤️ for a sustainable future | Powered by VeChain & VeBetterDAO
+### 📈 Summary
+
+ReCircle is a full-featured x2Earn sustainability platform that rewards users for climate-positive behaviors across a variety of everyday activities. These include:
+
+* Purchasing **secondhand clothing**, **used books**, and **pre-owned games** from stores like GameStop
+* Using **rideshare** (Uber, Lyft, Waymo) and **electric vehicle rentals**
+
+Users earn B3TR tokens on-chain by submitting verified receipts. The app uses AI to scan and validate these receipts, with a manual fallback for human review.
+
+Gamification layers like **badges**, **achievements**, and **streak rewards** keep users engaged. Their progress is displayed on a visual **Impact Explorer**, which tracks actions, CO₂ saved, and the equivalent number of trees planted.
+
+All rewards use VeBetterDAO smart contracts and are executed with a transparent 70/30 model, with blockchain transaction hashes and explorer links logged and returned by API.
+
+---
+
+### 📅 Current Status: Ready for Mainnet Recognition
+
+* ✅ **70/30 On-Chain Reward Distribution**
+* ✅ **Used Item Purchase Support (Fashion, Games, Books)**
+* ✅ **Rideshare & EV Reward Support**
+* ✅ **Blockchain Integration: VeChain + VeWorld**
+* ✅ **Gamification System (Streaks, Badges, Bonuses)**
+* ✅ **Eco Dashboard (CO₂ saved, trees planted)**
+* ✅ **Fraud Prevention + Manual Moderation**
+* ✅ **Transaction Logging + Explorer URLs**
+* ✅ **Accessible UI with contrast-tested visual updates**
+* ✅ **Google Forms for Feedback and Help**
+
+---
+
+### 🔧 Technical Proof
+
+* All rewards are processed using `distributeRewardWithProofAndMetadata()`
+* Three transactions per reward: User (70%), Creator (15%), App (15%)
+* Logs include wallet, amount, tx hash, fund type
+
+**Example Transaction Hashes:**
+
+* User: `0x3d35100fbd7a199cc84e07a471309fc579e2e5404139cf5b48f5a9d9b4f30f76`
+* Creator: `0x745f2617e0997db60e01cdb9ef43f50b5e11f7b8b9d0b7317bdfdefbb8d13b13`
+* App: `0xf2176eb86b49d59e9ef2d9d72f028cb3e98ad790dc13e3d1635db709f40f7cc3`
+
+**Screenshots Include:**
+
+* Receipt scanning
+* Blockchain transaction explorer
+* Badge achievements
+* CO₂ & tree dashboard
+* Token earnings & profile UI
+
+---
+
+### 💡 Roadmap
+
+1. **Bonus B3TR for VeChain Visa Purchases**
+2. **Ride-share partnerships (Uber, Lyft, Waymo)**
+3. **EV Rental Incentives (Hertz, fleet providers)**
+4. **Grant Applications** (VeChain Foundation & DAO-based)
+5. **LLC Formation for IP, Fund Management, Partnerships**
+
+---
+
+### 📂 GitHub Repository
+
+[https://github.com/the-recircle-app/Recircle](https://github.com/the-recircle-app/Recircle)
+
+* README includes platform overview, features, screenshots
+* Transaction hashes and technical proof included
+* Contact info for outreach and collaboration
+
+---
+
+### ✉️ Submission Request
+
+We respectfully request that **ReCircle** be:
+
+* Recognized as an official VeBetterDAO x2Earn app
+* Included in DAO announcements or ecosystem lists
+* Considered for grant opportunities
+
+We are committed to driving real-world sustainability powered by VeChain technology. Thank you for your time and consideration!
+
+**Contact:** Damian Reyes
+**Email:** [recircleapp@gmail.com]
