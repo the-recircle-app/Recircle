@@ -4,9 +4,32 @@
 [![VeChain](https://img.shields.io/badge/VeChain-Thor-blue)](https://www.vechain.org/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-## 🌱 Overview
+## ♻️ ReCircle Overview
+ReCircle is a gamified sustainability rewards platform built on the VeChain blockchain and fully integrated with VeBetterDAO. The app empowers users to earn B3TR tokens by engaging in real-world, climate-positive actions — specifically through participation in the circular economy.
 
-ReCircle is a blockchain-powered circular economy platform that transforms sustainable consumption into an engaging, rewarding digital experience using VeChain Thor technology. Users earn B3TR tokens by scanning receipts from sustainable stores, contributing to environmental impact tracking, and building a community-driven marketplace for eco-friendly commerce.
+Unlike other sustainability apps that focus narrowly on recycling or offsetting, ReCircle rewards re-use, one of the most impactful and underrepresented behaviors in climate action. Users earn tokens for verifiably choosing:
+
+👚 Secondhand fashion — shopping at thrift stores and clothing resellers
+
+📚 Used books — from online platforms like ThriftBooks and AbeBooks
+
+🎮 Used games and media — including purchases from GameStop and other pre-owned vendors
+
+🚗 Shared transportation — such as Uber, Lyft, Waymo, public transit, and electric vehicle rentals
+
+🛍️ Adding new secondhand stores to the platform for others to explore
+
+ReCircle uses AI-powered receipt verification, blockchain-backed proof-of-impact, and smart contract reward distribution to automate trust and transparency. The app also includes:
+
+🏆 Achievement badges and streak bonuses for long-term engagement
+
+🌱 Eco-impact dashboards that quantify actions in CO₂ saved and trees planted
+
+🔐 Built-in anti-fraud systems, duplicate protection, and moderation tools
+
+🧠 Seamless integrations with VeWorld, Google Forms, Google Sheets, and OpenAI GPT-4o
+
+With a full-featured frontend and backend now live, ReCircle is not just rewarding sustainability — it's making re-use fun, trackable, and financially incentivized.
 
 ## 🚀 Features
 
