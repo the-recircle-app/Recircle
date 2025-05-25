@@ -127,6 +127,12 @@ ReCircle is committed to environmental sustainability:
 - **Circular Economy**: Promoting reuse and sustainable consumption
 - **Community Driven**: Empowering users to make environmental impact
 - **Transparent Tracking**: Real-time sustainability metrics
+  ### Live Blockchain Transaction Example
+![Transaction History](screenshots/blockchain-integration.png)
+
+### Impact Explorer
+![Impact Dashboard](screenshots/impact-explorer-dashboard.png)
+
 
 ## 📞 Support
 
