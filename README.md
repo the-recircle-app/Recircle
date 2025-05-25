@@ -133,7 +133,7 @@ ReCircle is committed to environmental sustainability:
 - **Documentation**: [docs/](./docs/)
 - **Issues**: [GitHub Issues](https://github.com/your-username/recircle/issues)
 - **Community**: Join our Discord server
-- **Email**: support@recircle.app
+- **Email**: recircleapp@gmail.com
 
 ---
 
