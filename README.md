@@ -5,6 +5,7 @@ ReCircle - Sustainability Rewards Platform
 ReCircle is a blockchain-powered circular economy platform that transforms sustainable consumption into an engaging, rewarding digital experience using VeChain Thor technology. Users earn B3TR tokens by scanning receipts from second hand stores such as GoodWill and GameStop (preowned items) as well as electric vehicle rentals from companies like Hertz and rideshare trips from companies like Uber, Lyft, and Waymo contributing to environmental impact tracking, and building a community-driven marketplace for eco-friendly commerce.
 
 🚀 Features
+
 Core Functionality
 Receipt Validation: AI-powered receipt scanning using OpenAI Vision API
 Blockchain Rewards: Automated B3TR token distribution via VeBetterDAO smart contracts
@@ -19,6 +20,7 @@ Impact Explorer: Comprehensive sustainability achievement dashboard
 Mobile-First Design: Responsive interface optimized for mobile devices
 
 🏗️ Architecture
+
 Frontend Stack
 React with TypeScript for type-safe development
 Vite for fast development and optimized builds
@@ -36,6 +38,7 @@ VeChain Thor Network for sustainable blockchain operations
 70/30 Distribution Model: 70% to users, 15% each to creator and app funds
 
 📊 Impact Metrics
+
 The platform tracks comprehensive sustainability metrics:
 
 Environmental Impact: CO₂ emissions saved, waste reduction
@@ -44,6 +47,7 @@ Token Economics: B3TR distribution, reward tracking
 Achievement System: Blockchain-verified sustainability badges
 
 🛠️ Development Setup
+
 Prerequisites
 Node.js 18+
 PostgreSQL database
@@ -66,6 +70,7 @@ npm run db:push
 npm run dev
 
 🔗 VeBetterDAO Integration
+
 ReCircle implements the VeBetterDAO standard for transparent, sustainable token distribution:
 
 Technical Proof
@@ -77,6 +82,7 @@ Verified Transactions
 All token distributions are publicly verifiable on VeChain Explorer. Transaction hashes are provided in the application's Impact Explorer for full transparency.
 
 📱 Mobile Experience
+
 ReCircle is designed mobile-first with:
 
 Progressive Web App capabilities
@@ -85,6 +91,7 @@ Offline functionality for core features
 Push notifications for reward updates
 
 🤝 Contributing
+
 We welcome contributions from the community! Please see our Contributing Guidelines for details.
 
 Development Workflow
@@ -94,9 +101,11 @@ Make your changes
 Submit a pull request
 
 📄 License
+
 This project is licensed under the MIT License - see the LICENSE file for details.
 
 🌍 Environmental Impact
+
 ReCircle is committed to environmental sustainability:
 
 Carbon Neutral: Built on VeChain's energy-efficient blockchain
@@ -105,6 +114,7 @@ Community Driven: Empowering users to make environmental impact
 Transparent Tracking: Real-time sustainability metrics
 
 📞 Support
+
 Documentation: docs/
 Issues: GitHub Issues
 Community: Join our Discord server
