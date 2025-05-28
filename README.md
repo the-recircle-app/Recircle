@@ -24,7 +24,9 @@ ReCircle is a blockchain-powered circular economy platform that transforms susta
 *AI-powered receipt validation with real-time confidence scoring*
 
 ### VeChain Wallet Integration
-![Wallet Connection](screenshots/wallet-connection.png)
+[Wallet Connect Before](https://github.com/user-attachments/assets/d3c9f2d6-6c78-4a7a-bd73-136509940d73)
+[Wallet Connect After](https://github.com/user-attachments/assets/ea5bfa97-df72-485e-8b2f-c52422da7d11)
+
 *Seamless VeWorld wallet connection and B3TR token balance display*
 
 ### Impact Tracking Dashboard
