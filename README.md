@@ -45,7 +45,7 @@ ReCircle is a blockchain-powered circular economy platform that transforms susta
 
 ### Reward Distribution
 [First Eco Purchase Achievement unlock notification with 70/30 split detailed info and streak/bonus info |](https://github.com/user-attachments/assets/ecde63c0-aa8b-44c9-afbe-eca834fb239a)
-[Transaction history and transaction details PNG1](https://github.com/user-attachments/assets/c993249a-533b-484c-86ce-f426ef6de964)
+[Transaction history and transaction details PNG1 |](https://github.com/user-attachments/assets/c993249a-533b-484c-86ce-f426ef6de964)
 [blockchain integration with View on Vechain Ex PNG1](https://github.com/user-attachments/assets/115e54ac-5b1d-4b29-9413-2b0f1d4c248a)
 
 *VeBetterDAO 70/30 distribution model in action*
