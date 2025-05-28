@@ -54,7 +54,7 @@ ReCircle is a **production-ready** blockchain-powered circular economy platform 
 | **Thrift Stores** | 90%+ | 95% | 5% |
 | **Pre-owned Items** | 85%+ | 92% | 8% |
 | **Transportation** | 88%+ | 94% | 6% |
-| - Ride Share (Uber/Lyft) | 95%+ | 98% | 2% |
+| - Ride Share (Uber/Lyft/Waymo) | 95%+ | 98% | 2% |
 | - Electric Vehicles | 90%+ | 96% | 4% |
 | - Public Transit | 85%+ | 89% | 11% |
 
