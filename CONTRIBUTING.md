@@ -71,9 +71,11 @@ Thank you for your interest in contributing to ReCircle! We're building a blockc
    ```
 
 5. **Verify Setup**
-   - Open http://localhost:5173
+   - Open http://localhost:5173 (local development server)
    - Test basic functionality like wallet connection
    - Explore the platform features
+
+   **Note**: The localhost URL only works on your local machine during development. For the live demo, visit the deployed application link in the README.
 
 ### Project Structure
 ```
