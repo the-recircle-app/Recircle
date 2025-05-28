@@ -5,7 +5,8 @@
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 ## 🌱 Overview
-ReCircle is a blockchain-powered circular economy platform that transforms sustainable consumption into an engaging, rewarding digital experience using VeChain Thor technology. Users earn B3TR tokens by scanning receipts from second hand stores such as GoodWill and GameStop (preowned items) as well as electric vehicle rentals from companies like Hertz and rideshare trips from companies like Uber, Lyft, and Waymo contributing to environmental impact tracking, and building a community-driven marketplace for eco-friendly commerce.
+
+ReCircle is a blockchain-powered circular economy platform that transforms sustainable consumption into an engaging, rewarding digital experience using VeChain Thor technology. Users earn B3TR tokens by scanning receipts from sustainable stores, contributing to environmental impact tracking, and building a community-driven marketplace for eco-friendly commerce.
 
 ## 🚀 Features
 
@@ -15,6 +16,24 @@ ReCircle is a blockchain-powered circular economy platform that transforms susta
 - **Impact Tracking**: Real-time environmental impact metrics (CO₂ saved, sustainability score)
 - **Store Network**: Community-driven sustainable store verification system
 - **Gamification**: Achievement badges with blockchain verification
+
+## 📱 Platform Screenshots
+
+### Receipt Scanning & Validation
+![Receipt Scanner Interface](screenshots/receipt-scanner.png)
+*AI-powered receipt validation with real-time confidence scoring*
+
+### VeChain Wallet Integration
+![Wallet Connection](screenshots/wallet-connection.png)
+*Seamless VeWorld wallet connection and B3TR token balance display*
+
+### Impact Tracking Dashboard
+![Impact Dashboard](screenshots/impact-dashboard.png)
+*Environmental impact visualization with CO₂ savings and sustainability metrics*
+
+### Reward Distribution
+![Token Rewards](screenshots/token-rewards.png)
+*VeBetterDAO 70/30 distribution model in action*
 
 ### Technical Highlights
 - **VeChain Integration**: Native VeWorld wallet connection with Connex framework
