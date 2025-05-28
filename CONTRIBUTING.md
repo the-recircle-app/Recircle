@@ -138,7 +138,7 @@ recircle-app/
 - **Never commit API keys** or sensitive credentials
 - **Validate all user inputs** on both frontend and backend
 - **Follow security best practices** outlined in SECURITY.md
-- **Report security issues** privately to security@recircleapp.com
+- **Report security issues** privately to recircleapp@gmail.com
 
 ---
 
