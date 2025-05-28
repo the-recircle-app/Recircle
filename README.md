@@ -20,7 +20,14 @@ ReCircle is a blockchain-powered circular economy platform that transforms susta
 ## 📱 Platform Screenshots
 
 ### Receipt Scanning & Validation
-![Receipt Scanner Interface](screenshots/receipt-scanner.png)
+[Scan a receipt option on homepage](https://github.com/user-attachments/assets/9cffdd7a-d134-4caf-866b-fcd1e2e45a83)
+[Receipt upload Enable Camera and Upload from Gallery](https://github.com/user-attachments/assets/f02ce7b1-0d42-4aff-8afe-839b2d568f2e)
+[Receipt upload instructions](https://github.com/user-attachments/assets/056ffe5b-a31c-4250-acd5-63b876234082)
+[Success toast notification before receipt submission](https://github.com/user-attachments/assets/4998342a-ab18-47b6-9663-ab7d07c2e227)
+[Test receipt details](https://github.com/user-attachments/assets/0161b930-d05c-4a92-a6d5-8a07c94e9174)
+[Sustainable category options](https://github.com/user-attachments/assets/c181bef9-15ec-4338-9037-82c89b6db032)
+[Success screen after receipt submission](https://github.com/user-attachments/assets/d2ae6e45-85e2-4c0d-8c88-09e5f39443b0)
+
 *AI-powered receipt validation with real-time confidence scoring*
 
 ### VeChain Wallet Integration
@@ -30,7 +37,10 @@ ReCircle is a blockchain-powered circular economy platform that transforms susta
 *Seamless VeWorld wallet connection and B3TR token balance display*
 
 ### Impact Tracking Dashboard
-![Impact Dashboard](screenshots/impact-dashboard.png)
+[impact-explorer-dashboard](https://github.com/user-attachments/assets/eeef1c12-097a-4f1e-9fce-67e9b7fcf858)
+[impact-explorer-dashboard with badge](https://github.com/user-attachments/assets/5577b61e-6078-4a10-bf6e-de864a99f6b5)
+[impact-explorer-dashboard badge progression](https://github.com/user-attachments/assets/379923d4-d9f2-4d43-a5f5-0db685bfffb8)
+
 *Environmental impact visualization with CO₂ savings and sustainability metrics*
 
 ### Reward Distribution
