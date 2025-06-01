@@ -14,6 +14,7 @@ ReCircle aims to become the leading blockchain-powered circular economy platform
 - **Core Platform**: Production-ready receipt validation and B3TR token distribution
 - **VeChain Integration**: Full VeWorld wallet connectivity and blockchain transactions
 - **AI Validation**: OpenAI Vision API with 94% accuracy across sustainable categories
+- **Fraud Detection**: Advanced receipt image storage, duplicate prevention, and manual review system
 - **Transportation Focus**: Uber/Lyft/Waymo receipt recognition and rewards
 - **Community Features**: Store verification, referral system, achievement badges
 
