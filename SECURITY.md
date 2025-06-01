@@ -127,6 +127,37 @@ We offer rewards for qualifying security vulnerabilities based on severity and i
 
 ---
 
+## 🚨 Advanced Fraud Detection System
+
+### Receipt Validation Security
+ReCircle implements a comprehensive fraud detection system to protect against sophisticated attacks experienced by other VeBetterDAO applications:
+
+#### Image Storage & Analysis
+- **SHA-256 Cryptographic Hashing**: Prevents duplicate receipt submissions
+- **Metadata Extraction**: Detects file manipulation and editing software traces
+- **File Size Anomaly Detection**: Identifies suspiciously large or small image files
+- **Compression Pattern Analysis**: Recognizes signs of image modification
+
+#### Suspicious Pattern Recognition
+- **Handwritten Receipt Detection**: Automatic flagging of potentially fraudulent handwritten receipts
+- **Photoshopped Content Identification**: Detection of altered amounts, dates, or store names
+- **Editing Software Traces**: Recognition of common image editing tools in metadata
+- **Duplicate Image Prevention**: Real-time comparison against stored receipt database
+
+#### Manual Review Workflow
+- **Admin Security Interface**: Dedicated dashboard at `/admin/fraud-detection` for reviewing suspicious submissions
+- **Risk-Based Categorization**: High/Medium/Low risk classification system
+- **Visual Verification**: Manual reviewers can view actual receipt images through Google Sheets integration
+- **Fraud Flag Alerts**: Automatic warnings for reviewers when suspicious indicators are detected
+
+#### Audit Trail & Compliance
+- **Complete Image Storage**: All receipt images stored with metadata for fraud investigation
+- **Review History**: Comprehensive logging of all manual review decisions
+- **Compliance Documentation**: Detailed fraud detection reports for VeBetterDAO standards
+- **Incident Response**: Structured process for handling confirmed fraud attempts
+
+---
+
 ## 🔒 Platform Security Features
 
 ### User Account Protection
@@ -138,7 +169,11 @@ We offer rewards for qualifying security vulnerabilities based on severity and i
 ### Transaction Security
 - **Blockchain Verification**: All transactions verified on VeChain network
 - **Double-Spend Protection**: Prevention of duplicate reward claims
-- **Fraud Detection**: AI-powered analysis of suspicious patterns
+- **Advanced Fraud Detection**: Multi-layered fraud prevention system
+  - Receipt image storage with SHA-256 hashing for duplicate detection
+  - Automatic detection of handwritten receipts and image manipulation
+  - File metadata analysis for editing software traces
+  - Visual verification system for manual review
 - **Secure Wallet Integration**: Non-custodial wallet connections
 
 ### Data Privacy Controls
@@ -270,8 +305,8 @@ We offer rewards for qualifying security vulnerabilities based on severity and i
 
 ---
 
-**Last Updated**: May 28, 2025  
-**Next Review**: August 2025  
-**Version**: 1.0
+**Last Updated**: June 1, 2025  
+**Next Review**: September 2025  
+**Version**: 1.1 - Enhanced Fraud Detection
 
 *Security is not a destination, but a journey of continuous improvement and vigilance.*
