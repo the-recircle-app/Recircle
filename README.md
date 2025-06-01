@@ -6,7 +6,7 @@
 
 ## 🌱 Overview
 
-ReCircle is a blockchain-powered circular economy platform that transforms sustainable consumption into an engaging, rewarding digital experience using VeChain Thor technology. Users earn B3TR tokens by scanning receipts from sustainable stores, contributing to environmental impact tracking, and building a community-driven marketplace for eco-friendly commerce.
+ReCircle is a blockchain-powered circular economy platform that transforms sustainable consumption into an engaging, rewarding digital experience using VeChain Thor technology. Users earn B3TR tokens by scanning receipts of secondhand purchases (thrift stores like GoodWill or preowned items at GameStop) from sustainable stores as well as ELECTRIC VEHICLE RENTALS from places like Hertz and RIDESHARE trips from companies like Uber/Lyft/Waymo, contributing to environmental impact tracking, and building a community-driven marketplace for eco-friendly commerce.
 
 ## 🚀 Features
 
