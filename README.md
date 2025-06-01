@@ -6,12 +6,13 @@
 
 ## 🌱 Overview
 
-ReCircle is a blockchain-powered circular economy platform that transforms sustainable consumption into an engaging, rewarding digital experience using VeChain Thor technology. Users earn B3TR tokens by scanning receipts from second hand stores such as GoodWill and GameStop (preowned items) as well as electric vehicle rentals from companies like Hertz and rideshare trips from companies like Uber/Lyft/Waymo contributing to environmental impact tracking, and building a community-driven marketplace for eco-friendly commerce.
+ReCircle is a blockchain-powered circular economy platform that transforms sustainable consumption into an engaging, rewarding digital experience using VeChain Thor technology. Users earn B3TR tokens by scanning receipts from sustainable stores, contributing to environmental impact tracking, and building a community-driven marketplace for eco-friendly commerce.
 
 ## 🚀 Features
 
 ### Core Functionality
-- **Receipt Validation**: AI-powered receipt scanning using OpenAI Vision API
+- **Receipt Validation**: AI-powered receipt scanning using OpenAI Vision API with fraud detection
+- **Fraud Prevention**: Advanced image analysis, duplicate detection, and suspicious pattern identification
 - **Blockchain Rewards**: Automated B3TR token distribution via VeBetterDAO smart contracts
 - **Impact Tracking**: Real-time environmental impact metrics (CO₂ saved, sustainability score)
 - **Store Network**: Community-driven sustainable store verification system
@@ -20,40 +21,27 @@ ReCircle is a blockchain-powered circular economy platform that transforms susta
 ## 📱 Platform Screenshots
 
 ### Receipt Scanning & Validation
-[Scan a receipt option on homepage |](https://github.com/user-attachments/assets/9cffdd7a-d134-4caf-866b-fcd1e2e45a83)
-[Receipt upload Enable Camera and Upload from Gallery |](https://github.com/user-attachments/assets/f02ce7b1-0d42-4aff-8afe-839b2d568f2e)
-[Receipt upload instructions |](https://github.com/user-attachments/assets/056ffe5b-a31c-4250-acd5-63b876234082)
-[Success toast notification before receipt submission |](https://github.com/user-attachments/assets/4998342a-ab18-47b6-9663-ab7d07c2e227)
-[Test receipt details |](https://github.com/user-attachments/assets/0161b930-d05c-4a92-a6d5-8a07c94e9174)
-[Sustainable category options |](https://github.com/user-attachments/assets/c181bef9-15ec-4338-9037-82c89b6db032)
-[Success screen after receipt submission](https://github.com/user-attachments/assets/d2ae6e45-85e2-4c0d-8c88-09e5f39443b0)
-
+![Receipt Scanner Interface](screenshots/receipt-scanner.png)
 *AI-powered receipt validation with real-time confidence scoring*
 
 ### VeChain Wallet Integration
-[Wallet Connect Before |](https://github.com/user-attachments/assets/d3c9f2d6-6c78-4a7a-bd73-136509940d73)
-[Wallet Connect After](https://github.com/user-attachments/assets/ea5bfa97-df72-485e-8b2f-c52422da7d11)
-
+![Wallet Connection](screenshots/wallet-connection.png)
 *Seamless VeWorld wallet connection and B3TR token balance display*
 
 ### Impact Tracking Dashboard
-[impact-explorer-dashboard |](https://github.com/user-attachments/assets/eeef1c12-097a-4f1e-9fce-67e9b7fcf858)
-[impact-explorer-dashboard with badge |](https://github.com/user-attachments/assets/5577b61e-6078-4a10-bf6e-de864a99f6b5)
-[impact-explorer-dashboard badge progression](https://github.com/user-attachments/assets/379923d4-d9f2-4d43-a5f5-0db685bfffb8)
-
+![Impact Dashboard](screenshots/impact-dashboard.png)
 *Environmental impact visualization with CO₂ savings and sustainability metrics*
 
 ### Reward Distribution
-[First Eco Purchase Achievement unlock notification with 70/30 split detailed info and streak/bonus info |](https://github.com/user-attachments/assets/ecde63c0-aa8b-44c9-afbe-eca834fb239a)
-[Transaction history and transaction details |](https://github.com/user-attachments/assets/c993249a-533b-484c-86ce-f426ef6de964)
-[blockchain integration with View on Vechain Ex](https://github.com/user-attachments/assets/115e54ac-5b1d-4b29-9413-2b0f1d4c248a)
-
+![Token Rewards](screenshots/token-rewards.png)
 *VeBetterDAO 70/30 distribution model in action*
 
 ### Technical Highlights
 - **VeChain Integration**: Native VeWorld wallet connection with Connex framework
 - **Smart Contract Integration**: VeBetterDAO 70/30 distribution model implementation
-- **Google Sheets Automation**: Seamless receipt validation and approval workflow
+- **Advanced Fraud Detection**: Receipt image storage with SHA-256 hashing and duplicate prevention
+- **Google Sheets Automation**: Enhanced receipt validation and approval workflow with image viewing
+- **Admin Security Interface**: Manual review system for suspicious submissions
 - **Impact Explorer**: Comprehensive sustainability achievement dashboard
 - **Mobile-First Design**: Responsive interface optimized for mobile devices
 
@@ -117,6 +105,25 @@ npm run db:push
 # Start development server
 npm run dev
 ```
+
+## 🛡️ Security & Fraud Prevention
+
+ReCircle implements advanced fraud detection to protect against sophisticated attacks experienced by other VeBetterDAO applications:
+
+### Fraud Detection Features
+- **Receipt Image Storage**: SHA-256 hashing for duplicate detection and verification
+- **Suspicious Pattern Recognition**: Automatic detection of handwritten receipts, unusual file sizes, and editing traces
+- **Visual Verification**: Manual reviewers can view actual receipt images through Google Sheets integration
+- **Admin Interface**: Dedicated fraud detection dashboard at `/admin/fraud-detection` for high-risk submissions
+- **Metadata Analysis**: File size, compression patterns, and editing software detection
+- **Real-time Alerts**: Automatic flagging of suspicious submissions for manual review
+
+### Security Measures
+- **Cryptographic Hashing**: Prevents duplicate image submissions
+- **Image Metadata Extraction**: Detects signs of manipulation or editing
+- **Manual Review Workflow**: Human verification for flagged submissions
+- **Audit Trail**: Complete logging of all receipt submissions and approvals
+- **Protected API Endpoints**: Secure access controls for sensitive operations
 
 ## 🔗 VeBetterDAO Integration
 
