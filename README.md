@@ -21,7 +21,7 @@ ReCircle is a blockchain-powered circular economy platform that transforms susta
 ## 📱 Platform Screenshots
 
 ## Receipt Scanning Process
-[Scan a receipt option on homepage |](https://github.com/user-attachments/assets/9cffdd7a-d134-4caf-866b-fcd1e2e45a83)Add commentMore actions
+[Scan a receipt option on homepage |](https://github.com/user-attachments/assets/9cffdd7a-d134-4caf-866b-fcd1e2e45a83)
 [Receipt upload Enable Camera and Upload from Gallery |](https://github.com/user-attachments/assets/f02ce7b1-0d42-4aff-8afe-839b2d568f2e)
 [Receipt upload instructions |](https://github.com/user-attachments/assets/056ffe5b-a31c-4250-acd5-63b876234082)
 [Success toast notification before receipt submission |](https://github.com/user-attachments/assets/4998342a-ab18-47b6-9663-ab7d07c2e227)
