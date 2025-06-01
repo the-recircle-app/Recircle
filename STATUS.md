@@ -17,7 +17,7 @@ ReCircle is a **production-ready** blockchain-powered circular economy platform 
 | **Frontend** | React + TypeScript | ✅ Production | 98ms avg load time |
 | **Backend** | Node.js + Express | ✅ Production | <100ms API response |
 | **Blockchain** | VeChain Thor + Connex | ✅ Production | 2-3s transaction time |
-| **AI Validation** | OpenAI Vision API | ✅ Production | 92% accuracy rate |
+| **AI Validation** | OpenAI Vision API + Fraud Detection | ✅ Production | 92% accuracy rate |
 | **Database** | PostgreSQL + Drizzle ORM | ✅ Production | 50ms query time |
 | **Deployment** | Replit + VeBetterDAO | ✅ Production | 99.9% uptime |
 
@@ -54,7 +54,7 @@ ReCircle is a **production-ready** blockchain-powered circular economy platform 
 | **Thrift Stores** | 90%+ | 95% | 5% |
 | **Pre-owned Items** | 85%+ | 92% | 8% |
 | **Transportation** | 88%+ | 94% | 6% |
-| - Ride Share (Uber/Lyft/Waymo) | 95%+ | 98% | 2% |
+| - Ride Share (Uber/Lyft) | 95%+ | 98% | 2% |
 | - Electric Vehicles | 90%+ | 96% | 4% |
 | - Public Transit | 85%+ | 89% | 11% |
 
