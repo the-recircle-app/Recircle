@@ -1,55 +1,49 @@
-# ReCircle - Sustainability Rewards Platform
+# ReCircle - Sustainable Transportation Rewards Platform
 
 [![VeBetterDAO](https://img.shields.io/badge/VeBetterDAO-Integrated-green)](https://www.vebetterdao.org/)
 [![VeChain](https://img.shields.io/badge/VeChain-Thor-blue)](https://www.vechain.org/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-## 🌱 Overview
+## 🚗 Overview
 
-ReCircle is a blockchain-powered circular economy platform that transforms sustainable consumption into an engaging, rewarding digital experience using VeChain Thor technology. Users earn B3TR tokens by scanning receipts from second hand stores such as GoodWill and GameStop (preowned items) as well as electric vehicle rentals from companies like Hertz and rideshare trips from companies like Uber/Lyft/Waymo contributing to environmental impact tracking, and building a community-driven marketplace for eco-friendly commerce.
+ReCircle is a blockchain-powered rewards platform that incentivizes sustainable transportation choices through B3TR token distribution. Users earn rewards by submitting receipts from ride-share services, electric vehicle rentals, and public transit, contributing to reduced carbon emissions and promoting eco-friendly mobility solutions.
+
 ## 🚀 Features
 
 ### Core Functionality
-- **Receipt Validation**: AI-powered receipt scanning using OpenAI Vision API with fraud detection
-- **Fraud Prevention**: Advanced image analysis, duplicate detection, and suspicious pattern identification
-- **Blockchain Rewards**: Automated B3TR token distribution via VeBetterDAO smart contracts
-- **Impact Tracking**: Real-time environmental impact metrics (CO₂ saved, sustainability score)
-- **Store Network**: Community-driven sustainable store verification system
-- **Gamification**: Achievement badges with blockchain verification
+- **Transportation Receipt Validation**: AI-powered receipt scanning for ride-share, electric vehicles, and public transit
+- **Multi-Tier Processing**: Auto-approval for ride-share services, manual review for public transit accuracy
+- **Blockchain Rewards**: Automated B3TR token distribution via VeBetterDAO smart contracts (70/30 model)
+- **Carbon Impact Tracking**: Real-time CO₂ emissions saved through sustainable transportation choices
+- **Transportation Network**: Comprehensive database of sustainable mobility services
+- **Smart Validation**: OpenAI Vision API with fraud detection and duplicate prevention
 
 ## 📱 Platform Screenshots
 
-## Receipt Scanning Process
-[Scan a receipt option on homepage |](https://github.com/user-attachments/assets/9cffdd7a-d134-4caf-866b-fcd1e2e45a83)
-[Receipt upload Enable Camera and Upload from Gallery |](https://github.com/user-attachments/assets/f02ce7b1-0d42-4aff-8afe-839b2d568f2e)
-[Receipt upload instructions |](https://github.com/user-attachments/assets/056ffe5b-a31c-4250-acd5-63b876234082)
-[Success toast notification before receipt submission |](https://github.com/user-attachments/assets/4998342a-ab18-47b6-9663-ab7d07c2e227)
-[Test receipt details |](https://github.com/user-attachments/assets/0161b930-d05c-4a92-a6d5-8a07c94e9174)
-[Sustainable category options |](https://github.com/user-attachments/assets/c181bef9-15ec-4338-9037-82c89b6db032)
-[Success screen after receipt submission](https://github.com/user-attachments/assets/d2ae6e45-85e2-4c0d-8c88-09e5f39443b0)
+### Transportation Receipt Scanning
+![Receipt Scanner Interface](screenshots/receipt-scanner.png)
+*Multi-category transportation receipt validation: Uber, Tesla, Metro Transit*
 
 ### VeChain Wallet Integration
-[Wallet Connect Before |](https://github.com/user-attachments/assets/d3c9f2d6-6c78-4a7a-bd73-136509940d73)
-[Wallet Connect After](https://github.com/user-attachments/assets/ea5bfa97-df72-485e-8b2f-c52422da7d11)
+![Wallet Connection](screenshots/wallet-connection.png)
+*Seamless VeWorld wallet connection with B3TR token rewards*
 
-### Impact Tracking Dashboard
-[impact-explorer-dashboard |](https://github.com/user-attachments/assets/eeef1c12-097a-4f1e-9fce-67e9b7fcf858)
-[impact-explorer-dashboard with badge |](https://github.com/user-attachments/assets/5577b61e-6078-4a10-bf6e-de864a99f6b5)
-[impact-explorer-dashboard badge progression](https://github.com/user-attachments/assets/379923d4-d9f2-4d43-a5f5-0db685bfffb8)
+### Transportation Services Hub
+![Transportation Dashboard](screenshots/transportation-hub.png)
+*Comprehensive transportation options: ride-share, electric vehicles, public transit*
 
-### Reward Distribution
-[First Eco Purchase Achievement unlock notification with 70/30 split detailed info and streak/bonus info |](https://github.com/user-attachments/assets/ecde63c0-aa8b-44c9-afbe-eca834fb239a)
-[Transaction history and transaction details |](https://github.com/user-attachments/assets/c993249a-533b-484c-86ce-f426ef6de964)
-[blockchain integration with View on Vechain Ex](https://github.com/user-attachments/assets/115e54ac-5b1d-4b29-9413-2b0f1d4c248a)
+### Manual Review System
+![Manual Review](screenshots/manual-review.png)
+*Google Sheets integration for public transit receipt verification*
 
 ### Technical Highlights
+- **Multi-Tier Validation**: Auto-approval for ride-share (Uber, Lyft, Waymo), manual review for public transit
 - **VeChain Integration**: Native VeWorld wallet connection with Connex framework
 - **Smart Contract Integration**: VeBetterDAO 70/30 distribution model implementation
-- **Advanced Fraud Detection**: Receipt image storage with SHA-256 hashing and duplicate prevention
-- **Google Sheets Automation**: Enhanced receipt validation and approval workflow with image viewing
-- **Admin Security Interface**: Manual review system for suspicious submissions
-- **Impact Explorer**: Comprehensive sustainability achievement dashboard
-- **Mobile-First Design**: Responsive interface optimized for mobile devices
+- **Transportation Categories**: Ride-share, electric vehicle rentals, public transit with specialized handling
+- **Google Sheets Automation**: Manual review workflow for public transit receipt verification
+- **Advanced Rate Limiting**: Comprehensive API protection against abuse and fraud
+- **Mobile-First Design**: Optimized for on-the-go transportation receipt submission
 
 ## 🏗️ Architecture
 
@@ -71,14 +65,14 @@ ReCircle is a blockchain-powered circular economy platform that transforms susta
 - **VeChain Thor Network** for sustainable blockchain operations
 - **70/30 Distribution Model**: 70% to users, 15% each to creator and app funds
 
-## 📊 Impact Metrics
+## 📊 Transportation Impact Metrics
 
-The platform tracks comprehensive sustainability metrics:
+The platform tracks comprehensive transportation sustainability metrics:
 
-- **Environmental Impact**: CO₂ emissions saved, waste reduction
-- **Community Growth**: Stores added, user engagement
-- **Token Economics**: B3TR distribution, reward tracking
-- **Achievement System**: Blockchain-verified sustainability badges
+- **Carbon Emissions Saved**: CO₂ reduction through shared and electric mobility
+- **Transportation Modes**: Ride-share usage, electric vehicle adoption, public transit utilization
+- **Token Economics**: B3TR distribution across transportation categories
+- **Mobility Patterns**: User engagement with sustainable transportation options
 
 ## 🛠️ Development Setup
 
@@ -116,6 +110,14 @@ npm run dev
 
 ReCircle implements advanced fraud detection to protect against sophisticated attacks experienced by other VeBetterDAO applications:
 
+### Rate Limiting & Abuse Prevention
+- **Enterprise Rate Limiting**: Comprehensive protection across all API endpoints
+- **Receipt Validation**: 5 requests per 10 minutes to prevent AI API abuse
+- **Receipt Submission**: 3 requests per 5 minutes to stop spam submissions
+- **Authentication**: 10 requests per 15 minutes to prevent account creation abuse
+- **Admin Protection**: 20 requests per hour for administrative functions
+- **General API**: 100 requests per 15 minutes for overall system protection
+
 ### Fraud Detection Features
 - **Receipt Image Storage**: SHA-256 hashing for duplicate detection and verification
 - **Suspicious Pattern Recognition**: Automatic detection of handwritten receipts, unusual file sizes, and editing traces
@@ -146,11 +148,11 @@ All token distributions are publicly verifiable on VeChain Explorer. Transaction
 
 ## 📱 Mobile Experience
 
-ReCircle is designed mobile-first with:
-- **Progressive Web App** capabilities
-- **Native camera integration** for receipt scanning
-- **Offline functionality** for core features
-- **Push notifications** for reward updates
+ReCircle is designed mobile-first for on-the-go transportation receipt submission:
+- **Progressive Web App** capabilities for seamless mobile access
+- **Native camera integration** for quick transportation receipt capture
+- **Real-time validation** for immediate ride-share receipt processing
+- **Offline functionality** for receipt storage until network connection
 
 ## 🤝 Contributing
 
@@ -166,13 +168,13 @@ We welcome contributions from the community! Please see our [Contributing Guidel
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🌍 Environmental Impact
+## 🌍 Transportation & Environmental Impact
 
-ReCircle is committed to environmental sustainability:
-- **Carbon Neutral**: Built on VeChain's energy-efficient blockchain
-- **Circular Economy**: Promoting reuse and sustainable consumption
-- **Community Driven**: Empowering users to make environmental impact
-- **Transparent Tracking**: Real-time sustainability metrics
+ReCircle promotes sustainable mobility solutions:
+- **Carbon Reduction**: Incentivizing shared transportation and electric vehicles
+- **Sustainable Mobility**: Promoting public transit, ride-sharing, and electric vehicle adoption
+- **Community Impact**: Empowering users to choose eco-friendly transportation
+- **Transparent Tracking**: Real-time carbon emissions saved through sustainable transportation choices
 
 ## 📞 Support
 
