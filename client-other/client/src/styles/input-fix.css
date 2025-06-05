@@ -1,0 +1,18 @@
+/* Custom styles to fix input contrast issues */
+.stores-search-input::placeholder {
+  color: #454545 !important;
+  opacity: 1 !important;
+  font-weight: 500 !important;
+}
+
+.stores-search-input:-ms-input-placeholder {
+  color: #454545 !important;
+  opacity: 1 !important;
+  font-weight: 500 !important;
+}
+
+.stores-search-input::-ms-input-placeholder {
+  color: #454545 !important;
+  opacity: 1 !important;
+  font-weight: 500 !important;
+}
