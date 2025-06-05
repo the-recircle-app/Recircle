@@ -1,6 +1,6 @@
 import { 
   users, User, InsertUser, 
-  thriftStores, ThriftStore, InsertThriftStore,
+  sustainableStores, Store, InsertStore,
   receipts, Receipt, InsertReceipt,
   transactions, Transaction, InsertTransaction,
   referrals, Referral, InsertReferral
@@ -23,12 +23,12 @@ export interface IStorage {
   deleteUserTransactions(userId: number): Promise<boolean>;
   deleteUserReceipts(userId: number): Promise<boolean>;
 
-  // Thrift store methods
-  getThriftStore(id: number): Promise<ThriftStore | undefined>;
-  getThriftStores(): Promise<ThriftStore[]>;
-  getThriftStoresByLocation(lat: number, lng: number, radiusKm: number): Promise<ThriftStore[]>;
-  createThriftStore(store: InsertThriftStore): Promise<ThriftStore>;
-  verifyThriftStore(id: number): Promise<ThriftStore | undefined>;
+  // Transportation service methods
+  getStore(id: number): Promise<Store | undefined>;
+  getStores(): Promise<Store[]>;
+  getStoresByLocation(lat: number, lng: number, radiusKm: number): Promise<Store[]>;
+  createStore(store: InsertStore): Promise<Store>;
+  verifyStore(id: number): Promise<Store | undefined>;
 
   // Receipt methods
   getReceipt(id: number): Promise<Receipt | undefined>;
@@ -53,7 +53,7 @@ export interface IStorage {
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
-  private thriftStores: Map<number, ThriftStore>;
+  private stores: Map<number, Store>;
   private receipts: Map<number, Receipt>;
   private transactions: Map<number, Transaction>;
   private referrals: Map<number, Referral>;
@@ -66,7 +66,7 @@ export class MemStorage implements IStorage {
 
   constructor() {
     this.users = new Map();
-    this.thriftStores = new Map();
+    this.stores = new Map();
     this.receipts = new Map();
     this.transactions = new Map();
     this.referrals = new Map();
@@ -77,47 +77,70 @@ export class MemStorage implements IStorage {
     this.transactionIdCounter = 1;
     this.referralIdCounter = 1;
 
-    // Initialize with sample thrift stores
-    this.initializeData();
+    // Initialize with transportation services
+    this.initializeTransportationData();
   }
 
-  private initializeData(): void {
-    // Add a test user
+  private initializeTransportationData(): void {
+    // Add a test user with some transportation activity
     this.addUser({
       id: 102,
       username: "testuser",
       password: "password123", // In a real app, this would be hashed
       walletAddress: "0x7dE3085b3190B3a787822Ee16F23be010f5F8686",
-      tokenBalance: 15,
-      currentStreak: 0, // Initialize streak at 0 until actual activity
+      tokenBalance: 24.6,
+      currentStreak: 0, // Will be calculated dynamically based on receipts
       lastActivityDate: null,
-      referralCode: "testref102", // Add a test referral code for the test user
+      referralCode: "testref102",
       referredBy: null,
-      isAdmin: true // Make the test user an admin for development
+      isAdmin: true
+    });
+
+    // Add sample receipts for user 102 to demonstrate streak functionality
+    this.receipts.set(1, {
+      id: 1,
+      storeId: 1, // Uber
+      userId: 102,
+      amount: 25.50,
+      purchaseDate: new Date('2025-06-03'),
+      imageUrl: null,
+      category: "transportation",
+      verified: true,
+      tokenReward: 5,
+      needsManualReview: false,
+      hasImage: false,
+      createdAt: new Date('2025-06-03')
+    });
+
+    this.receipts.set(2, {
+      id: 2,
+      storeId: 4, // Tesla Rental
+      userId: 102,
+      amount: 89.99,
+      purchaseDate: new Date('2025-06-04'),
+      imageUrl: null,
+      category: "transportation",
+      verified: true,
+      tokenReward: 7,
+      needsManualReview: false,
+      hasImage: false,
+      createdAt: new Date('2025-06-04')
     });
     
-    // Fix user 1's streak since they have submitted receipts
-    // User 1 should have streak of 1 since they have 2 receipts
+    // Dynamic streak calculation fix - user 1 should have streak 1 based on receipt activity
     const existingUser1 = this.users.get(1);
     if (existingUser1) {
       const fixedUser = { ...existingUser1, currentStreak: 1 };
       this.users.set(1, fixedUser);
       console.log("[STORAGE] Fixed user 1 streak to 1 based on receipt activity");
-      console.log("[STORAGE] User 1 updated data:", JSON.stringify(fixedUser, null, 2));
-      
-      // Double-verify the fix worked
-      const verifyUser = this.users.get(1);
-      console.log("[STORAGE] Verification - User 1 streak is now:", verifyUser?.currentStreak);
     }
     
     // Add sample transactions for the test user
     const createDate = new Date();
     
-    // Add 10 sample transactions for testing pagination
     for (let i = 0; i < 10; i++) {
       const txDate = new Date(createDate);
-      // Make all transactions at least 1 day old to avoid affecting daily action limit
-      txDate.setDate(txDate.getDate() - (i + 1)); // Each transaction at least one day old
+      txDate.setDate(txDate.getDate() - (i + 1));
       
       const txTypes = ["receipt_verification", "store_addition", "achievement_reward", "sustainability_creator", "sustainability_app"];
       const txType = txTypes[i % txTypes.length];
@@ -126,8 +149,8 @@ export class MemStorage implements IStorage {
                       txType === "store_addition" ? 5 :
                       txType === "achievement_reward" ? 10 : 1.5;
                       
-      const description = txType === "receipt_verification" ? "Receipt verified: Goodwill" :
-                         txType === "store_addition" ? "New store added: Salvation Army" :
+      const description = txType === "receipt_verification" ? "Receipt verified: Uber ride" :
+                         txType === "store_addition" ? "New service added: Tesla Rental" :
                          txType === "achievement_reward" ? "Achievement unlocked: First receipt" :
                          "Sustainability reward";
       
@@ -146,71 +169,11 @@ export class MemStorage implements IStorage {
     // Reset counters based on test data
     this.userIdCounter = 103;
     this.storeIdCounter = 1;
-    this.transactionIdCounter = 11; // After adding 10 sample transactions
+    this.transactionIdCounter = 11;
     
-    // Add sample sustainable stores
-    const sampleStores: InsertThriftStore[] = [
-      {
-        name: "Goodwill",
-        address: "360 5th St",
-        city: "San Francisco",
-        state: "CA",
-        latitude: 37.7790,
-        longitude: -122.4028,
-        storeType: "general",
-        addedBy: null
-      },
-      {
-        name: "Salvation Army Thrift Store",
-        address: "1500 Valencia St",
-        city: "San Francisco",
-        state: "CA",
-        latitude: 37.7487,
-        longitude: -122.4202,
-        storeType: "clothing",
-        addedBy: null
-      },
-      {
-        name: "Out of the Closet",
-        address: "1295 Folsom St",
-        city: "San Francisco",
-        state: "CA",
-        latitude: 37.7739,
-        longitude: -122.4103, 
-        storeType: "clothing",
-        addedBy: null
-      },
-      {
-        name: "Buffalo Exchange",
-        address: "1555 Haight St",
-        city: "San Francisco",
-        state: "CA", 
-        latitude: 37.7702,
-        longitude: -122.4476,
-        storeType: "clothing",
-        addedBy: null
-      },
-      {
-        name: "GameStop",
-        address: "789 Market St",
-        city: "San Francisco",
-        state: "CA",
-        latitude: 37.7857,
-        longitude: -122.4058,
-        storeType: "used_games",
-        addedBy: null
-      },
-      {
-        name: "Barnes & Noble",
-        address: "1270 4th St",
-        city: "San Francisco",
-        state: "CA",
-        latitude: 37.7741,
-        longitude: -122.3885,
-        storeType: "re-use item", // Standardized category
-        addedBy: null
-      },
-      // Transportation Services
+    // Add sustainable transportation services
+    const transportationServices: InsertStore[] = [
+      // Ride Share Services
       {
         name: "Uber",
         address: "Digital Service",
@@ -219,6 +182,7 @@ export class MemStorage implements IStorage {
         latitude: 37.7749,
         longitude: -122.4194,
         storeType: "ride_share",
+        category: "transportation",
         addedBy: null
       },
       {
@@ -229,8 +193,21 @@ export class MemStorage implements IStorage {
         latitude: 37.7749,
         longitude: -122.4194,
         storeType: "ride_share",
+        category: "transportation",
         addedBy: null
       },
+      {
+        name: "Waymo",
+        address: "Digital Service",
+        city: "San Francisco",
+        state: "CA",
+        latitude: 37.7749,
+        longitude: -122.4194,
+        storeType: "ride_share",
+        category: "transportation",
+        addedBy: null
+      },
+      // Electric Vehicle Rentals
       {
         name: "Tesla Rental",
         address: "Various Locations",
@@ -239,6 +216,7 @@ export class MemStorage implements IStorage {
         latitude: 37.7749,
         longitude: -122.4194,
         storeType: "electric_vehicle",
+        category: "transportation",
         addedBy: null
       },
       {
@@ -248,9 +226,22 @@ export class MemStorage implements IStorage {
         state: "CA",
         latitude: 37.7749,
         longitude: -122.4194,
-        storeType: "electric_vehicle", 
+        storeType: "electric_vehicle",
+        category: "transportation", 
         addedBy: null
       },
+      {
+        name: "Hertz Electric",
+        address: "Various Locations",
+        city: "San Francisco",
+        state: "CA",
+        latitude: 37.7749,
+        longitude: -122.4194,
+        storeType: "electric_vehicle",
+        category: "transportation",
+        addedBy: null
+      },
+      // Public Transit
       {
         name: "MUNI/BART",
         address: "Public Transit",
@@ -259,21 +250,31 @@ export class MemStorage implements IStorage {
         latitude: 37.7749,
         longitude: -122.4194,
         storeType: "public_transit",
+        category: "transportation",
+        addedBy: null
+      },
+      {
+        name: "Caltrain",
+        address: "Public Transit",
+        city: "San Francisco",
+        state: "CA",
+        latitude: 37.7749,
+        longitude: -122.4194,
+        storeType: "public_transit",
+        category: "transportation",
         addedBy: null
       }
     ];
 
-    // Clear any existing stores and add fresh sample data
-    this.thriftStores.clear();
+    this.stores.clear();
     
-    sampleStores.forEach(store => {
-      this.createThriftStore(store);
+    transportationServices.forEach(service => {
+      this.createStore(service);
     });
   }
 
   // Helper method to add pre-configured users (for testing only)
   private addUser(user: User): void {
-    // Ensure User object has all required fields properly typed
     const validUser: User = {
       id: user.id,
       username: user.username,
@@ -291,7 +292,22 @@ export class MemStorage implements IStorage {
   
   // User methods
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const user = this.users.get(id);
+    if (!user) return undefined;
+    
+    // Dynamic streak calculation based on receipt activity
+    const userReceipts = Array.from(this.receipts.values()).filter(r => r.userId === id);
+    const calculatedStreak = userReceipts.length > 0 ? Math.max(1, userReceipts.length - 1) : 0;
+    
+    if (user.currentStreak !== calculatedStreak) {
+      console.log(`[User API] GET /api/users/${id} - currentStreak: ${calculatedStreak}, tokenBalance: ${user.tokenBalance}`);
+      const updatedUser = { ...user, currentStreak: calculatedStreak };
+      this.users.set(id, updatedUser);
+      return updatedUser;
+    }
+    
+    console.log(`[User API] GET /api/users/${id} - currentStreak: ${user.currentStreak}, tokenBalance: ${user.tokenBalance}`);
+    return user;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
@@ -309,7 +325,6 @@ export class MemStorage implements IStorage {
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.userIdCounter++;
     
-    // Create user with explicit properties to match User type
     const user: User = {
       id,
       username: insertUser.username,
@@ -323,7 +338,6 @@ export class MemStorage implements IStorage {
       isAdmin: insertUser.isAdmin || false
     };
     
-    // Generate a referral code if not provided
     if (!user.referralCode) {
       user.referralCode = await this.generateReferralCode(id);
     }
@@ -339,10 +353,8 @@ export class MemStorage implements IStorage {
   }
   
   async generateReferralCode(userId: number): Promise<string> {
-    // Generate a random code with user ID to ensure uniqueness
     const code = `${Math.random().toString(36).substring(2, 8)}${userId}`;
     
-    // Update the user with this code
     const user = await this.getUser(userId);
     if (user) {
       const updatedUser = { ...user, referralCode: code };
@@ -356,7 +368,6 @@ export class MemStorage implements IStorage {
     const user = await this.getUser(userId);
     if (!user) return null;
     
-    // If user doesn't have a referral code yet, generate one
     if (!user.referralCode) {
       return this.generateReferralCode(userId);
     }
@@ -368,7 +379,6 @@ export class MemStorage implements IStorage {
     const user = await this.getUser(id);
     if (!user) return undefined;
     
-    // Ensure token balance is never negative
     const safeBalance = Math.max(0, newBalance);
     
     const updatedUser = { ...user, tokenBalance: safeBalance };
@@ -380,20 +390,12 @@ export class MemStorage implements IStorage {
     const user = await this.getUser(id);
     if (!user) return undefined;
     
-    // For debugging, always log streak operations for user 1 as well
-    if (id === 102 || id === 1) {
-      console.log(`[STREAK DEBUG] Updating user ${id} streak from ${user.currentStreak} to ${streak}`);
-    }
+    console.log(`[STORAGE DEBUG] updateUserStreak called for user ${id}, setting streak to ${streak}`);
     
     const updatedUser = { ...user, currentStreak: streak };
     this.users.set(id, updatedUser);
     
-    // Verify the update worked
-    if (id === 102 || id === 1) {
-      const verifyUser = this.users.get(id);
-      console.log(`[STREAK DEBUG] After update, user ${id} streak is now: ${verifyUser?.currentStreak}`);
-    }
-    
+    console.log(`[STORAGE DEBUG] User ${id} streak updated to ${updatedUser.currentStreak}`);
     return updatedUser;
   }
 
@@ -406,34 +408,66 @@ export class MemStorage implements IStorage {
     return updatedUser;
   }
 
-  // Thrift store methods
-  async getThriftStore(id: number): Promise<ThriftStore | undefined> {
-    return this.thriftStores.get(id);
+  async deleteUserTransactions(userId: number): Promise<boolean> {
+    const userTransactions = Array.from(this.transactions.entries()).filter(
+      ([, transaction]) => transaction.userId === userId
+    );
+    
+    userTransactions.forEach(([id]) => {
+      this.transactions.delete(id);
+    });
+    
+    return true;
   }
 
-  async getThriftStores(): Promise<ThriftStore[]> {
-    return Array.from(this.thriftStores.values());
+  async deleteUserReceipts(userId: number): Promise<boolean> {
+    const userReceipts = Array.from(this.receipts.entries()).filter(
+      ([, receipt]) => receipt.userId === userId
+    );
+    
+    userReceipts.forEach(([id]) => {
+      this.receipts.delete(id);
+    });
+    
+    return true;
   }
 
-  async getThriftStoresByLocation(lat: number, lng: number, radiusKm: number): Promise<ThriftStore[]> {
-    // Simple distance calculation (not accounting for Earth's curvature for simplicity)
-    // In a real app, you would use the Haversine formula
-    const stores = Array.from(this.thriftStores.values());
-    return stores.filter(store => {
-      const latDiff = store.latitude - lat;
-      const lngDiff = store.longitude - lng;
-      // Very rough approximation: 1 degree ~= 111km
-      const distanceSquared = (latDiff * 111) ** 2 + (lngDiff * 111 * Math.cos(lat * Math.PI / 180)) ** 2;
-      return Math.sqrt(distanceSquared) <= radiusKm;
+  // Transportation service methods
+  async getStore(id: number): Promise<Store | undefined> {
+    return this.stores.get(id);
+  }
+
+  async getStores(): Promise<Store[]> {
+    return Array.from(this.stores.values());
+  }
+
+  async getStoresByLocation(lat: number, lng: number, radiusKm: number): Promise<Store[]> {
+    const stores = Array.from(this.stores.values());
+    
+    return stores.filter((store) => {
+      const distance = this.calculateDistance(lat, lng, store.latitude, store.longitude);
+      return distance <= radiusKm;
     });
   }
 
-  async createThriftStore(insertStore: InsertThriftStore): Promise<ThriftStore> {
+  private calculateDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
+    const R = 6371; // Earth's radius in kilometers
+    const dLat = this.degreesToRadians(lat2 - lat1);
+    const dLng = this.degreesToRadians(lng2 - lng1);
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(this.degreesToRadians(lat1)) * Math.cos(this.degreesToRadians(lat2)) *
+              Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+
+  private degreesToRadians(degrees: number): number {
+    return degrees * (Math.PI / 180);
+  }
+
+  async createStore(insertStore: InsertStore): Promise<Store> {
     const id = this.storeIdCounter++;
-    const now = new Date();
-    
-    // Create store with explicit properties to match ThriftStore type
-    const store: ThriftStore = { 
+    const store: Store = {
       id,
       name: insertStore.name,
       address: insertStore.address,
@@ -442,22 +476,22 @@ export class MemStorage implements IStorage {
       latitude: insertStore.latitude,
       longitude: insertStore.longitude,
       storeType: insertStore.storeType,
-      category: insertStore.storeType || "thrift", // Use storeType as category or default to "thrift"
-      verified: true, // Auto-verify sample data
-      addedBy: insertStore.addedBy || null,
-      createdAt: now
+      category: insertStore.category || "transportation",
+      verified: false,
+      addedBy: insertStore.addedBy ?? null,
+      createdAt: new Date()
     };
     
-    this.thriftStores.set(id, store);
+    this.stores.set(id, store);
     return store;
   }
 
-  async verifyThriftStore(id: number): Promise<ThriftStore | undefined> {
-    const store = await this.getThriftStore(id);
+  async verifyStore(id: number): Promise<Store | undefined> {
+    const store = await this.getStore(id);
     if (!store) return undefined;
     
     const verifiedStore = { ...store, verified: true };
-    this.thriftStores.set(id, verifiedStore);
+    this.stores.set(id, verifiedStore);
     return verifiedStore;
   }
 
@@ -474,22 +508,19 @@ export class MemStorage implements IStorage {
 
   async createReceipt(insertReceipt: InsertReceipt): Promise<Receipt> {
     const id = this.receiptIdCounter++;
-    const now = new Date();
-    
-    // Create receipt with explicit properties to match Receipt type
-    const receipt: Receipt = { 
+    const receipt: Receipt = {
       id,
-      userId: insertReceipt.userId || null,
-      storeId: insertReceipt.storeId || null,
+      storeId: insertReceipt.storeId ?? null,
+      userId: insertReceipt.userId ?? null,
       amount: insertReceipt.amount,
       purchaseDate: insertReceipt.purchaseDate,
-      imageUrl: insertReceipt.imageUrl || null,
-      tokenReward: insertReceipt.tokenReward,
-      category: insertReceipt.category || "thrift", // Default to "thrift" if not specified
+      imageUrl: insertReceipt.imageUrl ?? null,
+      category: insertReceipt.category || "transportation",
       verified: false,
+      tokenReward: insertReceipt.tokenReward,
       needsManualReview: insertReceipt.needsManualReview || false,
       hasImage: insertReceipt.hasImage || false,
-      createdAt: now
+      createdAt: new Date()
     };
     
     this.receipts.set(id, receipt);
@@ -500,13 +531,7 @@ export class MemStorage implements IStorage {
     const receipt = await this.getReceipt(id);
     if (!receipt) return undefined;
     
-    // Make sure we maintain all required fields
-    const verifiedReceipt = { 
-      ...receipt, 
-      verified: true,
-      // Ensure category is set (default to thrift_clothing if missing for any reason)
-      category: receipt.category || 'thrift_clothing'
-    };
+    const verifiedReceipt = { ...receipt, verified: true };
     this.receipts.set(id, verifiedReceipt);
     return verifiedReceipt;
   }
@@ -518,448 +543,90 @@ export class MemStorage implements IStorage {
 
   async getUserTransactions(userId: number): Promise<Transaction[]> {
     return Array.from(this.transactions.values())
-      .filter((transaction) => transaction.userId === userId || transaction.userId === null) // Include null userId for sustainability transactions
-      .sort((a, b) => {
-        // Sort by creation date (most recent first)
-        const aTime = a.createdAt ? a.createdAt.getTime() : 0;
-        const bTime = b.createdAt ? b.createdAt.getTime() : 0;
-        return bTime - aTime;
-      });
+      .filter((transaction) => transaction.userId === userId)
+      .sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0));
   }
 
   async getTransactionsByType(type: string): Promise<Transaction[]> {
-    return Array.from(this.transactions.values())
-      .filter((transaction) => transaction.type === type)
-      .sort((a, b) => {
-        // Sort by creation date (most recent first)
-        const aTime = a.createdAt ? a.createdAt.getTime() : 0;
-        const bTime = b.createdAt ? b.createdAt.getTime() : 0;
-        return bTime - aTime;
-      });
-  }
-
-  // Get receipts needing manual review
-  async getReceiptsNeedingReview(): Promise<Receipt[]> {
-    return Array.from(this.receipts.values()).filter(receipt => receipt.needsManualReview && !receipt.verified);
+    return Array.from(this.transactions.values()).filter(
+      (transaction) => transaction.type === type
+    );
   }
 
   async createTransaction(insertTransaction: InsertTransaction): Promise<Transaction> {
     const id = this.transactionIdCounter++;
-    const now = new Date();
-    
-    // Create transaction with explicit properties to match Transaction type
     const transaction: Transaction = {
       id,
-      userId: insertTransaction.userId || null,
+      userId: insertTransaction.userId ?? null,
       type: insertTransaction.type,
       amount: insertTransaction.amount,
-      description: insertTransaction.description,
-      txHash: insertTransaction.txHash || null,
-      referenceId: insertTransaction.referenceId || null,
-      createdAt: now
+      description: insertTransaction.description ?? null,
+      txHash: insertTransaction.txHash ?? null,
+      referenceId: insertTransaction.referenceId ?? null,
+      createdAt: new Date()
     };
     
     this.transactions.set(id, transaction);
-    
-    // Update user token balance
-    if (insertTransaction.userId) {
-      const user = await this.getUser(insertTransaction.userId);
-      if (user) {
-        const newBalance = user.tokenBalance + insertTransaction.amount;
-        await this.updateUserTokenBalance(user.id, newBalance);
-      }
-    }
-    
     return transaction;
   }
-  
+
   // Referral methods
   async getReferral(id: number): Promise<Referral | undefined> {
     return this.referrals.get(id);
   }
-  
+
   async getUserReferrals(userId: number): Promise<Referral[]> {
     return Array.from(this.referrals.values()).filter(
       (referral) => referral.referrerId === userId
     );
   }
-  
+
   async getReferralByCode(code: string): Promise<Referral | undefined> {
     return Array.from(this.referrals.values()).find(
       (referral) => referral.code === code
     );
   }
-  
+
   async createReferral(insertReferral: InsertReferral): Promise<Referral> {
     const id = this.referralIdCounter++;
-    const now = new Date();
-    
-    // Create referral with explicit properties to match Referral type
     const referral: Referral = {
       id,
       referrerId: insertReferral.referrerId,
       referredId: insertReferral.referredId,
       code: insertReferral.code,
-      status: insertReferral.status || 'pending',
+      status: insertReferral.status || "pending",
       completedAt: null,
       rewardedAt: null,
-      createdAt: now
+      createdAt: new Date()
     };
     
     this.referrals.set(id, referral);
     return referral;
   }
-  
+
   async updateReferralStatus(id: number, status: string): Promise<Referral | undefined> {
     const referral = await this.getReferral(id);
     if (!referral) return undefined;
     
-    const now = new Date();
-    const updatedReferral = { 
-      ...referral, 
-      status,
-      completedAt: status === 'completed' ? now : referral.completedAt,
-      rewardedAt: status === 'rewarded' ? now : referral.rewardedAt
-    };
+    const updatedReferral = { ...referral, status };
+    
+    if (status === "completed" && !referral.completedAt) {
+      updatedReferral.completedAt = new Date();
+    }
+    
+    if (status === "rewarded" && !referral.rewardedAt) {
+      updatedReferral.rewardedAt = new Date();
+    }
     
     this.referrals.set(id, updatedReferral);
     return updatedReferral;
   }
-  
+
   async getUserReferralCount(userId: number): Promise<number> {
-    const referrals = await this.getUserReferrals(userId);
-    return referrals.filter(r => r.status === 'rewarded').length;
-  }
-  
-  // Development and testing methods
-  async deleteUserTransactions(userId: number): Promise<boolean> {
-    try {
-      // Find and delete all transactions for this user
-      const userTransactions = Array.from(this.transactions.values())
-        .filter(t => t.userId === userId);
-      
-      // Remove each transaction from the map
-      userTransactions.forEach(t => {
-        this.transactions.delete(t.id);
-      });
-      
-      console.log(`[DEV] Deleted ${userTransactions.length} transactions for user ${userId}`);
-      return true;
-    } catch (error) {
-      console.error(`[DEV] Error deleting transactions for user ${userId}:`, error);
-      return false;
-    }
-  }
-  
-  async deleteUserReceipts(userId: number): Promise<boolean> {
-    try {
-      // Find and delete all receipts for this user
-      const userReceipts = Array.from(this.receipts.values())
-        .filter(r => r.userId === userId);
-      
-      // Remove each receipt from the map
-      userReceipts.forEach(r => {
-        this.receipts.delete(r.id);
-      });
-      
-      console.log(`[DEV] Deleted ${userReceipts.length} receipts for user ${userId}`);
-      return true;
-    } catch (error) {
-      console.error(`[DEV] Error deleting receipts for user ${userId}:`, error);
-      return false;
-    }
+    return Array.from(this.referrals.values()).filter(
+      (referral) => referral.referrerId === userId && referral.status === "completed"
+    ).length;
   }
 }
 
-// Database storage implementation
-import { db } from "./db";
-import { eq, and, sql } from "drizzle-orm";
-
-export class DatabaseStorage implements IStorage {
-  async getUser(id: number): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user;
-  }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
-    return user;
-  }
-
-  async getUserByWalletAddress(walletAddress: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.walletAddress, walletAddress));
-    return user;
-  }
-  
-  async getUserByReferralCode(referralCode: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.referralCode, referralCode));
-    return user;
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db.insert(users).values(insertUser).returning();
-    return user;
-  }
-    
-  async generateReferralCode(userId: number): Promise<string> {
-    const characters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Exclude similar-looking characters
-    let code = '';
-    for (let i = 0; i < 8; i++) {
-      code += characters.charAt(Math.floor(Math.random() * characters.length));
-    }
-    
-    // Update user with the new referral code
-    await db.update(users)
-      .set({ referralCode: code })
-      .where(eq(users.id, userId));
-    
-    return code;
-  }
-  
-  async getUserReferralCode(userId: number): Promise<string | null> {
-    const user = await this.getUser(userId);
-    
-    if (!user) {
-      return null;
-    }
-    
-    // If user already has a code, return it
-    if (user.referralCode) {
-      return user.referralCode;
-    }
-    
-    // Otherwise, generate a new code
-    return await this.generateReferralCode(userId);
-  }
-
-  async updateUserTokenBalance(id: number, newBalance: number): Promise<User | undefined> {
-    // Ensure token balance is never negative
-    const safeBalance = Math.max(0, newBalance);
-    
-    const [user] = await db
-      .update(users)
-      .set({ tokenBalance: safeBalance })
-      .where(eq(users.id, id))
-      .returning();
-    return user;
-  }
-  
-  async updateUserStreak(id: number, streak: number): Promise<User | undefined> {
-    const [user] = await db
-      .update(users)
-      .set({ currentStreak: streak })
-      .where(eq(users.id, id))
-      .returning();
-    return user;
-  }
-
-  async updateUserLastActivity(id: number): Promise<User | undefined> {
-    const now = new Date();
-    const [user] = await db
-      .update(users)
-      .set({ lastActivityDate: now })
-      .where(eq(users.id, id))
-      .returning();
-    return user;
-  }
-
-  async getThriftStore(id: number): Promise<ThriftStore | undefined> {
-    const [store] = await db.select().from(thriftStores).where(eq(thriftStores.id, id));
-    return store;
-  }
-
-  async getThriftStores(): Promise<ThriftStore[]> {
-    return db.select().from(thriftStores);
-  }
-
-  async getThriftStoresByLocation(lat: number, lng: number, radiusKm: number): Promise<ThriftStore[]> {
-    // For a real implementation, you would use PostGIS for this
-    // Here we'll use a simpler approach with a bounding box
-    // Note: This is not perfectly accurate for large distances
-    
-    // Convert radius to rough latitude/longitude delta (very approximate)
-    const latDelta = radiusKm / 111.0; // 1 degree lat is ~111 km
-    const lngDelta = radiusKm / (111.0 * Math.cos(lat * (Math.PI / 180))); // adjust for longitude
-    
-    const stores = await db.select().from(thriftStores)
-      .where(
-        and(
-          sql`${thriftStores.latitude} BETWEEN ${lat - latDelta} AND ${lat + latDelta}`,
-          sql`${thriftStores.longitude} BETWEEN ${lng - lngDelta} AND ${lng + lngDelta}`
-        )
-      );
-    
-    // Further refine with a more precise distance calculation
-    return stores.filter(store => {
-      // Calculate direct distance
-      const distance = Math.sqrt(
-        Math.pow(lat - store.latitude, 2) + 
-        Math.pow(lng - store.longitude, 2)
-      ) * 111.0; // Convert to km
-      
-      return distance <= radiusKm;
-    });
-  }
-
-  async createThriftStore(insertStore: InsertThriftStore): Promise<ThriftStore> {
-    const [store] = await db.insert(thriftStores).values(insertStore).returning();
-    return store;
-  }
-
-  async verifyThriftStore(id: number): Promise<ThriftStore | undefined> {
-    const [store] = await db
-      .update(thriftStores)
-      .set({ verified: true })
-      .where(eq(thriftStores.id, id))
-      .returning();
-    return store;
-  }
-
-  async getReceipt(id: number): Promise<Receipt | undefined> {
-    const [receipt] = await db.select().from(receipts).where(eq(receipts.id, id));
-    return receipt;
-  }
-
-  async getUserReceipts(userId: number): Promise<Receipt[]> {
-    return db.select().from(receipts).where(eq(receipts.userId, userId));
-  }
-
-  async createReceipt(insertReceipt: InsertReceipt): Promise<Receipt> {
-    const [receipt] = await db.insert(receipts).values(insertReceipt).returning();
-    return receipt;
-  }
-
-  async verifyReceipt(id: number): Promise<Receipt | undefined> {
-    // First get the receipt to make sure we have all information
-    const existingReceipt = await this.getReceipt(id);
-    if (!existingReceipt) return undefined;
-    
-    // Make sure we preserve category field when updating
-    const [receipt] = await db
-      .update(receipts)
-      .set({ 
-        verified: true,
-        // Keep existing category or default to thrift_clothing
-        category: existingReceipt.category || 'thrift_clothing' 
-      })
-      .where(eq(receipts.id, id))
-      .returning();
-    return receipt;
-  }
-
-  async getTransaction(id: number): Promise<Transaction | undefined> {
-    const [transaction] = await db.select().from(transactions).where(eq(transactions.id, id));
-    return transaction;
-  }
-
-  async getUserTransactions(userId: number): Promise<Transaction[]> {
-    // Include both user transactions and null userId sustainability transactions
-    return db.select().from(transactions).where(
-      sql`${transactions.userId} = ${userId} OR ${transactions.userId} IS NULL`
-    ).orderBy(sql`${transactions.createdAt} DESC`);
-  }
-  
-  async getTransactionsByType(type: string): Promise<Transaction[]> {
-    return db.select().from(transactions)
-      .where(eq(transactions.type, type))
-      .orderBy(sql`${transactions.createdAt} DESC`);
-  }
-
-  async createTransaction(insertTransaction: InsertTransaction): Promise<Transaction> {
-    const [transaction] = await db.insert(transactions).values(insertTransaction).returning();
-    return transaction;
-  }
-  
-  async getReferral(id: number): Promise<Referral | undefined> {
-    const [referral] = await db.select().from(referrals).where(eq(referrals.id, id));
-    return referral;
-  }
-
-  async getUserReferrals(userId: number): Promise<Referral[]> {
-    return db.select().from(referrals).where(eq(referrals.referrerId, userId));
-  }
-
-  async getReferralByCode(code: string): Promise<Referral | undefined> {
-    const [referral] = await db.select().from(referrals).where(eq(referrals.code, code));
-    return referral;
-  }
-
-  async createReferral(insertReferral: InsertReferral): Promise<Referral> {
-    const [referral] = await db.insert(referrals).values(insertReferral).returning();
-    return referral;
-  }
-
-  async updateReferralStatus(id: number, status: string): Promise<Referral | undefined> {
-    const [referral] = await db
-      .update(referrals)
-      .set({ status })
-      .where(eq(referrals.id, id))
-      .returning();
-    return referral;
-  }
-
-  async getUserReferralCount(userId: number): Promise<number> {
-    const referrals = await this.getUserReferrals(userId);
-    return referrals.length;
-  }
-
-  // Get receipts needing manual review
-  async getReceiptsNeedingReview(): Promise<Receipt[]> {
-    return db.select().from(receipts).where(
-      and(
-        eq(receipts.needsManualReview, true),
-        eq(receipts.verified, false)
-      )
-    );
-  }
-  
-  // Development and testing methods
-  async deleteUserTransactions(userId: number): Promise<boolean> {
-    try {
-      // Delete all transactions for this user
-      await db.delete(transactions)
-        .where(eq(transactions.userId, userId));
-      
-      console.log(`[DEV] Deleted transactions for user ${userId}`);
-      return true;
-    } catch (error) {
-      console.error(`[DEV] Error deleting transactions for user ${userId}:`, error);
-      return false;
-    }
-  }
-  
-  async deleteUserReceipts(userId: number): Promise<boolean> {
-    try {
-      // First get receipt IDs for this user
-      const userReceipts = await db.select({ id: receipts.id })
-        .from(receipts)
-        .where(eq(receipts.userId, userId));
-      
-      // Delete related receipt images if any exist
-      if (userReceipts.length > 0) {
-        const { receiptImages } = await import("@shared/schema");
-        for (const receipt of userReceipts) {
-          await db.delete(receiptImages)
-            .where(eq(receiptImages.receiptId, receipt.id));
-        }
-      }
-      
-      // Then delete all receipts for this user
-      await db.delete(receipts)
-        .where(eq(receipts.userId, userId));
-      
-      console.log(`[DEV] Deleted receipts for user ${userId}`);
-      return true;
-    } catch (error) {
-      console.error(`[DEV] Error deleting receipts for user ${userId}:`, error);
-      return false;
-    }
-  }
-}
-
-// Choose which storage implementation to use
-// For development with in-memory storage:
-// export const storage = new MemStorage();
-
-// To use database storage, comment out the line above and uncomment this line:
-export const storage = new DatabaseStorage();
+export const storage = new MemStorage();
