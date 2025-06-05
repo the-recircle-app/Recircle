@@ -40,7 +40,12 @@ Security is fundamental to ReCircle's mission of building a trusted, blockchain-
 - **Immutable Audit Trail**: Complete transaction history on VeChain blockchain
 
 ### API Security
-- **Rate Limiting**: Protection against abuse and DDoS attacks
+- **Enterprise Rate Limiting**: Multi-tier protection system across all endpoints
+  - Receipt validation: 5 requests per 10 minutes (prevents AI API abuse)
+  - Receipt submission: 3 requests per 5 minutes (stops spam submissions)
+  - Authentication: 10 requests per 15 minutes (prevents account creation abuse)
+  - Admin functions: 20 requests per hour (protects administrative access)
+  - General API: 100 requests per 15 minutes (overall system protection)
 - **Input Validation**: Comprehensive sanitization of all user inputs
 - **Authentication**: Multi-factor authentication for administrative access
 - **Authorization**: Role-based access control with principle of least privilege
