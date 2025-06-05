@@ -8,6 +8,12 @@
 
 ReCircle is a blockchain-powered rewards platform that incentivizes sustainable transportation choices through B3TR token distribution. Users earn rewards by submitting receipts from ride-share services, electric vehicle rentals, and public transit, contributing to reduced carbon emissions and promoting eco-friendly mobility solutions.
 
+**Latest Updates:**
+- Fixed streak counter display issue with dynamic calculation
+- Enhanced VeBetterDAO integration for production deployment
+- Transportation-focused achievement system implementation
+- Self-healing data consistency for production reliability
+
 ## 🚀 Features
 
 ### Core Functionality
@@ -17,6 +23,24 @@ ReCircle is a blockchain-powered rewards platform that incentivizes sustainable 
 - **Carbon Impact Tracking**: Real-time CO₂ emissions saved through sustainable transportation choices
 - **Transportation Network**: Comprehensive database of sustainable mobility services
 - **Smart Validation**: OpenAI Vision API with fraud detection and duplicate prevention
+
+## 📱 Platform Screenshots
+
+### Transportation Receipt Scanning
+![Receipt Scanner Interface](screenshots/receipt-scanner.png)
+*Multi-category transportation receipt validation: Uber, Tesla, Metro Transit*
+
+### VeChain Wallet Integration
+![Wallet Connection](screenshots/wallet-connection.png)
+*Seamless VeWorld wallet connection with B3TR token rewards*
+
+### Transportation Services Hub
+![Transportation Dashboard](screenshots/transportation-hub.png)
+*Comprehensive transportation options: ride-share, electric vehicles, public transit*
+
+### Manual Review System
+![Manual Review](screenshots/manual-review.png)
+*Google Sheets integration for public transit receipt verification*
 
 ### Technical Highlights
 - **Multi-Tier Validation**: Auto-approval for ride-share (Uber, Lyft, Waymo), manual review for public transit
