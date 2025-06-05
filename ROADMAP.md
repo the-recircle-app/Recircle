@@ -17,6 +17,9 @@ ReCircle aims to become the leading blockchain-powered sustainable transportatio
 - **AI Validation**: OpenAI Vision API optimized for transportation receipts
 - **Fraud Detection**: Advanced rate limiting, duplicate prevention, and Google Sheets manual review workflow
 - **Carbon Tracking**: Real-time CO₂ emissions saved through sustainable transportation choices
+- **Streak Counter Fix**: Dynamic calculation system that auto-corrects based on actual user activity
+- **VeBetterDAO Integration**: Production-ready integration with B3TR token distribution
+- **Transportation Achievements**: Updated achievement system focused on sustainable mobility milestones
 
 ---
 
