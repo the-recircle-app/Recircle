@@ -96,6 +96,20 @@ export class MemStorage implements IStorage {
       isAdmin: true // Make the test user an admin for development
     });
     
+    // Fix user 1's streak since they have submitted receipts
+    // User 1 should have streak of 1 since they have 2 receipts
+    const existingUser1 = this.users.get(1);
+    if (existingUser1) {
+      const fixedUser = { ...existingUser1, currentStreak: 1 };
+      this.users.set(1, fixedUser);
+      console.log("[STORAGE] Fixed user 1 streak to 1 based on receipt activity");
+      console.log("[STORAGE] User 1 updated data:", JSON.stringify(fixedUser, null, 2));
+      
+      // Double-verify the fix worked
+      const verifyUser = this.users.get(1);
+      console.log("[STORAGE] Verification - User 1 streak is now:", verifyUser?.currentStreak);
+    }
+    
     // Add sample transactions for the test user
     const createDate = new Date();
     
@@ -194,6 +208,57 @@ export class MemStorage implements IStorage {
         latitude: 37.7741,
         longitude: -122.3885,
         storeType: "re-use item", // Standardized category
+        addedBy: null
+      },
+      // Transportation Services
+      {
+        name: "Uber",
+        address: "Digital Service",
+        city: "San Francisco",
+        state: "CA",
+        latitude: 37.7749,
+        longitude: -122.4194,
+        storeType: "ride_share",
+        addedBy: null
+      },
+      {
+        name: "Lyft",
+        address: "Digital Service",
+        city: "San Francisco", 
+        state: "CA",
+        latitude: 37.7749,
+        longitude: -122.4194,
+        storeType: "ride_share",
+        addedBy: null
+      },
+      {
+        name: "Tesla Rental",
+        address: "Various Locations",
+        city: "San Francisco",
+        state: "CA", 
+        latitude: 37.7749,
+        longitude: -122.4194,
+        storeType: "electric_vehicle",
+        addedBy: null
+      },
+      {
+        name: "Enterprise Electric",
+        address: "Various Locations",
+        city: "San Francisco",
+        state: "CA",
+        latitude: 37.7749,
+        longitude: -122.4194,
+        storeType: "electric_vehicle", 
+        addedBy: null
+      },
+      {
+        name: "MUNI/BART",
+        address: "Public Transit",
+        city: "San Francisco",
+        state: "CA",
+        latitude: 37.7749,
+        longitude: -122.4194,
+        storeType: "public_transit",
         addedBy: null
       }
     ];
@@ -315,16 +380,16 @@ export class MemStorage implements IStorage {
     const user = await this.getUser(id);
     if (!user) return undefined;
     
-    // For test user 102, always log streak operations
-    if (id === 102) {
+    // For debugging, always log streak operations for user 1 as well
+    if (id === 102 || id === 1) {
       console.log(`[STREAK DEBUG] Updating user ${id} streak from ${user.currentStreak} to ${streak}`);
     }
     
     const updatedUser = { ...user, currentStreak: streak };
     this.users.set(id, updatedUser);
     
-    // Verify for test user 102
-    if (id === 102) {
+    // Verify the update worked
+    if (id === 102 || id === 1) {
       const verifyUser = this.users.get(id);
       console.log(`[STREAK DEBUG] After update, user ${id} streak is now: ${verifyUser?.currentStreak}`);
     }
@@ -837,6 +902,16 @@ export class DatabaseStorage implements IStorage {
     const referrals = await this.getUserReferrals(userId);
     return referrals.length;
   }
+
+  // Get receipts needing manual review
+  async getReceiptsNeedingReview(): Promise<Receipt[]> {
+    return db.select().from(receipts).where(
+      and(
+        eq(receipts.needsManualReview, true),
+        eq(receipts.verified, false)
+      )
+    );
+  }
   
   // Development and testing methods
   async deleteUserTransactions(userId: number): Promise<boolean> {
@@ -855,7 +930,21 @@ export class DatabaseStorage implements IStorage {
   
   async deleteUserReceipts(userId: number): Promise<boolean> {
     try {
-      // Delete all receipts for this user
+      // First get receipt IDs for this user
+      const userReceipts = await db.select({ id: receipts.id })
+        .from(receipts)
+        .where(eq(receipts.userId, userId));
+      
+      // Delete related receipt images if any exist
+      if (userReceipts.length > 0) {
+        const { receiptImages } = await import("@shared/schema");
+        for (const receipt of userReceipts) {
+          await db.delete(receiptImages)
+            .where(eq(receiptImages.receiptId, receipt.id));
+        }
+      }
+      
+      // Then delete all receipts for this user
       await db.delete(receipts)
         .where(eq(receipts.userId, userId));
       
@@ -870,7 +959,7 @@ export class DatabaseStorage implements IStorage {
 
 // Choose which storage implementation to use
 // For development with in-memory storage:
-export const storage = new MemStorage();
+// export const storage = new MemStorage();
 
 // To use database storage, comment out the line above and uncomment this line:
-// export const storage = new DatabaseStorage();
+export const storage = new DatabaseStorage();
