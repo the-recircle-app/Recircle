@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, doublePrecision } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, doublePrecision, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -30,7 +30,7 @@ export const users = pgTable("users", {
   isAdmin: boolean("is_admin").default(false).notNull(), // Admin status for accessing admin features
 });
 
-// Sustainable stores table to track verified locations of all sustainable categories
+// Transportation services table to track verified sustainable transportation providers
 export const sustainableStores = pgTable("sustainable_stores", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
@@ -40,7 +40,7 @@ export const sustainableStores = pgTable("sustainable_stores", {
   latitude: doublePrecision("latitude").notNull(),
   longitude: doublePrecision("longitude").notNull(),
   storeType: text("store_type").notNull(),
-  category: text("category").notNull().default("re-use item"), // re-use item, used_video_games_electronics, used_books, etc.
+  category: text("category").notNull().default("transportation"), // transportation, rideshare, public_transit, ev_rental
   verified: boolean("verified").default(false),
   addedBy: integer("added_by").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
@@ -68,7 +68,7 @@ export const receipts = pgTable("receipts", {
   amount: doublePrecision("amount").notNull(),
   purchaseDate: timestamp("purchase_date").notNull(),
   imageUrl: text("image_url"), // Deprecated - use receiptImages table instead
-  category: text("category").notNull().default("re-use item"), // re-use item, used_video_games_electronics, used_books, etc.
+  category: text("category").notNull().default("transportation"), // transportation, rideshare, public_transit, ev_rental
   verified: boolean("verified").default(false),
   tokenReward: doublePrecision("token_reward").notNull(),
   needsManualReview: boolean("needs_manual_review").default(false), // Flag to indicate if receipt needs manual review
@@ -177,3 +177,5 @@ export type ReceiptImage = typeof receiptImages.$inferSelect;
 export type ThriftStore = Store;
 export type InsertThriftStore = InsertStore;
 export const thriftStores = sustainableStores;
+
+// Note: Database indexes will be added in a separate migration for production optimization
