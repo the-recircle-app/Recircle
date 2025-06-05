@@ -1,1 +1,1 @@
-Placeholder
+# Public Directory - Static Assets
