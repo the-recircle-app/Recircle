@@ -26,6 +26,7 @@ import {
   applyPaymentMethodBonuses,
   PAYMENT_BONUSES
 } from "./utils/tokenRewards";
+// sendReward imported below with other functions
 import { differenceInCalendarDays, format, parseISO } from 'date-fns';
 import { isVeChainVisaCard } from "./utils/receiptUtils";
 
@@ -61,7 +62,7 @@ import { trackAwardedAchievement, wasAchievementAwarded } from "./utils/rewardTr
 import { checkDailyActionLimit, MAX_DAILY_ACTIONS } from "./utils/dailyActions";
 import { logReceiptToGoogleSheets, sendReceiptForManualReview } from "./utils/webhooks";
 import { updateApprovedReceiptStatus } from "./utils/updateWebhooks";
-import { sendReward, convertB3TRToWei, getReceiptProofData } from "./utils/distributeReward";
+import { sendReward, convertB3TRToWei, getReceiptProofData } from "./utils/distributeReward-connex";
 import { storeReceiptImage, getReceiptImage } from "./utils/imageStorage";
 import { z } from "zod";
 import { log } from "./vite";
@@ -103,6 +104,105 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ 
         message: 'Server configuration error', 
         details: process.env.NODE_ENV !== 'production' ? (error.message || 'Unknown error') : undefined 
+      });
+    }
+  });
+
+  // User update endpoint for wallet address and other fields
+  app.patch("/api/users/:id", async (req: Request, res: Response) => {
+    try {
+      const userId = parseInt(req.params.id);
+      
+      if (isNaN(userId)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid user ID" 
+        });
+      }
+
+      // Check if user exists
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ 
+          success: false, 
+          message: `User ${userId} not found` 
+        });
+      }
+
+      // Update user with provided fields
+      const updatedUser = await storage.updateUser(userId, req.body);
+      
+      if (!updatedUser) {
+        return res.status(500).json({ 
+          success: false, 
+          message: "Failed to update user" 
+        });
+      }
+
+      res.json(updatedUser);
+    } catch (error) {
+      console.error('Error updating user:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  // Comprehensive data reset endpoint for any user ID
+  app.post("/api/users/:id/reset", async (req: Request, res: Response) => {
+    try {
+      const userId = parseInt(req.params.id);
+      
+      if (isNaN(userId)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid user ID" 
+        });
+      }
+
+      // Check if user exists
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ 
+          success: false, 
+          message: `User ${userId} not found` 
+        });
+      }
+
+      // Reset user's token balance and streak
+      await storage.updateUser(userId, {
+        tokenBalance: 0,
+        currentStreak: 0
+      });
+
+      // Clear all user's receipts
+      const userReceipts = await storage.getUserReceipts(userId);
+      for (const receipt of userReceipts) {
+        await storage.deleteReceipt(receipt.id);
+      }
+
+      // Clear all user's transactions
+      const userTransactions = await storage.getUserTransactions(userId);
+      for (const transaction of userTransactions) {
+        await storage.deleteTransaction(transaction.id);
+      }
+
+      // Get updated user data
+      const updatedUser = await storage.getUser(userId);
+
+      console.log(`[RESET] User ${userId} data reset successfully - Balance: ${updatedUser?.tokenBalance}, Streak: ${updatedUser?.currentStreak}`);
+
+      res.json({ 
+        success: true, 
+        message: `User ${userId} data reset successfully`,
+        user: updatedUser
+      });
+    } catch (error) {
+      console.error("Error resetting user data:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to reset user data" 
       });
     }
   });
@@ -2653,17 +2753,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(404).json({ message: "User not found" });
         }
         
+        console.log(`[ACHIEVEMENT DEBUG] Starting achievement check for user ${submittedUserId}`);
+        
         // Check user's receipts to determine if this is their first one
         const userReceipts = await storage.getUserReceipts(submittedUserId);
+        console.log(`[ACHIEVEMENT DEBUG] User has ${userReceipts.length} receipts`);
         
         // Determine if this is their first receipt (for achievement tracking)
         const isFirstReceipt = userReceipts.length === 1;
+        console.log(`[ACHIEVEMENT DEBUG] Is first receipt: ${isFirstReceipt}`);
         
         // Check if the user has already been awarded the first_receipt achievement
         const hasFirstReceiptAchievement = await wasAchievementAwarded(submittedUserId, 'first_receipt');
+        console.log(`[ACHIEVEMENT DEBUG] Already has achievement: ${hasFirstReceiptAchievement}`);
         
         // Debug achievement conditions
-        console.log(`DEBUG - Achievement conditions:
+        console.log(`[ACHIEVEMENT DEBUG] Achievement conditions:
           - User ID: ${submittedUserId}
           - Is first receipt? ${isFirstReceipt} (receipts count: ${userReceipts.length})
           - Already has first_receipt achievement? ${hasFirstReceiptAchievement}
@@ -2677,12 +2782,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // OR if we're in test mode with the first receipt
         const shouldAwardFirstReceipt = (isFirstReceipt && !hasFirstReceiptAchievement) || forceAward;
         
+        console.log(`[ACHIEVEMENT DEBUG] Force award: ${forceAward}`);
+        console.log(`[ACHIEVEMENT DEBUG] Should award first receipt: ${shouldAwardFirstReceipt}`);
+        
         if (forceAward) {
-          console.log(`DEBUG - Force awarding first_receipt achievement in test mode`);
+          console.log(`[ACHIEVEMENT DEBUG] Force awarding first_receipt achievement in test mode`);
         }
         
         // Calculate achievement bonus if applicable
         const achievementBonus = shouldAwardFirstReceipt ? calculateAchievementReward('first_receipt') : 0;
+        console.log(`[ACHIEVEMENT DEBUG] Achievement bonus calculated: ${achievementBonus} B3TR`);
         
         // Log breakdown of the final calculation for verification
         console.log(`Token reward breakdown:
@@ -2881,6 +2990,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
             initialUserData.id, 
             newBalance
           );
+
+          // ===== CRITICAL: TRIGGER 70/30 BLOCKCHAIN DISTRIBUTION =====
+          // This ensures VeBetterDAO compliance with mandatory fund distribution
+          console.log(`[BLOCKCHAIN] Triggering 70/30 distribution for receipt ${newReceipt.id}`);
+          
+          try {
+            // Get user wallet address for distribution
+            const userWalletAddress = initialUserData.walletAddress;
+            
+            if (userWalletAddress && totalRewards > 0) {
+              console.log(`[BLOCKCHAIN] Starting distribution: ${totalRewards} B3TR to user ${userWalletAddress}`);
+              
+              // Get store info for receipt metadata
+              const receiptStoreInfo = newReceipt.storeId ? await storage.getStore(newReceipt.storeId) : null;
+              
+              // Execute the 70/30 distribution: 70% to user, 15% to creator fund, 15% to app fund
+              const distributionResult = await sendReward({
+                recipient: userWalletAddress,
+                amount: totalRewards.toString(),
+                proofTypes: ["receipt_id", "store_verification", "sustainability_category"],
+                proofValues: [
+                  newReceipt.id.toString(),
+                  receiptStoreInfo?.name || "Unknown Store",
+                  receiptData.category
+                ],
+                impactTypes: ["co2_saved_grams", "purchase_amount_cents", "sustainability_score"],
+                impactValues: [
+                  "500", // Estimated CO2 savings in grams
+                  Math.round(receiptData.amount * 100).toString(), // Amount in cents
+                  "95" // High sustainability score for validated receipts
+                ],
+                receiptId: newReceipt.id
+              });
+
+              if (distributionResult.success) {
+                console.log(`[BLOCKCHAIN] ✅ 70/30 distribution successful!`);
+                console.log(`[BLOCKCHAIN] User TX: ${distributionResult.hash}`);
+                console.log(`[BLOCKCHAIN] Creator TX: ${distributionResult.creatorHash || 'N/A'}`);
+                console.log(`[BLOCKCHAIN] App TX: ${distributionResult.appHash || 'N/A'}`);
+                
+                // Create transaction records for creator and app fund distributions
+                try {
+                  const creatorAmount = parseFloat(distributionResult.distribution?.creator || '0');
+                  const appAmount = parseFloat(distributionResult.distribution?.app || '0');
+                  
+                  if (creatorAmount > 0) {
+                    await storage.createTransaction({
+                      userId: null, // Fund transactions don't belong to a specific user
+                      type: "sustainability_creator",
+                      amount: creatorAmount,
+                      description: `Creator Fund Distribution (Receipt #${newReceipt.id}): ${CREATOR_FUND_WALLET.slice(0, 8)}...`,
+                      referenceId: newReceipt.id,
+                      txHash: distributionResult.creatorHash || `creator-${Date.now()}`
+                    });
+                    console.log(`[BLOCKCHAIN] ✅ Creator fund transaction record created: ${creatorAmount} B3TR`);
+                  }
+                  
+                  if (appAmount > 0) {
+                    await storage.createTransaction({
+                      userId: null, // Fund transactions don't belong to a specific user
+                      type: "sustainability_app",
+                      amount: appAmount,
+                      description: `App Fund Distribution (Receipt #${newReceipt.id}): ${APP_FUND_WALLET.slice(0, 8)}...`,
+                      referenceId: newReceipt.id,
+                      txHash: distributionResult.appHash || `app-${Date.now()}`
+                    });
+                    console.log(`[BLOCKCHAIN] ✅ App fund transaction record created: ${appAmount} B3TR`);
+                  }
+                } catch (txRecordError) {
+                  console.error(`[BLOCKCHAIN] ❌ Error creating fund transaction records:`, txRecordError);
+                }
+              } else {
+                console.error(`[BLOCKCHAIN] ❌ Distribution failed: ${distributionResult.error}`);
+              }
+            } else {
+              console.log(`[BLOCKCHAIN] ⚠️ Skipping distribution - no wallet address or zero reward`);
+            }
+          } catch (distributionError) {
+            console.error(`[BLOCKCHAIN] ❌ Distribution error:`, distributionError);
+            // Don't fail the receipt submission if blockchain distribution fails
+            // The user still gets their database balance updated
+          }
         } else {
           console.log(`NOT updating token balance because receipt needs manual review. Current balance: ${initialUserData.tokenBalance}`);
         }
