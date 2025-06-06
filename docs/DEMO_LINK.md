@@ -4,7 +4,8 @@
 
 **Live Application:** [View Demo on Replit home screen and wallet conmect page until whitelisted](https://www.recirclerewards.app)
 
-### Demo Features Available:
+### Features Available 
+Ready for Production After Whitelisting:
 
 #### 🔗 Wallet Integration
 - Connect with VeWorld wallet
@@ -31,12 +32,6 @@
 - **VeBetterDAO Compliance**: 70/30 distribution model
 - **Mobile Optimized**: Responsive design for all devices
 - **Real-time Updates**: Live data synchronization
-
-### Demo Instructions
-1. Connect your VeWorld wallet
-2. Explore the Impact Explorer
-3. View transaction history
-4. Test receipt validation features
 
 ---
 *Built for VeBetterDAO submission - showcasing sustainable blockchain innovation*
