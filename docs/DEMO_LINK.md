@@ -2,7 +2,7 @@
 
 ## 🌟 Experience ReCircle Platform
 
-**Live Application:** [View Demo on Replit home screen and wallet conmect page until whitelisted](https://www.recirclerewards.app)
+**Live Application:** [View Demo on Replit home screen and wallet connect page until whitelisted](https://www.recirclerewards.app)
 
 ### Features Available 
 Ready for Production After Whitelisting:
