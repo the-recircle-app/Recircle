@@ -18,7 +18,7 @@ Ready for Production After Whitelisting:
 - Automatic reward calculation
 
 #### 🏆 Impact Explorer
-- Achievement badge system
+- Achievement badge and bonus reward system
 - Environmental impact tracking
 - Blockchain-verified milestones
 
