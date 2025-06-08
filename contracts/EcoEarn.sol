@@ -1,18 +1,24 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.19;
+
+import '@openzeppelin/contracts/access/AccessControl.sol';
+import '@openzeppelin/contracts/utils/Strings.sol';
+import './interfaces/IX2EarnRewardsPool.sol';
 
 /**
  * @title EcoEarn - ReCircle Sustainability Rewards Contract
  * @dev Smart contract for distributing B3TR tokens through VeBetterDAO's x2Earn system
- * Validates and rewards sustainable consumption behaviors on the ReCircle platform
+ * Validates and rewards sustainable transportation behaviors on the ReCircle platform
+ * Follows VeBetterDAO standards with AccessControl and submission tracking
  */
-contract EcoEarn {
+contract EcoEarn is AccessControl {
     
     // VeBetterDAO Integration
-    bytes32 public immutable APP_ID;
-    address public immutable VEBETTERDAO_REWARDS_POOL;
+    bytes32 public appId;
+    IX2EarnRewardsPool public immutable x2EarnRewardsPoolContract;
     address public immutable B3TR_TOKEN;
-    address public owner;
+    
+
     
     // Reward Categories
     enum RewardCategory {
@@ -75,10 +81,7 @@ contract EcoEarn {
     uint256 public totalReceiptsProcessed;
     uint256 public totalCO2Saved; // Environmental impact tracking
     
-    modifier onlyOwner() {
-        require(msg.sender == owner, "Only owner can call this function");
-        _;
-    }
+
     
     /**
      * @dev Constructor
@@ -87,14 +90,17 @@ contract EcoEarn {
      * @param _b3trToken B3TR token contract address
      */
     constructor(
+        address _admin,
         bytes32 _appId,
         address _rewardsPool,
         address _b3trToken
     ) {
-        APP_ID = _appId;
-        VEBETTERDAO_REWARDS_POOL = _rewardsPool;
+        require(_admin != address(0), 'EcoEarn: admin cannot be zero address');
+        require(_rewardsPool != address(0), 'EcoEarn: rewards pool cannot be zero address');
+        appId = _appId;
+        x2EarnRewardsPoolContract = IX2EarnRewardsPool(_rewardsPool);
         B3TR_TOKEN = _b3trToken;
-        owner = msg.sender;
+        _grantRole(DEFAULT_ADMIN_ROLE, _admin);
         
         // Initialize default reward configurations
         _initializeRewardConfigs();
@@ -159,7 +165,7 @@ contract EcoEarn {
         RewardCategory category,
         ReceiptProof calldata proof,
         uint256 rewardAmount
-    ) external onlyOwner {
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(recipient != address(0), "Invalid recipient");
         require(rewardConfigs[category].isActive, "Category not active");
         require(rewardAmount > 0, "Invalid reward amount");
@@ -179,6 +185,22 @@ contract EcoEarn {
         uint256 co2Saved = _calculateCO2Impact(category, proof.amount);
         totalCO2Saved += co2Saved;
         
+        // Distribute reward through VeBetterDAO's X2EarnRewardsPool
+        string memory sustainabilityProof = string.concat(
+            '{"receiptHash":"', proof.ipfsHash, 
+            '","storeName":"', proof.storeName,
+            '","category":"', _getCategoryName(category),
+            '","amount":"', Strings.toString(proof.amount),
+            '","co2Saved":"', Strings.toString(co2Saved), '"}'
+        );
+        
+        x2EarnRewardsPoolContract.distributeReward(
+            appId,
+            rewardAmount,
+            recipient,
+            sustainabilityProof
+        );
+        
         // Emit events
         emit RewardDistributed(
             recipient,
@@ -197,6 +219,21 @@ contract EcoEarn {
         );
     }
     
+    /**
+     * @dev Get category name as string
+     * @param category Reward category enum
+     * @return Category name as string
+     */
+    function _getCategoryName(RewardCategory category) private pure returns (string memory) {
+        if (category == RewardCategory.THRIFT_STORE) return "thrift_store";
+        if (category == RewardCategory.GAMING_PREOWNED) return "gaming_preowned";
+        if (category == RewardCategory.RIDESHARE) return "rideshare";
+        if (category == RewardCategory.EV_RENTAL) return "ev_rental";
+        if (category == RewardCategory.STORE_ADDITION) return "store_addition";
+        if (category == RewardCategory.ACHIEVEMENT) return "achievement";
+        return "unknown";
+    }
+
     /**
      * @dev Calculate CO2 impact based on purchase category
      * @param category Purchase category
@@ -232,7 +269,7 @@ contract EcoEarn {
         uint256 baseReward,
         uint256 maxReward,
         bool isActive
-    ) external onlyOwner {
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(baseReward <= maxReward, "Base reward exceeds max");
         
         rewardConfigs[category] = RewardConfig({
