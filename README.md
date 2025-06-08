@@ -4,6 +4,11 @@
 [![VeChain](https://img.shields.io/badge/VeChain-Thor-blue)](https://www.vechain.org/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
+## 🌐 Live Demo
+**[View Live Application →](https://recircle-rewards.replit.app/)**
+
+*Experience the full ReCircle platform with VeChain wallet integration and B3TR rewards*
+
 ## 🚗 Overview
 
 ReCircle is a blockchain-powered rewards platform that incentivizes sustainable transportation choices through B3TR token distribution. Users earn rewards by submitting receipts from ride-share services, electric vehicle rentals, and public transit, contributing to reduced carbon emissions and promoting eco-friendly mobility solutions.
@@ -27,39 +32,21 @@ ReCircle is a blockchain-powered rewards platform that incentivizes sustainable 
 
 ## 📱 Platform Screenshots
 
-### Transportation Receipt Scanning Screenshots
-[Receipt Capture Interface 1](https://github.com/user-attachments/assets/c3424584-c894-4fcf-9c30-ee3d22906dea) | 
-[Receipt Capture Interface 2](https://github.com/user-attachments/assets/08065c0e-2ffe-4f86-a62d-aca07c9ce752) | 
-[Receipt Capture Interface 3](https://github.com/user-attachments/assets/a9f42661-04aa-4dc6-8044-3c3c59cb3773)
+### Transportation Receipt Scanning
+![Receipt Scanner Interface](screenshots/receipt-scanner.png)
 *Multi-category transportation receipt validation: Uber, Tesla, Metro Transit*
 
-### VeChain Wallet Integration Screenshots
-[Wallet Connect Button](https://github.com/user-attachments/assets/ac7d69ba-36b0-4967-9c3b-b7f0fff21d26) | 
-[Wallet Connection Success Screen](https://github.com/user-attachments/assets/cb013dae-498d-4a4c-967c-4ea64a7841ef)
+### VeChain Wallet Integration
+![Wallet Connection](screenshots/wallet-connection.png)
 *Seamless VeWorld wallet connection with B3TR token rewards*
 
-### Transportation Services Hub Screenshot
-[Transportation Dashboard](https://github.com/user-attachments/assets/bdb556fd-235a-4c5a-ae11-0f2cc51d5e1b)
+### Transportation Services Hub
+![Transportation Dashboard](screenshots/transportation-hub.png)
 *Comprehensive transportation options: ride-share, electric vehicles, public transit*
 
-### Eco Impact and Achievements ScreenShot
-[Eco Impact and Achievement Badges](https://github.com/user-attachments/assets/81b0f250-2628-44a7-9bf5-61b1fe84e861)
-
-### Transaction History / Blockchain History Screeshots
-[Transaction history](https://github.com/user-attachments/assets/3fd56a4d-eff5-46a9-873a-9830f3410118) | 
-[Transactio and reward details](https://github.com/user-attachments/assets/e36c68a7-63e3-430f-866b-5dfb12e5ed77) |
-[Blockchain transaction history tab](https://github.com/user-attachments/assets/d6e2f2ae-a8fe-4c4f-a93a-ea5fd3e1469c) |
-[blockchain integration with View on Vechain Ex](https://github.com/user-attachments/assets/81956344-493e-4b77-b656-0be7ca6454fd)
-
-### Token Claim Screenshots
-[Redeem Page](https://github.com/user-attachments/assets/d70c0279-65d9-4da9-aa52-5bac6d4ba67b) |
-[Claim Tokens with details](https://github.com/user-attachments/assets/a910b301-656f-4bd0-b25e-f7bde233e711) |
-[Confirmation of Token Claim button](https://github.com/user-attachments/assets/4c2ea26f-c953-4bcf-b8ac-ed0a15292d76) |
-[Token Claim Success screen](https://github.com/user-attachments/assets/b071ad5a-f091-4c59-8700-ffbe35e837be)
-
-### Share and Invite Page Screenshots
-[Share On Social Media Page](https://github.com/user-attachments/assets/e682d8c7-0ce6-4468-be5f-80e7d6def663) |
-[Invite Link Screen](https://github.com/user-attachments/assets/6eb1330f-db85-4eae-a058-6b94f12789b6)
+### Manual Review System
+![Manual Review](screenshots/manual-review.png)
+*Google Sheets integration for public transit receipt verification*
 
 ### Technical Highlights
 - **Multi-Tier Validation**: Auto-approval for ride-share (Uber, Lyft, Waymo), manual review for public transit
