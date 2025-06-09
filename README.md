@@ -38,8 +38,6 @@ ReCircle is a blockchain-powered rewards platform that incentivizes sustainable 
 [Wallet Connection Success Screen](https://github.com/user-attachments/assets/cb013dae-498d-4a4c-967c-4ea64a7841ef)
 *Seamless VeWorld wallet connection with B3TR token rewards*
 
-ReCircle is a blockchain-powered rewards platform that incentivizes sustainable
-
 ### Eco Impact
 [Eco Impact and Achievement Badges](https://github.com/user-attachments/assets/81b0f250-2628-44a7-9bf5-61b1fe84e861)
 
