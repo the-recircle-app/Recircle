@@ -58,7 +58,7 @@ ReCircle is a blockchain-powered rewards platform that incentivizes sustainable 
 [Invite Link Screen](https://github.com/user-attachments/assets/6eb1330f-db85-4eae-a058-6b94f12789b6)
 
 ### Technical Highlights
-- **Multi-Tier Validation**: Auto-approval for ride-share (Uber, Lyft, Waymo), manual review for public transit
+- **Multi-Tier Validation**: Auto-approval for ride-share (Uber, Lyft, Waymo,EV rentals), manual review for public transit
 - **VeChain Integration**: Native VeWorld wallet connection with Connex framework
 - **Smart Contract Integration**: VeBetterDAO 70/30 distribution model implementation
 - **Transportation Categories**: Ride-share, electric vehicle rentals, public transit with specialized handling
