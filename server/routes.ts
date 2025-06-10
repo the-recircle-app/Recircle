@@ -2870,7 +2870,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Only create transactions and award tokens if receipt does NOT need manual review
         let receiptTransaction = null;
-        let sustainabilityRewards = null;
         
         if (!needsManualReview) {
           // Create a transaction for the receipt verification reward (without achievement bonus)
@@ -2883,44 +2882,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
             txHash: `txhash-r-${Date.now().toString(16)}` // Mock hash with a unique identifier
           });
           
-          // Calculate additional sustainability rewards (50% to creator, 50% to app)
-          // These are ADDITIONAL tokens, not taking from the user's reward
-          sustainabilityRewards = calculateSustainabilityRewards(finalReward);
-          
-          // Create transaction for creator sustainability reward (framed as additional sustainability contribution)
-          await storage.createTransaction({
-            userId: null, // No specific user - this goes to creator wallet
-            type: "sustainability_creator",
-            amount: sustainabilityRewards.creatorReward,
-            description: `Creator Sustainability Fund: ${CREATOR_FUND_WALLET.slice(0, 8)}...`,
-            referenceId: newReceipt.id,
-            txHash: `txhash-sc-${Date.now().toString(16)}` // Mock hash with a unique identifier
-          });
-          
-          // Create transaction for app ecosystem sustainability reward
-          await storage.createTransaction({
-            userId: null, // No specific user - this goes to app wallet
-            type: "sustainability_app",
-            amount: sustainabilityRewards.appReward,
-            description: `App Sustainability Fund: ${APP_FUND_WALLET.slice(0, 8)}...`,
-            referenceId: newReceipt.id,
-            txHash: `txhash-sa-${Date.now().toString(16)}` // Mock hash with a unique identifier
-          });
-          
           console.log(`Receipt #${newReceipt.id} automatically verified and tokens awarded`);
         } else {
           console.log(`Receipt #${newReceipt.id} requires manual review - no tokens awarded yet`);
         }
         
-        // Log sustainability rewards details only if we created them
-        if (!needsManualReview && sustainabilityRewards) {
-          console.log(`Sustainability rewards created:
-            - User reward: ${finalReward} B3TR (user keeps 100% of this)
-            - ADDITIONAL Creator sustainability: ${sustainabilityRewards?.creatorReward || 0} B3TR (${ECOSYSTEM_MULTIPLIERS.CREATOR_MULTIPLIER * 100}% of matching amount)
-            - ADDITIONAL App sustainability: ${sustainabilityRewards?.appReward || 0} B3TR (${ECOSYSTEM_MULTIPLIERS.APP_MULTIPLIER * 100}% of matching amount)
-            - Total additional sustainability: ${sustainabilityRewards?.totalSustainabilityReward || 0} B3TR
-          `);
-        }
+        // Fund distributions will be handled by the 70/30 blockchain distribution system below
         
         // Initialize achievement tracking
         let awardedAchievements: string[] = [];
@@ -2945,37 +2912,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
             txHash: `txhash-a-${Date.now().toString(16)}` // Mock hash with a unique identifier
           });
           
-          // Calculate additional sustainability rewards for the achievement bonus
-          // These are ADDITIONAL tokens, not taking from user's achievement reward
-          const achievementSustainabilityRewards = calculateSustainabilityRewards(achievementBonus);
+          // Achievement fund distributions will be handled by the 70/30 blockchain distribution system below
           
-          // Create transaction for creator sustainability reward from achievement bonus
-          await storage.createTransaction({
-            userId: null, // No specific user - this goes to creator wallet
-            type: "sustainability_creator",
-            amount: achievementSustainabilityRewards.creatorReward,
-            description: `Creator Sustainability (Achievement): ${CREATOR_FUND_WALLET.slice(0, 8)}...`,
-            referenceId: null,
-            txHash: `txhash-sca-${Date.now().toString(16)}` // Mock hash with a unique identifier
-          });
+          // Track the achievement as awarded
+          trackAwardedAchievement(submittedUserId, 'first_receipt', achievementBonus);
           
-          // Create transaction for app ecosystem sustainability reward from achievement bonus
-          await storage.createTransaction({
-            userId: null, // No specific user - this goes to app wallet
-            type: "sustainability_app",
-            amount: achievementSustainabilityRewards.appReward,
-            description: `App Sustainability (Achievement): ${APP_FUND_WALLET.slice(0, 8)}...`,
-            referenceId: null,
-            txHash: `txhash-saa-${Date.now().toString(16)}` // Mock hash with a unique identifier
-          });
-          
-          // Log achievement sustainability rewards details (emphasizing additional nature)
-          console.log(`Achievement sustainability rewards created:
-            - Achievement bonus: ${achievementBonus} B3TR (user keeps 100% of this)
-            - ADDITIONAL Creator sustainability: ${achievementSustainabilityRewards.creatorReward} B3TR (${ECOSYSTEM_MULTIPLIERS.CREATOR_MULTIPLIER * 100}% of matching amount)
-            - ADDITIONAL App sustainability: ${achievementSustainabilityRewards.appReward} B3TR (${ECOSYSTEM_MULTIPLIERS.APP_MULTIPLIER * 100}% of matching amount)
-            - Total additional sustainability: ${achievementSustainabilityRewards.totalSustainabilityReward} B3TR
-          `);
+          console.log(`Achievement bonus awarded: ${achievementBonus} B3TR for first receipt`);
         }
         
         // Update user's token balance with all rewards at once
