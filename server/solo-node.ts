@@ -112,6 +112,21 @@ export function setupSoloNodeRoutes(app: Express) {
     console.log('[SOLO-NODE] 🚀 Setting up integrated VeChain Solo Node routes');
     initializeGenesis();
 
+    // Add CORS middleware for all /solo endpoints
+    app.use('/solo/*', (req, res, next) => {
+        res.header('Access-Control-Allow-Origin', '*');
+        res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+        res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+        res.header('Access-Control-Allow-Credentials', 'true');
+        res.header('Access-Control-Max-Age', '86400');
+        
+        if (req.method === 'OPTIONS') {
+            res.sendStatus(200);
+            return;
+        }
+        next();
+    });
+
     // VeChain API endpoints
     app.get('/solo/blocks/best', (req, res) => {
         const bestBlock = blocks[blocks.length - 1];
