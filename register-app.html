@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Register ReCircle dApp</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; }
+    button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    button:hover { background: #0056b3; }
+    .status { margin: 20px 0; padding: 10px; border-radius: 5px; }
+    .error { background: #ffebee; border: 1px solid #f44336; }
+    .success { background: #e8f5e8; border: 1px solid #4caf50; }
+    .debug { background: #f5f5f5; padding: 10px; border-radius: 5px; font-family: monospace; font-size: 12px; }
+    .step { margin: 10px 0; padding: 10px; background: #f0f8ff; border-left: 4px solid #007bff; }
+  </style>
+</head>
+<body>
+  <h1>Register ReCircle on VeBetterDAO Testnet</h1>
+  
+  <div class="step">
+    <h3>Prerequisites:</h3>
+    <ul>
+      <li>VeWorld wallet installed and connected</li>
+      <li>Switch to VeChain Testnet in VeWorld</li>
+      <li>Have some testnet VET for gas fees</li>
+    </ul>
+  </div>
+
+  <button id="checkNetwork">1. Check Network</button>
+  <button id="register">2. Register App</button>
+  
+  <div id="status"></div>
+  <div id="debug" class="debug"></div>
+
+  <script>
+    const log = (message) => {
+      const debug = document.getElementById("debug");
+      debug.innerHTML += message + "<br>";
+      console.log(message);
+    };
+
+    const setStatus = (message, type = "") => {
+      const status = document.getElementById("status");
+      status.innerHTML = message;
+      status.className = `status ${type}`;
+    };
+
+    document.getElementById("checkNetwork").onclick = async () => {
+      try {
+        log("Checking VeWorld connection...");
+        
+        if (!window.connex) {
+          throw new Error("VeWorld not detected. Please install VeWorld extension and refresh.");
+        }
+
+        const connex = window.connex;
+        const status = connex.thor.status;
+        
+        log(`Connected to: ${status.head.id}`);
+        log(`Network: ${connex.thor.genesis.id}`);
+        
+        // Check if on testnet
+        const testnetGenesisId = "0x000000000b2bce3c70bc649a02749e8687721b09ed2e15997f466536b20bb127";
+        
+        if (connex.thor.genesis.id === testnetGenesisId) {
+          setStatus("✅ Connected to VeChain Testnet!", "success");
+          log("Ready to register!");
+        } else {
+          setStatus("❌ Please switch to VeChain Testnet in VeWorld", "error");
+          log("Current network is not testnet");
+        }
+        
+      } catch (error) {
+        setStatus(`❌ ${error.message}`, "error");
+        log(`Error: ${error.message}`);
+      }
+    };
+
+    document.getElementById("register").onclick = async () => {
+      try {
+        log("Starting registration process...");
+        
+        if (!window.connex) {
+          throw new Error("VeWorld not detected");
+        }
+
+        const connex = window.connex;
+        const thor = connex.thor;
+        const vendor = connex.vendor;
+
+        // Contract ABI for registerApp function
+        const ABI = [
+          {
+            "inputs": [
+              { "internalType": "string", "name": "name", "type": "string" },
+              { "internalType": "string", "name": "description", "type": "string" }
+            ],
+            "name": "registerApp",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          }
+        ];
+
+        const CONTRACT_ADDRESS = "0xB54f3b684135cC6b54B9C2591c6F33e12f1F0070";
+        const APP_NAME = "ReCircle";
+        const APP_DESCRIPTION = "Sustainability rewards platform for validating thrift, EV, and rideshare receipts";
+
+        log(`Contract: ${CONTRACT_ADDRESS}`);
+        log(`Name: ${APP_NAME}`);
+        log(`Description: ${APP_DESCRIPTION}`);
+
+        // Create contract instance
+        const contract = thor.account(CONTRACT_ADDRESS).method(ABI.find(item => item.name === 'registerApp'));
+        
+        // Prepare transaction clause
+        const clause = {
+          to: CONTRACT_ADDRESS,
+          value: '0x0',
+          data: contract.encode(APP_NAME, APP_DESCRIPTION)
+        };
+
+        log("Prepared transaction clause");
+        setStatus("Please confirm the transaction in VeWorld...", "");
+
+        // Request signature
+        const result = await vendor.sign('tx', [clause]).request();
+
+        log(`Transaction submitted: ${result.txid}`);
+        
+        const explorerUrl = `https://explore-testnet.vechain.org/transactions/${result.txid}`;
+        setStatus(`✅ Registration transaction submitted!<br><br>
+          <strong>Transaction ID:</strong> ${result.txid}<br><br>
+          <a href="${explorerUrl}" target="_blank">View on VeChain Testnet Explorer</a><br><br>
+          <strong>Next Steps:</strong><br>
+          1. Wait for transaction confirmation<br>
+          2. Check transaction logs for your APP_ID<br>
+          3. Update your .env file with the new APP_ID`, "success");
+
+      } catch (error) {
+        console.error(error);
+        setStatus(`❌ Registration failed: ${error.message}`, "error");
+        log(`Error: ${error.message}`);
+      }
+    };
+
+    // Auto-check network on load
+    window.onload = () => {
+      document.getElementById("checkNetwork").click();
+    };
+  </script>
+</body>
+</html>

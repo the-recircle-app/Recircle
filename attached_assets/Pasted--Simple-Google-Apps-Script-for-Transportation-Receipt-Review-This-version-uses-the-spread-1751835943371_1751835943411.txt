@@ -1,0 +1,138 @@
+/**
+ * Simple Google Apps Script for Transportation Receipt Review
+ * This version uses the spreadsheet ID directly to avoid binding issues
+ */
+
+// Configuration - UPDATE THESE VALUES
+const WEBHOOK_URL = 'https://www.recirclerewards.app/api/receipt-approved';
+const SPREADSHEET_ID = '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms'; // Get this from your sheet URL
+const SHEET_NAME = 'Form Responses 1';
+
+/**
+ * Main function that processes form submissions
+ */
+function onFormSubmit(e) {
+  try {
+    console.log('🚀 Processing transportation receipt review...');
+    
+    // Get the spreadsheet by ID
+    const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const sheet = spreadsheet.getSheetByName(SHEET_NAME);
+    
+    if (!sheet) {
+      console.error('❌ Sheet not found:', SHEET_NAME);
+      return;
+    }
+    
+    // Get the latest row (most recent form submission)
+    const lastRow = sheet.getLastRow();
+    if (lastRow <= 1) {
+      console.log('No form responses found');
+      return;
+    }
+    
+    // Get headers and values
+    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    const values = sheet.getRange(lastRow, 1, 1, sheet.getLastColumn()).getValues()[0];
+    
+    // Create responses object
+    const responses = {};
+    headers.forEach((header, index) => {
+      if (header && values[index] !== undefined) {
+        responses[header] = values[index];
+      }
+    });
+    
+    console.log('Form responses:', responses);
+    
+    // Extract data
+    const receiptId = responses['Receipt ID'] || '';
+    const userId = parseInt(responses['User ID']) || 0;
+    const walletAddress = responses['Wallet Address'] || '';
+    const transportationCategory = responses['Transportation Category'] || '';
+    const serviceProvider = responses['Service Provider'] || '';
+    const reviewDecision = responses['Review Decision'] || '';
+    const reviewNotes = responses['Review Notes'] || '';
+    
+    // Check if approved
+    const isApproved = reviewDecision.includes('Approve') || reviewDecision.includes('✅');
+    
+    if (isApproved) {
+      console.log('✅ Receipt approved - sending to webhook...');
+      
+      // Send webhook
+      const payload = {
+        receiptId: receiptId,
+        userId: userId,
+        walletAddress: walletAddress,
+        approved: true,
+        reviewType: 'manual_transportation_review',
+        transportationData: {
+          category: transportationCategory,
+          serviceProvider: serviceProvider
+        },
+        reviewMetadata: {
+          reviewNotes: reviewNotes,
+          reviewedAt: new Date().toISOString(),
+          reviewSource: 'google_apps_script_transportation'
+        }
+      };
+      
+      console.log('Sending webhook:', JSON.stringify(payload, null, 2));
+      
+      const response = UrlFetchApp.fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        payload: JSON.stringify(payload),
+        muteHttpExceptions: true
+      });
+      
+      const responseCode = response.getResponseCode();
+      const responseText = response.getContentText();
+      
+      console.log(`Webhook response: ${responseCode} - ${responseText}`);
+      
+      if (responseCode === 200) {
+        console.log('✅ Webhook sent successfully');
+        
+        // Add status to the sheet
+        sheet.getRange(lastRow, sheet.getLastColumn() + 1).setValue('PROCESSED');
+        sheet.getRange(lastRow, sheet.getLastColumn() + 1).setValue(new Date().toISOString());
+      } else {
+        console.error('❌ Webhook failed');
+        sheet.getRange(lastRow, sheet.getLastColumn() + 1).setValue('WEBHOOK_FAILED');
+      }
+    } else {
+      console.log('❌ Receipt not approved - no webhook sent');
+      sheet.getRange(lastRow, sheet.getLastColumn() + 1).setValue('REJECTED');
+    }
+    
+  } catch (error) {
+    console.error('❌ Error processing form submission:', error);
+  }
+}
+
+/**
+ * Test function - run this manually to test
+ */
+function testScript() {
+  console.log('🧪 Testing script...');
+  onFormSubmit(null);
+}
+
+/**
+ * Setup trigger function
+ */
+function setupTrigger() {
+  // Delete existing triggers
+  const triggers = ScriptApp.getProjectTriggers();
+  triggers.forEach(trigger => ScriptApp.deleteTrigger(trigger));
+  
+  // Create new trigger
+  const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+  ScriptApp.newTrigger('onFormSubmit')
+    .onFormSubmit()
+    .create();
+    
+  console.log('✅ Trigger setup complete');
+}

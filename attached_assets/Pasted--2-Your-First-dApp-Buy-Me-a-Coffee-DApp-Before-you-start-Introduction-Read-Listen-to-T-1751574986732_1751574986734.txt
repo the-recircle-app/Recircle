@@ -1,0 +1,203 @@
+
+
+2. Your First dApp: Buy Me a Coffee DApp
+
+Before you start
+Introduction
+
+Read & Listen to Transactions
+
+Write Transactions
+
+Writing and Deploying Contract
+Introduction
+
+Writing the Buy Me a Coffee Smart Contract
+
+Deploying the Contract (Hardhat on VeChain)
+
+Summary & Key Takeaways
+
+React + Vite Frontend
+Introduction
+
+Setting Up the App and Connecting to VeChain
+
+UI & Contracts
+
+Summary & Key Takeaways
+
+
+
+
+
+W
+W
+If you’re using the repository example, the frontend is located in the apps/frontend directory. It’s a Vite-powered React app.
+
+
+You can start the dev server with:
+
+code editor
+cd apps/frontend
+yarn dev
+This opens the app at http://localhost:XXXX (the port depends on your configuration), and you’ll see the UI, which already includes a Connect Wallet button, input fields, etc.
+
+Verify that your dapp uses the smart contract you have deployed earlier. 
+
+
+
+In the example, contract address and ABI are updated automatically with the deploy script, but you can also define them manually inside your front-end app.
+
+
+Let’s say there’s a file where you do something like:
+
+code editor
+const CONTRACT_ADDRESS = '0xYourContractAddress...';
+const COFFEE_CONTRACT_ABI = [ 
+  /* ... ABI JSON ... */
+];
+Make sure to replace '0xYourContractAddress...' with the actual address output from your Hardhat deployment, and ensure the ABI exactly matches your compiled contract’s ABI.
+
+Now, with the address and ABI set, the frontend can create a contract instance for calls.
+
+VeChain’s dApp Kit greatly simplifies wallet connections in the browser. It provides a React context and hooks that manage the connection state.
+
+
+
+main.tsx:
+In the main React entry (App component), the app should be wrapped with a provider from dApp kit — this is typically DAppKitProvider, which establishes a connection to the blockchain and the user’s wallet across the app.
+
+dApp kit is also available for Angular, Next, Remix, Svelte, Vue, and in a pure js vanilla version. 
+
+apps/frontend/src/main.tsx
+code editor
+import { DAppKitProvider } from '@vechain/dapp-kit-react';
+import {THOR_URL} from "./config/constants.ts";
+function App() {
+  return (
+    <DAppKitProvider node={THOR_URL}>
+      {/* rest of the app components */}
+    </DAppKitProvider>
+  );
+}
+By wrapping with DAppKitProvider, all child components can access the connection and signer provided by dApp kit (via React context).
+
+The provider is configured to automatically connect to Testnet or prompt the user.
+
+
+
+Wallet Selection UI:
+The dApp kit UI library has ready-made components for wallet selection. Often, you’d include something like <ConnectButton /> or a <WalletSelectorModal /> to allow the user to pick VeWorld.
+
+If you'd like to dive deeper into the dApp kit documentation, you can find more information in the VeChain docs.
+
+Once the user connects through VeWorld, the DAppProvider will hold the wallet’s connection and the currently selected account.
+
+What is the main purpose of wrapping the app in DAppProvider from VeChain's dApp Kit?
+
+
+Test 1: Single Choice
+
+
+
+
+Let’s briefly explain what’s happening behind our calls:
+
+
+
+Wallet Connection:
+VeWorld provides an object in the window (window.vechain) that the dApp kit uses.
+When the user selects a wallet and connects, dApp kit either uses the injected provider (VeWorld extension).
+
+
+After connection, you have a signing authority.
+
+Calling a Contract:
+When you call buyCoffee with the dApp kit, it constructs a Clause (VeChain’s term for an action) that encodes:
+
+
+
+The function signature and parameters
+
+The amount of VET to send
+
+
+
+This clause is sent to the wallet for signing. VeWorld will show a transaction dialog with:
+
+
+
+destination address = our contract
+
+value = amount of VET
+
+data = the function call
+
+
+
+Once the user approves, the wallet signs the transaction and submits it to a VeChain node.
+
+Understand how Clauses are created and signed 
+
+Complete task
+Gas and VTHO:
+The user must have VTHO to cover the execution of transactions.
+
+To simplify: just make sure the user has some VTHO in their wallet.
+
+The buyCoffee and sendCoffee functions are not computationally heavy, but they store data (write to an array), which costs gas — paid in VTHO.
+
+
+The wallet uses the user’s VTHO to pay. No manual configuration is needed.
+
+
+Since you’re on Testnet, and the Testnet faucet gave us VTHO, you’ll be fine.
+
+Reading data:
+When TransactionHistory calls getSales(), dApp kit uses a read-only call.
+This does not consume VTHO and does not require a signed transaction.
+It queries a node for the contract state. The returned data is decoded via the ABI into JavaScript objects.
+
+
+
+All of these complexities are handled by the dApp kit and SDK, so you mostly interact with simple JavaScript functions or React hooks.
+
+What happens when the buyCoffee or sendCoffee function is called using the VeChain dApp Kit?
+(Select two correct answers.)
+
+
+Test 2: Multiple Choice
+
+
+
+
+Incorrect Contract Address or ABI:
+If the address or ABI is wrong, contract calls will fail silently or do nothing.
+Double-check that you copied the correct address from Hardhat’s output.
+The ABI must include the definitions for buyCoffee, sendCoffee, getSales, etc.
+
+For example: 
+
+They provided the ABI JSON in a config. Use the one from your compiled artifacts to be sure it matches exactly.
+
+Wallet not connecting:
+Ensure the VeWorld extension is installed and that you refreshed the page after installing.
+Also check that your app is being served over http://localhost or https:// — some wallets require a secure context.
+
+
+
+Network mismatches:
+If your contract is on Testnet but your wallet is on Mainnet, the calls won’t succeed.
+Switch the wallet network — VeWorld shows the current network at the top of the extension. Choose Testnet.
+
+
+
+Viewing on Explorer:
+You can copy a transaction ID from the VeWorld prompt or console logs and find it in VeChain’s explorer to see details. Or check the contract address on the explorer to see event logs — the CoffeeSold events will appear there.
+
+Not sure about something? 
+Ask our friendly community in Telegram!
+
+Complete task
+Next Lesson

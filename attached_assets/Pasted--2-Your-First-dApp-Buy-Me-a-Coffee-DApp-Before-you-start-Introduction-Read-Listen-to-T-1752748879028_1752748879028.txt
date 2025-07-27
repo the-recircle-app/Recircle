@@ -1,0 +1,128 @@
+
+
+2. Your First dApp: Buy Me a Coffee DApp
+
+Before you start
+Introduction
+
+Read & Listen to Transactions
+
+Write Transactions
+
+Writing and Deploying Contract
+Introduction
+
+Writing the Buy Me a Coffee Smart Contract
+
+Deploying the Contract (Hardhat on VeChain)
+
+Summary & Key Takeaways
+
+React + Vite Frontend
+Introduction
+
+Setting Up the App and Connecting to VeChain
+
+UI & Contracts
+
+Summary & Key Takeaways
+
+
+
+
+
+W
+W
+Reading transactions is fundamental to making your dApp interactive and trustworthy. If a user triggers an action, like buying an NFT or making a donation, your dApp needs to confirm the result by inspecting the chain.
+
+
+
+In this lesson, you'll learn the basics of how to access and interpret transaction details on the VeChainThor blockchain. This lesson explores the structure of a transaction, identifies the most important fields, and prepares you to use this data effectively in your applications.
+
+
+
+When inspecting a transaction, there are two components that matter: 
+
+
+
+The transaction object – includes all input data and details on how the transaction is stored.
+
+
+The transaction receipt – lists all changes emitted by the blockchain, including:
+
+
+
+status (reverted) of the execution of the transactoipn
+
+logs and events emitted by contracts
+
+address of a newly deployed contract
+
+gas information of the transaction
+
+
+
+Below is the full code snippet, including the required imports and connection to the VeChainThor mainnet. 
+
+
+
+READ 
+code editor
+import { ThorClient, TESTNET_URL } from '@vechain/sdk-network';
+const thor = ThorClient.at(TESTNET_URL);
+
+// get a single transaction
+const txId='0xfbcb25914ce85ec47b7b3b2885593abab29ee4891efcf4350d6a70cb7a934168';
+
+// getting transaction details
+const tx = await thorClient.transactions.getTransaction(txId)
+console.log("Decoded transaction",tx)
+
+// getting transaction receipt
+const txReceipt = await thor.transactions.getTransactionReceipt(txId)
+console.log("Decoded receipt",txReceipt)
+Alternatively, you can see how this code snippet works on StackBlitz
+
+Check how it works
+
+Complete task
+Instead of reading individual events, you can subscribe to data streams to build responsive and dynamic dApps. As you will see in the UI of the "Buy Me A Coffee dApp" later, you can establish regular connections to track VET token transfers between addresses in real time, enhancing transaction transparency. ​
+
+
+
+LISTEN
+
+
+Before starting a websocket connection to listen for new events, we need to provide the signature of the events we are interested in filtering (e.g. Transfer), and a Smart Contract address.
+
+
+A simple connection can be established with this snippet:
+
+code editor
+const abiEventSignature = "event Transfer(address indexed from, address indexed to, uint256 value)";
+const abiEvent = new ABIEvent(abiEventSignature);
+
+const wsUrl = subscriptions.getEventSubscriptionUrl(
+  MAINNET_URL,
+  abiEventSignature,
+  [],
+  { address: '0x0000000000000000000000000000456e65726779' }
+);
+const ws = new WebSocket(wsUrl);
+
+ws.onmessage = (message) => {
+  const response = JSON.parse(message.data)
+  const decodedLog = abiEvent.decodeEventLog(response)
+  console.log('Decoded event', decodedLog)
+};
+There are additional event filtering parameters (which you'll learn more in-depth in the "Developer Fundamentals" module), in this case we are subscribing to Transfer events emitted by a specific smart contract (VTHO token).
+
+Test It Yourself
+
+
+Check the Stackblitz code snippet to see how this subscription works
+
+Check how it works
+
+Complete task
+Next Lesson

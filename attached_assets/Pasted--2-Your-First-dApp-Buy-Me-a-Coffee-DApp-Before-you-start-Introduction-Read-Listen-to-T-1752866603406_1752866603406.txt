@@ -1,0 +1,111 @@
+
+
+2. Your First dApp: Buy Me a Coffee DApp
+
+Before you start
+Introduction
+
+Read & Listen to Transactions
+
+Write Transactions
+
+Writing and Deploying Contract
+Introduction
+
+Writing the Buy Me a Coffee Smart Contract
+
+Deploying the Contract (Hardhat on VeChain)
+
+Summary & Key Takeaways
+
+React + Vite Frontend
+Introduction
+
+Setting Up the App and Connecting to VeChain
+
+UI & Contracts
+
+Summary & Key Takeaways
+
+
+
+
+
+W
+W
+You developed a Solidity smart contract for a "Buy Me a Coffee" dApp, tailored for VeChain.
+
+
+The contract defines:
+
+
+
+A struct and an array to store coffee purchase records.
+
+Functions for buying coffee (for the owner or others).
+
+A function for withdrawing accumulated tips.
+
+
+Function Visibility & Access Control:
+Public functions in Solidity can be called by anyone, so you added an owner check on withdrawTips using require. You also used the payable keyword to allow functions to receive VET.
+
+
+
+VeChain-Specific Details:
+
+You used VET for sending tips and noted that VeChain requires VTHO for gas.
+You obtained testnet tokens from the faucet.
+
+Thanks to VeChain’s EVM-compatibility, you could use Hardhat with minimal configuration.
+
+You compiled and deployed the contract using Hardhat to:
+
+
+
+A local Solo node, or
+
+The public Testnet.
+
+You configured network settings and ran deployment scripts. After deployment, you received the contract address and ABI, which will be used in the frontend.
+
+What’s Next
+In the next chapter, you’ll:
+
+
+
+Use the contract address and ABI in a React + Vite frontend.
+
+Integrate VeChain’s dApp Kit to connect a wallet.
+
+Interact with the contract (call buyCoffee, read getSales, etc.).
+
+
+
+Keep your contract address and ABI handy!
+
+Need help? We're always ready to support your learning journey: head over to our Telegram channel for quick answers!
+
+Join our VeChain builders chat
+
+Complete task
+In Chapter 2, you’ll integrate everything into a web app so that anyone with a VeChain wallet can buy you a coffee through a user-friendly interface.
+
+What is the purpose of the payable keyword in the smart contract?
+
+
+Test 1: Single Choice
+
+
+
+
+What do developers obtain after deploying the contract with Hardhat?
+(Select two correct answers)
+
+
+Test 2: Multiple Choice
+
+
+
+
+Next Lesson

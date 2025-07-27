@@ -1,0 +1,17 @@
+{
+  "storeId": 1,
+  "userId": 6,
+  "amount": 25.00,
+  "purchaseDate": "2025-07-26",
+  "ipfsHash": "QmTest123",
+  "walletAddress": "0x7567d83b7b8d80addcb281a71d54fc7b3364ffed",
+  "storeName": "Uber",
+  "category": "ride_share",
+  "totalAmount": 25.00,
+  "confidence": 0.92,
+  "environmentalImpact": {
+    "co2SavedGrams": 1800,
+    "sustainabilityCategory": "ride_sharing"
+  },
+  "photoUrl": "https://example.com/receipt.jpg"
+}

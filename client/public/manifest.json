@@ -1,0 +1,21 @@
+{
+  "name": "ReCircle - Sustainable Transportation Rewards",
+  "short_name": "ReCircle",
+  "description": "Earn B3TR tokens for sustainable transportation choices",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#22c55e",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

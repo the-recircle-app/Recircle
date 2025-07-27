@@ -1,0 +1,17 @@
+# ReCircle Memory Optimization Configuration for Deployment
+# This file configures memory allocation to prevent JavaScript heap out of memory errors
+
+[deployment]
+# Increase memory allocation to 8GB for build process
+memory = "8192"
+cpu = "4"
+
+[build]
+# Use memory-optimized build process
+command = "node --max-old-space-size=8192 build-production.js"
+environment = "production"
+
+[runtime]
+# Production runtime memory allocation
+memory = "4096"
+command = "node --max-old-space-size=4096 start-production.js"

@@ -1,0 +1,111 @@
+Microsoft Windows [Version 10.0.26100.4652]
+(c) Microsoft Corporation. All rights reserved.
+
+C:\Users\damia>docker --version
+Docker version 28.3.2, build 578ccf6
+
+C:\Users\damia>docker pull vechain/thor:latest
+error during connect: Post "http://%2F%2F.%2Fpipe%2FdockerDesktopLinuxEngine/v1.51/images/create?fromImage=docker.io%2Fvechain%2Fthor&tag=latest": open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+
+C:\Users\damia>docker pull vechain/thor:latest
+latest: Pulling from vechain/thor
+Digest: sha256:d46b46842e7b93995202fe81a714282f3cd99975f336043b83a5e6efa0207a5e
+Status: Image is up to date for vechain/thor:latest
+docker.io/vechain/thor:latest
+
+C:\Users\damia>docker run -d --name vechain-solo -p 8669:8669 vechain/thor:latest --network solo --api-addr 0.0.0.0:8669 --api-cors "*"
+docker: Error response from daemon: Conflict. The container name "/vechain-solo" is already in use by container "472d8af98e5c2f750ffa0ab80aad05ccf0f2a72e4284a700c8f34094b5231178". You have to remove (or rename) that container to be able to reuse that name.
+
+Run 'docker run --help' for more information
+
+C:\Users\damia>docker stop vechain-solo
+vechain-solo
+
+C:\Users\damia>docker rm vechain-solo
+vechain-solo
+
+C:\Users\damia>docker run -d --name vechain-solo -p 8669:8669 vechain/thor:latest --network solo --api-addr 0.0.0.0:8669 --api-cors "*"
+20f98a856d69b3ee058b878adf861a5a613f4ca0bae9e04c1589f76df1e67a3d
+
+C:\Users\damia>docker ps
+CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+
+C:\Users\damia>docker logs vechain-solo
+INFO [07-22|22:58:21.176] exited
+open genesis file: open solo: no such file or directory
+
+C:\Users\damia>docker stop vechain-solo
+vechain-solo
+
+C:\Users\damia>docker rm vechain-solo
+vechain-solo
+
+C:\Users\damia>docker run -d --name vechain-solo -p 8669:8669 vechain/thor:latest --network solo --api-addr 0.0.0.0:8669 --api-cors "*" --data-dir /tmp/thor-data
+65956c2a67492a25b8ba7f5d2c2c264a71997a85bb9f9d012ae4050f34db9ce1
+
+C:\Users\damia>docker ps
+CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+
+C:\Users\damia>docker logs vechain-solo
+INFO [07-22|23:00:06.814] exited
+open genesis file: open solo: no such file or directory
+
+C:\Users\damia>docker stop vechain-solo
+vechain-solo
+
+C:\Users\damia>docker rm vechain-solo
+vechain-solo
+
+C:\Users\damia>docker run -d --name vechain-solo -p 8669:8669 vechain/thor:latest solo --api-addr 0.0.0.0:8669
+fc126825f0463b2ded9f6b2fb2cc425de98f9adc875fbac87f9173c0db719760
+
+C:\Users\damia>docker ps
+CONTAINER ID   IMAGE                 COMMAND                  CREATED          STATUS          PORTS                                         NAMES
+fc126825f046   vechain/thor:latest   "thor solo --api-add…"   53 seconds ago   Up 52 seconds   0.0.0.0:8669->8669/tcp, [::]:8669->8669/tcp   vechain-solo
+
+C:\Users\damia>ipconfig
+
+Windows IP Configuration
+
+
+Wireless LAN adapter Local Area Connection* 1:
+
+   Media State . . . . . . . . . . . : Media disconnected
+   Connection-specific DNS Suffix  . :
+
+Wireless LAN adapter Local Area Connection* 2:
+
+   Media State . . . . . . . . . . . : Media disconnected
+   Connection-specific DNS Suffix  . :
+
+Wireless LAN adapter Wi-Fi:
+
+   Connection-specific DNS Suffix  . : lan
+   IPv6 Address. . . . . . . . . . . : 2607:fb91:8e00:ccae::7f29
+   IPv6 Address. . . . . . . . . . . : 2607:fb91:8e00:ccae:dbd1:1bd7:2ec5:587d
+   Temporary IPv6 Address. . . . . . : 2607:fb91:8e00:ccae:6cf4:1f5d:3c79:ebe3
+   Link-local IPv6 Address . . . . . : fe80::50cd:d9ec:61ca:119e%10
+   IPv4 Address. . . . . . . . . . . : 192.168.12.101
+   Subnet Mask . . . . . . . . . . . : 255.255.255.0
+   Default Gateway . . . . . . . . . : fe80::c2d7:aaff:fef7:30f%10
+                                       192.168.12.1
+
+Ethernet adapter Bluetooth Network Connection:
+
+   Media State . . . . . . . . . . . : Media disconnected
+   Connection-specific DNS Suffix  . :
+
+Ethernet adapter Ethernet:
+
+   Media State . . . . . . . . . . . : Media disconnected
+   Connection-specific DNS Suffix  . :
+
+Ethernet adapter vEthernet (WSL (Hyper-V firewall)):
+
+   Connection-specific DNS Suffix  . :
+   Link-local IPv6 Address . . . . . : fe80::81b4:a0d1:35f:5156%40
+   IPv4 Address. . . . . . . . . . . : 172.27.80.1
+   Subnet Mask . . . . . . . . . . . : 255.255.240.0
+   Default Gateway . . . . . . . . . :
+
+C:\Users\damia>

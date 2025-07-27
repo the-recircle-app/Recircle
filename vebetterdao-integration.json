@@ -1,0 +1,38 @@
+{
+  "deployment": {
+    "network": "testnet",
+    "appId": "0x90178ff5f95f31644b5e21b11ba6e173ea0d9b9595e675cb84593c0d2df730c1",
+    "rewardsPool": "0x5F8f86B8D0Fa93cdaE20936d150175dF0205fB38",
+    "x2EarnApps": "0xcB23Eb1bBD5c07553795b9538b1061D0f4ABA153",
+    "b3trToken": "0x0dd62dac6abb12bd62a58469b34f4d986697ef19",
+    "deployedAt": "2025-06-02T20:30:00.000Z",
+    "status": "DEPLOYED"
+  },
+  "integration": {
+    "ready": true,
+    "contractType": "VeBetterDAO_Native",
+    "description": "Direct integration with VeBetterDAO rewards system using registered APP_ID",
+    "rewardDistributor": "0x15D009B3A5811fdE66F19b2db1D40172d53E5653"
+  },
+  "endpoints": {
+    "distributeReward": "0x5F8f86B8D0Fa93cdaE20936d150175dF0205fB38#distributeReward",
+    "distributeWithProof": "0x5F8f86B8D0Fa93cdaE20936d150175dF0205fB38#distributeRewardWithProof",
+    "checkBalance": "0x5F8f86B8D0Fa93cdaE20936d150175dF0205fB38#getAppBalance"
+  },
+  "configuration": {
+    "environmentVariables": {
+      "APP_ID": "0x90178ff5f95f31644b5e21b11ba6e173ea0d9b9595e675cb84593c0d2df730c1",
+      "X2EARN_REWARDS_POOL": "0x5F8f86B8D0Fa93cdaE20936d150175dF0205fB38",
+      "REWARD_DISTRIBUTOR_WALLET": "0x15D009B3A5811fdE66F19b2db1D40172d53E5653",
+      "VECHAIN_NETWORK": "testnet"
+    },
+    "rewardCategories": {
+      "THRIFT_STORE": { "baseReward": 1, "maxReward": 50 },
+      "GAMING_PREOWNED": { "baseReward": 2, "maxReward": 30 },
+      "RIDESHARE": { "baseReward": 1, "maxReward": 20 },
+      "EV_RENTAL": { "baseReward": 5, "maxReward": 100 },
+      "STORE_ADDITION": { "baseReward": 25, "maxReward": 25 },
+      "ACHIEVEMENT": { "baseReward": 10, "maxReward": 100 }
+    }
+  }
+}

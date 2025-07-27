@@ -1,0 +1,17 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        { "internalType": "string", "name": "name", "type": "string" },
+        { "internalType": "string", "name": "description", "type": "string" }
+      ],
+      "name": "registerApp",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "contractAddress": "0xB54f3b684135cC6b54B9C2591c6F33e12f1F0070",
+  "name": "ReCircle",
+  "description": "Sustainability rewards platform for validating thrift, EV, and rideshare receipts"
+}

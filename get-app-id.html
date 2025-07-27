@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Get VeBetterDAO APP_ID</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; }
+    .step { margin: 15px 0; padding: 15px; background: #f8f9fa; border-left: 4px solid #007bff; }
+    .important { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 15px 0; }
+    input, button { padding: 10px; margin: 5px; }
+    button { background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    code { background: #f8f9fa; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
+  </style>
+</head>
+<body>
+  <h1>Get Your VeBetterDAO APP_ID</h1>
+  
+  <div class="important">
+    Since browser wallet detection isn't working, let's use the official VeBetterDAO dashboard to get your APP_ID.
+  </div>
+
+  <div class="step">
+    <h3>Step 1: Visit VeBetterDAO Dashboard</h3>
+    <p>Go to: <a href="https://dev.testnet.governance.vebetterdao.org" target="_blank">https://dev.testnet.governance.vebetterdao.org</a></p>
+  </div>
+
+  <div class="step">
+    <h3>Step 2: Connect Your Wallet</h3>
+    <p>Click "Connect Wallet" and select VeWorld</p>
+    <p>Make sure you're on VeChain Testnet</p>
+  </div>
+
+  <div class="step">
+    <h3>Step 3: Create Your App</h3>
+    <p>Look for "Create App" or "Register App" button</p>
+    <p>Enter these details:</p>
+    <ul>
+      <li><strong>Name:</strong> ReCircle</li>
+      <li><strong>Description:</strong> Sustainability rewards platform for validating thrift, EV, and rideshare receipts</li>
+    </ul>
+  </div>
+
+  <div class="step">
+    <h3>Step 4: Get Your APP_ID</h3>
+    <p>After successful registration, copy your assigned APP_ID</p>
+    <input type="text" id="appId" placeholder="Paste your APP_ID here" style="width: 300px;">
+    <button onclick="updateEnv()">Generate .env Update</button>
+  </div>
+
+  <div id="envUpdate" style="margin-top: 20px; padding: 15px; background: #e8f5e8; border-radius: 5px; display: none;">
+    <h3>Update Your .env File:</h3>
+    <p>Add this line to your .env file:</p>
+    <code id="envLine"></code>
+  </div>
+
+  <div class="step">
+    <h3>Step 5: Claim Testnet B3TR</h3>
+    <p>Use the faucet on the VeBetterDAO dashboard to claim testnet B3TR tokens</p>
+    <p>Deposit some B3TR into your app's balance</p>
+  </div>
+
+  <script>
+    function updateEnv() {
+      const appId = document.getElementById("appId").value.trim();
+      if (appId) {
+        document.getElementById("envLine").innerText = `APP_ID=${appId}`;
+        document.getElementById("envUpdate").style.display = "block";
+      } else {
+        alert("Please enter your APP_ID first");
+      }
+    }
+  </script>
+</body>
+</html>

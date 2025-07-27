@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>VeWorld Connex Test</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        #status { background: #f5f5f5; padding: 15px; margin: 15px 0; border-radius: 5px; }
+        button { padding: 10px 20px; font-size: 16px; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>VeWorld Connex Test</h1>
+    <p>This page tests if VeWorld browser properly injects the Connex API.</p>
+    <button id="testButton" onclick="testConnex()">Test Connex Connection</button>
+    <div id="status"></div>
+    
+    <script>
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            const className = type === 'success' ? 'success' : type === 'error' ? 'error' : '';
+            statusDiv.innerHTML += `<div class="${className}">${message}</div>`;
+            console.log(message);
+        }
+        
+        function testConnex() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = ''; // Clear previous results
+            
+            updateStatus('=== VeWorld Connex Test Started ===');
+            updateStatus('User Agent: ' + navigator.userAgent);
+            updateStatus('Current URL: ' + window.location.href);
+            updateStatus('Window.connex type: ' + typeof window.connex);
+            
+            // Check for VeChain-related objects
+            const windowKeys = Object.keys(window);
+            const vechainKeys = windowKeys.filter(key => 
+                key.toLowerCase().includes('vechain') || 
+                key.toLowerCase().includes('connex') ||
+                key.toLowerCase().includes('thor')
+            );
+            updateStatus('VeChain-related properties: ' + JSON.stringify(vechainKeys));
+            
+            if (typeof window.connex !== 'undefined') {
+                updateStatus('✅ Connex API detected!', 'success');
+                updateStatus('Connex version: ' + window.connex.version, 'success');
+                updateStatus('Thor available: ' + typeof window.connex.thor, 'success');
+                updateStatus('Vendor available: ' + typeof window.connex.vendor, 'success');
+                
+                // Test wallet connection
+                updateStatus('Attempting wallet connection...');
+                try {
+                    window.connex.vendor.sign('cert', {
+                        purpose: 'identification',
+                        payload: {
+                            type: 'text',
+                            content: 'VeWorld connection test - ' + new Date().toISOString()
+                        }
+                    }).request().then(result => {
+                        updateStatus('✅ Wallet connection successful!', 'success');
+                        updateStatus('Wallet address: ' + result.annex?.signer, 'success');
+                        updateStatus('Domain: ' + result.annex?.domain);
+                        updateStatus('Signature: ' + result.signature);
+                    }).catch(err => {
+                        updateStatus('❌ Wallet connection failed: ' + err.message, 'error');
+                    });
+                } catch (error) {
+                    updateStatus('❌ Error during wallet test: ' + error.message, 'error');
+                }
+            } else {
+                updateStatus('❌ Connex API is NOT available', 'error');
+                updateStatus('Possible reasons:', 'error');
+                updateStatus('1. Not using VeWorld in-app browser', 'error');
+                updateStatus('2. VeWorld doesn\'t recognize this domain', 'error');
+                updateStatus('3. Connex injection is disabled for this URL', 'error');
+                updateStatus('4. App needs to be served from whitelisted domain', 'error');
+            }
+        }
+        
+        // Auto-test when page loads
+        window.addEventListener('load', () => {
+            setTimeout(testConnex, 500);
+        });
+    </script>
+</body>
+</html>

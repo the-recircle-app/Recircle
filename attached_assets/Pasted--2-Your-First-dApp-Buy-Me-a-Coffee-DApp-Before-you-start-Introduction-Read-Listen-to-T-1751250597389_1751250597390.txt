@@ -1,0 +1,359 @@
+
+
+2. Your First dApp: Buy Me a Coffee DApp
+
+Before you start
+Introduction
+
+Read & Listen to Transactions
+
+Write Transactions
+
+Writing and Deploying Contract
+Introduction
+
+Writing the Buy Me a Coffee Smart Contract
+
+Deploying the Contract (Hardhat on VeChain)
+
+Summary & Key Takeaways
+
+React + Vite Frontend
+Introduction
+
+Setting Up the App and Connecting to VeChain
+
+UI & Contracts
+
+Summary & Key Takeaways
+
+
+
+
+
+W
+W
+With the provider in place and the wallet connected, the next step is to interact with the smart contract. This involves calling functions (such as buyCoffee, sendCoffee) and reading data (like getSales). The dApp kit provides React hooks that make it easier to call contracts and query data.
+
+
+
+Key Components:
+
+
+Calling functions: Functions such as buyCoffee are called to interact with the contract (e.g., send tips or gifts).
+
+
+Reading data: getSales allows the frontend to retrieve transaction history and display it.
+
+
+
+Let’s outline how each major component works.
+
+buyCoffee
+
+
+This component allows a user to buy a coffee for the contract owner. 
+
+
+
+It contains:
+
+
+
+Input fields for the user’s name and message.
+
+An input for the amount of VET to send (or a predefined amount selection).
+
+A submit button to trigger the purchase.
+
+
+
+When the user submits:
+
+
+
+Gather the name, message, and amount (in VET).
+
+Call the buyCoffee function on the contract through the dApp kit.
+
+
+
+Using dApp kit, contract calls are done via a hook or method that uses the contract ABI and address.
+
+For example:
+
+After a successful buyCoffee call, they typically set refetchHistory = true to tell the TransactionHistory component to fetch the latest data.
+
+The BuyCoffee.tsx component manages this state and interaction:
+
+
+
+It provides a form for user input.
+
+It uses dApp kit to connect and send the transaction by calling buyCoffee.
+
+It ensures the amount > 0 (both via the contract's require and also maybe a quick check in the UI to disable the button if the amount is 0).
+
+sendCoffee
+
+This is similar to buyCoffee, but with an extra field for the recipient address:
+
+
+
+Inputs: recipient address (_to), name, message, and amount.
+
+
+
+When submitted, it calls the sendCoffee function on the contract, passing the recipient address (_to), name, message, and the VET amount.
+
+
+
+The process is analogous to buyCoffee:  using dApp kit, a transaction is sent to call sendCoffee(address, name, message) with the specified value. VeWorld will prompt the user to confirm sending the VET to the contract, which then forwards it to the recipient.
+
+
+
+After success, the history is updated, and the new entry will show the recipient's address.
+
+
+
+The UI should:
+
+
+
+Validate the recipient address format (a valid VeChain address starting with 0x and 42 hex characters).
+
+
+Ensure amount > 0, etc., to avoid user errors. Possibly, dApp kit or VeWorld will reject improper addresses as well.
+
+What are key differences between the BuyCoffee and SendCoffee components?
+(Select two correct answers.)
+
+
+Test 1: Multiple Choice
+
+
+
+
+This component retrieves and displays the list of all coffee purchases by calling the getSales() view function of the contract. Since getSales() returns an array of structs, the dApp kit can call it without needing a transaction (it’s a view method).
+
+
+
+Using dApp kit, you can call a contract’s method in a read-only way. 
+
+
+
+For example, you can call contract.call for view functions. dApp kit likely wraps that.
+
+
+
+You can find this code snippet in the official repo:
+
+apps/frontend/src/components/txhistory.tsx
+
+code editor
+export function TransactionHistory({fetch}) {
+  const [history, setHistory] = useState<CoffeeDonation[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const thorClient = ThorClient.at(THOR_URL);
+  const contract = thorClient.contracts.load(
+    config.CONTRACT_ADDRESS,
+    COFFEE_CONTRACT_ABI
+  );
+
+  const getHistory = async () => {
+    setIsLoading(true);
+    try {
+      const salesResponse = await contract.read.getSales();
+      const allSales = salesResponse[0];
+      setHistory([...allSales]);
+    } catch (e) {
+      if (e instanceof Error) {
+        alert("Unable to load donation history: " + e.message);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  // Fetch history on component mount
+  useEffect(() => {
+    getHistory();
+  }, [fetch]); // Everytime we successfully send it, it will reload the data
+
+.....
+
+}
+The result will be an array or tuple representing the struct array. You can then render each record in a table or list:
+
+
+
+Show the buyer (address or their name provided).
+
+
+Show the recipient (could be the owner or some address).
+
+
+Show the message.
+
+
+Show the amount (in VET, likely in wei internally — you should convert from the smallest unit to a readable format).
+
+
+Show the timestamp (formatted to a date/time). For formatting VET, recall that 1 VET = 10^18 wei (VeChain follows Ethereum’s units). The dApp uses @vechain/sdk-core utilities to format the amount.
+
+
+
+Updating the UI:
+
+
+
+The TransactionHistory component should update whenever a new coffee is bought. 
+
+
+
+You can achieve this by using React state to refetch data after certain events.
+
+
+The example mentions a refetchHistory state in App that is logged when a purchase is made. TransactionHistory could use this state or a hook dependency to know when to refresh. It calls getSales() each time refetchHistory is true, then reset the flag.
+
+Learn about VET/VTHO clauses
+
+Complete task
+The VeChain Thor transaction model uses clauses (a single transaction can contain multiple clauses). When using the dApp kit for a typical contract call, it is handled as a single clause within the transaction.
+
+When a user submits a transaction (such as buy or send coffee), there may be a short delay while it’s processed in a block (since VeChain has 10-second block times). 
+
+
+
+The UI should give feedback:
+
+
+
+Disable the button while pending, show "Transaction pending..." or a spinner.
+
+
+On success, inform "Coffee bought successfully!" and trigger a history refresh.
+
+
+On failure (user rejected in wallet, or transaction reverted by require), catch the error. If reverted (e.g., require failed), show a message like "Transaction failed: did you send enough VET?".
+
+The dApp kit returns a promise or uses events to inform of completion. You can use that to know when to update the UI state.
+
+App Component:
+
+This component coordinates the above components. 
+
+
+
+You can find this code snippet in the official repo:
+
+apps/frontend/src/App.tsx
+
+
+
+The App looks like this:
+
+code editor
+const App = () => {
+  const [refetchHistory, setRefetchHistory] = useState(null) //this state is triggered once the transaction went through so we can update the list
+
+  return (
+    <Box minH="100vh" width="100%">
+      <AppHeader />
+      <Box
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        width="100%"
+        maxW="1200px"
+        px={{ base: 4, md: 6 }}
+        py={6}
+        flex={1}
+        mx="auto" // Center the content horizontally
+      >
+        <WelcomeText />
+        <SendCoffee refetch={setRefetchHistory}/>
+        <BuyCoffee refetch={setRefetchHistory}/>
+        <TransactionHistory fetch={refetchHistory}/>
+      </Box>
+    </Box>
+  );
+};
+In this pseudocode:
+
+
+
+You maintain refetchHistory, toggling to force TransactionHistory to refresh.
+
+
+
+When BuyCoffee or SendCoffee completes successfully, you can call onCoffeeBought/onCoffeeSent to toggle the flag.
+
+
+
+The TransactionHistory, seeing a change in the refetchTrigger prop, will fetch the latest sales from the contract.
+
+
+
+The example documentation indicates something similar: using a state to trigger updates after a purchase.
+
+What is a recommended UI behavior when handling transaction results in the VeChain dApp?
+
+
+Test 2: Single Choice
+
+
+
+
+Start the development server (npm run dev). 
+
+
+
+Connect your VeChain wallet:
+
+
+
+Using the VeWorld extension, clicking "connect" should trigger the extension to pop up for approval. After connecting, your account address may be displayed in the UI (the dApp kit’s connect button often shows a shortened version of the address once connected).
+
+
+Ensure your network in VeWorld is set to the correct one (Testnet, or your custom Solo network if testing locally). The dApp kit’s provider will default to Testnet if not specified; you can explicitly set network="testnet" in DAppProvider to be sure.
+
+Now try buying a coffee:
+
+
+
+Enter a name (e.g., “Alice”), a message (“Great content!”), and an amount (for example, 1 VET).
+
+
+Click Buy Coffee. Your wallet should prompt you to send 1 VET to the contract. Accept it.
+
+
+After a few seconds (once a block is produced and the transaction included), you should see a success indication. The TransactionHistory list will update to show a new entry (timestamp just now, from your address, to the owner’s address, with your name and message, and 1 VET).
+
+Explore how VET and VTHO differ in transactions
+
+Complete task
+Try to Send Coffee to another address (you can even use your own second address or a friend’s testnet address). Fill in the recipient, name, message, and amount. Submit and approve. The history should be updated with this new entry, showing the specified recipient.
+
+The UI will show all past entries every time (since the sales array grows, you fetch all). In a real scenario, you will want to show only the latest or paginate if it gets large, but for our learning purposes, it’s fine.
+
+While our focus is on the basics, note that:
+
+
+
+The example UI likely has some nice touches like form validation, loading spinners, and maybe even an animation when a new coffee appears (some tutorials add an animation of a coffee cup, etc.). These are nice for the user experience.
+
+
+You could integrate a conversion so the user can see how much 1 VET is in their local currency, etc., but that’s beyond our scope here.
+
+
+
+VeChain Insights:
+
+
+
+VeChain’s dual-token model means that when a user sends a transaction, their VTHO balance decreases, not their VET (except the VET they explicitly sent as value). This is a bit different from Ethereum, where gas is paid in ETH itself. Our dApp doesn’t need to handle this difference explicitly, but it’s good to remember. The wallet takes care of gas (VTHO) as long as they have it.
+
+Finally, after testing everything on Testnet/Solo, deploying to Mainnet would involve using the deploy-mainnet script, getting the contract address on mainnet, and updating the frontend config to that address and perhaps switching dApp provider to network="main". And of course, you’d remove or limit the faucet and testing hints in a production app.
+
+Next Lesson

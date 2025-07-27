@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt Image Viewer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .receipt-image {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        .error {
+            color: #e74c3c;
+            background: #ffeaea;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .receipt-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .receipt-info h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Receipt Image Viewer</h1>
+        <div id="content" class="loading">Loading receipt image...</div>
+    </div>
+
+    <script>
+        async function loadReceiptImage() {
+            try {
+                // Get receipt ID from URL parameter
+                const urlParams = new URLSearchParams(window.location.search);
+                const receiptId = urlParams.get('id');
+                
+                if (!receiptId) {
+                    document.getElementById('content').innerHTML = `
+                        <div class="error">
+                            <strong>Error:</strong> No receipt ID provided. 
+                            <br>Use: ?id=RECEIPT_ID in the URL
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Fetch receipt data
+                const response = await fetch(`/api/receipts/${receiptId}/image`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                
+                // Display receipt information and image
+                document.getElementById('content').innerHTML = `
+                    <div class="receipt-info">
+                        <h3>Receipt #${receiptId}</h3>
+                        <p><strong>Amount:</strong> $${data.amount}</p>
+                        <p><strong>Store:</strong> ${data.store_name}</p>
+                        <p><strong>Status:</strong> ${data.status}</p>
+                        <p><strong>Submitted:</strong> ${new Date(data.created_at).toLocaleString()}</p>
+                    </div>
+                    
+                    <h3>Receipt Image:</h3>
+                    <img src="data:${data.image.mime_type};base64,${data.image.data}" 
+                         alt="Receipt Image" 
+                         class="receipt-image">
+                    
+                    <p><em>Image size: ${Math.round(data.image.file_size / 1024)} KB</em></p>
+                `;
+
+            } catch (error) {
+                document.getElementById('content').innerHTML = `
+                    <div class="error">
+                        <strong>Error loading receipt:</strong> ${error.message}
+                        <br><br>
+                        Make sure the receipt ID exists and has an image attached.
+                    </div>
+                `;
+            }
+        }
+
+        // Load receipt when page loads
+        loadReceiptImage();
+    </script>
+</body>
+</html>

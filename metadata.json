@@ -1,0 +1,30 @@
+{
+   "name": "ReCircle",
+   "description": "Blockchain-powered circular economy platform that transforms sustainable consumption into an engaging digital experience. Upload receipts from thrift stores, secondhand shops, and sustainable transportation to earn B3TR tokens.",
+   "external_url": "https://recircle.app",
+   "logo": "https://ipfs.io/ipfs/QmYourLogoHashHere/recircle-logo.png",
+   "header_image": "https://ipfs.io/ipfs/QmYourHeaderHashHere/recircle-header.png",
+   "screenshots": [
+      "https://ipfs.io/ipfs/QmYourScreenshotHash1/dashboard-screenshot.png",
+      "https://ipfs.io/ipfs/QmYourScreenshotHash2/receipt-upload-screenshot.png",
+      "https://ipfs.io/ipfs/QmYourScreenshotHash3/wallet-connect-screenshot.png"
+   ],
+   "social_urls": [
+      {
+         "name": "GitHub",
+         "url": "https://github.com/your-username/recircle-app"
+      },
+      {
+         "name": "Twitter",
+         "url": "https://twitter.com/recircleapp"
+      }
+   ],
+   "app_urls": [
+      {
+         "code": "web_app",
+         "url": "https://your-deployed-app.replit.app"
+      }
+   ],
+   "tweets": [],
+   "categories": ["sustainability", "circular-economy"]
+}

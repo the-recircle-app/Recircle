@@ -1,0 +1,462 @@
+
+
+2. Your First dApp: Buy Me a Coffee DApp
+
+Before you start
+Introduction
+
+Read & Listen to Transactions
+
+Write Transactions
+
+Writing and Deploying Contract
+Introduction
+
+Writing the Buy Me a Coffee Smart Contract
+
+Deploying the Contract (Hardhat on VeChain)
+
+Summary & Key Takeaways
+
+React + Vite Frontend
+Introduction
+
+Setting Up the App and Connecting to VeChain
+
+UI & Contracts
+
+Summary & Key Takeaways
+
+
+
+
+
+W
+W
+code editor
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.18;
+
+contract BuyMeACoffee {
+    // Event to emit when a Coffee purchase is made
+    event CoffeeSold(
+        address indexed from,
+        address indexed to,
+        uint256 timestamp,
+        uint256 value,
+        string name,
+        string message
+    );
+
+    // Coffee sale struct
+    struct CoffeeSale {
+        address from;
+        address to;
+        uint256 timestamp;
+        uint256 value;
+        string name;
+        string message;
+    }
+
+    // Address of contract deployer
+    address payable owner;
+
+    // List of all donations received from coffee purchases
+    CoffeeSale[] sales;
+
+    constructor() {
+        owner = payable(msg.sender);
+    }
+
+    /**
+     * @dev fetches all stored sales
+     */
+    function getSales() public view returns (CoffeeSale[] memory) {
+        return sales;
+    }
+
+    /**
+     * @dev buy a coffee for the contract owner
+     * @param _name name of the coffee purchaser
+     * @param _message a nice message from the purchaser
+     */
+    function buyCoffee(string memory _name, string memory _message) public payable {
+        require(msg.value > 0, "can't buy coffee for free!");
+
+        // Add the sale to storage
+        sales.push(CoffeeSale(
+            msg.sender,
+            owner, // Owner is the recipient
+            block.timestamp,
+            msg.value,
+            _name,
+            _message
+        ));
+
+        // Send the VET to the owner
+        (bool sent, ) = owner.call{value: msg.value}("");
+        require(sent, "Failed to send VET");
+
+        emit CoffeeSold(
+            msg.sender,
+            owner,
+            block.timestamp,
+            msg.value,
+            _name,
+            _message
+        );
+    }
+
+    /**
+     * @dev send coffee to a specific address
+     * @param _to recipient address
+     * @param _name name of the coffee purchaser
+     * @param _message a nice message from the purchaser
+     */
+    function sendCoffee(
+        address payable _to,
+        string memory _name,
+        string memory _message
+    ) public payable {
+        require(msg.value > 0, "can't buy coffee for free!");
+
+        // Add the sale to storage
+        sales.push(CoffeeSale(
+            msg.sender,
+            _to,
+            block.timestamp,
+            msg.value,
+            _name,
+            _message
+        ));
+
+        // Send the VET to the recipient
+        (bool sent, ) = _to.call{value: msg.value}("");
+        require(sent, "Failed to send VET");
+
+        // Emit event
+        emit CoffeeSold(
+            msg.sender,
+            _to,
+            block.timestamp,
+            msg.value,
+            _name,
+            _message
+        );
+    }
+
+    /**
+     * @dev send the entire balance stored in this contract to the owner
+     */
+    function withdrawTips() public {
+        require(msg.sender == owner, "Only owner can withdraw");
+        require(owner.send(address(this).balance));
+    }
+}
+Open BuyMeACoffee.sol contract file in Github
+
+Complete task
+This contract is written in Solidity, a programming language for writing smart contracts originally developed by Ethereum.
+
+
+Let’s break down the key parts:
+
+State Variables and Structs
+At the top of the contract, you define state and data structures:
+
+code editor
+address payable public owner;
+The address of the contract owner (the person who will receive coffee tips). It’s marked payable because you will send VET to this address (for withdrawals). The owner is set in the constructor to the deployer’s address (msg.sender).
+
+A custom struct CoffeeSale (or similarly named) to represent a coffee purchase record. This likely includes fields for the purchaser’s address, the recipient’s address,  the amount of VET paid, the name and message from the purchaser, and a timestamp.
+
+For example:
+
+code editor
+struct CoffeeSale {
+  address from;
+  address to;
+  uint256 timestamp;
+  uint256 value;
+  string name;
+  string message;
+}
+CoffeeSale[] private sales;
+Here, sales is a dynamic array storing every coffee purchase. You keep it as a private array and will provide a getter function to read it. Each CoffeeSale struct in the array holds the details of one “Buy Me a Coffee” transaction.
+
+An event CoffeeSold is declared (named NewCoffee in some versions). Events in Solidity are used to log information when certain actions occur.
+
+Our event will be emitted whenever a coffee is purchased. It could include parameters like the buyer’s address, recipient’s address, amount, name, and message, so off-chain apps (like our frontend) can listen for new coffee donations.
+
+Together, these state elements set up the storage for our dapp: who the owner is, a list of all coffees purchased (sales), and an event to announce new tips.
+
+The constructor runs once during deployment. 
+
+Here, you assign the contract’s owner:
+
+code editor
+constructor() {
+    owner = payable(msg.sender);
+}
+By setting the deployer as the owner, you establish who can withdraw funds later.
+msg.sender is the account that is deploying the contract.
+
+Marking it payable is necessary because this address will receive VET from the contract.
+
+What is the purpose of the CoffeeSale struct in the "Buy Me a Coffee" smart contract?
+(Select two correct answers)
+
+
+Test 1: Multiple Choice
+
+
+
+
+code editor
+function buyCoffee(string memory _name, string memory _message) public payable {
+    require(msg.value > 0, "Must send a positive amount of VET");
+    // Record the coffee purchase
+    sales.push(CoffeeSale(
+       msg.sender,
+       owner, // Owner is the recipient
+       block.timestamp,
+       msg.value,
+       _name,
+       _message
+    ));
+    emit CoffeeSold(
+        msg.sender, 
+        owner, 
+        block.timestamp,
+        msg.value, 
+        _name, 
+        _message,
+    );
+}
+Let’s unpack this:
+
+
+
+Purpose: 
+
+buyCoffee allows any user to buy a “coffee” for the contract owner by sending a transaction with some VET. It’s marked public and payable.
+
+
+
+Access and payment:
+
+
+
+public means it can be called from outside (anyone can invoke it) – this is expected, as we want any supporter to call this function to send a tip.
+
+
+payable means the function can receive cryptocurrency along with the call. In this case, it enables the function to accept VET from the sender’s wallet.
+
+Require check:
+
+You use require(msg.value > 0) to ensure a tip of > 0 is sent. If the value is zero, the transaction is reverted with the message “Must send a positive amount of VET”.
+
+This prevents calling buyCoffee without actually sending any VET (no free coffees!).
+
+
+
+Recording the purchase: You create a new CoffeeSale struct with the details:
+
+
+from as msg.sender (the person who sent the transaction)
+
+to as owner (the contract owner, since this function is specifically for buying a coffee for the owner)
+
+value as msg.value (the amount of VET sent)
+
+name and message as provided by the buyer
+
+timestamp as the current block timestamp
+
+Storing this on-chain allows the DApp (and anyone) to later read the history of all coffee purchases. Every entry remains permanently available in the blockchain, providing transparency and traceability.
+
+
+
+Emitting event:
+
+After a coffee is purchased, the contract emits a CoffeeSold(...) event with all relevant details. This event acts as a log entry on the blockchain. Our frontend can listen for these events and update the UI in real time when a new coffee is bought.
+
+For example:
+If the frontend is connected to the blockchain via WebSocket or polling, it can subscribe to CoffeeSold and immediately show the new tip on the screen.
+
+For example:
+If ten people send tips, the contract will hold all those funds until the owner decides to call a withdraw() function and collect everything in one go.
+
+Besides real-time responsiveness, events also serve as a permanent record of the tip. In Solidity, events can include indexed fields (like addresses), making it possible to filter them.
+
+No immediate fund transfer:
+
+In buyCoffee, we do not immediately send the received VET to the owner. Instead, the msg.value remains stored in the contract’s balance. We chose to accumulate tips inside the contract so the owner can withdraw them later, all at once. This is a common design for tip jars.
+
+For example:
+The contract owner could filter all CoffeeSold events where they are the recipient, helping them analyze tips they received.
+
+Technically, we could forward each tip immediately to the owner, but then the contract wouldn’t hold any funds — making it harder to manage tips or see how much has been collected.
+
+
+
+Accumulating funds provides a single point of withdrawal and a clear record of total tips received.
+
+What is the main purpose of emitting the CoffeeSold event in the Buy Me a Coffee smart contract?
+
+
+Test 2: Single Choice
+
+
+
+
+The contract also includes function sendCoffee(address payable to, string memory name, string memory _message) public payable.
+
+
+This function is similar to buyCoffee, but allows the sender to specify a recipient address for the coffee tip (instead of always the contract owner):
+
+
+
+It has the same require(msg.value > 0) check for a positive tip amount.
+
+
+It creates a new CoffeeSale record in the sales array, just like buyCoffee, except recipient is set to _to (the provided address) instead of the owner.
+
+
+It emits the CoffeeSold event with the buyer and the specified recipient and other details.
+
+Importantly, after recording the sale, the function transfers the VET to the to address.
+This is done by calling something like to.transfer(msg.value) within the function.
+
+In other words, sendCoffee immediately forwards the tip to the given recipient’s address.
+
+Because the funds are directly sent to to, they do not stay in the contract.
+
+
+This makes sense: 
+
+sendCoffee is intended for, say, buying a coffee for another user or friend — the contract just facilitates the transfer and logging, but the friend should receive the VET right away.
+
+The contract owner does not get these funds (unless, of course, to is the owner in some call).
+
+By having both buyCoffee (for the owner) and sendCoffee (for arbitrary recipients), our DApp supports two scenarios: tipping the site owner, and peer-to-peer coffee gifting, all recorded in one place.
+
+Since buyCoffee tips accumulate in the contract, you need a way for the owner to withdraw them. 
+
+
+
+That’s what withdrawTips() does:
+
+code editor
+function withdrawTips() public {
+    require(msg.sender == owner, "Only owner can withdraw");
+    require(owner.send(address(this).balance));
+}
+Key Points
+
+
+Access control:
+The function requires that the caller msg.sender is equal to the owner. If not, it reverts with “Only owner can withdraw".
+
+This check ensures only the contract owner (set in the constructor) can pull out the accumulated funds.
+
+Here you see a clear distinction between function visibility and access control: withdrawTips is a public function in terms of visibility (meaning anyone can attempt to call the function), but the require(msg.sender == owner) enforces that only the owner’s call will succeed.
+
+
+
+(In a more advanced contract, you could use OpenZeppelin’s Ownable and an onlyOwner modifier to handle this, but the require statement is a straightforward way to implement the access restriction.)
+
+Withdraw logic:
+
+It checks that there is a positive balance in the contract. Then it transfers the entire balance to the owner’s address.
+
+The transfer is done using owner.call{value: address(this).balance}(""), which is a recommended way to send Ether or VET while returning a success flag.
+
+If the call fails (i.e., success is false), the transaction reverts. But if the owner is a regular externally owned account (EOA), the transfer should succeed.
+
+
+
+Result:
+
+All the accumulated VET from buyCoffee tips is sent to the owner’s wallet.
+
+The contract balance goes to zero, while the sales history remains on-chain for record-keeping.
+
+Whenever the owner wants to collect their tips, they can call withdrawTips through their wallet. If someone else tries, the require will fail, and nothing happens (other than wasting a transaction fee).
+
+Complete the sentence by placing the correct words in the blanks.
+
+
+Test 3: Fill in the Blanks (Select From Options)
+Typically, the contract provides a way to read the list of all coffee purchases.
+
+
+In our contract, that’s the getSales() function:
+
+code editor
+function getSales() public view returns (CoffeeSale[] memory) {
+    return sales;
+}
+This function returns an array of CoffeeSale structs, which represent the full history of all coffee purchases made through both buyCoffee and sendCoffee.
+
+It is marked as view because it does not modify the contract’s state and simply returns an in-memory copy of the sales array.
+
+The frontend will call getSales() to retrieve the transaction history and display it.
+
+Note: 
+
+Returning a dynamic array of structs is fine for off-chain calls (via RPC), but if the array grows very large, it could become expensive in terms of gas to return on-chain.
+
+In our scenario, reading data is typically done off-chain (using a call) without costing gas, so this design is acceptable for a demo DApp.
+
+Questions? We've got answers! 
+Drop them in our dedicated Telegram channel.
+
+Complete task
+Visibility vs Access:
+All user-facing functions (buyCoffee, sendCoffee, withdrawTips, getSales) are declared as public, meaning they can be externally called. 
+
+
+
+However, only withdrawTips has an access restriction (owner-only) enforced by a require check. The other functions can be called by any user. This is intentional: we want anyone to be able to send tips or buy coffees, but only the owner should withdraw the pooled funds.
+
+
+
+Payable functions:
+Both buyCoffee and sendCoffee are marked as payable so that they can accept VET.
+withdrawTips is not payable — it doesn’t need to receive funds; it only sends them out.
+
+
+
+State changes and effects:
+Sending VET out (to owner or others) is an important effect.
+
+
+
+In sendCoffee, the transfer to _to happens during the function call.
+
+In buyCoffee, no transfer is done, so the contract’s balance increases by msg.value.
+
+In withdrawTips, a transfer of the full balance to the owner happens.
+
+
+
+Events:
+Every time a coffee is bought (through either function), a CoffeeSold event is emitted with details. This is useful for the UI to update in real time and also for any analytics or off-chain record. You can use VeChain’s event logs just like Ethereum’s.
+
+Note: 
+
+Returning a dynamic array of structs is fine for off-chain calls (via RPC), but if the array grows very large, it could become expensive in terms of gas to return on-chain.
+
+
+
+Additional Resources
+Learn how to structure a Solidity Contract
+
+Complete task
+Learn how the BuyMeACoffee dApp Works
+
+Complete task
+With the contract written and understood, let’s move on to deploying it.
+
+Next Lesson

@@ -1,0 +1,17 @@
+{
+  "storeId": 1,
+  "userId": 6,
+  "amount": 30.00,
+  "purchaseDate": "2025-07-26",
+  "ipfsHash": "QmTest456",
+  "walletAddress": "0x119761865b79bea9e7924edaa630942322ca09d1",
+  "storeName": "Lyft",
+  "category": "ride_share",
+  "totalAmount": 30.00,
+  "confidence": 0.95,
+  "environmentalImpact": {
+    "co2SavedGrams": 2200,
+    "sustainabilityCategory": "ride_sharing"
+  },
+  "photoUrl": "https://example.com/receipt2.jpg"
+}

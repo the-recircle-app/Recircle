@@ -1,0 +1,46 @@
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+Install the latest PowerShell for new features and improvements! https://aka.ms/PSWindows
+
+PS C:\Users\damia> docker stop vechain-solo
+vechain-solo
+PS C:\Users\damia> docker rm vechain-solo
+vechain-solo
+PS C:\Users\damia> docker run -d --name vechain-solo -p 8669:8669 vechain/thor:latest solo --api-addr 0.0.0.0:8669 --api-cors "*" --on-demand
+f6c041e082619d761369f0093c7059b3a2681f098c0cc8b0f4b38df06524b28a
+PS C:\Users\damia> docker ps
+CONTAINER ID   IMAGE                 COMMAND                  CREATED          STATUS          PORTS                                         NAMES
+f6c041e08261   vechain/thor:latest   "thor solo --api-add…"   27 seconds ago   Up 26 seconds   0.0.0.0:8669->8669/tcp, [::]:8669->8669/tcp   vechain-solo
+PS C:\Users\damia> node deploy-b3tr.js
+node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\damia\deploy-b3tr.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.17.1
+PS C:\Users\damia> cd recircle-solo
+PS C:\Users\damia\recircle-solo> node deploy-b3tr.js
+Connecting to solo node...
+JsonRpcProvider failed to detect network and cannot start up; retry in 1s (perhaps the URL is wrong or the node is not started)
+❌ Error: server response 307 Temporary Redirect (request={  }, response={  }, error=null, info={ "requestUrl": "http://localhost:8669", "responseBody": "", "responseStatus": "307 Temporary Redirect" }, code=SERVER_ERROR, version=6.15.0)
+JsonRpcProvider failed to detect network and cannot start up; retry in 1s (perhaps the URL is wrong or the node is not started)
+JsonRpcProvider failed to detect network and cannot start up; retry in 1s (perhaps the URL is wrong or the node is not started)
+JsonRpcProvider failed to detect network and cannot start up; retry in 1s (perhaps the URL is wrong or the node is not started)
+JsonRpcProvider failed to detect network and cannot start up; retry in 1s (perhaps the URL is wrong or the node is not started)
+JsonRpcProvider failed to detect network and cannot start up; retry in 1s (perhaps the URL is wrong or the node is not started)
+JsonRpcProvider failed to detect network and cannot start up; retry in 1s (perhaps the URL is wrong or the node is not started)
+JsonRpcProvider failed to detect network and cannot start up; retry in 1s (perhaps the URL is wrong or the node is not started)
+JsonRpcProvider failed to detect network and cannot start up; retry in 1s (perhaps the URL is wrong or the node is not started)
+JsonRpcProvider failed t

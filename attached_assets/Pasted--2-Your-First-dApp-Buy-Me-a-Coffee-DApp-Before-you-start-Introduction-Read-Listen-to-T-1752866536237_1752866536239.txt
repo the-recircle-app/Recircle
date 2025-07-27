@@ -1,0 +1,149 @@
+
+
+2. Your First dApp: Buy Me a Coffee DApp
+
+Before you start
+Introduction
+
+Read & Listen to Transactions
+
+Write Transactions
+
+Writing and Deploying Contract
+Introduction
+
+Writing the Buy Me a Coffee Smart Contract
+
+Deploying the Contract (Hardhat on VeChain)
+
+Summary & Key Takeaways
+
+React + Vite Frontend
+Introduction
+
+Setting Up the App and Connecting to VeChain
+
+UI & Contracts
+
+Summary & Key Takeaways
+
+
+
+
+
+W
+W
+Over the next few lessons, you’ll be guided step-by-step — from understanding the basics to deploying your first decentralized application (dApp) on VeChain.
+
+The Buy Me a Coffee dApp allows supporters to send small donations in VET to a content creator (the contract owner) along with a message. Each “coffee” purchase is logged on-chain, and the VET tips are stored in the smart contract until the owner withdraws them.
+
+
+
+What You Will Learn
+You'll write a smart contract in Solidity and use Hardhat to compile and deploy it on VeChainThor. VeChainThor has an Ethereum Virtual Machine (EVM). 
+
+
+
+If you have experience with Ethereum, much of the Solidity code and Hardhat usage will feel familiar. If you don't, don't worry - you'll learn step by step how to deploy your own smart contract.
+
+VeChain has a dual-token model — VET is used for value transfer, and VTHO is used for gas fees. 
+
+
+
+You’ll also use VeChain-specific tools, such as the official wallet (VeWorld) and public endpoints, when deploying.
+
+Node.js and npm: Make sure you have Node.js and npm installed — Hardhat runs as an npm package.
+
+
+Hardhat: Install it globally with the following command:
+
+code editor
+npm install -g hardhat
+Don't know Hardhat? Visit the Hardhat website
+
+Complete task
+This provides the Command Line Interface (CLI) for compiling and deploying smart contracts.
+
+VeChain Wallet: Install a VeChain-compatible wallet. We recommend VeWorld, the official browser extension.
+
+
+
+VeWorld allows websites to connect to VeChain and sign transactions.  
+
+Set up the VeWorld wallet to connect with VeChain apps
+
+Complete task
+Testnet Access:
+
+
+Once you've created your VeWorld wallet, you’ll proceed to deploy it to the VeChain Testnet. You will need testnet tokens:
+
+
+VET — used for sending tips
+
+VTHO — used for paying gas fees
+
+Remember that these testnet tokens have no value.
+
+A more advanced choice can be to run your contracts and dApp on Solo.  
+
+How to Claim Testnet Tokens:
+
+
+Open VeWorld and copy your wallet address.
+
+Visit the faucet.
+
+Connect your wallet and Claim tokens.
+
+The website will ask you to sign a certificate. 
+
+Tokens should appear in your wallet shortly after.
+
+At this point, you should have:
+
+
+
+Node.js & npm installed
+
+Hardhat installed
+
+Created a VeWorld wallet
+
+Claimed testnet tokens
+
+
+
+Now you can start building your Buy Me A Coffee dApp.
+
+The Buy Me A Coffee Example Repository
+
+Complete task
+Use the commands below in your terminal, to clone the repository. 
+
+code editor
+git clone https://github.com/vechain/buy-me-coffee-example.git
+ Enter the directory and navigate into the contracts directory:
+
+code editor
+cd buy-me-coffee-example
+cd apps/contracts
+Install the dependencies and open the project in your editor:
+
+code editor
+yarn install
+The repository already includes the Hardhat setup and the smart contract file.
+
+VeChain Hardhat Configuration
+Hardhat connects to VeChain using Ethereum-compatible RPC endpoints, which you can see in the Hardhat config (hardhat.config.ts).
+
+Make sure your config includes these networks —  vechain_solo, vechain_testnet, etc., just like in the official repo.
+
+Additional Resources
+Learn more about the testnet
+
+Complete task
+Any questions? Ask us directly!
+
+Complete task
+Next Lesson

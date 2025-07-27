@@ -1,0 +1,53 @@
+
+NAME:
+    solo - client runs in solo mode for test & dev
+
+USAGE:
+    solo [command options] [arguments...]
+
+OPTIONS:
+   --genesis value                       path or URL to genesis file, if not set, the default devnet genesis will be used
+   --data-dir value                      directory for block-chain databases (default: "/home/thor/.org.vechain.thor")
+   --cache value                         megabytes of ram allocated to trie nodes cache (default: 4096)
+   --api-enable-txpool                   enable txpool REST API endpoints
+   --api-addr value                      API service listening address (default: "localhost:8669")
+   --api-cors value                      comma separated list of domains from which to accept cross origin requests to API
+   --api-timeout value                   API request timeout value in milliseconds (default: 10000)
+   --api-call-gas-limit value            limit contract call gas (default: 50000000)
+   --api-backtrace-limit value           limit the distance between 'position' and best block for subscriptions and fees APIs (default: 1000)
+   --api-allow-custom-tracer             allow custom JS tracer to be used tracer API
+   --api-enable-deprecated               enable deprecated API endpoints (POST /accounts/{address}, POST /accounts, WS /subscriptions/beat
+   --enable-api-logs                     enables API requests logging
+   --api-logs-limit value                limit the number of logs returned by /logs API (default: 1000)
+   --api-priority-fees-percentage value  percentage of the block base fee for priority fees calculation (default: 5)
+   --on-demand                           create new block when there is pending transaction
+   --block-interval value                choose a custom block interval for solo mode (seconds) (default: 10)
+   --persist                             blockchain data storage option, if set data will be saved to disk
+   --gas-limit value                     block gas limit(adaptive if set to 0) (default: 40000000)
+   --verbosity value                     log verbosity (0-9) (default: 3)
+   --json-logs                           output logs in JSON format
+   --pprof                               turn on go-pprof
+   --skip-logs                           skip writing event|transfer logs (/logs API will be disabled)
+   --txpool-limit value                  set tx limit in pool (default: 10000)
+   --txpool-limit-per-account value      set tx limit per account in pool (default: 128)
+   --disable-pruner                      disable state pruner to keep all history
+   --enable-metrics                      enables metrics collection
+   --metrics-addr value                  metrics service listening address (default: "localhost:2112")
+   --admin-addr value                    admin service listening address (default: "localhost:2113")
+   --enable-admin                        enables admin server
+   --api-allowed-tracers value           comma separated list of allowed API tracers(none,all,call,prestate etc.) (default: "none")
+   --min-effective-priority-fee value    set a minimum effective priority fee for transactions to be included in the block proposed by the block proposer (default: 0)
+
+invalid value "60s" for flag -api-timeout: parse error
+
+C:\Users\damia>docker rm vechain-solo
+vechain-solo
+
+C:\Users\damia>docker run -d --name vechain-solo -p 8669:8669 vechain/thor:latest solo --api-addr 0.0.0.0:8669
+9bdb1c9d95e54678a961bf492762c5fdde41c6ea64e8436adc1f917e7867518e
+
+C:\Users\damia>docker ps
+CONTAINER ID   IMAGE                 COMMAND                  CREATED         STATUS         PORTS                                         NAMES
+9bdb1c9d95e5   vechain/thor:latest   "thor solo --api-add…"   6 seconds ago   Up 6 seconds   0.0.0.0:8669->8669/tcp, [::]:8669->8669/tcp   vechain-solo
+
+C:\Users\damia>

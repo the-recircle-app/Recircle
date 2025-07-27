@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  vechain-solo:
+    image: vechain/thor:latest
+    container_name: vechain-solo-node
+    ports:
+      - "8669:8669"
+    environment:
+      - NETWORK=solo
+      - API_ADDR=0.0.0.0:8669
+      - API_CORS=*
+      - VERBOSITY=3
+    command: [
+      "solo",
+      "--network", "solo",
+      "--api-addr", "0.0.0.0:8669",
+      "--api-cors", "*",
+      "--verbosity", "3"
+    ]
+    volumes:
+      - solo-data:/root/.org.vechain.thor
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8669/blocks/best"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  solo-data:

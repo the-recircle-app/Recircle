@@ -1,0 +1,100 @@
+Task Card: Configure Solo Node & VeWorld for Real B3TR Distribution
+Description
+Set up your Replit environment so that your DApp and VeWorld extension connect to your local VeChain Thor Solo node and display real B3TR token balances.
+
+Steps
+Start Thor Solo node
+In your Replit Shell, run (or configure your Docker container) to launch a Solo node on port 8669:
+
+bash
+Copy
+Edit
+./bin/thor solo \
+  --on-demand \
+  --api-cors '*' \
+  --api-addr 0.0.0.0:8669 \
+  --verbosity 4
+Or via Docker:
+
+bash
+Copy
+Edit
+docker run -p 8669:8669 vechain/thor:latest solo \
+  --api-cors '*' \
+  --api-addr 0.0.0.0:8669 \
+  --verbosity 4
+Configure your DApp’s env vars
+In Replit → Secrets (Environment Variables), add:
+
+ini
+Copy
+Edit
+VITE_RPC_URL=http://localhost:8669
+VITE_CHAIN_ID=39
+Then restart your Replit repl so these values take effect.
+
+Add Solo network to VeWorld
+
+Open VeWorld → Settings → Networks → Add Custom Network
+
+Name: Solo (or any label)
+
+RPC URL: http://localhost:8669
+
+Chain Tag: 0x27
+
+Switch your wallet over to this new “Solo” network.
+
+Add the B3TR token in VeWorld
+
+In VeWorld → My Tokens → Add Token
+
+Address: 0x5ef79995fe8a89e0812330e4378eb2660cede699
+
+Symbol: B3TR
+
+Decimals: 18
+
+You should now see your Solo‑distributed B3TR balance under “My Tokens.”
+
+(Optional) Trigger “Add Token” from your React UI
+Add a button in your front end to pop up VeWorld’s Add‑Token dialog:
+
+tsx
+Copy
+Edit
+function AddB3TRButton() {
+  const addToken = async () => {
+    try {
+      await window.vechain.request({
+        method: 'wallet_watchAsset',
+        params: {
+          type: 'ERC20',
+          options: {
+            address: '0x5ef79995fe8a89e0812330e4378eb2660cede699',
+            symbol:  'B3TR',
+            decimals: 18,
+          },
+        },
+      });
+    } catch (e) {
+      console.error('wallet_watchAsset failed', e);
+    }
+  };
+  return <button onClick={addToken}>Add B3TR to VeWorld</button>;
+}
+Deploy & reload your app, then click that button while on the Solo network.
+
+Verify end‑to‑end
+
+Submit a test receipt in your app → confirm backend issues a real B3TR transfer
+
+In VeWorld (on Solo network) check “My Tokens” → B3TR balance should increase
+
+Replit Secrets Recap
+
+nginx
+Copy
+Edit
+VITE_RPC_URL    http://localhost:8669  
+VITE_CHAIN_ID   39  

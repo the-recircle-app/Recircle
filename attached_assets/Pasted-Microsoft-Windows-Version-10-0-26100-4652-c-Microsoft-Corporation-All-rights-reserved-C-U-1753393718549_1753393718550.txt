@@ -1,0 +1,74 @@
+Microsoft Windows [Version 10.0.26100.4652]
+(c) Microsoft Corporation. All rights reserved.
+
+C:\Users\damia>node --version
+v22.17.1
+
+C:\Users\damia>cd recircle-solo
+
+C:\Users\damia\recircle-solo>npm init -y
+Wrote to C:\Users\damia\recircle-solo\package.json:
+
+{
+  "name": "recircle-solo",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
+
+
+
+
+C:\Users\damia\recircle-solo>npm install ethers
+
+added 9 packages, and audited 10 packages in 7s
+
+3 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+
+C:\Users\damia\recircle-solo>cd C:\Users\damia\recircle-solo
+
+C:\Users\damia\recircle-solo>npm install ethers
+
+up to date, audited 10 packages in 1s
+
+3 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+
+C:\Users\damia\recircle-solo>node deploy-b3tr.js
+🚀 Deploying B3TR to Solo Node at http://192.168.12.101:8669
+❌ Deployment failed: server response 307 Temporary Redirect (request={  }, response={  }, error=null, info={ "requestUrl": "http://192.168.12.101:8669", "responseBody": "", "responseStatus": "307 Temporary Redirect" }, code=SERVER_ERROR, version=6.15.0)
+Error: server response 307 Temporary Redirect (request={  }, response={  }, error=null, info={ "requestUrl": "http://192.168.12.101:8669", "responseBody": "", "responseStatus": "307 Temporary Redirect" }, code=SERVER_ERROR, version=6.15.0)
+    at makeError (C:\Users\damia\recircle-solo\node_modules\ethers\lib.commonjs\utils\errors.js:137:21)
+    at assert (C:\Users\damia\recircle-solo\node_modules\ethers\lib.commonjs\utils\errors.js:157:15)
+    at FetchResponse.assertOk (C:\Users\damia\recircle-solo\node_modules\ethers\lib.commonjs\utils\fetch.js:839:32)
+    at JsonRpcProvider._send (C:\Users\damia\recircle-solo\node_modules\ethers\lib.commonjs\providers\provider-jsonrpc.js:917:18)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async C:\Users\damia\recircle-solo\node_modules\ethers\lib.commonjs\providers\provider-jsonrpc.js:439:27
+    at async JsonRpcProvider._detectNetwork (C:\Users\damia\recircle-solo\node_modules\ethers\lib.commonjs\providers\provider-jsonrpc.js:453:16)
+    at async C:\Users\damia\recircle-solo\node_modules\ethers\lib.commonjs\providers\abstract-provider.js:560:37
+    at async JsonRpcProvider.getNetwork (C:\Users\damia\recircle-solo\node_modules\ethers\lib.commonjs\providers\abstract-provider.js:572:21)
+    at async deployB3TR (C:\Users\damia\recircle-solo\deploy-b3tr.js:37:21) {
+  code: 'SERVER_ERROR',
+  request: FetchRequest {},
+  response: FetchResponse {},
+  error: undefined,
+  info: {
+    requestUrl: 'http://192.168.12.101:8669',
+    responseBody: '',
+    responseStatus: '307 Temporary Redirect'
+  },
+  shortMessage: 'server response 307 Temporary Redirect'
+}
+
+C:\Users\damia\recircle-solo>

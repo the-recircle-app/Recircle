@@ -1,0 +1,218 @@
+
+
+2. Your First dApp: Buy Me a Coffee DApp
+
+Before you start
+Introduction
+
+Read & Listen to Transactions
+
+Write Transactions
+
+Writing and Deploying Contract
+Introduction
+
+Writing the Buy Me a Coffee Smart Contract
+
+Deploying the Contract (Hardhat on VeChain)
+
+Summary & Key Takeaways
+
+React + Vite Frontend
+Introduction
+
+Setting Up the App and Connecting to VeChain
+
+UI & Contracts
+
+Summary & Key Takeaways
+
+
+
+
+
+W
+W
+You will use Hardhat to compile and deploy the smart contract to VeChain. The Hardhat project is already configured in the example repository with network settings for VeChain’s Solo, Testnet, and Mainnet. 
+
+Let’s go through the deployment steps.
+
+Run Hardhat’s compile task to ensure the Solidity code compiles without errors:
+
+code editor
+npx hardhat compile
+This uses the Solidity compiler specified in your Hardhat config (for example, Solidity 0.8.17). It will output the contract’s ABI and bytecode into the artifacts/directory. A successful compilation is required before deployment.
+
+Note: If everything is already compiled, you may see a message like "Nothing to compile". That’s totally fine — it just means there have been no changes since the last compilation.
+
+(If you’re using the example repo, you can also run npm run compile as a shortcut, which invokes Hardhat’s compile script.)
+
+You have a few options:
+
+
+
+VeChain Thor Solo (local node): Ideal for development and testing without using real networks. If you have Docker, you can launch a Solo node easily. Make sure it’s running on localhost:8669 and that your wallet is connected to it (VeWorld allows adding a custom network pointing to the Solo node URL and port). Solo node gives you a private blockchain and typically comes funded with some test VET/VTHO.
+
+Setting up a Solo node goes beyond the scope of this course, but you can learn more about it in the official VeChain Documentation.
+
+
+
+VeChain Testnet: To test on a public test network, you’ll need a funded testnet wallet (use the faucet as mentioned earlier) and network config for the testnet RPC. VeWorld has Testnet available in its network list by default (or you can add it)
+
+
+
+VeChain Mainnet: This is for production deployment. Mainnet requires real VET/VTHO and typically should be done only after thorough testing. (You’ll focus on Solo and Testnet here, as this is a beginner tutorial.)
+
+
+
+Replace your Hardhat config (hardhat.config.ts) with the following, or make sure to include this:
+
+code editor
+import { HardhatUserConfig } from 'hardhat/config';
+import {HttpNetworkConfig} from "hardhat/types";
+import "@nomicfoundation/hardhat-ethers";
+import '@vechain/sdk-hardhat-plugin';
+
+const config: HardhatUserConfig = {
+  solidity: '0.8.20',
+};
+
+module.exports = {
+  solidity: {
+    version: '0.8.20',
+    evmVersion: 'paris',
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 200,
+      },
+    },
+  },
+  networks: {
+
+    vechain_solo: {
+      // Solo
+      url: 'http://localhost:8669',
+      accounts: {
+        mnemonic:'<YOUR_SOLO_MNEMONIC>',
+        path: "m/44'/818'/0'/0",
+        count: 3,
+        initialIndex: 0,
+        passphrase: 'vechainthor'
+      },
+      gas: 'auto',
+      gasPrice: 'auto',
+      gasMultiplier: 1,
+      timeout: 20000,
+      httpHeaders: {}
+    } satisfies HttpNetworkConfig,
+
+    vechain_testnet: {
+      // Testnet
+      url: 'https://testnet.vechain.org',
+      accounts: {
+        mnemonic:
+              '<YOUR_TESTNET_MNEMONIC>',
+        path: "m/44'/818'/0'/0",
+        count: 3,
+        initialIndex: 0,
+        passphrase: 'vechainthor'
+      },
+      gas: 'auto',
+      gasPrice: 'auto',
+      gasMultiplier: 1,
+      timeout: 20000,
+      httpHeaders: {}
+    } satisfies HttpNetworkConfig
+  },
+};
+
+export default config;
+  
+The snippet above can be found on apps/contracts/hardhat.config.ts
+
+The example project uses environment variables for private keys. Make sure the deploying account’s private key is provided so Hardhat can sign the deployment transaction.
+
+Never share your private keys, and use a test key for testnet.
+
+Which of the following statements about compiling and deploying a smart contract on VeChain are correct?
+(Select two correct answers)
+
+
+Test 1: Multiple Choice
+
+
+
+
+In the repository’s apps/contracts/scripts directory, you’ll find a deployment script (e.g. deploy.ts). 
+
+
+
+This script uses Hardhat’s runtime environment to deploy the compiled smart contract.
+
+
+
+Example deploy script:
+
+code editor
+import { ethers } from "hardhat";
+import { updateConfig, config } from '@repo/config-contract';
+import { getABI } from "../utils/abi";
+
+async function main() {
+    const contract = await ethers.deployContract('BuyMeACoffee');
+    await contract.waitForDeployment();
+    const address = await contract.getAddress();
+    console.log(`BuyMeACoffee Contract deployed with address: ${address}`);
+    const tokenABI = await getABI('BuyMeACoffee');
+    updateConfig(
+        {
+            ...config,
+            CONTRACT_ADDRESS: address,
+        },
+        tokenABI
+    )
+    console.log('Config updated');
+}
+main().catch(error => {
+  console.error(error);
+  process.exitCode = 1;
+});
+You can run the script in testnet with the following command:
+
+code editor
+npx hardhat run scripts/deploy.ts --network vechain_testnet
+Or this one:
+
+code editor
+npm run deploy-testnet
+Hardhat will compile the contract (if not already compiled), then send the transaction.
+If you're using VeWorld, a prompt will appear for approval. If deploying with a private key, it signs the transaction automatically.
+
+
+
+After deployment, Hardhat will print the contract address — make sure to copy it, you'll need it to connect the frontend (should be done automatically in this example).
+
+It’s a good idea to verify that the contract is deployed and functioning correctly:
+
+
+
+Check the contract’s balance (on testnet explorer or by calling eth_getBalance via Hardhat). It should be 0 initially, since no tips have been sent yet.
+
+
+Test calling getSales(). It should first return an empty array.
+
+
+If using Solo, you can test buyCoffee via the Hardhat console or a small script to confirm it works.
+
+Complete the missing parts of the code by selecting the correct options from the list.
+
+
+Test 2: Fill in the Blanks (Select From Options)
+Your smart contract is now live on VeChain!
+
+You’ve written a Solidity contract to store coffee purchases and tip messages, and used Hardhat to deploy it to VeChain. You ensured your deployer wallet had VTHO for gas, and confirmed the deployment worked.
+
+In the next module, you’ll build a React + Vite frontend to connect with this deployed contract, allowing users to buy coffee via a web interface.
+
+Next Lesson

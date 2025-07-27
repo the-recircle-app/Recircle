@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Find Your Deployment URL</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
+        .url-box { background: #f5f5f5; padding: 15px; border-radius: 5px; margin: 10px 0; }
+        .step { margin: 20px 0; padding: 15px; border-left: 3px solid #007bff; }
+    </style>
+</head>
+<body>
+    <h1>Find Your ReCircle Deployment URL</h1>
+    
+    <div class="step">
+        <h3>Step 1: Find Your Replit URL</h3>
+        <p>Your actual deployment URL should look like one of these:</p>
+        <div class="url-box">
+            <strong>Format:</strong> https://[project-name].replit.app<br>
+            <strong>Example:</strong> https://recircle-rewards.replit.app
+        </div>
+        <p>Look in your Replit browser tab or project settings to find the exact URL.</p>
+    </div>
+
+    <div class="step">
+        <h3>Step 2: Test Wallet Connection</h3>
+        <p>Once you find your URL, test these paths:</p>
+        <div class="url-box">
+            <strong>Simple Test:</strong> [your-url]/veworld-test<br>
+            <strong>Debug Page:</strong> [your-url]/wallet-debug<br>
+            <strong>Full Wallet:</strong> [your-url]/dao-wallet-connect
+        </div>
+    </div>
+
+    <div class="step">
+        <h3>Step 3: Use VeWorld Browser</h3>
+        <ol>
+            <li>Open VeWorld app on your device</li>
+            <li>Go to the in-app browser</li>
+            <li>Enter your actual Replit URL (not recirclerewards.app)</li>
+            <li>Make sure VeChain testnet is selected</li>
+            <li>Navigate to /veworld-test</li>
+        </ol>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentUrl = window.location.href.replace('/find-deployment-url.html', '');
+            if (currentUrl.includes('.replit.app')) {
+                const urlBox = document.createElement('div');
+                urlBox.className = 'url-box';
+                urlBox.innerHTML = `<strong>Your Current URL:</strong> ${currentUrl}<br><strong>Test URL:</strong> ${currentUrl}/veworld-test`;
+                document.querySelector('.step').appendChild(urlBox);
+            }
+        });
+    </script>
+</body>
+</html>

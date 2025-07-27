@@ -1,0 +1,103 @@
+
+VeChain Docs
+Search...
+Ctrl
+K
+Welcome to VeChain
+Blockchain Basics
+Introduction to VeChain
+Core Concepts
+How to run a node
+Developer Resources
+Getting Started
+How to build on VeChain
+Example dApps
+EVM Compatibility for Developers
+How to verify Address-Ownership
+Debug Reverted Transactions
+Account Abstraction
+VIP-191: Designated Gas Payer
+Index with Graph Node
+SDKs & Providers
+SDK
+Thor DevKit
+DApp Kit
+v2
+v1
+v0
+VeChain Kit
+DevPal
+Web3-Providers-Connex
+Connex
+Frameworks & IDEs
+Built-in Contracts
+VORJ
+Useful Links
+How to contribute
+Powered by GitBook
+Repo
+Libraries
+React and other Frameworks
+Key Features
+Was this helpful?
+
+
+
+
+
+
+
+Copy
+
+Developer Resources
+SDKs & Providers
+DApp Kit
+The VeChain dApp kit is a frontend library designed to make it easy to build dApps on the VeChainThor blockchain. This documentation provides a comprehensive guide to using the dApp kit library, including installation, usage instructions, and details about its key features and methods.
+
+Repo
+https://github.com/vechain/vechain-dapp-kit
+
+Libraries
+@vechain/dapp-kit - A library to provide a layer on top of Connex, which makes wallet management easier.
+
+@vechain/dapp-kit-ui - A library of UI components to make it easy to select and connect to a wallet.
+
+@vechain/dapp-kit-react - A library of React hooks and components to make it easy to use the dApp kit with React.
+
+React and other Frameworks
+Please note that server-side rendering (SSR) must be disabled when using the dApp kit libraries.
+
+React is our favourite library but the dApp kit library has been made to be used with every JavaScript framework.
+You can start with these sample apps:
+
+React
+
+Next.js
+
+Remix.run
+
+Vanilla JS
+
+Vue
+
+Angular
+
+Svelte
+
+you can use both JavaScript and TypeScript
+
+Key Features
+The VeChain dApp kit is designed to make it easy to interact with all VeChainThor compatible wallets
+
+Wallet Management: Connex was designed with Sync / Sync2 in mind, so this library provides an additional layer on top, making it easier to manage multiple wallets.
+
+Wallet Selection: The @vechain/dapp-kit-ui library provides multiple components to make it easy to select and connect to a wallet.
+
+React: The @vechain-dapp-kit-react library provides several hooks and components to make it easy to use the dApp kit with React.
+
+Previous
+Bloom Filter
+Next
+v2
+Last updated 1 year ago
+

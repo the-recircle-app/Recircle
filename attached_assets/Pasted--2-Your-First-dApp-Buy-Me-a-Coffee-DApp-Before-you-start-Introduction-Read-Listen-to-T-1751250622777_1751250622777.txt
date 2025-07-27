@@ -1,0 +1,152 @@
+
+
+2. Your First dApp: Buy Me a Coffee DApp
+
+Before you start
+Introduction
+
+Read & Listen to Transactions
+
+Write Transactions
+
+Writing and Deploying Contract
+Introduction
+
+Writing the Buy Me a Coffee Smart Contract
+
+Deploying the Contract (Hardhat on VeChain)
+
+Summary & Key Takeaways
+
+React + Vite Frontend
+Introduction
+
+Setting Up the App and Connecting to VeChain
+
+UI & Contracts
+
+Summary & Key Takeaways
+
+
+
+
+
+W
+W
+React + Vite Frontend Setup:
+
+You built a frontend for the "Buy Me a Coffee" DApp using VeChain’s dApp Kit. The app was configured with the contract’s address and ABI, allowing interaction with smart contract functions.
+
+
+
+VeChain dApp Kit Integration:
+
+You wrapped the app with DAppKitProvider, enabling wallet connection via VeWorld without manually handling low-level contract interactions.
+
+
+
+Wallet Recognition:
+
+After connecting their wallet, users are automatically recognized.
+The app does not manage private keys — VeWorld handles signing transactions, similar to how MetaMask works on Ethereum.
+
+
+
+Implemented Smart Contract Interactions:
+
+
+buyCoffee: sends a name, message, and amount of VET to the contract (adds a record + emits an event).
+
+
+sendCoffee: same as above, but with a recipient address.
+
+
+withdrawTips: owner-only function. Not exposed in the UI but can be invoked through VeWorld or added via a custom admin interface.
+
+
+getSales: retrieves all past coffee purchases. The UI updates automatically after each successful transaction.
+
+VeChain Transaction Model:
+
+You learned how VeChain’s dual-token system (VET + VTHO) operates in practice.
+Users pay gas in VTHO, handled automatically by the wallet. Our app doesn’t manage gas — only ensures the user has some (via faucet).
+
+
+
+Frontend Reactivity:
+
+The TransactionHistory component reacts to changes using a flag (e.g. refetchHistory) triggered after a purchase. This lets the UI stay in sync with on-chain data.
+
+
+
+Network Awareness:
+
+The dApp Kit ensures the correct chain ID and RPC endpoint are used based on whether you deploy to Testnet or Mainnet.
+
+
+
+Documentation & References:
+
+You referenced official VeChain docs and example repos. Our implementation follows their structure closely, verifying that our frontend accurately reflects the contract’s logic and permissions.
+
+With both courses completed, you now have a fully working "Buy Me a Coffee" DApp running on VeChainThor — complete with a deployed smart contract and a connected React frontend.
+
+
+
+You’ve learned to:
+
+
+Avoid common Ethereum-to-VeChain pitfalls (like differences in VET vs ETH, VeWorld vs MetaMask).
+
+Handle payable functions and owner-only access correctly.
+
+Follow best practices for VeChain dApp development.
+
+Congratulations on building your first VeChain-powered dApp!
+
+As next steps, consider exploring further enhancements:
+
+
+Deploy to Mainnet.
+
+Add features like QR code payments, tip customization, or profile-based access.
+
+Improve UX with animations, spinners, or input validation.
+
+You've now built a solid foundation to continue developing on VeChain!
+
+Need clarification? 
+Ask away in our Telegram channel — we're here to help!
+
+Complete task
+What are the key takeaways from building the “Buy Me a Coffee” dApp?
+
+(Select two correct answers)
+
+
+Test 1: Multiple Choice
+
+
+
+
+What are the VeChain-specific considerations when building the frontend?
+
+(Select two correct answers)
+
+
+Test 2: Multiple Choice
+
+
+
+
+1. Submit your GitHub repository with your Coffee dApp
+Make sure that the repository is public. (submitted link must contain github.com)
+
+Test 3: Type Answer
+2. Submit your coffee Smart contract, deployed on VeChain testnet. (link must contain explore-testnet.vechain.org)
+
+Test 4: Type Answer
+3. Submit your VeWorld wallet to airdrop the rewards (please make sure you are using VeWorld, otherwise the rewards might be lost)
+
+Test 5: Type Answer
+Back to space

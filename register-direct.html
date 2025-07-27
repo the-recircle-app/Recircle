@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>VeBetterDAO Registration - Direct Method</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+    .method { margin: 20px 0; padding: 20px; border: 2px solid #007bff; border-radius: 10px; }
+    .step { margin: 10px 0; padding: 10px; background: #f8f9fa; border-left: 4px solid #007bff; }
+    code { background: #f8f9fa; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
+    .important { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 15px 0; }
+  </style>
+</head>
+<body>
+  <h1>Register ReCircle on VeBetterDAO - Manual Methods</h1>
+  
+  <div class="important">
+    <strong>Goal:</strong> Get your unique APP_ID for ReCircle by calling the registerApp function
+  </div>
+
+  <div class="method">
+    <h2>Method 1: VeWorld Console (Recommended)</h2>
+    <div class="step">
+      <strong>Step 1:</strong> Open VeWorld extension in your browser
+    </div>
+    <div class="step">
+      <strong>Step 2:</strong> Make sure you're on VeChain Testnet
+    </div>
+    <div class="step">
+      <strong>Step 3:</strong> Look for "DApp Browser" or "Contract" section in VeWorld
+    </div>
+    <div class="step">
+      <strong>Step 4:</strong> If available, enter contract: <code>0xB54f3b684135cC6b54B9C2591c6F33e12f1F0070</code>
+    </div>
+    <div class="step">
+      <strong>Step 5:</strong> Call function <code>registerApp</code> with:
+      <br>• name: <code>ReCircle</code>
+      <br>• description: <code>Sustainability rewards platform for validating thrift, EV, and rideshare receipts</code>
+    </div>
+  </div>
+
+  <div class="method">
+    <h2>Method 2: Use MyVeTools.com</h2>
+    <div class="step">
+      <strong>Step 1:</strong> Go to <a href="https://myvetools.com" target="_blank">myvetools.com</a>
+    </div>
+    <div class="step">
+      <strong>Step 2:</strong> Look for "Contract Interaction" or "Send Transaction" tool
+    </div>
+    <div class="step">
+      <strong>Step 3:</strong> Connect your VeWorld wallet
+    </div>
+    <div class="step">
+      <strong>Step 4:</strong> Enter contract address and function details
+    </div>
+  </div>
+
+  <div class="method">
+    <h2>Method 3: VisualVeChain.com</h2>
+    <div class="step">
+      <strong>Step 1:</strong> Go to <a href="https://visualvechain.com" target="_blank">visualvechain.com</a>
+    </div>
+    <div class="step">
+      <strong>Step 2:</strong> Switch to testnet mode
+    </div>
+    <div class="step">
+      <strong>Step 3:</strong> Use contract interaction tools
+    </div>
+  </div>
+
+  <div class="method">
+    <h2>Method 4: Raw Transaction Data</h2>
+    <p>If you have another tool that can send raw transactions, use this data:</p>
+    <div class="step">
+      <strong>To:</strong> <code>0xB54f3b684135cC6b54B9C2591c6F33e12f1F0070</code>
+    </div>
+    <div class="step">
+      <strong>Data:</strong> <code id="txData">Loading...</code>
+    </div>
+    <div class="step">
+      <strong>Value:</strong> <code>0</code>
+    </div>
+  </div>
+
+  <div class="important">
+    <h3>After Successful Registration:</h3>
+    <ol>
+      <li>Check your transaction on VeChain testnet explorer</li>
+      <li>Look for your assigned APP_ID in the transaction logs</li>
+      <li>Update your .env file: <code>APP_ID=0xYOUR_NEW_ID</code></li>
+    </ol>
+  </div>
+
+  <script>
+    // Generate the transaction data for registerApp
+    function generateTxData() {
+      // This is the encoded function call for registerApp("ReCircle", "Sustainability rewards platform for validating thrift, EV, and rideshare receipts")
+      const functionSelector = "0x3f92d95f"; // registerApp(string,string)
+      
+      // Encode the parameters (this is a simplified version)
+      const name = "ReCircle";
+      const description = "Sustainability rewards platform for validating thrift, EV, and rideshare receipts";
+      
+      // For display purposes - in practice you'd need proper ABI encoding
+      document.getElementById("txData").innerText = "Use ABI encoding tools or the methods above";
+    }
+
+    window.onload = generateTxData;
+  </script>
+</body>
+</html>

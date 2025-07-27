@@ -1,0 +1,1229 @@
+script
+
+
+0:01
+hello I'm P I'm a software engineer at
+0:04
+vchain and today we'll be looking at how
+0:07
+to build a vchain application
+0:10
+particularly fine-tuned for the vad
+0:13
+da the vad da is a
+0:18
+community it's a community in place to
+0:21
+make the world a better
+0:23
+place behind the scenes it's a
+0:26
+decentralized autonomous organization
+0:28
+with a lot of unique features in our
+0:32
+industry in particular through many
+0:37
+applications the V better da is able to
+0:40
+reward users that perform sustainable
+0:42
+actions through the better token and if
+0:46
+you want to join this ecosystem as a
+0:49
+developer as a builder with one of your
+0:51
+applications this video is for
+0:54
+you let's see a couple of examples
+0:57
+already existing inside this
+1:03
+ecosystem we have X to earn which is the
+1:07
+concept of doing something to be
+1:11
+rewarded so X can be anything to earn
+1:14
+means that you're getting rewarded with
+1:16
+the better token for example
+1:19
+mugshot X The X Factor in mugshot is
+1:23
+that users choose reusable mugs when
+1:27
+drinking their coffee therefore not
+1:30
+choosing disposable cups that are a big
+1:34
+factor in particular with cafes coffee
+1:36
+chains around the world and you get
+1:39
+rewarded with a fun and simple
+1:41
+experience through the mugshot app for
+1:44
+choosing a reusable mug drinking your
+1:46
+coffee thanks to Cutting Edge AI
+1:49
+technology all built on the vchain
+1:52
+blockchain you have also cleanify that's
+1:55
+also an Innovative application on vchain
+1:59
+which Rewards users that clean their
+2:01
+streets remove the rubbish clean the
+2:04
+beaches through also in this case
+2:07
+Cutting Edge AI technology manual
+2:09
+verification and also this application
+2:11
+is built on VJ and as you can see these
+2:14
+are only a couple of examples inside an
+2:17
+ecosystem that is growing
+2:19
+rapidly you have mug shock cleanify
+2:22
+Green Card green Ambassador challenge
+2:23
+oily EV earn with EV earn you get
+2:26
+rewarded by charging your Tesla for
+2:28
+example or your elect vehicle in general
+2:31
+so a lot of applications are joining and
+2:34
+this is your chance to join a rapidly
+2:36
+growing ecosystem with a lot of
+2:39
+important values such as the fact that
+2:42
+it is also a decentralized venture
+2:45
+capitalist for your application in fact
+2:47
+through the decentralized governance
+2:50
+system
+2:51
+users are able to vote the favorite
+2:54
+applications which then in return
+2:56
+receive better allocations in the better
+2:59
+token toen to then reward their users
+3:03
+for their sustainable
+3:07
+actions now let's jump straight into the
+3:11
+juicy part of this video building our
+3:14
+EXN
+3:16
+application so first things first head
+3:19
+to the description and there you'll find
+3:22
+a link to the template from which we'll
+3:25
+be showcasing and walking through every
+3:29
+important detail to be able to build
+3:31
+your very own extern application on the
+3:34
+V better
+3:36
+Dow as of any new repository the first
+3:39
+thing we look at is the readme and
+3:42
+inside the readme you are quickly
+3:44
+greeted with what is required to run
+3:47
+this project first of all you need
+3:50
+nodejs so you need a node version 18 or
+3:54
+above you need a package manager for
+3:58
+example npm yarn
+4:00
+you need to have Docker if you want to
+4:03
+run a local uh vchain node which is what
+4:07
+we'll be doing in this tutorial in this
+4:10
+walkthr and you also need hard hat to be
+4:13
+able to run the smart contract Suite
+4:16
+from compiling testing and also
+4:20
+deploying to all the vchain
+4:23
+networks the project structure you'll be
+4:26
+greeted with inside the repository is
+4:29
+both a front end and the backend but
+4:31
+also the smart contract Suite together
+4:34
+with some reusable packages between all
+4:37
+the
+4:38
+applications in fact let's just dive
+4:41
+quickly into the repository first to be
+4:44
+able to see exactly what uh the
+4:47
+repository
+4:49
+contains this codebase is a mono
+4:53
+repository built using the turbo
+4:55
+framework turbo allows to manage monor
+4:58
+repositories in a more uh facilitated
+5:02
+automized way in fact everything is
+5:04
+already set up for you to be able to run
+5:06
+front end and back end with one single
+5:08
+script and also call the smart contracts
+5:11
+compilation and deployment or also
+5:13
+testing with also a few amount of
+5:16
+command line um command
+5:20
+lines first of all let's have a look at
+5:22
+the applications so you have as we said
+5:26
+a backend which is uh there to be able
+5:30
+to perform a series of tasks we'll see
+5:33
+very shortly a contracts application
+5:36
+which has the smart contracts that we
+5:38
+need and also scripts for deployment and
+5:41
+testing then we have the front end too
+5:45
+which will be demoed also very
+5:48
+shortly in fact before we go into more
+5:51
+details let me just show you exactly
+5:55
+what this template is so you have a
+5:58
+better understand understanding of what
+6:01
+an xtern app should do and should look
+6:07
+like so let's head over to our
+6:12
+browser and here is the demo front end
+6:17
+What's Happening Here is that we're
+6:19
+showing the user exactly what he needs
+6:21
+to do so purchase eco-friendly products
+6:24
+then he needs to upload the receipt
+6:26
+through the drop down below and if the
+6:28
+receipt passes the verifications
+6:31
+required then he is rewarded with the
+6:33
+better token in this case just for demo
+6:36
+purposes the verification checks simply
+6:39
+if the receipt is a physical receipt
+6:41
+with at least one product uh sustainable
+6:44
+product purchased otherwise the AI sends
+6:47
+the analysis uh through the backend
+6:50
+system back to the user um as of why the
+6:54
+submission was not
+6:56
+validated first of all let's try with
+6:58
+this digital received that should not
+7:01
+pass okay so it's saying please connect
+7:03
+to your wallet so first of all let's
+7:05
+connect our wallet using VW if you have
+7:08
+not got vworld installed make sure to
+7:10
+head over to the Chrome web store and um
+7:14
+install vworld in your browser in your
+7:17
+chromium based
+7:19
+browser then back to the application we
+7:23
+head over and sign in so basically
+7:27
+connect our wallet to the um front end
+7:31
+and now let's try again sending the
+7:34
+receipt so now we're sending the receipt
+7:36
+to our backend service which is running
+7:39
+and I'll show you exactly how to reach
+7:40
+this point having the backend running
+7:42
+the smart contracts deployed and
+7:44
+everything necessary to be able to reach
+7:46
+this step and the AI says that the image
+7:49
+is not a receipt of a product purchase
+7:51
+but an invoice for clothing items now
+7:54
+let's try again with another receipt for
+7:56
+example this one
+8:00
+and this time it should pass let's see
+8:04
+there you go so you've earned one better
+8:06
+token and to verify the balance we can
+8:08
+even head to our wallet
+8:10
+again go back to
+8:14
+networks solo Network which is the local
+8:17
+network I'm
+8:19
+utilizing which I'll show you exactly
+8:21
+how to set up
+8:24
+shortly and here we can see that I have
+8:28
+a lot of tokens because with this
+8:30
+account I also deployed the mock uh
+8:33
+token of better but at the end you can
+8:36
+see that there is one more token which
+8:38
+is the one that we just
+8:41
+received now let's head back to our
+8:43
+codebase and deploy our smart contracts
+8:48
+so if you head to the apps contracts
+8:53
+route you'll be presented with a typical
+8:55
+hard hat smart contracts suite and
+8:58
+inside the contracts uh directory you'll
+9:00
+have the Eco SM contract which is the
+9:03
+core SM contract of our application
+9:06
+interfaces needed for ERC 20s for
+9:09
+example and also mock contracts that
+9:13
+both mock the better token of the V
+9:15
+better da and also the smart contract
+9:18
+that handles rewarding of the users
+9:21
+which is another smart contract part of
+9:22
+the V better
+9:24
+da now let's briefly look at the Eco and
+9:27
+smart contract this is a very simple
+9:29
+smart contract and I invite everyone to
+9:32
+um read the smart contract in detail and
+9:36
+understand it fully before proceeding in
+9:39
+modifying it or writing a completely new
+9:41
+version now if you already have your
+9:43
+smart contract Suite ready that's
+9:46
+amazing but if you want to use this temp
+9:48
+this template as a SM as a starting
+9:50
+point then make sure you completely
+9:52
+understand what's happening The Core
+9:54
+Concepts of the smart contract are the
+9:56
+fact that it's a round based rewarding
+9:59
+system
+10:00
+every round has a specific cycle
+10:02
+duration and each cycle there are a
+10:05
+maximum number of submissions that user
+10:07
+can do for that
+10:09
+round how does the rewarding happen the
+10:12
+rewarding happens through the register
+10:14
+valid submission um function this
+10:17
+function is called by an admin which in
+10:20
+this case is the backend the admin
+10:23
+specifies the the participant so the
+10:25
+address of who we are going to reward
+10:28
+and the amount in way that we're going
+10:31
+to reward in terms of the better token
+10:34
+it does a series of checks for example
+10:35
+the amount is greater than zero the
+10:37
+participant has not exceeded his maximum
+10:39
+submissions there are enough rewards
+10:42
+left and then obviously that the cycle
+10:45
+has not
+10:47
+ended what happens is that the
+10:49
+submission counter for the participant
+10:51
+increases by one the total submissions
+10:54
+increase by one the rewards left for
+10:57
+this round decrease by the amount amount
+10:59
+we're rewarding and then the reward
+11:01
+distribution
+11:03
+happens the last field of this method
+11:07
+that is called um needs to be populated
+11:11
+by the sustainability proof you can read
+11:13
+all about sustainability proofs in this
+11:16
+link but to summarize all of this
+11:19
+applications are uh required to provide
+11:23
+a proof of the sustainable action the
+11:25
+user performed thus uh the reason why he
+11:29
+was rewarded this can be a Json uploaded
+11:33
+to ipfs for example or even to your own
+11:37
+uh centralized Solutions showcasing the
+11:40
+exact format that can be um detailed in
+11:44
+this
+11:45
+document but now let's look at how we
+11:48
+can deploy the smart
+11:51
+contracts so if you head back to the
+11:54
+root of the project you are greeted with
+11:57
+yarn contracts deployed solo because
+12:00
+we'll be deploying on the solo Network
+12:02
+and if you haven't got the solo node
+12:04
+running locally which is a vchain node
+12:07
+mock instance that can be run locally
+12:09
+for testing all you have to do is head
+12:12
+over to the contracts
+12:15
+package call yarn solo up which is
+12:18
+another script which then instantiates
+12:21
+the docker container um having your
+12:24
+vchain so uh solo node running locally
+12:27
+obviously you need your Docker demon
+12:28
+active running now let's go back to the
+12:32
+route and call yarn contracts deploy
+12:36
+solo what this script does is deploy all
+12:39
+the necessary contracts that can be
+12:41
+found in the scripts deploy um file so
+12:46
+first of all we are deploying the mock
+12:48
+token because we are on the solo Network
+12:50
+the mock token of better so we'll have
+12:52
+the better token on our local solo note
+12:55
+then we are deploying the mock contracts
+12:58
+needed for for rewarding the user and at
+13:01
+the end we are also deploying the Eco
+13:03
+earn smart contract there you go once
+13:06
+everything is done you will have the
+13:09
+addresses of the deployed contracts in
+13:11
+the console but also under the config
+13:15
+file of the packages um config contract
+13:19
+package you'll also have the token
+13:21
+address and the contract address
+13:23
+automatically refactored uh putting in
+13:26
+the correct deployed addresses for you
+13:28
+now now to correctly uh verify that the
+13:32
+deployer has the tokens that uh were
+13:35
+minted to him upon deployment we can
+13:38
+verify this for example in the vorld
+13:40
+wallet in fact a quick look at the
+13:42
+better mock we can see that the Minter
+13:45
+the deployer sorry of the better mock is
+13:48
+minted with 10 million better
+13:51
+tokens in fact let's quickly copy the
+13:55
+token address which is here
+13:59
+head over to our
+14:02
+browser to the vchain wallet
+14:06
+again if we go to add custom token paste
+14:10
+the address of the token then we can see
+14:12
+the better token has been added and now
+14:14
+in the home screen you can see that
+14:16
+there are 9
+14:20
+99,999 sorry
+14:21
+9,998 th000 better tokens this is
+14:24
+because 2,000 better tokens were used to
+14:27
+fund our
+14:29
+application in fact back in the deposit
+14:32
+sorry in the deploy script you can see
+14:34
+at the end that the um reward token was
+14:40
+deposited to be able to uh reward our
+14:43
+users in particular 2,000 better
+14:48
+tokens now before we go back to the next
+14:51
+steps um inside our read me I'd love to
+14:54
+invite everyone
+14:56
+to be aware that we we are currently
+15:00
+pointing uh to the solo Network inside
+15:03
+our wallet this might not be the case
+15:06
+for everyone in fact when you add the
+15:09
+token before if you do not see any
+15:11
+balances or if you do not see the token
+15:13
+most probably this is because the solo
+15:15
+Network needs to be added to the wallet
+15:17
+in fact head over to settings networks
+15:21
+add custom note here you can write Solo
+15:24
+or solo local and make sure that the URL
+15:26
+is HTTP column for/ / localhost column
+15:31
+8669 this is the end point from which
+15:35
+the vchain solo node that you're running
+15:37
+locally is exposing the uh rest API in
+15:42
+fact a quick search on this should
+15:47
+redirect to the rest API of a vchain
+15:51
+solo
+15:52
+node now back to our template what you
+15:56
+see here are steps to to reward our user
+16:01
+but before rewarding the user we are
+16:04
+funding the X to earn rewards pool with
+16:08
+better tokens to be able to reward that
+16:11
+user now as you can see inside the
+16:14
+script already 2,000 tokens have been
+16:17
+deposited so we can skip this step but
+16:20
+remember that to add more tokens you
+16:23
+will need to have the contracts uh
+16:26
+instantiated inside your in inspector to
+16:30
+do so all you have to do is copy this
+16:33
+command here npx Dar devp Etc go to your
+16:38
+common line
+16:40
+interface paste it and you'll have an
+16:43
+instance of the inspector running
+16:46
+locally here I already have the
+16:48
+contracts instantiated previously but
+16:51
+all you have to do is click the plus
+16:53
+icon put the name of the contract the
+16:55
+address and the API of the contract to
+16:58
+find the correct AB the contract all you
+17:00
+have to do is go into the apps contracts
+17:03
+application in your codebase artifacts
+17:06
+contract and here you will have all the
+17:10
+abis of your contract for example the AI
+17:13
+of the X2 earn rewards pool mock is
+17:15
+inside this folder and then you have to
+17:17
+go to the Json and copy this entire
+17:20
+array under the API key of this Json
+17:24
+file all you have to do is then paste
+17:26
+the ABI array here we've already done
+17:29
+that the only thing that's left on our
+17:32
+side is to start the round so I'll be
+17:36
+walking through exactly the starting
+17:39
+process which can be found also at this
+17:43
+step here so first of all we need to
+17:45
+specify the correct contract address so
+17:48
+I already have the Eco ear contract here
+17:50
+so let's edit it the address let's see
+17:53
+if it's the same uh It Ends by c7b BF so
+17:58
+let's cop copy this paste it here the
+18:00
+ABI Remains the Same as I put it before
+18:04
+now if we do a quick check on the
+18:06
+current cycle it should be cycle zero
+18:08
+exactly because we have not yet started
+18:11
+any round so the first round will be the
+18:14
+cycle
+18:15
+one now what we can do is set the
+18:17
+rewards amount for the next cycle here
+18:20
+to 1,000 but 1,000 is not the correct
+18:23
+value because what solidity expects is
+18:26
+the value in way so if you head over to
+18:31
+e-con
+18:33
+converter.com you can then convert ether
+18:36
+value which is the same as vet value or
+18:39
+better value into the way value whereby
+18:42
+the way value is the 18 decimal
+18:45
+representation of the amount we can then
+18:48
+copy this value which is 1,000 in the uh
+18:51
+better
+18:52
+value head back to the Eco earn um set
+18:57
+rewards amount function specify the
+18:59
+amount here call
+19:01
+execute this will then prompt our wallet
+19:05
+with the correct function as you can see
+19:07
+set rewards amount now let's sign the
+19:09
+transaction send the transaction and
+19:12
+what we can now do is verify that the
+19:15
+rewards left for cycle one which is the
+19:18
+next round is 1,000 and there you go so
+19:22
+this is 1,000 in way now that all that's
+19:26
+left to do is trigger the cycle so let's
+19:28
+let's trigger
+19:30
+that
+19:32
+sign and now let's check again what the
+19:35
+current cycle is and there you go boom
+19:38
+we're at cycle one so the first round
+19:40
+has officially
+19:42
+started now we should all be good to run
+19:46
+our front end and back end head over
+19:49
+back to the code base in the root
+19:52
+directory we can do a simple yarn Dev
+19:56
+this through turbo will be able to spin
+19:58
+up both the front end and the back end
+20:00
+that are pointing to our freshly
+20:02
+deployed smart
+20:05
+contracts so as you can see in parallel
+20:08
+both the front end through the Vite
+20:10
+framework and the back end through an
+20:13
+Express node.js framework are running so
+20:17
+we can now head over to Local Host 882
+20:20
+whereby our front end is running there
+20:22
+you go and let's try and add our
+20:28
+received
+20:30
+again as you can see the request has
+20:33
+been correctly sent and the backend has
+20:37
+already replied in fact AI says that
+20:40
+it's not
+20:43
+working now let's look exactly at what
+20:47
+is happening behind the scenes on our
+20:50
+back end to do so I'll be using another
+20:53
+IDE called intellig to be able to be to
+20:56
+be able to debug you can also do that
+20:58
+with virtual with Visual Studio codee
+21:00
+but I prefer intellig J for uh debugging
+21:02
+back ends in general so let's head over
+21:06
+to um our root we can cancel the uh
+21:12
+process running with contrl C now let's
+21:15
+only run our front end so at CD apps
+21:18
+front end we are on dev
+21:21
+again and if we go to intellig we can
+21:23
+now head over to the package Json
+21:29
+of the back
+21:31
+end there you go and here we have yarn
+21:36
+Dev let's run yarn Dev in debug
+21:40
+mode inside the back end you have a
+21:44
+controller called the submission
+21:46
+controller here you can see the
+21:48
+controller as your uh first visit for
+21:53
+the requests coming from the front end
+21:55
+in particular you have submit receipt
+21:57
+which is the controller of the business
+21:59
+logic in terms of where to send the flow
+22:03
+of validation in fact let's see exactly
+22:06
+what's happening behind the scenes again
+22:08
+let me send a
+22:11
+receipt and here we go so in debugger in
+22:14
+debug mode of intell J we can go step by
+22:17
+step into what's happening with our uh
+22:21
+submission from the front
+22:22
+end so the front end as you can see is
+22:26
+sending in the uh rest uh post HTTP body
+22:32
+the address a capture token a device ID
+22:35
+and the image which is encoded in base
+22:38
+64 all of this is uh formatted through
+22:41
+the front end and business logic that is
+22:44
+already implemented in the front end
+22:46
+once that is pared we then check if the
+22:50
+capture is valid capture validation is
+22:53
+very important because it allows uh us
+22:56
+to limit the ways Bad actors are able to
+22:59
+contact directly our backend uh kind of
+23:02
+forcing them to go through the front end
+23:04
+this is very important in applications
+23:06
+whereby for example you are forcing the
+23:08
+user to use the front end taking a photo
+23:10
+and not updating a invalid photo or fake
+23:14
+receipt in this case so for our example
+23:18
+whereby we are uploading it through our
+23:20
+file system this is just for demo
+23:22
+purposes but in a real world environment
+23:24
+for example the application that rewards
+23:26
+you for drinking coffee with reusable
+23:29
+mugs called mugshot it forces the user
+23:31
+to use the mobile application whereby um
+23:34
+users have to take an actual photo in
+23:37
+real
+23:38
+time now the submission request here is
+23:41
+then passed again and we go and validate
+23:44
+the submission in this case we're
+23:45
+checking if the user has reached the
+23:47
+maximum submissions so it calls is user
+23:50
+Max submissions reached
+23:54
+function and then the return value is
+23:57
+false so the user has not reached his
+23:59
+maximum submissions and now we call
+24:02
+validate image validate image is a
+24:06
+helper utility function inside the open
+24:09
+AI service you can find in the back end
+24:11
+and the prompt is very simple it asks
+24:14
+open AI in particular to check if the
+24:17
+receipt has um the element of purchase
+24:20
+of at least one product it is not a
+24:21
+screenshot and must include the date of
+24:23
+purchase it must also include the store
+24:25
+where the purchase was made these are
+24:27
+very simple uh prompts and should not be
+24:30
+used in real world environment if you
+24:33
+want to go live but it's just for demo
+24:35
+purposes also every configuration
+24:37
+environment variable um is specified
+24:41
+both in the environment variable
+24:42
+examples and also in the readme of the
+24:45
+repository now back to the controller
+24:47
+what we can see here is that the
+24:49
+validity factor is zero and that's
+24:52
+exactly what we asked openi to send us a
+24:54
+validity factor of the submission if the
+24:57
+validity Factor was one then we would go
+25:00
+and register the submission by calling
+25:03
+that famous method we stated before
+25:05
+initially when talking about ecrement
+25:07
+contract the register valid submission
+25:10
+whereby we specify the submission
+25:12
+address who is the participant and also
+25:14
+the amount to reward in this case we are
+25:17
+passing the reward amount um fetching it
+25:20
+from the environment variables that is
+25:22
+one better uh into hexadecimal uh
+25:26
+representation now let's continue and
+25:29
+the back endend sent to the frontend the
+25:31
+request with the analysis from
+25:37
+AI last but not least let's have a quick
+25:40
+look at our front end this is very very
+25:43
+simple um it's a react application built
+25:47
+uh using the Vite framework it has a
+25:50
+couple of utility methods such as the
+25:53
+the device ID I mentioned previously and
+25:55
+the um compression plus conversion of an
+25:59
+image to the base 64 encoding format and
+26:04
+a series of also utilities such as
+26:07
+networking for submitting the receipt
+26:09
+some hooks around um persistence State
+26:13
+Management submission management and
+26:16
+also some front-end components that are
+26:18
+reusable uh remember the front end is
+26:22
+the key visit for any user so let's try
+26:27
+our best to keep it simple
+26:28
+but at the same
+26:30
+[Music]
+26:31
+time sorry uh we have some motorcycle
+26:35
+enthusiasts in the background I was
+26:37
+saying let's try and keep it simple easy
+26:39
+to understand from the user but also uh
+26:44
+make make it as seamless as possible our
+26:47
+intent is to diminish as many
+26:51
+interactions possible to be able to
+26:53
+submit their sustainable action
+26:56
+otherwise it becomes frustrating because
+26:59
+not always even the submission itself is
+27:02
+able to be validated so keeping it
+27:05
+simple for the user is key to this kind
+27:08
+of application now one thing you can
+27:10
+notice in this type of application is
+27:13
+that there are no transactions being
+27:15
+signed on the application front end
+27:18
+itself if your application is and
+27:21
+requires transactions to be signed on
+27:23
+the front end all you have to do is head
+27:26
+back to the V better Dow docs so docs.
+27:30
+v.org
+27:33
+and um see the integration example
+27:36
+number one in this case you have the use
+27:40
+only smart contracts so the front end
+27:42
+will also require the user to sign the
+27:45
+transaction if you need an example also
+27:47
+for a template starting point that is a
+27:50
+lot simpler than the one that we just
+27:53
+went through you can again go to your
+27:56
+terminal and
+27:58
+look for yarn or npm so let's go with
+28:02
+mpm create vchain Das
+28:06
+dap this then prompts you with a wizard
+28:10
+that allows you to clone the xop
+28:12
+template we've seen or also a react dap
+28:15
+template a lot simpler in U terms of
+28:18
+code based terms with a front end and
+28:22
+some smart contracts with also the
+28:24
+possibility to make transactions from
+28:26
+the front end itself using VOR the app
+28:30
+template we went through instead
+28:32
+performs the transactions for the user
+28:34
+on the backend service now that's
+28:37
+everything you need to know about the
+28:39
+xter app template obviously there's a
+28:43
+lot more inside the code base but I'm
+28:45
+sure you really have fun looking at it
+28:48
+and building maybe the future of finance
+28:51
+and sustainability who knows again if
+28:54
+you need any help on our side feel free
+28:57
+to join our
+28:58
+Community uh below v.org you can find
+29:02
+all the links uh that uh allow you to
+29:06
+join our community and even our Dev
+29:08
+channels including Discord and
+29:10
+telegram so developers fellow developers
+29:14
+please have fun building this which is
+29:16
+the most important thing and let's hope
+29:18
+you we'll see you one day inside the V
+29:21
+better DOW market place itself thank you

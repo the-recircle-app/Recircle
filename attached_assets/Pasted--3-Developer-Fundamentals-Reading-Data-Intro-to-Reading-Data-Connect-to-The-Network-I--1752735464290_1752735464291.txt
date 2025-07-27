@@ -1,0 +1,150 @@
+
+
+3. Developer Fundamentals
+
+Reading Data
+Intro to Reading Data
+
+Connect to The Network
+
+I. Read Blocks
+
+II. Read Transactions
+
+III. Read Accounts
+
+IV. States & Views
+
+V. Events & Logs
+
+VI. VET Transfers
+
+Writing Data
+Intro to Writing Data
+
+I. Transactions
+
+II. Fee Delegation
+
+Listening to Changes
+Intro to Listening to Changes
+
+I. Events
+
+II. VET Transfers
+
+III. Transaction Log
+
+IV. Blocks
+
+V. Beats
+
+
+
+
+
+W
+W
+Interacting with VeChainThor requires only an instance of ThorClient that is configured for the relevant network. 
+
+
+
+Before continuing with this course, you must understand how to establish a connection with either the Mainnet or Testnet.
+
+
+
+Once the connection is established, this instance can be utilized to interact asynchronously. Below is a snippet that demonstrates importing the library and initializing a client:
+
+code editor
+import { ThorClient } from "@vechain/sdk-network";
+const thor = ThorClient.at("https://mainnet.vechain.org");
+The snippet connects to the Mainnet, where all production-related activity is found.
+
+In addition to the Mainnet, VeChain provides a Testnet for testing and development purposes. This allows developers to experiment safely without risking real assets.
+
+
+
+To connect to the Testnet, use the following endpoint:
+
+code editor
+const thorTestnet = ThorClient.at("https://testnet.vechain.org");
+For additional Testnet setup instructions, visit the VeChain Testnet Portal. There, you can:
+
+
+
+Access the API documentation for interacting with the Testnet
+
+Obtain test VET for simulating transactions
+
+Remember to set up your VeWorld wallet to claim Testnet tokens
+
+Explore available blockchain data for testing smart contracts
+
+If you have deployed a solo node of VeChain, it is normally available on http://localhost:8669
+
+The ThorClient uses an HttpClient underneath to communicate with the VeChain nodes with a REST API.
+
+
+
+The default HttpClient is a Fetch implementation and can be replaced with any custom implementation as long as the interfaces are met.
+
+To test the connectivity, you'll request the first and last block from the chain and output their number & id:
+
+code editor
+// get the current latest & best block from the chain
+const bestBlock = await thor.blocks.getBestBlockCompressed();
+console.log("Best Block:", bestBlock?.number, bestBlock?.id);
+
+// get the first and genesis block from the chain
+const genesisBlock = await thor.blocks.getBlockCompressed(0);
+console.log("Genesis Block:", genesisBlock?.number, genesisBlock?.id);
+Test It Yourself
+The snippet below shows how you can connect to the VeChain Mainnet to test connectivity:
+
+code editor
+import { ThorClient } from '@vechain/sdk-network';
+const nodeUrl = 'https://mainnet.vechain.org';
+
+console.log('Connecting to', nodeUrl);
+const thor = ThorClient.at(nodeUrl);
+
+const bestBlock = await thor.blocks.getBestBlockCompressed();
+const genesisBlock = await thor.blocks.getBlockCompressed(0);
+
+console.table(
+  [
+    { Block: 'Genesis', ...genesisBlock },
+    { Block: 'Best', ...bestBlock },
+  ],
+  ['Block', 'number', 'id']
+);
+Alternatively, you can see how this code snippet works on StackBlitz
+
+Check how it works
+
+Complete task
+The ThorClient provides a multitude of properties with access to all relevant functionality on VeChain. 
+
+You can find examples and details about all of them in the ThorClient docs:
+
+Go to VeChain Documentation
+
+Complete task
+Which of the following are valid ways to interact with the VeChainThor blockchain? 
+(Select two correct answers)
+
+
+Test 1: Multiple Choice
+
+
+
+
+What does the ThorClient use to communicate with VeChain nodes?
+
+
+Test 2: Single Choice
+
+
+
+
+Next Lesson

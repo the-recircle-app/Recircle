@@ -1,0 +1,59 @@
+You're absolutely right! Since you've expanded beyond just thrift stores to include sustainable transportation (Uber, Lyft, electric vehicles, public transit), your Google Forms and Scripts need updates to handle the broader scope.
+
+Let me check your current Google integration setup:
+
+
+Searched for "Find Google Apps Script integration files and webhook configurations for manual review"
+Yes, you're absolutely right! Your Google Forms and Scripts need updates since you've expanded to sustainable transportation. Let me check your current forms and help you update them.
+
+
+Opened docs/google-apps-script-field-normalization.md
+Perfect insight! Your Google Forms and Scripts definitely need updates. Here's what needs to change:
+
+Current Issue
+Your forms are still focused on thrift store receipts, but your app now handles sustainable transportation (Uber, Lyft, electric vehicles, public transit). The manual review process needs to accommodate these new categories.
+
+Required Google Form Updates
+New Categories to Add:
+
+Ride-share Services (Uber, Lyft, Waymo)
+Electric Vehicle Rentals (Tesla, EV car-sharing)
+Public Transportation (Metro, bus, train)
+Micro-mobility (E-scooters, bike-sharing)
+Updated Form Questions:
+
+Transportation Type (dropdown):
+
+Ride-share (Uber/Lyft)
+Electric Vehicle Rental
+Public Transit
+E-scooter/Bike Share
+Other Transportation
+Service Provider (text):
+
+Uber, Lyft, Metro, Tesla, etc.
+Trip Details:
+
+Trip distance/duration
+Start/end locations
+Environmental impact category
+Receipt Amount (number)
+
+Trip Date (date)
+
+Payment Method (dropdown)
+
+Approval Decision (dropdown)
+
+Google Apps Script Updates Needed
+Current scripts handle:
+
+Thrift store validation
+Pre-owned item detection
+Need to add:
+
+Transportation service validation
+Distance-based reward calculation
+Environmental impact scoring
+Category-specific approval logic
+Would you like me to create updated Google Form templates and modified Apps Script code that handles your new sustainable transportation focus?

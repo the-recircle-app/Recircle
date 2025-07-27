@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple VeWorld Test</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #000; color: #fff; }
+        .status { margin: 10px 0; padding: 10px; background: #333; border-radius: 5px; }
+        .success { background: #2d5a2d; }
+        .error { background: #5a2d2d; }
+        button { padding: 15px 30px; font-size: 18px; margin: 10px; }
+    </style>
+</head>
+<body>
+    <h1>VeWorld Direct Test</h1>
+    <div id="results"></div>
+    <button onclick="testAll()">Test Everything</button>
+    
+    <script>
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.textContent = message;
+            document.getElementById('results').appendChild(div);
+            console.log(message);
+        }
+        
+        function testAll() {
+            document.getElementById('results').innerHTML = '';
+            
+            log('=== VeWorld Direct Test ===');
+            log('URL: ' + window.location.href);
+            log('Domain: ' + window.location.hostname);
+            log('Is .replit.app domain: ' + window.location.hostname.includes('replit.app'));
+            log('User Agent: ' + navigator.userAgent);
+            
+            // Check all possible VeChain objects
+            log('window.vechain: ' + typeof window.vechain);
+            log('window.connex: ' + typeof window.connex);
+            log('window.ethereum: ' + typeof window.ethereum);
+            log('window.web3: ' + typeof window.web3);
+            
+            // Check for any object that might be VeChain related
+            const allKeys = Object.keys(window);
+            const vechainKeys = allKeys.filter(key => 
+                key.toLowerCase().includes('vechain') || 
+                key.toLowerCase().includes('connex') ||
+                key.toLowerCase().includes('thor') ||
+                key.toLowerCase().includes('vet')
+            );
+            log('VeChain-related keys: ' + JSON.stringify(vechainKeys));
+            
+            // If VeWorld provider exists, try to connect
+            if (window.vechain) {
+                log('✅ VeWorld provider found!', 'success');
+                testVeWorldConnection();
+            } else if (window.connex) {
+                log('✅ Connex provider found!', 'success');
+                testConnexConnection();
+            } else {
+                log('❌ No VeChain provider found', 'error');
+                log('This means VeWorld is not injecting providers into this domain', 'error');
+            }
+        }
+        
+        async function testVeWorldConnection() {
+            try {
+                const accounts = await window.vechain.request({ method: 'eth_requestAccounts' });
+                log('✅ VeWorld connection successful! Address: ' + accounts[0], 'success');
+            } catch (err) {
+                log('❌ VeWorld connection failed: ' + err.message, 'error');
+            }
+        }
+        
+        async function testConnexConnection() {
+            try {
+                const result = await window.connex.vendor.sign('cert', {
+                    purpose: 'identification',
+                    payload: { type: 'text', content: 'Test connection' }
+                }).request();
+                log('✅ Connex connection successful! Address: ' + result.annex.signer, 'success');
+            } catch (err) {
+                log('❌ Connex connection failed: ' + err.message, 'error');
+            }
+        }
+        
+        // Auto-run test
+        setTimeout(testAll, 500);
+    </script>
+</body>
+</html>

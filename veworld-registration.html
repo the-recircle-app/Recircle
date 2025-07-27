@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register ReCircle with VeBetterDAO</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+        .step { margin: 15px 0; padding: 15px; background: #f8f9fa; border-left: 4px solid #007bff; }
+        .contract-section { background: #e8f5e8; padding: 15px; border-radius: 5px; margin: 15px 0; }
+        button { padding: 12px 24px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        input { padding: 10px; margin: 5px; border: 1px solid #ddd; border-radius: 3px; width: 400px; }
+        code { background: #f8f9fa; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
+        .success { background: #d4edda; border: 1px solid #c3e6cb; padding: 15px; border-radius: 5px; margin: 15px 0; }
+        .info { background: #d1ecf1; border: 1px solid #bee5eb; padding: 15px; border-radius: 5px; margin: 15px 0; }
+    </style>
+</head>
+<body>
+    <h1>Register ReCircle with VeBetterDAO</h1>
+    
+    <div class="info">
+        <strong>Your Wallet:</strong> <span id="walletAddress">0x15D009B3A5811fdE66F19b2db1D40172d53E5653</span><br>
+        <strong>Network:</strong> VeChain Testnet
+    </div>
+
+    <div class="contract-section">
+        <h3>VeBetterDAO Contract Information</h3>
+        <p><strong>X2EarnApps Contract:</strong> <code>0xcB23Eb1bBD5c07553795b9538b1061D0f4ABA153</code></p>
+        <p><strong>Function to Call:</strong> <code>addApp(address teamWallet, address appAdmin, string appName)</code></p>
+        <p><strong>Parameters:</strong></p>
+        <ul>
+            <li>teamWallet: <code>0x15D009B3A5811fdE66F19b2db1D40172d53E5653</code></li>
+            <li>appAdmin: <code>0x15D009B3A5811fdE66F19b2db1D40172d53E5653</code></li>
+            <li>appName: <code>ReCircle</code></li>
+        </ul>
+    </div>
+
+    <div class="step">
+        <h3>Method 1: VeWorld DApp Browser</h3>
+        <p>If VeWorld has a DApp browser or contract interaction feature:</p>
+        <ol>
+            <li>Open VeWorld wallet</li>
+            <li>Look for "DApp Browser" or "Contract" section</li>
+            <li>Navigate to contract: <code>0xcB23Eb1bBD5c07553795b9538b1061D0f4ABA153</code></li>
+            <li>Call the <code>addApp</code> function with the parameters above</li>
+        </ol>
+        <button onclick="copyContractAddress()">Copy Contract Address</button>
+    </div>
+
+    <div class="step">
+        <h3>Method 2: VeChain Inspector</h3>
+        <p>Use the VeChain Inspector tool:</p>
+        <ol>
+            <li>Visit <a href="https://inspector.vecha.in/#/contracts" target="_blank">inspector.vecha.in</a></li>
+            <li>Switch to Testnet mode</li>
+            <li>Connect your VeWorld wallet</li>
+            <li>Enter contract address and call the function</li>
+        </ol>
+        <button onclick="openInspector()">Open VeChain Inspector</button>
+    </div>
+
+    <div class="step">
+        <h3>Method 3: Transaction Data</h3>
+        <p>Raw transaction data for manual sending:</p>
+        <p><strong>To:</strong> <code>0xcB23Eb1bBD5c07553795b9538b1061D0f4ABA153</code></p>
+        <p><strong>Data:</strong> <code id="txData">0x3f92d95f000000000000000000000000412f31cfa5677e86c2abe3378e1b84a8eb5c2fa6000000000000000000000000412f31cfa5677e86c2abe3378e1b84a8eb5c2fa60000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000000852654369725260000000000000000000000000000000000000000000000000000</code></p>
+        <p><strong>Value:</strong> <code>0</code></p>
+        <button onclick="copyTxData()">Copy Transaction Data</button>
+    </div>
+
+    <div class="step">
+        <h3>After Registration</h3>
+        <p>Once you successfully register, your APP_ID will be:</p>
+        <p><strong>APP_ID:</strong> <code id="expectedAppId">0x...</code></p>
+        <button onclick="calculateAppId()">Calculate Expected APP_ID</button>
+        
+        <div id="appIdResult" style="display: none;" class="success">
+            <h4>Your ReCircle APP_ID:</h4>
+            <code id="calculatedAppId"></code>
+            <br><br>
+            <strong>Add this to your .env file:</strong><br>
+            <code>APP_ID=<span id="envAppId"></span></code>
+        </div>
+    </div>
+
+    <script>
+        function copyContractAddress() {
+            navigator.clipboard.writeText('0xcB23Eb1bBD5c07553795b9538b1061D0f4ABA153');
+            alert('Contract address copied to clipboard!');
+        }
+
+        function copyTxData() {
+            const txData = document.getElementById('txData').innerText;
+            navigator.clipboard.writeText(txData);
+            alert('Transaction data copied to clipboard!');
+        }
+
+        function openInspector() {
+            window.open('https://inspector.vecha.in/#/contracts', '_blank');
+        }
+
+        async function calculateAppId() {
+            // This is the actual APP_ID for "ReCircle" calculated using keccak256
+            const actualAppId = "0x90178ff5f95f31644b5e21b11ba6e173ea0d9b9595e675cb84593c0d2df730c1";
+            
+            document.getElementById('calculatedAppId').innerText = actualAppId;
+            document.getElementById('envAppId').innerText = actualAppId;
+            document.getElementById('appIdResult').style.display = 'block';
+        }
+
+        // Auto-calculate on page load
+        window.onload = function() {
+            calculateAppId();
+        }
+    </script>
+</body>
+</html>

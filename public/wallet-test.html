@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VeWorld Wallet Test (Pure HTML)</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+      background-color: #121212;
+      color: #e0e0e0;
+    }
+    h1 {
+      color: #fafafa;
+      border-bottom: 1px solid #333;
+      padding-bottom: 10px;
+    }
+    button {
+      background: #4CAF50;
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+    button:disabled {
+      background: #555555;
+      color: #999999;
+    }
+    pre {
+      background: #1e1e1e;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+      color: #66c0f4;
+    }
+    .connected {
+      background: #0a2f1c;
+      border: 1px solid #1e573a;
+      padding: 15px;
+      border-radius: 4px;
+      margin: 20px 0;
+    }
+    .logs {
+      background: #000;
+      color: #00ff00;
+      padding: 10px;
+      border-radius: 4px;
+      height: 300px;
+      overflow-y: auto;
+      margin-top: 20px;
+      font-family: monospace;
+    }
+    .error {
+      color: #ff6b6b;
+      margin: 10px 0;
+    }
+    .panel {
+      background: #1e1e1e;
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 4px;
+    }
+    .success {
+      color: #4CAF50;
+    }
+    .warning {
+      color: #ff9800;
+    }
+    .danger {
+      color: #f44336;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .status-item {
+      padding: 8px;
+      border-radius: 4px;
+      margin-bottom: 5px;
+    }
+    .status-label {
+      color: #999;
+      font-weight: bold;
+    }
+    .banner {
+      padding: 10px 15px;
+      margin: 15px 0;
+      border-radius: 4px;
+      border-left: 4px solid #6c757d;
+      background-color: #2d3748;
+    }
+    .info-banner {
+      border-left-color: #3498db;
+      background-color: #1e3a5f;
+    }
+  </style>
+</head>
+<body>
+  <h1>VeWorld Wallet Test (Static HTML)</h1>
+  
+  <div class="banner info-banner">
+    <p>This page is a simple static HTML test for VeWorld wallet connection. It doesn't require React or any framework to function.</p>
+  </div>
+  
+  <div class="panel" id="env-info">
+    <h2>Environment Info</h2>
+    <div class="grid">
+      <div>
+        <div class="status-item">
+          <div class="status-label">URL</div>
+          <div id="current-url"></div>
+        </div>
+        <div class="status-item">
+          <div class="status-label">Protocol</div>
+          <div id="protocol"></div>
+        </div>
+        <div class="status-item">
+          <div class="status-label">User Agent</div>
+          <div id="user-agent"></div>
+        </div>
+      </div>
+      <div>
+        <div class="status-item">
+          <div class="status-label">window.connex</div>
+          <div id="connex-status"></div>
+        </div>
+        <div class="status-item">
+          <div class="status-label">window.connex.thor</div>
+          <div id="thor-status"></div>
+        </div>
+        <div class="status-item">
+          <div class="status-label">VeWorld Detected</div>
+          <div id="veworld-status"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="panel" id="connect-section">
+    <h2>Connect Wallet</h2>
+    <button id="connect-btn">Connect VeWorld Wallet</button>
+    <div id="error" class="error"></div>
+  </div>
+  
+  <div id="wallet-info" class="connected" style="display: none;">
+    <h2>Connected Wallet</h2>
+    <p id="wallet-address"></p>
+    <button id="disconnect-btn">Disconnect</button>
+  </div>
+  
+  <div class="logs" id="logs">
+    <div>Logs will appear here...</div>
+  </div>
+
+  <script>
+    // Log function
+    function log(message) {
+      const timestamp = new Date().toLocaleTimeString();
+      const logEl = document.getElementById('logs');
+      const entry = document.createElement('div');
+      entry.textContent = `${timestamp}: ${message}`;
+      logEl.appendChild(entry);
+      logEl.scrollTop = logEl.scrollHeight;
+      console.log(message);
+    }
+
+    // Update the status indicator
+    function updateStatus(elementId, value, isBoolean = false) {
+      const element = document.getElementById(elementId);
+      
+      if (isBoolean) {
+        element.textContent = value ? "Yes ✓" : "No ✗";
+        element.className = value ? "success" : "danger";
+      } else {
+        element.textContent = value;
+      }
+    }
+
+    // Display environment info
+    function showEnvInfo() {
+      const url = window.location.href;
+      const protocol = window.location.protocol;
+      const userAgent = navigator.userAgent;
+      const hasConnex = typeof window.connex !== 'undefined';
+      const hasThor = hasConnex && typeof window.connex.thor !== 'undefined';
+      const isVeWorld = userAgent.includes("vechain") || userAgent.includes("VeWorld");
+      
+      // Update status indicators
+      updateStatus("current-url", url);
+      updateStatus("protocol", protocol);
+      updateStatus("user-agent", userAgent);
+      updateStatus("connex-status", hasConnex, true);
+      updateStatus("thor-status", hasThor, true);
+      updateStatus("veworld-status", isVeWorld, true);
+      
+      log(`Page loaded with readyState: ${document.readyState}`);
+      log(`URL: ${url}`);
+      log(`Protocol: ${protocol}`);
+      log(`User Agent: ${userAgent}`);
+      log(`window.connex available: ${hasConnex}`);
+      log(`window.connex.thor available: ${hasThor}`);
+      log(`VeWorld detected: ${isVeWorld}`);
+      
+      // Enable/disable connect button based on connex availability
+      document.getElementById('connect-btn').disabled = !hasConnex;
+    }
+
+    // Connect to wallet
+    async function connectWallet() {
+      const connectBtn = document.getElementById('connect-btn');
+      const errorEl = document.getElementById('error');
+      
+      connectBtn.disabled = true;
+      errorEl.textContent = '';
+      log('Connect button clicked');
+      
+      try {
+        if (!window.connex) {
+          log('No window.connex available');
+          errorEl.textContent = 'VeWorld wallet not detected. Please use VeWorld browser.';
+          connectBtn.disabled = false;
+          return;
+        }
+        
+        log('window.connex is available');
+        
+        if (!window.connex.thor) {
+          log('window.connex.thor is not available');
+          errorEl.textContent = 'VeWorld Thor not available. Please check your browser.';
+          connectBtn.disabled = false;
+          return;
+        }
+        
+        log('Calling window.connex.thor.account.getSelected()');
+        const account = await window.connex.thor.account.getSelected();
+        
+        if (account && account.address) {
+          const address = account.address;
+          log(`Wallet connected: ${address}`);
+          
+          // Show wallet info
+          document.getElementById('wallet-address').textContent = address;
+          document.getElementById('wallet-info').style.display = 'block';
+          document.getElementById('connect-section').style.display = 'none';
+          
+          // Save to localStorage
+          localStorage.setItem('static_wallet', address);
+        } else {
+          log('No account selected');
+          errorEl.textContent = 'No wallet selected. Please select your wallet in VeWorld.';
+        }
+      } catch (err) {
+        log(`Error: ${err.message || String(err)}`);
+        errorEl.textContent = 'Connection failed. See logs for details.';
+      } finally {
+        connectBtn.disabled = false;
+      }
+    }
+
+    // Disconnect wallet
+    function disconnectWallet() {
+      localStorage.removeItem('static_wallet');
+      document.getElementById('wallet-info').style.display = 'none';
+      document.getElementById('connect-section').style.display = 'block';
+      log('Wallet disconnected');
+    }
+
+    // Check for connex periodically
+    function startConnexCheck() {
+      log('Starting connex availability check');
+      let checkCount = 0;
+      
+      const intervalId = setInterval(() => {
+        const hasConnex = typeof window.connex !== 'undefined';
+        const hasThor = hasConnex && typeof window.connex.thor !== 'undefined';
+        
+        checkCount++;
+        
+        // Update the UI
+        updateStatus("connex-status", hasConnex, true);
+        updateStatus("thor-status", hasThor, true);
+        
+        // Enable/disable connect button
+        document.getElementById('connect-btn').disabled = !hasConnex;
+        
+        if (hasConnex && hasThor) {
+          log('✓ Connex and Thor detected!');
+          clearInterval(intervalId);
+        } else if (checkCount % 5 === 0) {
+          log(`Still waiting for connex... (${checkCount} checks)`);
+        }
+        
+        // Give up after 60 seconds
+        if (checkCount > 60) {
+          log('Giving up on automatic connex detection after 60 checks');
+          clearInterval(intervalId);
+        }
+      }, 1000);
+    }
+
+    // Initialize
+    function init() {
+      // Check if wallet is already connected
+      const savedWallet = localStorage.getItem('static_wallet');
+      if (savedWallet) {
+        log(`Found saved wallet: ${savedWallet}`);
+        document.getElementById('wallet-address').textContent = savedWallet;
+        document.getElementById('wallet-info').style.display = 'block';
+        document.getElementById('connect-section').style.display = 'none';
+      }
+      
+      // Show environment info
+      showEnvInfo();
+      
+      // Start checking for connex
+      startConnexCheck();
+      
+      // Add event listeners
+      document.getElementById('connect-btn').addEventListener('click', connectWallet);
+      document.getElementById('disconnect-btn').addEventListener('click', disconnectWallet);
+      
+      log('Page initialization complete');
+    }
+
+    // Run init on DOMContentLoaded
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  </script>
+</body>
+</html>

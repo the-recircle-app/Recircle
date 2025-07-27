@@ -1,0 +1,142 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles for input contrast fixes */
+.stores-search-input::placeholder {
+  color: #454545 !important;
+  opacity: 1 !important;
+  font-weight: 500 !important;
+}
+
+.stores-search-input:-ms-input-placeholder {
+  color: #454545 !important;
+  opacity: 1 !important;
+  font-weight: 500 !important;
+}
+
+.stores-search-input::-ms-input-placeholder {
+  color: #454545 !important;
+  opacity: 1 !important;
+  font-weight: 500 !important;
+}
+
+@keyframes shrink {
+  0% {
+    width: 100%;
+  }
+  100% {
+    width: 0%;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+}
+
+/* Animation for token rewards */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.reward-item {
+  animation: fadeIn 0.3s ease-out forwards;
+  opacity: 0;
+}
+
+.reward-item:nth-child(1) { animation-delay: 0.1s; }
+.reward-item:nth-child(2) { animation-delay: 0.2s; }
+.reward-item:nth-child(3) { animation-delay: 0.3s; }
+.reward-item:nth-child(4) { animation-delay: 0.4s; }
+
+@keyframes sparkle {
+  0% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.7; }
+}
+
+.sparkle-icon {
+  animation: sparkle 1.5s ease-in-out infinite;
+}
+
+.animate-spin-slow {
+  animation: spin 8s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+  
+  /* Eco-friendly and hipster styles */
+  .eco-card {
+    @apply bg-white border border-green-100 rounded-lg shadow-sm hover:shadow-md transition-all duration-300;
+  }
+  
+  .eco-gradient-text {
+    @apply bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent font-bold;
+  }
+  
+  /* Sustainability sections */
+  .sustainability-gradient {
+    @apply bg-gradient-to-r from-green-400 to-emerald-600 bg-clip-text text-transparent font-bold;
+  }
+  
+  .paper-texture {
+    background-color: #f8f7f3;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%23a4a196' fill-opacity='0.07' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'%3E%3C/path%3E%3C/svg%3E");
+  }
+  
+  .leaf-accent {
+    @apply relative;
+  }
+  
+  .leaf-accent::before {
+    content: '🍃';
+    @apply absolute -top-2 -right-2 opacity-70 text-base transform rotate-45;
+  }
+  
+  /* B3tr Token Symbol Styles */
+  .b3tr-symbol {
+    @apply inline-flex items-center justify-center text-center font-bold;
+    font-family: 'Courier New', monospace;
+  }
+  
+  .b3tr-symbol:before {
+    content: 'ᛒ';
+    @apply mr-0.5 text-primary font-bold;
+  }
+
+  /* Fixes for Toast notifications */
+  .fixed-position {
+    transform: translateZ(0); /* Force GPU acceleration */
+    will-change: transform; /* Hint to browser about animation */
+    position: relative;
+    backface-visibility: hidden; /* Prevents layering issues */
+  }
+}

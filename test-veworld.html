@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>VeWorld Connex Test</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <h1>VeWorld Connex Test</h1>
+    <div id="status"></div>
+    <button id="testButton" onclick="testConnex()">Test Connex</button>
+    
+    <script>
+        function updateStatus(message) {
+            document.getElementById('status').innerHTML += message + '<br>';
+            console.log(message);
+        }
+        
+        function testConnex() {
+            updateStatus('=== VeWorld Connex Test ===');
+            updateStatus('User Agent: ' + navigator.userAgent);
+            updateStatus('Window.connex available: ' + typeof window.connex);
+            
+            // Check all window properties for VeChain related objects
+            const windowKeys = Object.keys(window);
+            const vechainKeys = windowKeys.filter(key => 
+                key.toLowerCase().includes('vechain') || 
+                key.toLowerCase().includes('connex') ||
+                key.toLowerCase().includes('thor')
+            );
+            updateStatus('VeChain-related window properties: ' + JSON.stringify(vechainKeys));
+            
+            if (typeof window.connex !== 'undefined') {
+                updateStatus('✅ Connex is available!');
+                updateStatus('Connex version: ' + window.connex.version);
+                updateStatus('Thor available: ' + typeof window.connex.thor);
+                updateStatus('Vendor available: ' + typeof window.connex.vendor);
+                
+                // Try to get accounts
+                try {
+                    window.connex.vendor.sign('cert', {
+                        purpose: 'identification',
+                        payload: {
+                            type: 'text',
+                            content: 'Test VeWorld connection'
+                        }
+                    }).request().then(result => {
+                        updateStatus('✅ Wallet connection successful!');
+                        updateStatus('Address: ' + result.annex?.signer);
+                    }).catch(err => {
+                        updateStatus('❌ Wallet connection failed: ' + err.message);
+                    });
+                } catch (error) {
+                    updateStatus('❌ Error testing wallet: ' + error.message);
+                }
+            } else {
+                updateStatus('❌ Connex is NOT available');
+                updateStatus('This may mean:');
+                updateStatus('1. Not using VeWorld browser');
+                updateStatus('2. VeWorld doesn\'t recognize this domain');
+                updateStatus('3. App needs to be deployed to proper domain');
+            }
+        }
+        
+        // Test immediately when page loads
+        setTimeout(testConnex, 1000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,303 @@
+
+VeChain Kit Docs
+Search...
+Ctrl
+K
+Resources
+Privy
+VeChain
+Changelog
+V2
+VeChain Kit
+Intro
+Quickstart
+Migrations
+Troubleshooting
+Connection Types
+Send Transactions
+Sign Messages
+Text Records (avatar & co.)
+Hooks
+Components
+Configs
+Utils
+Social Login
+Embedded Wallets
+Smart Accounts
+Fee Delegation
+Powered by GitBook
+Sign Message
+Sign Typed Data (EIP712)
+Certificate Signing
+Was this helpful?
+
+
+
+
+Edit on GitHub
+Export as PDF
+
+
+
+Copy
+
+VeChain Kit
+Sign Messages
+Sign Message
+Sign a string, eg "Hello VeChain", with the useSignMessage() hook.
+
+Copy
+'use client';
+
+import { ReactElement, useCallback } from 'react';
+import {
+    useSignMessage,
+} from '@vechain/vechain-kit';
+
+export function SigningExample(): ReactElement {
+    const {
+        signMessage,
+        isSigningPending: isMessageSignPending,
+        signature: messageSignature,
+    } = useSignMessage();
+
+   const handleSignMessage = useCallback(async () => {
+        try {
+            const signature = await signMessage('Hello VeChain!');
+            toast({
+                title: 'Message signed!',
+                description: `Signature: ${signature.slice(0, 20)}...`,
+                status: 'success',
+                duration: 1000,
+                isClosable: true,
+            });
+        } catch (error) {
+            toast({
+                title: 'Signing failed',
+                description:
+                    error instanceof Error ? error.message : String(error),
+                status: 'error',
+                duration: 1000,
+                isClosable: true,
+            });
+        }
+    }, [signMessage, toast]);
+
+    return (
+        <>
+            <button
+                onClick={handleSignTypedData}
+                isLoading={isTypedDataSignPending}
+            >
+                Sign Typed Data
+            </button>
+            {typedDataSignature && (
+                <h4>
+                    {typedDataSignature}
+                </h4>
+            )}
+        </>
+    );
+}
+Sign Typed Data (EIP712)
+Use the useSignTypedData() hook to sign structured data. 
+
+Copy
+'use client';
+
+import { ReactElement, useCallback } from 'react';
+import {
+    useWallet,
+    useSignTypedData,
+} from '@vechain/vechain-kit';
+
+// Example EIP-712 typed data
+const exampleTypedData = {
+    domain: {
+        name: 'VeChain Example',
+        version: '1',
+        chainId: 1,
+    },
+    types: {
+        Person: [
+            { name: 'name', type: 'string' },
+            { name: 'wallet', type: 'address' },
+        ],
+    },
+    message: {
+        name: 'Alice',
+        wallet: '0x0000000000000000000000000000000000000000',
+    },
+    primaryType: 'Person',
+};
+
+export function SigningTypedDataExample(): ReactElement {
+    const {
+        signTypedData,
+        isSigningPending: isTypedDataSignPending,
+        signature: typedDataSignature,
+    } = useSignTypedData();
+    
+    const { account } = useWallet()
+
+    const handleSignTypedData = useCallback(async () => {
+        try {
+            const signature = await signTypedData(exampleTypedData, {
+                signer: account?.address
+            });
+            alert({
+                title: 'Typed data signed!',
+                description: `Signature: ${signature.slice(0, 20)}...`,
+                status: 'success',
+                duration: 1000,
+                isClosable: true,
+            });
+        } catch (error) {
+            alert({
+                title: 'Signing failed',
+                description:
+                    error instanceof Error ? error.message : String(error),
+                status: 'error',
+                duration: 1000,
+                isClosable: true,
+            });
+        }
+    }, [signTypedData, toast, account]);
+
+    return (
+        <>
+            <button
+                onClick={handleSignTypedData}
+                isLoading={isTypedDataSignPending}
+            >
+                Sign Typed Data
+            </button>
+            {typedDataSignature && (
+                <h4>
+                    {typedDataSignature}
+                </h4>
+            )}
+        </>
+    );
+}
+Certificate Signing
+To authenticate users in your backend (BE) and issue them a JWT (JSON Web Token), you may need to check that the connected user actually holds the private keys of that wallet (assuring he is not pretending to be someone else). 
+
+The recommended approach is to use signTypedData to have the user sign a piece of structured data, ensuring the signed payload is unique for each authentication request.
+
+When using Privy the user owns a smart account (which is a smart contract), and he cannot directly sign a message with the smart account but needs to do it with his Embedded Wallet (the wallet created and secured by Privy). This means that when you verify identities of users connected with social login you will need to check that the address that signed the message is actually the owner of the smart account.
+
+Example usage
+SignatureWrapperProvider.tsx
+main.tsx
+useSignatureVerification.ts
+Backend Validation
+Create a provider that will handle the signature verification.
+
+Copy
+import { useSignatureVerification } from "../hooks/useSignatureVerification";
+import { Modal, ModalOverlay, ModalContent, VStack, Text, Spinner, Button } from "@chakra-ui/react";
+import { useTranslation } from "react-i18next";
+import { ReactNode, useEffect } from "react";
+import { useWallet } from "@vechain/vechain-kit";
+import { clearSignature, usePostUser } from "@/hooks";
+
+type Props = {
+  children: ReactNode;
+};
+
+export const SignatureVerificationWrapper = ({ children }: Props) => {
+  const { hasVerified, isVerifying, signature, verifySignature, value } = useSignatureVerification();
+  const { account } = useWallet();
+  const { t } = useTranslation();
+
+  const { mutate: postUser } = usePostUser();
+
+  useEffect(() => {
+    if (account?.address && !signature) {
+      verifySignature();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [account?.address, signature]);
+
+  useEffect(() => {
+    // If user signed the signature we call our backend endpoint
+    if (signature && value.user !== "" && value.timestamp !== "" && account?.address) {
+      // When you want to execute the mutation:
+      postUser({
+        address: account.address,
+        value: value,
+        signature: signature,
+      });
+    }
+  }, [signature, value, account?.address, postUser]);
+
+  // if user disconnects we clear the signature
+  useEffect(() => {
+    if (!account) {
+      clearSignature();
+    }
+  }, [account]);
+
+  // Only show the modal if we have an account connected AND haven't verified yet AND are not in the process of verifying
+  const showModal = !!account?.address && (!hasVerified || !signature);
+
+  return (
+    <>
+      {children}
+      <Modal isOpen={showModal} onClose={() => {}} isCentered closeOnOverlayClick={false}>
+        <ModalOverlay />
+        <ModalContent p={6}>
+          <VStack spacing={4}>
+            {isVerifying ? (
+              <>
+                <Spinner size="xl" color="primary.500" />
+                <Text textAlign="center" fontSize="lg">
+                  {t("Please sign the message to verify your wallet ownership")}
+                </Text>
+              </>
+            ) : (
+              <>
+                <Text textAlign="center" fontSize="lg">
+                  {t("Signature verification is mandatory to proceed. Please try again.")}
+                </Text>
+                <Button onClick={verifySignature} colorScheme="secondary">
+                  {t("Try Again")}
+                </Button>
+              </>
+            )}
+          </VStack>
+        </ModalContent>
+      </Modal>
+    </>
+  );
+};
+You should deprecate this:
+
+Copy
+import { useConnex } from '@vechain/vechain-kit';
+
+export default function Home(): ReactElement {
+    const connex = useConnex();
+
+    const handleSignWithConnex = () => {
+        connex.vendor.sign(    
+            'cert',
+            {
+                purpose: 'identification',
+                payload: {
+                    type: 'text',
+                    content: 'Please sign this message to connect your wallet.',
+                },
+            }
+        ).request();
+    }
+    
+    return <button onClick={handleSignWithConnex}> Sign </button>
+}
+Previous
+Send Transactions
+Next
+Text Records (avatar & co.)
+Last updated 4 months ago
+

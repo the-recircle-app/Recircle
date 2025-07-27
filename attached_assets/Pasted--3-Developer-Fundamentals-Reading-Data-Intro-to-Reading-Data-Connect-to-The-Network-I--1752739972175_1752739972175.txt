@@ -1,0 +1,125 @@
+
+
+3. Developer Fundamentals
+
+Reading Data
+Intro to Reading Data
+
+Connect to The Network
+
+I. Read Blocks
+
+II. Read Transactions
+
+III. Read Accounts
+
+IV. States & Views
+
+V. Events & Logs
+
+VI. VET Transfers
+
+Writing Data
+Intro to Writing Data
+
+I. Transactions
+
+II. Fee Delegation
+
+Listening to Changes
+Intro to Listening to Changes
+
+I. Events
+
+II. VET Transfers
+
+III. Transaction Log
+
+IV. Blocks
+
+V. Beats
+
+
+
+
+
+W
+W
+Gas fees are usually paid by the address that signs the transaction. VeChain's fee delegation allows you to pass on this payment to another wallet, which can either reside as a private key in your realm or be shielded by a web service.
+
+Fee delegation is particularly interesting for developers who want to make their dApps more user-friendly, as it removes the friction of transaction fees for end users.
+
+This functionality is part of VeChain's broader strategy to make blockchain adoption easier, especially for businesses and users who are not familiar with cryptocurrency.
+
+
+
+To use fee delegation, you need to:
+
+
+
+Enable it while building the transaction object
+
+Provide information about the Gas-Payer during transaction signing
+
+To enable fee delegation as a feature, you need to set isDelegated to true while building the transaction body:
+
+code editor
+const tx = await thor.transactions.buildTransactionBody(clauses, gas.totalGas,
+  { isDelegated: true }
+);
+To get the gas-payer involved, you'll pass either gasPayerPrivateKey or gasPayerServiceUrl to the signing wallet:
+
+code editor
+const walletWithUrlSponsor = new ProviderInternalBaseWallet(
+    [{privateKey, address: senderAddress}],
+    {
+        gasPayer: {
+            gasPayerServiceUrl: 'https://sponsor-testnet.vechain.energy/by/90',
+        },
+    }
+);
+
+const walletWithAccountSponsor = new ProviderInternalBaseWallet(
+    [{privateKey, address: senderAddress}],
+    {
+        gasPayer: {
+            gasPayerPrivateKey: gasPayerAccount.privateKey,
+        },
+    }
+);
+Example Project
+
+Complete task
+To shield your private key for paying gas fees into a backend service, you can set up a web service that receives a raw transaction and co-signs it to confirm gas payment (based on VIP-201).
+
+
+The process requires you to rebuild a transaction object from a hex-encoded version:
+
+code editor
+const transactionToSign = Transaction.decode(
+  HexUInt.of(req.body.raw).bytes
+);
+Afterwards, a unique hash is calculated for the given transaction, only valid if a specific origin will sign it:
+
+code editor
+const delegatedHash = transactionToSign.getTransactionHash(req.body.origin);
+The resulting hash is signed and then returned as a hex string for further processing on the client side:
+
+code editor
+const signature = HexUInt.of(Secp256k1.sign(delegatedHash, gasPayerPrivateKey)).toString();
+Example Project
+
+Complete task
+What does the web service return after co-signing the transaction?
+
+
+Test 1: Single Choice
+
+
+
+
+Select the correct parameter that enables fee delegation in the transaction.
+
+
+Test 2: Fill in the Blanks (Select From Options)
+Next Lesson

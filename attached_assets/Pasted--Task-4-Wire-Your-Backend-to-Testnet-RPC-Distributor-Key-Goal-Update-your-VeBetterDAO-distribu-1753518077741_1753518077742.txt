@@ -1,0 +1,67 @@
+🎯 Task 4: Wire Your Backend to Testnet RPC & Distributor Key
+Goal: Update your VeBetterDAO distribution logic so it uses the same Testnet JSON‑RPC provider and your DISTRIBUTOR_PRIVATE_KEY to sign real on‑chain B3TR distributions.
+
+Open server/utils/vebetterdao-rewards.ts in Replit.
+
+At the top, ensure you have these imports (add if missing):
+
+ts
+Copy
+Edit
+import { ethers } from "ethers";
+import RewardDistributorABI from "../abi/RewardDistributor.json"; // adjust path if needed
+Replace your existing provider & signer setup with exactly the following snippet before you instantiate or call the contract:
+
+ts
+Copy
+Edit
+// — Testnet JSON‑RPC provider with forced chain override —
+const provider = new ethers.providers.JsonRpcProvider(
+  process.env.VITE_RPC_URL,
+  {
+    name:    "vechain-testnet",
+    chainId: Number(process.env.VITE_CHAIN_ID),
+  }
+);
+
+// — Distributor wallet for signing reward txns —
+const distributorWallet = new ethers.Wallet(
+  process.env.DISTRIBUTOR_PRIVATE_KEY!,
+  provider
+);
+
+// — Reward Distributor contract instance —
+const rewardDistributor = new ethers.Contract(
+  process.env.VITE_REWARD_DISTRIBUTOR!,
+  RewardDistributorABI,
+  distributorWallet
+);
+Locate the code where you call the on‑chain distribute method (something like thor… or an old Connex call). Replace that section with:
+
+ts
+Copy
+Edit
+// Example: distributing reward to a single user
+const tx = await rewardDistributor.distributeRewardWithProofAndMetadata(
+  userAddress,      // the recipient’s address
+  proofBytes,       // your merkle proof or other proof data
+  metadataBytes,    // any metadata required
+  { gasLimit: 500_000 }
+);
+console.log("🥩 Sent B3TR distribution tx:", tx.hash);
+await tx.wait();
+console.log("✅ Distribution confirmed:", tx.hash);
+Save the file and Restart your Replit app (click Stop then Run).
+
+Verify
+
+In your Replit logs, you should see:
+
+yaml
+Copy
+Edit
+🥩 Sent B3TR distribution tx: 0x...
+✅ Distribution confirmed: 0x...
+No JSON‑RPC “failed to detect network” errors in the backend logs.
+
+Reply ✅ Task 4 complete once you see those real distributor tx hashes in your logs!
