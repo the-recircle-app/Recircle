@@ -1,0 +1,53 @@
+PS C:\Users\damia> docker ps
+CONTAINER ID   IMAGE                 COMMAND                  CREATED              STATUS              PORTS                                         NAMES
+e4eabf94e373   vechain/thor:latest   "thor solo --api-add…"   About a minute ago   Up About a minute   0.0.0.0:8669->8669/tcp, [::]:8669->8669/tcp   vechain-solo
+PS C:\Users\damia> curl http://localhost:8669/blocks/best
+
+
+StatusCode        : 200
+StatusDescription : OK
+Content           : {"number":10,"id":"0x0000000a5ff4991447bc365dcfbd7e2a674f82f8def272b4095247c8025c00dc","size":3
+                    64,"parentID":"0x000000097ec661eb47cdf904031b5fd81efa666519e6ed155343ac6439f47b28","timestamp":
+                    1753658760...
+RawContent        : HTTP/1.1 200 OK
+                    Vary: Accept-Encoding
+                    X-Genesis-Id: 0x00000000c05a20fbca2bf6ae3affba6af4a74b800b585bf7a4988aba7aea69f6
+                    X-Thorest-Ver: 2.3.1
+                    Content-Length: 720
+                    Content-Type: application/json; cha...
+Forms             : {}
+Headers           : {[Vary, Accept-Encoding], [X-Genesis-Id,
+                    0x00000000c05a20fbca2bf6ae3affba6af4a74b800b585bf7a4988aba7aea69f6], [X-Thorest-Ver, 2.3.1],
+                    [Content-Length, 720]...}
+Images            : {}
+InputFields       : {}
+Links             : {}
+ParsedHtml        : mshtml.HTMLDocumentClass
+RawContentLength  : 720
+
+
+
+PS C:\Users\damia> docker logs vechain-solo
+Starting Thor solo/v2.3.1-0551e43-release/linux/go1.24.5
+    Network      [ 0x00000000c05a20fbca2bf6ae3affba6af4a74b800b585bf7a4988aba7aea69f6 devnet ]
+    Best block   [ 0x00000000c05a20fbca2bf6ae3affba6af4a74b800b585bf7a4988aba7aea69f6 #0 @2018-05-15 16:00:00 +0000 UTC ]
+    Forks        [ VIP191: #0, ETH_CONST: #0, BLOCKLIST: #0, ETH_IST: #0, VIP214: #0, FINALITY: #0, GALACTICA: #1 ]
+    Instance dir [ Memory ]
+    API portal   [ http://[::]:8669/ ]
+┌──────────────────┬───────────────────────────────────────────────────────────────────────────────┐
+│  Mnemonic Words  │  denial kitchen pet squirrel other broom bar gas better priority spoil cross  │
+└──────────────────┴───────────────────────────────────────────────────────────────────────────────┘
+INFO [07-27|23:24:24.337] prepared to pack block                   pkg=solo
+INFO [07-27|23:24:24.337] pruner started                           pkg=pruner
+INFO [07-27|23:24:30.339] "📦 new block packed"                  pkg=solo   txs=1 mgas=0.045 et="531.043µs|404.695µs" id="[#1…b1ebc5b5]"
+INFO [07-27|23:24:40.344] "📦 new block packed"                  pkg=solo   txs=0 mgas=0.000 et="847.072µs|191.99µs"  id="[#2…41f7a927]"
+INFO [07-27|23:24:50.351] "📦 new block packed"                  pkg=solo   txs=0 mgas=0.000 et="968.187µs|196.925µs" id="[#3…26c5e2b9]"
+INFO [07-27|23:25:00.359] "📦 new block packed"                  pkg=solo   txs=0 mgas=0.000 et="1.100ms|181.881µs"   id="[#4…0221c515]"
+INFO [07-27|23:25:10.365] "📦 new block packed"                  pkg=solo   txs=0 mgas=0.000 et="576.043µs|233.273µs" id="[#5…d042fbab]"
+INFO [07-27|23:25:20.373] "📦 new block packed"                  pkg=solo   txs=0 mgas=0.000 et="454.151µs|131.315µs" id="[#6…72eda34d]"
+INFO [07-27|23:25:30.381] "📦 new block packed"                  pkg=solo   txs=0 mgas=0.000 et="413.414µs|175.269µs" id="[#7…ed9f473b]"
+INFO [07-27|23:25:40.388] "📦 new block packed"                  pkg=solo   txs=0 mgas=0.000 et="508.894µs|208.188µs" id="[#8…5d83deea]"
+INFO [07-27|23:25:50.396] "📦 new block packed"                  pkg=solo   txs=0 mgas=0.000 et="1.027ms|327.33µs"    id="[#9…39f47b28]"
+INFO [07-27|23:26:00.406] "📦 new block packed"                  pkg=solo   txs=0 mgas=0.000 et="1.682ms|534.26µs"    id="[#10…025c00dc]"
+INFO [07-27|23:26:10.412] "📦 new block packed"                  pkg=solo   txs=0 mgas=0.000 et="611.237µs|180.651µs" id="[#11…80511a82]"
+PS C:\Users\damia>
