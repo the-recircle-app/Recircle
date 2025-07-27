@@ -202,3 +202,5 @@ docker-compose.override.yml
 
 # Local environment
 .env.local.example.env*.solo
+.env
+.env.*
