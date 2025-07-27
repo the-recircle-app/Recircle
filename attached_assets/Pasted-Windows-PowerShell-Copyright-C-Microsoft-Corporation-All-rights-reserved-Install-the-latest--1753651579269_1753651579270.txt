@@ -1,0 +1,208 @@
+Windows PowerShell
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+Install the latest PowerShell for new features and improvements! https://aka.ms/PSWindows
+
+PS C:\Users\damia> cd C:\Users\damia\Recircle
+PS C:\Users\damia\Recircle> Get-Content .\scripts\deploy-solo-contracts.cjs | Select-Object -Skip 1 | Set-Content .\scripts\deploy-solo-contracts.cjs
+Set-Content : The process cannot access the file 'C:\Users\damia\Recircle\scripts\deploy-solo-contracts.cjs'
+because it is being used by another process.
+At line:1 char:75
++ ... lect-Object -Skip 1 | Set-Content .\scripts\deploy-solo-contracts.cjs
++                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [Set-Content], IOException
+    + FullyQualifiedErrorId : System.IO.IOException,Microsoft.PowerShell.Commands.SetContentCommand
+
+PS C:\Users\damia\Recircle> # 1) Extract all but the first line into a temp file
+PS C:\Users\damia\Recircle> Get-Content .\scripts\deploy-solo-contracts.cjs | Select-Object -Skip 1 `
+>>   | Out-File .\scripts\deploy-solo-contracts.tmp -Encoding utf8
+PS C:\Users\damia\Recircle>
+PS C:\Users\damia\Recircle> # 2) Overwrite the original with the temp
+PS C:\Users\damia\Recircle> Move-Item -Force .\scripts\deploy-solo-contracts.tmp .\scripts\deploy-solo-contracts.cjs
+PS C:\Users\damia\Recircle>
+PS C:\Users\damia\Recircle> # 3) Verify the shebang is gone
+PS C:\Users\damia\Recircle> Select-String -Path .\scripts\deploy-solo-contracts.cjs -Pattern "^#\!"
+PS C:\Users\damia\Recircle> (Get-Content .\scripts\deploy-solo-contracts.cjs) `
+>>   -replace "http://localhost:8669", "http://localhost:8669/api" `
+>>   | Set-Content .\scripts\deploy-solo-contracts.cjs -Encoding utf8
+PS C:\Users\damia\Recircle>
+PS C:\Users\damia\Recircle> # verify:
+PS C:\Users\damia\Recircle> Select-String -Path .\scripts\deploy-solo-contracts.cjs -Pattern "localhost:8669/api"
+
+scripts\deploy-solo-contracts.cjs:5:const SOLO_NODE_URL = 'http://localhost:8669/api';
+
+
+PS C:\Users\damia\Recircle> npm install
+
+up to date, audited 2183 packages in 13s
+
+245 packages are looking for funding
+  run `npm fund` for details
+
+49 vulnerabilities (20 low, 8 moderate, 17 high, 4 critical)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues possible (including breaking changes), run:
+  npm audit fix --force
+
+Some issues need review, and may require choosing
+a different dependency.
+
+Run `npm audit` for details.
+PS C:\Users\damia\Recircle> node .\scripts\deploy-solo-contracts.cjs
+ðŸš€ Deploying contracts to VeChain solo node...
+JsonRpcProvider failed to detect network and cannot start up; retry in 1s (perhaps the URL is wrong or the node is not started)
+âŒ Deployment failed: server response 404 Not Found (request={  }, response={  }, error=null, info={ "requestUrl": "http://localhost:8669/api", "responseBody": "404 page not found\n", "responseStatus": "404 Not Found" }, code=SERVER_ERROR, version=6.14.1)
+JsonRpcProvider failed to detect network and cannot start up; retry in 1s (perhaps the URL is wrong or the node is not started)
+JsonRpcProvider failed to detect network and cannot start up; retry in 1s (perhaps the URL is wrong or the node is not started)
+JsonRpcProvider failed to detect network and cannot start up; retry in 1s (perhaps the URL is wrong or the node is not started)
+JsonRpcProvider failed to detect network and cannot start up; retry in 1s (perhaps the URL is wrong or the node is not started)
+JsonRpcProvider failed to detect network and cannot start up; retry in 1s (perhaps the URL is wrong or the node is not started)
+JsonRpcProvider failed to detect network and cannot start up; retry in 1s (perhaps the URL is wrong or the node is not started)
+JsonRpcProvider failed to detect network and cannot start up; retry in 1s (perhaps the URL is wrong or the node is not started)
+JsonRpcProvider failed to detect network and cannot start up; retry in 1s (perhaps the URL is wrong or the node is not started)
+PS C:\Users\damia\Recircle> npm install
+
+up to date, audited 2183 packages in 5s
+
+245 packages are looking for funding
+  run `npm fund` for details
+
+49 vulnerabilities (20 low, 8 moderate, 17 high, 4 critical)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues possible (including breaking changes), run:
+  npm audit fix --force
+
+Some issues need review, and may require choosing
+a different dependency.
+
+Run `npm audit` for details.
+PS C:\Users\damia\Recircle> node .\scripts\deploy-solo-contracts.cjs
+ðŸš€ Deploying contracts to VeChain solo node...
+JsonRpcProvider failed to detect network and cannot start up; retry in 1s (perhaps the URL is wrong or the node is not started)
+âŒ Deployment failed: server response 404 Not Found (request={  }, response={  }, error=null, info={ "requestUrl": "http://localhost:8669/api", "responseBody": "404 page not found\n", "responseStatus": "404 Not Found" }, code=SERVER_ERROR, version=6.14.1)
+JsonRpcProvider failed to detect network and cannot start up; retry in 1s (perhaps the URL is wrong or the node is not started)
+JsonRpcProvider failed to detect network and cannot start up; retry in 1s (perhaps the URL is wrong or the node is not started)
+JsonRpcProvider failed to detect network and cannot start up; retry in 1s (perhaps the URL is wrong or the node is not started)
+JsonRpcProvider failed to detect network and cannot start up; retry in 1s (perhaps the URL is wrong or the node is not started)
+PS C:\Users\damia\Recircle> Get-Content .\scripts\deploy-solo-contracts.cjs -TotalCount 10
+
+const fs = require('fs');
+const ethers = require('ethers');
+
+const SOLO_NODE_URL = 'http://localhost:8669/api';
+const DEPLOYER_PRIVATE_KEY = '0x4f3edf983ac636a65a842ce7c78d9aa706d3b113b37a7c0f456fca3fcfd623a6';
+
+// Mock B3TR Token ABI
+const MOCK_B3TR_ABI = [
+  "constructor(string memory name, string memory symbol, uint256 totalSupply)",
+PS C:\Users\damia\Recircle> docker logs vechain-solo --tail 20
+INFO [07-27|21:15:10.293] "📦 new block packed"                  pkg=solo   txs=0 mgas=0.000 et="725.246µs|228.928µs" id="[#199…176b1f4c]"
+INFO [07-27|21:15:20.304] "📦 new block packed"                  pkg=solo   txs=0 mgas=0.000 et="923.533µs|329.738µs" id="[#200…cd6ee255]"
+INFO [07-27|21:15:30.313] "📦 new block packed"                  pkg=solo   txs=0 mgas=0.000 et="1.415ms|319.23µs"    id="[#201…05bc2d76]"
+INFO [07-27|21:15:40.321] "📦 new block packed"                  pkg=solo   txs=0 mgas=0.000 et="935.919µs|466.797µs" id="[#202…64087a10]"
+INFO [07-27|21:15:50.327] "📦 new block packed"                  pkg=solo   txs=0 mgas=0.000 et="419.448µs|178.77µs"  id="[#203…764d1f50]"
+INFO [07-27|21:16:00.332] "📦 new block packed"                  pkg=solo   txs=0 mgas=0.000 et="1.059ms|282.19µs"    id="[#204…8d93b44e]"
+INFO [07-27|21:16:10.343] "📦 new block packed"                  pkg=solo   txs=0 mgas=0.000 et="2.639ms|494.965µs"   id="[#205…928e8b33]"
+INFO [07-27|21:16:20.351] "📦 new block packed"                  pkg=solo   txs=0 mgas=0.000 et="1.356ms|218.983µs"   id="[#206…c545cd9c]"
+INFO [07-27|21:16:30.356] "📦 new block packed"                  pkg=solo   txs=0 mgas=0.000 et="567.672µs|294.242µs" id="[#207…9361b21f]"
+INFO [07-27|21:16:40.364] "📦 new block packed"                  pkg=solo   txs=0 mgas=0.000 et="1.128ms|533.205µs"   id="[#208…16205e59]"
+INFO [07-27|21:16:50.369] "📦 new block packed"                  pkg=solo   txs=0 mgas=0.000 et="405.654µs|279.473µs" id="[#209…f2692c81]"
+INFO [07-27|21:17:00.376] "📦 new block packed"                  pkg=solo   txs=0 mgas=0.000 et="460.903µs|191.843µs" id="[#210…4c202b42]"
+INFO [07-27|21:17:10.384] "📦 new block packed"                  pkg=solo   txs=0 mgas=0.000 et="422.807µs|175.131µs" id="[#211…bcd3d354]"
+INFO [07-27|21:17:20.391] "📦 new block packed"                  pkg=solo   txs=0 mgas=0.000 et="401.969µs|184.61µs"  id="[#212…0405eb70]"
+INFO [07-27|21:17:30.395] "📦 new block packed"                  pkg=solo   txs=0 mgas=0.000 et="512.985µs|208.467µs" id="[#213…909da4d4]"
+INFO [07-27|21:17:40.406] "📦 new block packed"                  pkg=solo   txs=0 mgas=0.000 et="2.075ms|526.897µs"   id="[#214…25c432d9]"
+INFO [07-27|21:17:50.416] "📦 new block packed"                  pkg=solo   txs=0 mgas=0.000 et="2.103ms|627.89µs"    id="[#215…c5ccfe1b]"
+INFO [07-27|21:18:00.424] "📦 new block packed"                  pkg=solo   txs=0 mgas=0.000 et="459.114µs|192.524µs" id="[#216…8725d302]"
+INFO [07-27|21:18:10.431] "📦 new block packed"                  pkg=solo   txs=0 mgas=0.000 et="417.67µs|184.492µs"  id="[#217…8e90dce2]"
+INFO [07-27|21:18:20.441] "📦 new block packed"                  pkg=solo   txs=0 mgas=0.000 et="433.597µs|218.127µs" id="[#218…46d87fb9]"
+PS C:\Users\damia\Recircle> notepad .\scripts\deploy-solo-contracts.cjs
+PS C:\Users\damia\Recircle> npm install
+
+up to date, audited 2183 packages in 11s
+
+245 packages are looking for funding
+  run `npm fund` for details
+
+49 vulnerabilities (20 low, 8 moderate, 17 high, 4 critical)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues possible (including breaking changes), run:
+  npm audit fix --force
+
+Some issues need review, and may require choosing
+a different dependency.
+
+Run `npm audit` for details.
+PS C:\Users\damia\Recircle> node .\scripts\deploy-solo-contracts.cjs
+ðŸš€ Deploying contracts to VeChain solo node...
+JsonRpcProvider failed to detect network and cannot start up; retry in 1s (perhaps the URL is wrong or the node is not started)
+âŒ Deployment failed: server response 307 Temporary Redirect (request={  }, response={  }, error=null, info={ "requestUrl": "http://localhost:8669", "responseBody": "", "responseStatus": "307 Temporary Redirect" }, code=SERVER_ERROR, version=6.14.1)
+JsonRpcProvider failed to detect network and cannot start up; retry in 1s (perhaps the URL is wrong or the node is not started)
+JsonRpcProvider failed to detect network and cannot start up; retry in 1s (perhaps the URL is wrong or the node is not started)
+JsonRpcProvider failed to detect network and cannot start up; retry in 1s (perhaps the URL is wrong or the node is not started)
+JsonRpcProvider failed to detect network and cannot start up; retry in 1s (perhaps the URL is wrong or the node is not started)
+JsonRpcProvider failed to detect network and cannot start up; retry in 1s (perhaps the URL is wrong or the node is not started)
+PS C:\Users\damia\Recircle> docker stop vechain-solo 2>$null
+vechain-solo
+PS C:\Users\damia\Recircle> docker rm   vechain-solo 2>$null
+vechain-solo
+PS C:\Users\damia\Recircle>
+PS C:\Users\damia\Recircle> docker run -d `
+>>   --name vechain-solo `
+>>   -p 8669:8669 `
+>>   vechain/thor:latest `
+>>   solo --api-addr 0.0.0.0:8669 --api-enable-logs
+d9b0232a01442508d2460bc89795f06377e136bab38b4f268edf155b9e0a0307
+PS C:\Users\damia\Recircle> docker logs -f vechain-solo
+Incorrect Usage: flag provided but not defined: -api-enable-logs
+
+NAME:
+    solo - client runs in solo mode for test & dev
+
+USAGE:
+    solo [command options] [arguments...]
+
+OPTIONS:
+   --genesis value                       path or URL to genesis file, if not set, the default devnet genesis will be used
+   --data-dir value                      directory for block-chain databases (default: "/home/thor/.org.vechain.thor")
+   --cache value                         megabytes of ram allocated to trie nodes cache (default: 4096)
+   --api-enable-txpool                   enable txpool REST API endpoints
+   --api-addr value                      API service listening address (default: "localhost:8669")
+   --api-cors value                      comma separated list of domains from which to accept cross origin requests to API
+   --api-timeout value                   API request timeout value in milliseconds (default: 10000)
+   --api-call-gas-limit value            limit contract call gas (default: 50000000)
+   --api-backtrace-limit value           limit the distance between 'position' and best block for subscriptions and fees APIs (default: 1000)
+   --api-allow-custom-tracer             allow custom JS tracer to be used tracer API
+   --api-enable-deprecated               enable deprecated API endpoints (POST /accounts/{address}, POST /accounts, WS /subscriptions/beat
+   --enable-api-logs                     enables API requests logging
+   --api-logs-limit value                limit the number of logs returned by /logs API (default: 1000)
+   --api-priority-fees-percentage value  percentage of the block base fee for priority fees calculation (default: 5)
+   --on-demand                           create new block when there is pending transaction
+   --block-interval value                choose a custom block interval for solo mode (seconds) (default: 10)
+   --persist                             blockchain data storage option, if set data will be saved to disk
+   --gas-limit value                     block gas limit(adaptive if set to 0) (default: 40000000)
+   --verbosity value                     log verbosity (0-9) (default: 3)
+   --json-logs                           output logs in JSON format
+   --pprof                               turn on go-pprof
+   --skip-logs                           skip writing event|transfer logs (/logs API will be disabled)
+   --txpool-limit value                  set tx limit in pool (default: 10000)
+   --txpool-limit-per-account value      set tx limit per account in pool (default: 128)
+   --disable-pruner                      disable state pruner to keep all history
+   --enable-metrics                      enables metrics collection
+   --metrics-addr value                  metrics service listening address (default: "localhost:2112")
+   --admin-addr value                    admin service listening address (default: "localhost:2113")
+   --enable-admin                        enables admin server
+   --api-allowed-tracers value           comma separated list of allowed API tracers(none,all,call,prestate etc.) (default: "none")
+   --min-effective-priority-fee value    set a minimum effective priority fee for transactions to be included in the block proposed by the block proposer (default: 0)
+
+flag provided but not defined: -api-enable-logs
+PS C:\Users\damia\Recircle>
