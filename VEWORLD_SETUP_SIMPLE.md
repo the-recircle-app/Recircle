@@ -10,7 +10,7 @@
 
 ```
 Network Name: ReCircle Solo
-RPC URL: http://localhost:8669
+RPC URL: http://localhost:5000/solo
 Chain ID: 39
 Symbol: VET
 ```
