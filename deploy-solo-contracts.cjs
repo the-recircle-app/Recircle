@@ -22,7 +22,7 @@ const MOCK_B3TR_BYTECODE = "0x608060405234801561001057600080fd5b506040516109c238
 
 // === Deployment Logic ===
 async function deploy() {
-  console.log("🚀 Connecting to Solo node...");
+  console.log("🚀 Deploying contracts to VeChain solo node...");
 
   const provider = new ethers.providers.JsonRpcProvider(SOLO_NODE_URL);
   const wallet = new ethers.Wallet(DEPLOYER_PRIVATE_KEY, provider);

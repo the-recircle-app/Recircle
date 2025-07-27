@@ -1,0 +1,53 @@
+#!/usr/bin/env node
+
+const fs = require('fs');
+const ethers = require('ethers'); // CHANGED HERE
+
+const SOLO_NODE_URL = 'http://localhost:8669';
+const DEPLOYER_PRIVATE_KEY = '0x4f3edf983ac636a65a842ce7c78d9aa706d3b113b37a7c0f456fca3fcfd623a6';
+
+// Mock B3TR Token ABI
+const MOCK_B3TR_ABI = [
+  "constructor(string memory name, string memory symbol, uint256 totalSupply)",
+  "function mint(address to, uint256 amount) public",
+  "function balanceOf(address account) view returns (uint256)",
+  "function transfer(address to, uint256 amount) returns (bool)",
+  "function approve(address spender, uint256 amount) returns (bool)",
+  "function allowance(address owner, address spender) view returns (uint256)",
+  "event Transfer(address indexed from, address indexed to, uint256 value)"
+];
+
+// (Truncated for brevity, keep your long BYTECODE exactly as is)
+const MOCK_B3TR_BYTECODE = "0x6080...<keep the full bytecode you have here>";
+
+// === Deployment Logic ===
+async function deploy() {
+  console.log("🚀 Deploying contracts to VeChain solo node...");
+
+  const provider = new ethers.providers.JsonRpcProvider(SOLO_NODE_URL); // FIXED HERE
+  const wallet = new ethers.Wallet(DEPLOYER_PRIVATE_KEY, provider);
+
+  const balance = await provider.getBalance(wallet.address);
+  console.log("💰 Deployer address:", wallet.address);
+  console.log("🪙 Balance:", ethers.formatEther(balance), "VET");
+
+  console.log("\n📦 Deploying Mock B3TR Token...");
+  const tokenFactory = new ethers.ContractFactory(MOCK_B3TR_ABI, MOCK_B3TR_BYTECODE, wallet);
+  const mockB3TR = await tokenFactory.deploy("Better Token", "B3TR", ethers.parseEther("10000000"));
+  await mockB3TR.waitForDeployment();
+
+  const deployedAddress = await mockB3TR.getAddress();
+  console.log("✅ B3TR deployed at:", deployedAddress);
+
+  fs.writeFileSync("solo-b3tr-address.json", JSON.stringify({ B3TR: deployedAddress }, null, 2));
+  console.log("📄 Saved address to solo-b3tr-address.json");
+
+  console.log("\n🪙 Add Custom Token to VeWorld Wallet:");
+  console.log("  Token Address:", deployedAddress);
+  console.log("  Symbol: B3TR");
+  console.log("  Decimals: 18");
+}
+
+deploy().catch((err) => {
+  console.error("❌ Deployment failed:", err.message);
+});
