@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const fs = require('fs');
-const ethers = require('ethers');
+const { ethers } = require('ethers');
 
 const SOLO_NODE_URL = 'http://localhost:8669';
 const DEPLOYER_PRIVATE_KEY = '0x4f3edf983ac636a65a842ce7c78d9aa706d3b113b37a7c0f456fca3fcfd623a6';
