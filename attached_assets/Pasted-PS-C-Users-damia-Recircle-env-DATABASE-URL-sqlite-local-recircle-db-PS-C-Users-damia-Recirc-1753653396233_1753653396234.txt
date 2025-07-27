@@ -1,0 +1,43 @@
+PS C:\Users\damia\Recircle> $env:DATABASE_URL="sqlite:./local-recircle.db"
+PS C:\Users\damia\Recircle> $env:NODE_ENV="development"
+PS C:\Users\damia\Recircle> $env:VITE_SOLO_MODE_ENABLED="true"
+PS C:\Users\damia\Recircle> $env:SOLO_MODE_ENABLED="true"
+PS C:\Users\damia\Recircle> $env:SOLO_PRIVATE_KEY="0x4f3edf983ac636a65a842ce7c78d9aa706d3b113b37a7c0f456fca3fcfd623a6"
+PS C:\Users\damia\Recircle> $env:REWARD_DISTRIBUTOR_WALLET="0x7567d83b7b8d80addcb281a71d54fc7b3364ffed"
+PS C:\Users\damia\Recircle> $env:CREATOR_FUND_WALLET="0xd3ae78222beadb038203be21ed5ce7c9b1bff602"
+PS C:\Users\damia\Recircle> $env:APP_FUND_WALLET="0x733b7269443c70de16bbf9b0615307884bcc5636"
+PS C:\Users\damia\Recircle> npx tsx server/index.ts
+[BLOCKCHAIN] ⚠️ No VECHAIN_PRIVATE_KEY or TESTNET_MNEMONIC found
+[BLOCKCHAIN] Real blockchain transactions will use pending mode
+2:56:08 PM [openai] WARNING: OpenAI API key environment variable not set. Test mode will be used for receipt validation.
+Server initialized with wallet addresses:
+  - REWARD_DISTRIBUTOR_WALLET: 0x7567d83b7b8d80addcb281a71d54fc7b3364ffed
+  - CREATOR_FUND_WALLET: 0xd3ae78222beadb038203be21ed5ce7c9b1bff602
+  - APP_FUND_WALLET: 0x733b7269443c70de16bbf9b0615307884bcc5636
+
+Initializing memory optimization for development
+[MEMORY] Environment configured for runtime:
+[MEMORY] NODE_OPTIONS: --expose-gc --max-old-space-size=4096 --max-semi-space-size=128
+[MEMORY] UV_THREADPOOL_SIZE: 64
+[MEMORY] ⚠️  Garbage collection not available - memory monitoring disabled
+[MEMORY] To enable: restart with NODE_OPTIONS="--expose-gc"
+[SOLO-NODE] 🔍 Checking solo mode setup: {
+  VITE_SOLO_MODE_ENABLED: 'true',
+  SOLO_MODE_ENABLED: 'true',
+  NODE_ENV: 'development',
+  soloEnabled: true
+}
+[SOLO-NODE] 🚀 Setting up integrated VeChain Solo Node routes
+[SOLO-NODE] 🔧 Initializing Solo Node Genesis State...
+[SOLO-NODE] ✅ Genesis block created
+[SOLO-NODE]    Block #0: 0x00000000851caf3cfdb6e899cf5958bfb1ac3413d346d43539627e6be7ec1b4a
+[SOLO-NODE] 💰 Pre-funded accounts available:
+[SOLO-NODE]    Account 1: 0x7567d83b7b8d80addcb281a71d54fc7b3364ffed
+[SOLO-NODE]    Account 2: 0xd3ae78222beadb038203be21ed5ce7c9b1bff602
+[SOLO-NODE]    Account 3: 0x733b7269443c70de16bbf9b0615307884bcc5636
+[SOLO-NODE] 🪙 B3TR Token deployed at: 0x5ef79995fe8a89e0812330e4378eb2660cede699
+[SOLO-NODE]    Each account has 100,000 B3TR tokens for testing
+[SOLO-NODE] ✅ Solo Node integrated into Express server
+[SOLO-NODE] 🌐 Available at /solo/* endpoints
+ReCircle server running on port 5000
+Memory optimization enabled: true
