@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const fs = require('fs');
-const { ethers } = require('ethers');
+const ethers = require('ethers');
 
 const SOLO_NODE_URL = 'http://localhost:8669';
 const DEPLOYER_PRIVATE_KEY = '0x4f3edf983ac636a65a842ce7c78d9aa706d3b113b37a7c0f456fca3fcfd623a6';
@@ -24,7 +24,7 @@ const MOCK_B3TR_BYTECODE = "0x608060405234801561001057600080fd5b506040516109c238
 async function deploy() {
   console.log("🚀 Connecting to Solo node...");
 
-  const provider = new ethers.JsonRpcProvider(SOLO_NODE_URL);
+  const provider = new ethers.providers.JsonRpcProvider(SOLO_NODE_URL);
   const wallet = new ethers.Wallet(DEPLOYER_PRIVATE_KEY, provider);
 
   const balance = await provider.getBalance(wallet.address);
