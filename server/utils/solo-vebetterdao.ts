@@ -3,7 +3,7 @@
  * Real B3TR distribution using the working integrated Solo node
  */
 
-const SOLO_BASE_URL = 'http://localhost:5000';
+const SOLO_BASE_URL = 'http://localhost:8669';
 const B3TR_CONTRACT_ADDRESS = '0x5ef79995fe8a89e0812330e4378eb2660cede699';
 
 // Pre-funded distributor account from solo node
