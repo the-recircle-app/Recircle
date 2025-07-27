@@ -28,7 +28,7 @@ export async function distributeSoloVeBetterDAO(
         console.log(`[SOLO-VEBETTERDAO] Distributing ${amount} B3TR to ${recipient}`);
         
         // Convert amount to wei (B3TR has 18 decimals)
-        const amountWei = (BigInt(amount) * BigInt('1000000000000000000')).toString();
+        const amountWei = (BigInt(Math.floor(amount)) * BigInt('1000000000000000000')).toString();
         
         // Execute B3TR transfer using Solo node
         const transferResponse = await fetch(`${SOLO_BASE_URL}/solo/contracts/${B3TR_CONTRACT_ADDRESS}/transfer`, {
