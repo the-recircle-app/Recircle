@@ -137,7 +137,8 @@ Recent Changes:
   - ✅ **VEWORLD READY**: Real Solo node ready for VeWorld Chrome extension connection
   - ✅ **PRE-FUNDED ACCOUNTS**: Test mnemonic provides accounts with VET and VTHO for testing
   - ✅ **GENESIS CONFIGURED**: Solo node properly initialized with genesis block
-  - 🎯 **NEXT STEP**: Connect VeWorld to localhost:8669 for real blockchain testing
+  - 🎯 **NEXT STEP**: Connect VeWorld to localhost:8669 and deploy B3TR contract locally
+  - ✅ **DEPLOYMENT STRATEGY**: Local deployment script created for user's computer (not Replit)
 - July 27, 2025: **🔧 DEPLOY SCRIPT ETHERS.JS V6 COMPATIBILITY FIX**
   - ✅ **ETHERS V6 SYNTAX IMPLEMENTED**: Updated to `new ethers.JsonRpcProvider()` (v6 syntax) from `ethers.providers.JsonRpcProvider` (v5)
   - ✅ **SCRIPT RELOCATED**: Moved deploy-solo-contracts.cjs to scripts/ directory for proper organization
