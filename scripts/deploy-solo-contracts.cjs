@@ -1,3 +1,4 @@
+// 🔧 FIXED: ethers v6 import & provider call
 #!/usr/bin/env node
 
 const fs = require('fs');
