@@ -65,12 +65,20 @@ async function testAndDeploy() {
 }
 
 // Run the test
-testAndDeploy()
-  .then(() => {
-    console.log('🎉 Solo node setup complete!');
-    process.exit(0);
-  })
-  .catch((error) => {
-    console.error('💥 Setup failed:', error);
-    process.exit(1);
-  });
+if (require.main === module) {
+  testAndDeploy()
+    .then(() => {
+      console.log('🎉 Solo node setup complete!');
+      console.log('');
+      console.log('Next steps:');
+      console.log('1. Create .env.local with Solo configuration');
+      console.log('2. Run: npm run dev:server (Terminal 1)');
+      console.log('3. Run: npm run dev:client (Terminal 2)');
+      console.log('4. Add Solo network to VeWorld mobile app');
+      process.exit(0);
+    })
+    .catch((error) => {
+      console.error('💥 Setup failed:', error);
+      process.exit(1);
+    });
+}
