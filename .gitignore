@@ -201,4 +201,4 @@ docker-compose.override.yml
 .terraform/
 
 # Local environment
-.env.local.example
+.env.local.example.env*.solo
