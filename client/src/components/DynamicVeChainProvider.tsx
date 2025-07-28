@@ -55,7 +55,12 @@ export function DynamicVeChainProvider({ children }: Props) {
                 }
               }
             }}
-            network={networkType}
+            network={isDevelopment && soloEnabled ? {
+              name: 'solo',
+              id: 39,
+              rpcUrl: soloNodeUrl,
+              explorerUrl: ''
+            } : 'testnet'}
           >
             <DAppKitProvider
               nodeUrl={nodeUrl}
