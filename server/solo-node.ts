@@ -92,17 +92,25 @@ function initializeGenesis() {
 }
 
 export function setupSoloNodeRoutes(app: Express) {
-    // Force enable Solo mode for local development
-    const soloEnabled = true;
+    // Check environment variables with trimming to handle extra spaces
+    const viteEnabled = process.env.VITE_SOLO_MODE_ENABLED?.trim() === 'true';
+    const soloEnabled = process.env.SOLO_MODE_ENABLED?.trim() === 'true';
+    const isDev = process.env.NODE_ENV?.trim() === 'development';
+    
+    // Enable solo mode if any condition is met or force enable for development
+    const finalSoloEnabled = viteEnabled || soloEnabled || isDev;
     
     console.log('[SOLO-NODE] 🔍 Checking solo mode setup:', {
         VITE_SOLO_MODE_ENABLED: `'${process.env.VITE_SOLO_MODE_ENABLED}'`,
         SOLO_MODE_ENABLED: `'${process.env.SOLO_MODE_ENABLED}'`,
         NODE_ENV: `'${process.env.NODE_ENV}'`,
-        soloEnabled
+        viteEnabled,
+        soloEnabled,
+        isDev,
+        finalSoloEnabled
     });
     
-    if (!soloEnabled) {
+    if (!finalSoloEnabled) {
         console.log('[SOLO-NODE] Solo mode disabled, skipping solo node routes');
         return;
     }
