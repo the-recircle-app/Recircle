@@ -98,9 +98,12 @@ export function setupSoloNodeRoutes(app: Express) {
                        process.env.NODE_ENV?.trim() === 'development'; // Enable by default in development
     
     console.log('[SOLO-NODE] 🔍 Checking solo mode setup:', {
-        VITE_SOLO_MODE_ENABLED: process.env.VITE_SOLO_MODE_ENABLED,
-        SOLO_MODE_ENABLED: process.env.SOLO_MODE_ENABLED,
-        NODE_ENV: process.env.NODE_ENV,
+        VITE_SOLO_MODE_ENABLED: `'${process.env.VITE_SOLO_MODE_ENABLED}'`,
+        SOLO_MODE_ENABLED: `'${process.env.SOLO_MODE_ENABLED}'`,
+        NODE_ENV: `'${process.env.NODE_ENV}'`,
+        VITE_SOLO_MODE_ENABLED_TRIMMED: `'${process.env.VITE_SOLO_MODE_ENABLED?.trim()}'`,
+        SOLO_MODE_ENABLED_TRIMMED: `'${process.env.SOLO_MODE_ENABLED?.trim()}'`,
+        NODE_ENV_TRIMMED: `'${process.env.NODE_ENV?.trim()}'`,
         soloEnabled
     });
     
