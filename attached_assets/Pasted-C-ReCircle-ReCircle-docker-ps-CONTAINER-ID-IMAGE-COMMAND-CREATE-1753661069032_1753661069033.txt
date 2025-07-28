@@ -1,0 +1,31 @@
+C:\ReCircle\ReCircle>docker ps
+CONTAINER ID   IMAGE                 COMMAND                  CREATED          STATUS          PORTS                                         NAMES
+e4eabf94e373   vechain/thor:latest   "thor solo --api-add…"   39 minutes ago   Up 39 minutes   0.0.0.0:8669->8669/tcp, [::]:8669->8669/tcp   vechain-solo
+
+C:\ReCircle\ReCircle>node scripts/deploy-solo-contracts.cjs
+🚀 Connecting to VeChain Solo Node...
+✅ Solo node connected. Best block: 238
+👤 Deployer address: 0x401EE82A841dc6B56DAe765bBBF3456Ea79F3B56
+JsonRpcProvider failed to detect network and cannot start up; retry in 1s (perhaps the URL is wrong or the node is not started)
+❌ Deployment failed: server response 307 Temporary Redirect (request={  }, response={  }, error=null, info={ "requestUrl": "http://localhost:8669", "responseBody": "", "responseStatus": "307 Temporary Redirect" }, code=SERVER_ERROR, version=6.14.1)
+
+💥 Deployment failed: Error: server response 307 Temporary Redirect (request={  }, response={  }, error=null, info={ "requestUrl": "http://localhost:8669", "responseBody": "", "responseStatus": "307 Temporary Redirect" }, code=SERVER_ERROR, version=6.14.1)
+    at makeError (C:\ReCircle\ReCircle\node_modules\ethers\lib.commonjs\utils\errors.js:129:21)
+    at assert (C:\ReCircle\ReCircle\node_modules\ethers\lib.commonjs\utils\errors.js:149:15)
+    at FetchResponse.assertOk (C:\ReCircle\ReCircle\node_modules\ethers\lib.commonjs\utils\fetch.js:839:32)
+    at JsonRpcProvider._send (C:\ReCircle\ReCircle\node_modules\ethers\lib.commonjs\providers\provider-jsonrpc.js:917:18)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async C:\ReCircle\ReCircle\node_modules\ethers\lib.commonjs\providers\provider-jsonrpc.js:281:40 {
+  code: 'SERVER_ERROR',
+  request: FetchRequest {},
+  response: FetchResponse {},
+  error: undefined,
+  info: {
+    requestUrl: 'http://localhost:8669',
+    responseBody: '',
+    responseStatus: '307 Temporary Redirect'
+  },
+  shortMessage: 'server response 307 Temporary Redirect'
+}
+
+C:\ReCircle\ReCircle>
