@@ -101,9 +101,6 @@ export function setupSoloNodeRoutes(app: Express) {
         VITE_SOLO_MODE_ENABLED: `'${process.env.VITE_SOLO_MODE_ENABLED}'`,
         SOLO_MODE_ENABLED: `'${process.env.SOLO_MODE_ENABLED}'`,
         NODE_ENV: `'${process.env.NODE_ENV}'`,
-        VITE_SOLO_MODE_ENABLED_TRIMMED: `'${process.env.VITE_SOLO_MODE_ENABLED?.trim()}'`,
-        SOLO_MODE_ENABLED_TRIMMED: `'${process.env.SOLO_MODE_ENABLED?.trim()}'`,
-        NODE_ENV_TRIMMED: `'${process.env.NODE_ENV?.trim()}'`,
         soloEnabled
     });
     
