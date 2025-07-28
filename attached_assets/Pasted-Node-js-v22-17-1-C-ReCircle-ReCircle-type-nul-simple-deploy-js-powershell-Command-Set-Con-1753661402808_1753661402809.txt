@@ -1,0 +1,195 @@
+Node.js v22.17.1
+
+C:\ReCircle\ReCircle>type nul > simple-deploy.js && powershell -Command "Set-Content -Path 'simple-deploy.js' -Value @'
+The string is missing the terminator: '@.
+    + CategoryInfo          : ParserError: (:) [], ParentContainsErrorRecordException
+    + FullyQualifiedErrorId : TerminatorExpectedAtEndOfString
+
+
+C:\ReCircle\ReCircle>const SOLO_URL = 'http://localhost:8669';
+'const' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\ReCircle\ReCircle>
+C:\ReCircle\ReCircle>async function testSoloConnection() {
+'async' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\ReCircle\ReCircle>    try {
+'try' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\ReCircle\ReCircle>        console.log('Testing Solo node connection...');
+'console.log' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\ReCircle\ReCircle>        const response = await fetch(`${SOLO_URL}/blocks/best`);
+'const' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\ReCircle\ReCircle>
+C:\ReCircle\ReCircle>        if (!response.ok) {
+{ was unexpected at this time.
+C:\ReCircle\ReCircle>            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+'throw' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\ReCircle\ReCircle>        }
+'}' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\ReCircle\ReCircle>
+C:\ReCircle\ReCircle>        const block = await response.json();
+'const' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\ReCircle\ReCircle>        console.log(`Solo node connected. Block #${block.number}`);
+'console.log' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\ReCircle\ReCircle>        return true;
+'return' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\ReCircle\ReCircle>    } catch (error) {
+'}' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\ReCircle\ReCircle>        console.log(`Solo node connection failed: ${error.message}`);
+'console.log' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\ReCircle\ReCircle>        return false;
+'return' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\ReCircle\ReCircle>    }
+'}' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\ReCircle\ReCircle>}
+'}' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\ReCircle\ReCircle>
+C:\ReCircle\ReCircle>async function deployB3TR() {
+'async' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\ReCircle\ReCircle>    console.log('Starting B3TR deployment to Solo node...');
+'console.log' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\ReCircle\ReCircle>
+C:\ReCircle\ReCircle>    const connected = await testSoloConnection();
+'const' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\ReCircle\ReCircle>    if (!connected) {
+{ was unexpected at this time.
+
+C:\ReCircle\ReCircle>        console.log('Cannot connect to Solo node. Make sure it is running at localhost:8669');
+'console.log' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\ReCircle\ReCircle>        return;
+'return' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\ReCircle\ReCircle>    }
+'}' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\ReCircle\ReCircle>
+C:\ReCircle\ReCircle>    const mockDeployment = {
+'const' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\ReCircle\ReCircle>        contractAddress: '0x5ef79995FE8a89e0812330E4378eB2660ceDe699',
+'contractAddress:' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\ReCircle\ReCircle>        txHash: '0x' + Array(64).fill().map(() => Math.floor(Math.random() * 16).toString(16)).join(''),
+'txHash:' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\ReCircle\ReCircle>        deployer: '0x401EE82A841dc6B56DAe765bBBF3456Ea79F3B56',
+'deployer:' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\ReCircle\ReCircle>        network: 'solo',
+'network:' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\ReCircle\ReCircle>        chainId: 39,
+'chainId:' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\ReCircle\ReCircle>        totalSupply: '1000000'
+'totalSupply:' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\ReCircle\ReCircle>    };
+'}' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\ReCircle\ReCircle>
+C:\ReCircle\ReCircle>    console.log('B3TR Contract Configuration:');
+'console.log' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\ReCircle\ReCircle>    console.log(`   Contract Address: ${mockDeployment.contractAddress}`);
+'console.log' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\ReCircle\ReCircle>    console.log(`   Network: Solo (Chain ID: 39)`);
+'console.log' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\ReCircle\ReCircle>    console.log(`   Total Supply: 1,000,000 B3TR`);
+'console.log' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\ReCircle\ReCircle>
+C:\ReCircle\ReCircle>    const fs = require('fs');
+'const' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\ReCircle\ReCircle>    fs.writeFileSync('solo-deployment.json', JSON.stringify(mockDeployment, null, 2));
+'fs.writeFileSync' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\ReCircle\ReCircle>    console.log('Deployment info saved to solo-deployment.json');
+'console.log' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\ReCircle\ReCircle>
+C:\ReCircle\ReCircle>    console.log('B3TR deployment complete!');
+'console.log' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\ReCircle\ReCircle>    console.log('Ready to start ReCircle with: npm run dev');
+'console.log' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\ReCircle\ReCircle>
+C:\ReCircle\ReCircle>    return mockDeployment;
+'return' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\ReCircle\ReCircle>}
+'}' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\ReCircle\ReCircle>
+C:\ReCircle\ReCircle>deployB3TR().catch(console.error);
+'deployB3TR' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\ReCircle\ReCircle>'@"
+''@"' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\ReCircle\ReCircle>node simple-deploy.js
+
+C:\ReCircle\ReCircle>
