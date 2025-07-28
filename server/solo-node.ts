@@ -93,14 +93,18 @@ function initializeGenesis() {
 
 export function setupSoloNodeRoutes(app: Express) {
     // Check multiple environment variables for solo mode (trim whitespace)
-    const soloEnabled = process.env.VITE_SOLO_MODE_ENABLED?.trim() === 'true' || 
-                       process.env.SOLO_MODE_ENABLED?.trim() === 'true' ||
-                       process.env.NODE_ENV?.trim() === 'development'; // Enable by default in development
+    const viteCheck = process.env.VITE_SOLO_MODE_ENABLED?.trim() === 'true';
+    const soloCheck = process.env.SOLO_MODE_ENABLED?.trim() === 'true';
+    const devCheck = process.env.NODE_ENV?.trim() === 'development';
+    const soloEnabled = viteCheck || soloCheck || devCheck;
     
     console.log('[SOLO-NODE] 🔍 Checking solo mode setup:', {
         VITE_SOLO_MODE_ENABLED: `'${process.env.VITE_SOLO_MODE_ENABLED}'`,
         SOLO_MODE_ENABLED: `'${process.env.SOLO_MODE_ENABLED}'`,
         NODE_ENV: `'${process.env.NODE_ENV}'`,
+        viteCheck,
+        soloCheck, 
+        devCheck,
         soloEnabled
     });
     
