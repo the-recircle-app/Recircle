@@ -876,5 +876,18 @@ export class PgStorage implements IStorage {
   }
 }
 
-// Use PostgreSQL storage in production, fallback to MemStorage for testing
-export const storage = process.env.NODE_ENV === 'test' ? new MemStorage() : new PgStorage();
+// Use MemStorage for local development and testing, PgStorage for production
+function createStorage() {
+  const isProduction = process.env.NODE_ENV === 'production';
+  const hasValidDatabase = process.env.DATABASE_URL && !process.env.DATABASE_URL.includes('sqlite');
+  
+  if (isProduction && hasValidDatabase) {
+    console.log('[STORAGE] Using PostgreSQL storage for production');
+    return new PgStorage();
+  } else {
+    console.log('[STORAGE] Using in-memory storage for local development');
+    return new MemStorage();
+  }
+}
+
+export const storage = createStorage();
