@@ -11,25 +11,26 @@ Clone Pierre's proven X-2-Earn dApp template locally as foundation, then systema
 
 ## Implementation Plan
 
-### Phase 1: Local Setup (User + AI)
-1. Clone Pierre's X-2-Earn template to local machine
-2. Get it running exactly as shown in video
-3. Verify VeBetterDAO token distribution works
-4. Document working patterns and architecture
+### Phase 1: Local Setup (All on User's Local Machine)
+1. Clone Pierre's X-2-Earn template to `C:\` directory on user's computer
+2. Install dependencies locally using npm/yarn
+3. Run template locally (not on Replit) exactly as shown in video
+4. Verify VeBetterDAO token distribution works on local machine
+5. AI guides user through command prompt for all setup steps
 
-### Phase 2: Pattern Analysis (AI)
-1. Study Pierre's VeBetterDAO integration code
-2. Identify key smart contract interaction patterns
-3. Document wallet connection and transaction flows
-4. Map token distribution mechanisms
-5. Understand error handling for blockchain operations
+### Phase 2: Pattern Analysis (AI Guides Local Analysis)
+1. User shares Pierre's local code files via command prompt
+2. AI analyzes VeBetterDAO integration patterns from local files
+3. AI identifies key smart contract interaction patterns
+4. AI documents wallet connection and transaction flows from local codebase
+5. AI maps token distribution mechanisms from working local example
 
-### Phase 3: Systematic Translation (AI)
-1. **Keep Working**: Pierre's proven VeBetterDAO integration
-2. **Replace Logic**: His earning triggers → ReCircle receipt validation
-3. **Adapt Rewards**: His reward calculation → Transportation categories
-4. **Port Distribution**: His token system → ReCircle 70/30 model
-5. **Integrate AI**: Add OpenAI receipt analysis to his framework
+### Phase 3: Systematic Translation (All Local Development)
+1. **Keep Working**: Port Pierre's proven VeBetterDAO integration to local ReCircle
+2. **Replace Logic**: Modify local files to change earning triggers → receipt validation
+3. **Adapt Rewards**: Update local reward calculation → Transportation categories
+4. **Port Distribution**: Adapt local token system → ReCircle 70/30 model
+5. **Integrate AI**: Add OpenAI receipt analysis to local ReCircle framework
 
 ### Phase 4: Feature Integration
 1. Transportation receipt validation (OpenAI Vision API)
@@ -45,10 +46,11 @@ Clone Pierre's proven X-2-Earn dApp template locally as foundation, then systema
 - **AI Translation**: Methodical adaptation of proven patterns
 - **Faster Results**: Working foundation → specific adaptations
 
-## Next Steps
-1. Find Pierre's exact template repository
-2. Guide local setup and verification
-3. Begin pattern analysis and documentation
-4. Start systematic translation to ReCircle features
+## Next Steps (All Local Machine)
+1. Find Pierre's exact template repository for local cloning
+2. Guide user through local setup via command prompt instructions
+3. Verify local Pierre template runs successfully on user's computer
+4. Begin local pattern analysis using command prompt file sharing
+5. Start systematic local translation to ReCircle features
 
 This strategy leverages proven working code rather than building blockchain integration from scratch.
