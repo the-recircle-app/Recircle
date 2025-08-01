@@ -1,0 +1,79 @@
+PS C:\Users\damia\Downloads> dir
+
+
+    Directory: C:\Users\damia\Downloads
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----         7/27/2025   4:50 PM                ReCircle
+d-----          8/1/2025   4:46 PM                x-app-template-main
+-a----         7/20/2025   3:27 PM         136133 b32-master.zip
+-a----         6/21/2025  12:58 PM         295066 buy-me-coffee-example-main (1).zip
+-a----         6/21/2025  12:04 PM         295066 buy-me-coffee-example-main.zip
+-a----         6/27/2025   9:40 AM           7085 CHATGPT_DEPLOYMENT_SUMMARY.md
+-a----         6/20/2025   6:10 AM       11332480 ChromeSetup.exe
+-a----         7/21/2025   7:35 PM      141226221 CIA Spy Breaks Silence on Epstein Cover-Up, Mossad & Trump's #1
+                                                  Problem _ John Kiriakou.mp3
+-a----         7/18/2025   7:45 PM        2198602 Darko - 21 _ Dumb Money (Original Motion Picture Soundtrack).mp3
+-a----          7/6/2025   7:32 PM        2895034 Dayglow - Every Little Thing I Say I Do (Official Lyric
+                                                  Video).mp3
+-a----          7/6/2025   7:31 PM        3259800 Dayglow - Hot Rod.mp3
+-a----          7/9/2025   5:37 PM       13075639 Desktop wallet connection screen recording (1).mp4
+-a----          7/9/2025   5:33 PM       13075639 Desktop wallet connection screen recording.mp4
+-a----         7/22/2025   3:06 PM      592480176 Docker Desktop Installer.exe
+-a----         7/16/2025  11:58 PM          94054 document (1).yaml
+-a----         7/16/2025  11:57 PM          92846 document.yaml
+-a----         6/21/2025  12:06 AM     1073452608 flstudio_win64_24.2.2.4597.exe
+-a----         7/26/2025   7:03 PM       70990944 Git-2.50.1-64-bit.exe
+-a----         6/22/2025   1:32 PM         870585 hardhat-deploy-1.zip
+-a----          7/6/2025  12:38 AM        4089083 IMG_0836.jpeg
+-a----          7/8/2025   4:10 PM         179497 IMG_0842.png
+-a----          7/8/2025   4:42 PM          62419 IMG_0843.png
+-a----         7/16/2025   8:57 PM         193635 IMG_0892.png
+-a----         7/16/2025   8:46 PM         126282 IMG_0893.png
+-a----         7/16/2025   8:46 PM         137600 IMG_0894.png
+-a----         7/16/2025   8:47 PM         122615 IMG_0895.png
+-a----         7/16/2025   8:51 PM         147941 IMG_0897.png
+-a----         7/16/2025   8:51 PM         144177 IMG_0898.png
+-a----         7/20/2025  12:29 PM         133747 IMG_0929.png
+-a----         7/20/2025  12:29 PM         112789 IMG_0930.png
+-a----         7/20/2025  12:29 PM         108004 IMG_0932.png
+-a----         7/20/2025  12:29 PM         151967 IMG_0933.png
+-a----         7/20/2025  12:29 PM        3504804 IMG_0934.jpeg
+-a----         7/20/2025   1:11 PM        3409433 IMG_0935.jpeg
+-a----         6/23/2025  12:29 PM        1104440 iTunes Installer.exe
+-a----          7/9/2025   7:41 PM      165174263 Joe Rogan Experience #2344 - Amjad Masad.mp3
+-a----         7/21/2025   7:36 PM           1344 Joe Rogan Experience #2347 - Paul Stamets.mp3
+-a----          7/7/2025   5:27 PM         562652 Modern Download App Instagram Post (3).png
+-a----         7/24/2025   2:09 PM       31457280 node-v22.17.1-x64.msi
+-a----         7/27/2025   4:47 PM       81371533 ReCircle.zip
+-a----         7/20/2025  12:25 PM        6177183 Recording 2025-07-20 122645.mp4
+-a----         7/29/2025   3:43 PM         101817 Resume.pdf
+-a----          7/9/2025  12:31 PM         117626 Screenshot 2025-07-09 123138.png
+-a----          7/9/2025  12:33 PM         102240 Screenshot 2025-07-09 123313.png
+-a----          7/9/2025  12:34 PM          35663 Screenshot 2025-07-09 123437.png
+-a----          7/9/2025  12:38 PM          32437 Screenshot 2025-07-09 123832.png
+-a----          7/9/2025  12:39 PM          28691 Screenshot 2025-07-09 123901.png
+-a----          7/9/2025  12:39 PM          29101 Screenshot 2025-07-09 123936.png
+-a----          7/9/2025  12:41 PM          36669 Screenshot 2025-07-09 124152.png
+-a----          7/9/2025  12:43 PM          34052 Screenshot 2025-07-09 124313.png
+-a----          7/9/2025  12:44 PM          37142 Screenshot 2025-07-09 124426.png
+-a----          7/9/2025  12:46 PM          14558 Screenshot 2025-07-09 124629.png
+-a----         7/11/2025  10:59 PM         101745 Screenshot 2025-07-11 225904.png
+-a----         7/12/2025  11:53 AM         227107 Screenshot 2025-07-11 at 8.13.30 AM.jpeg
+-a----         6/20/2025  12:33 AM        2380800 SteamSetup.exe
+-a----         7/16/2025   8:52 PM          48363 Test 1.png
+-a----          7/9/2025   7:46 PM      131440359 The Science of Getting Rich - Wallace Wattles - The Secret
+                                                  Wisdom Library.mp3
+-a----         7/18/2025  11:55 AM        2705739 thor-2.3.1.zip
+-a----         6/22/2025   1:44 AM        2700458 thor-master.zip
+-a----         7/20/2025   3:56 PM       48630568 tsetup-x64.5.16.4.exe
+-a----          7/7/2025   5:06 PM          35855 Untitled design (3).png
+-a----          7/8/2025   6:47 PM          36571 Untitled design (4).png
+-a----         6/26/2025  11:09 PM        5905273 vechain-dapp-kit-main.zip
+-a----         6/21/2025  11:19 AM        4701053 whitepaper-3-0.pdf
+-a----          8/1/2025   4:35 PM        1163843 x-app-template-main.zip
+
+
+PS C:\Users\damia\Downloads>
