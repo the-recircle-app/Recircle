@@ -1,0 +1,50 @@
+PS C:\Users\damia\Downloads\x-app-template-main> start http://localhost:8082
+PS C:\Users\damia\Downloads\x-app-template-main> netstat -an | findstr :8082
+PS C:\Users\damia\Downloads\x-app-template-main> netstat -an | findstr :3000
+PS C:\Users\damia\Downloads\x-app-template-main> start http://172.27.80.1:8082
+PS C:\Users\damia\Downloads\x-app-template-main> echo "Current server status - press Ctrl+C if you need to stop and restart"
+Current server status - press Ctrl+C if you need to stop and restart
+PS C:\Users\damia\Downloads\x-app-template-main> netstat -ano | findstr :8082
+PS C:\Users\damia\Downloads\x-app-template-main> netstat -ano | findstr :3000
+PS C:\Users\damia\Downloads\x-app-template-main> tasklist | findstr node
+node.exe                     10788 Console                    3     84,628 K
+PS C:\Users\damia\Downloads\x-app-template-main> Ctrl+C
+Ctrl+C : The term 'Ctrl+C' is not recognized as the name of a cmdlet, function, script file, or operable program.
+Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:1
++ Ctrl+C
++ ~~~~~~
+    + CategoryInfo          : ObjectNotFound: (Ctrl+C:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Users\damia\Downloads\x-app-template-main> yarn dev
+yarn run v1.22.22
+$ turbo dev
+turbo 2.1.2
+
+• Packages in scope: @repo/config-contract, @repo/contracts, @repo/typescript-config, @repo/utils, x-dapp-backend, x-dapp-frontend
+• Running dev in 6 packages
+• Remote caching disabled
+x-dapp-backend:dev: cache bypass, force executing c6bd8b88eb62b87b
+x-dapp-frontend:dev: cache bypass, force executing 93fd8919363c273d
+x-dapp-backend:dev: yarn run v1.22.22
+x-dapp-backend:dev: warning package.json: No license field
+x-dapp-backend:dev: warning package.json: "dependencies" has dependency "ethers" with range "^6.12.0" that collides with a dependency in "devDependencies" of the same name with version "^6.11.1"
+x-dapp-frontend:dev: yarn run v1.22.22
+x-dapp-backend:dev: $ cross-env NODE_ENV=development nodemon
+x-dapp-frontend:dev: $ vite --port 8082 --host
+x-dapp-frontend:dev:
+x-dapp-frontend:dev:   VITE v5.2.11  ready in 316 ms
+x-dapp-frontend:dev:
+x-dapp-frontend:dev:   ➜  Local:   http://localhost:8082/
+x-dapp-frontend:dev:   ➜  Network: http://172.27.80.1:8082/
+x-dapp-frontend:dev:   ➜  Network: http://192.168.12.101:8082/
+x-dapp-backend:dev: [nodemon] 2.0.22
+x-dapp-backend:dev: [nodemon] to restart at any time, enter `rs`
+x-dapp-backend:dev: [nodemon] watching path(s): src\**\* .env
+x-dapp-backend:dev: [nodemon] watching extensions: js,ts,json
+x-dapp-backend:dev: [nodemon] starting `ts-node -r tsconfig-paths/register --transpile-only src/server.ts`
+x-dapp-backend:dev: 2025-08-01 18:16:56 info: =================================
+x-dapp-backend:dev: 2025-08-01 18:16:56 info: ======= ENV: development =======
+x-dapp-backend:dev: 2025-08-01 18:16:56 info: 🚀 App listening on the port 3000
+x-dapp-backend:dev: 2025-08-01 18:16:56 info: =================================
