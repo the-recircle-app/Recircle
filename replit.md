@@ -8,6 +8,15 @@ ReCircle is a blockchain-powered rewards platform designed to incentivize sustai
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Progress
+
+**August 2, 2025**: 
+- Successfully started ReCircle application with VeChain Solo Node integration
+- B3TR token deployed at: 0x5ef79995fe8a89e0812330e4378eb2660cede699
+- Server running on port 5000 with blockchain functionality
+- Attempting to analyze Pierre's x-app-template for VeBetterDAO patterns
+- Network connectivity issues with x-app-template frontend (ports 8082/8083)
+
 ## System Architecture
 
 ### Frontend
