@@ -5862,6 +5862,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Pierre's VeBetterDAO submission routes
+  const pierreSubmissionController = (await import('./routes/pierre-submission')).pierreSubmissionController;
+  
+  app.post("/api/pierre/submit-receipt", async (req: Request, res: Response, next: NextFunction) => {
+    await pierreSubmissionController.submitReceipt(req, res, next);
+  });
+  
+  app.get("/api/pierre/contract-status", async (req: Request, res: Response) => {
+    await pierreSubmissionController.getContractStatus(req, res);
+  });
+
   // Solo Node Connection Test Page
   app.get("/test-solo-connection", (req: Request, res: Response) => {
     const testPage = `<!DOCTYPE html>
