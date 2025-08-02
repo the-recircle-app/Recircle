@@ -1,0 +1,129 @@
+PS C:\Users\damia\Downloads\x-app-template-main> echo "===== Raw content check ====="
+===== Raw content check =====
+PS C:\Users\damia\Downloads\x-app-template-main> powershell "Get-Content 'apps\backend\.env.development.local' | ForEach-Object { [System.Text.Encoding]::UTF8.GetBytes($_) }"
+Cannot find an overload for "GetBytes" and the argument count: "0".
+At line:1 char:70
++ ... t.local' | ForEach-Object { [System.Text.Encoding]::UTF8.GetBytes() }
++                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [], MethodException
+    + FullyQualifiedErrorId : MethodCountCouldNotFindBest
+
+Cannot find an overload for "GetBytes" and the argument count: "0".
+At line:1 char:70
++ ... t.local' | ForEach-Object { [System.Text.Encoding]::UTF8.GetBytes() }
++                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [], MethodException
+    + FullyQualifiedErrorId : MethodCountCouldNotFindBest
+
+Cannot find an overload for "GetBytes" and the argument count: "0".
+At line:1 char:70
++ ... t.local' | ForEach-Object { [System.Text.Encoding]::UTF8.GetBytes() }
++                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [], MethodException
+    + FullyQualifiedErrorId : MethodCountCouldNotFindBest
+
+Cannot find an overload for "GetBytes" and the argument count: "0".
+At line:1 char:70
++ ... t.local' | ForEach-Object { [System.Text.Encoding]::UTF8.GetBytes() }
++                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [], MethodException
+    + FullyQualifiedErrorId : MethodCountCouldNotFindBest
+
+Cannot find an overload for "GetBytes" and the argument count: "0".
+At line:1 char:70
++ ... t.local' | ForEach-Object { [System.Text.Encoding]::UTF8.GetBytes() }
++                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [], MethodException
+    + FullyQualifiedErrorId : MethodCountCouldNotFindBest
+
+Cannot find an overload for "GetBytes" and the argument count: "0".
+At line:1 char:70
++ ... t.local' | ForEach-Object { [System.Text.Encoding]::UTF8.GetBytes() }
++                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [], MethodException
+    + FullyQualifiedErrorId : MethodCountCouldNotFindBest
+
+Cannot find an overload for "GetBytes" and the argument count: "0".
+At line:1 char:70
++ ... t.local' | ForEach-Object { [System.Text.Encoding]::UTF8.GetBytes() }
++                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [], MethodException
+    + FullyQualifiedErrorId : MethodCountCouldNotFindBest
+
+Cannot find an overload for "GetBytes" and the argument count: "0".
+At line:1 char:70
++ ... t.local' | ForEach-Object { [System.Text.Encoding]::UTF8.GetBytes() }
++                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [], MethodException
+    + FullyQualifiedErrorId : MethodCountCouldNotFindBest
+
+Cannot find an overload for "GetBytes" and the argument count: "0".
+At line:1 char:70
++ ... t.local' | ForEach-Object { [System.Text.Encoding]::UTF8.GetBytes() }
++                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [], MethodException
+    + FullyQualifiedErrorId : MethodCountCouldNotFindBest
+
+Cannot find an overload for "GetBytes" and the argument count: "0".
+At line:1 char:70
++ ... t.local' | ForEach-Object { [System.Text.Encoding]::UTF8.GetBytes() }
++                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [], MethodException
+    + FullyQualifiedErrorId : MethodCountCouldNotFindBest
+
+Cannot find an overload for "GetBytes" and the argument count: "0".
+At line:1 char:70
++ ... t.local' | ForEach-Object { [System.Text.Encoding]::UTF8.GetBytes() }
++                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [], MethodException
+    + FullyQualifiedErrorId : MethodCountCouldNotFindBest
+
+Cannot find an overload for "GetBytes" and the argument count: "0".
+At line:1 char:70
++ ... t.local' | ForEach-Object { [System.Text.Encoding]::UTF8.GetBytes() }
++                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [], MethodException
+    + FullyQualifiedErrorId : MethodCountCouldNotFindBest
+
+Cannot find an overload for "GetBytes" and the argument count: "0".
+At line:1 char:70
++ ... t.local' | ForEach-Object { [System.Text.Encoding]::UTF8.GetBytes() }
++                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [], MethodException
+    + FullyQualifiedErrorId : MethodCountCouldNotFindBest
+
+PS C:\Users\damia\Downloads\x-app-template-main> powershell "Set-Content 'apps\backend\.env.development.local' -Value @('OPENAI_API_KEY=sk-proj-abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 'ADMIN_MNEMONIC=denial kitchen pet squirrel other broom bar gas better priority spoil cross') -Encoding UTF8"
+PS C:\Users\damia\Downloads\x-app-template-main> type apps\backend\.env.development.local
+OPENAI_API_KEY=sk-proj-abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789
+ADMIN_MNEMONIC=denial kitchen pet squirrel other broom bar gas better priority spoil cross
+PS C:\Users\damia\Downloads\x-app-template-main> yarn dev
+yarn run v1.22.22
+$ turbo dev
+turbo 2.1.2
+
+• Packages in scope: @repo/config-contract, @repo/contracts, @repo/typescript-config, @repo/utils, x-dapp-backend, x-dapp-frontend
+• Running dev in 6 packages
+• Remote caching disabled
+x-dapp-frontend:dev: cache bypass, force executing 93fd8919363c273d
+x-dapp-backend:dev: cache bypass, force executing c6bd8b88eb62b87b
+x-dapp-frontend:dev: yarn run v1.22.22
+x-dapp-backend:dev: yarn run v1.22.22
+x-dapp-frontend:dev: $ vite --port 8082 --host
+x-dapp-backend:dev: warning package.json: No license field
+x-dapp-backend:dev: warning package.json: "dependencies" has dependency "ethers" with range "^6.12.0" that collides with a dependency in "devDependencies" of the same name with version "^6.11.1"
+x-dapp-backend:dev: $ cross-env NODE_ENV=development nodemon
+x-dapp-frontend:dev:
+x-dapp-frontend:dev:   VITE v5.2.11  ready in 325 ms
+x-dapp-frontend:dev:
+x-dapp-frontend:dev:   ➜  Local:   http://localhost:8082/
+x-dapp-frontend:dev:   ➜  Network: http://172.27.80.1:8082/
+x-dapp-frontend:dev:   ➜  Network: http://192.168.12.101:8082/
+x-dapp-backend:dev: [nodemon] 2.0.22
+x-dapp-backend:dev: [nodemon] to restart at any time, enter `rs`
+x-dapp-backend:dev: [nodemon] watching path(s): src\**\* .env
+x-dapp-backend:dev: [nodemon] watching extensions: js,ts,json
+x-dapp-backend:dev: [nodemon] starting `ts-node -r tsconfig-paths/register --transpile-only src/server.ts`
+x-dapp-backend:dev: 2025-08-01 18:11:01 info: =================================
+x-dapp-backend:dev: 2025-08-01 18:11:01 info: ======= ENV: development =======
+x-dapp-backend:dev: 2025-08-01 18:11:01 info: 🚀 App listening on the port 3000
+x-dapp-backend:dev: 2025-08-01 18:11:01 info: =================================
