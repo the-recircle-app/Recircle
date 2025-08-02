@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate Test Receipt</title>
+    <style>
+        .receipt {
+            width: 300px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            background: white;
+        }
+        .center { text-align: center; }
+        .bold { font-weight: bold; }
+        .line { border-bottom: 1px dashed #999; margin: 10px 0; }
+        .total { font-size: 14px; font-weight: bold; }
+        body { background: #f0f0f0; padding: 20px; }
+        button { 
+            display: block; 
+            margin: 20px auto; 
+            padding: 10px 20px; 
+            background: #007cba; 
+            color: white; 
+            border: none; 
+            cursor: pointer; 
+        }
+    </style>
+</head>
+<body>
+    <div class="receipt" id="receipt">
+        <div class="center bold">GREEN TRANSPORT CO.</div>
+        <div class="center">123 Eco Street</div>
+        <div class="center">Sustainable City, SC 12345</div>
+        <div class="center">Tel: (555) 123-4567</div>
+        <div class="line"></div>
+        
+        <div>Date: 2024-01-15 14:30:25</div>
+        <div>Receipt #: ECO-2024-001234</div>
+        <div>Customer: John Doe</div>
+        <div class="line"></div>
+        
+        <div class="bold">ELECTRIC BIKE RENTAL</div>
+        <div>Duration: 2 hours</div>
+        <div style="display: flex; justify-content: space-between;">
+            <span>E-Bike Rental (2hrs @ $8/hr)</span>
+            <span>$16.00</span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+            <span>Eco Discount (10%)</span>
+            <span>-$1.60</span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+            <span>Tax (8%)</span>
+            <span>$1.15</span>
+        </div>
+        <div class="line"></div>
+        
+        <div class="total center">
+            TOTAL: $15.55
+        </div>
+        <div class="line"></div>
+        
+        <div class="center">Payment: Credit Card ****1234</div>
+        <div class="center">Authorization: 123456</div>
+        <div class="line"></div>
+        
+        <div class="center">🌱 Thank you for choosing</div>
+        <div class="center">sustainable transportation!</div>
+        <div class="center">CO₂ Saved: 2.4 kg</div>
+        <div class="center">Visit us at greentransport.eco</div>
+    </div>
+    
+    <button onclick="downloadReceipt()">Download as Image</button>
+    
+    <script>
+        function downloadReceipt() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const receipt = document.getElementById('receipt');
+            
+            // Set canvas size
+            canvas.width = 400;
+            canvas.height = 600;
+            
+            // Fill white background
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Set font
+            ctx.fillStyle = 'black';
+            ctx.font = '12px Courier New';
+            
+            // Draw receipt content (simplified)
+            const lines = [
+                'GREEN TRANSPORT CO.',
+                '123 Eco Street',
+                'Sustainable City, SC 12345',
+                'Tel: (555) 123-4567',
+                '--------------------------------',
+                'Date: 2024-01-15 14:30:25',
+                'Receipt #: ECO-2024-001234',
+                'Customer: John Doe',
+                '--------------------------------',
+                'ELECTRIC BIKE RENTAL',
+                'Duration: 2 hours',
+                'E-Bike Rental (2hrs)    $16.00',
+                'Eco Discount (10%)      -$1.60',
+                'Tax (8%)                 $1.15',
+                '--------------------------------',
+                'TOTAL: $15.55',
+                '--------------------------------',
+                'Payment: Credit Card ****1234',
+                'Authorization: 123456',
+                '--------------------------------',
+                'Thank you for choosing',
+                'sustainable transportation!',
+                'CO₂ Saved: 2.4 kg',
+                'Visit us at greentransport.eco'
+            ];
+            
+            let y = 30;
+            lines.forEach((line, index) => {
+                if (index === 0) {
+                    ctx.font = 'bold 14px Courier New';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(line, canvas.width/2, y);
+                    ctx.font = '12px Courier New';
+                } else if (index < 4 || index > 18) {
+                    ctx.textAlign = 'center';
+                    ctx.fillText(line, canvas.width/2, y);
+                } else if (index === 15) {
+                    ctx.font = 'bold 14px Courier New';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(line, canvas.width/2, y);
+                    ctx.font = '12px Courier New';
+                } else {
+                    ctx.textAlign = 'left';
+                    ctx.fillText(line, 40, y);
+                }
+                y += 20;
+            });
+            
+            // Download
+            const link = document.createElement('a');
+            link.download = 'sustainable-transport-receipt.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+    </script>
+</body>
+</html>
