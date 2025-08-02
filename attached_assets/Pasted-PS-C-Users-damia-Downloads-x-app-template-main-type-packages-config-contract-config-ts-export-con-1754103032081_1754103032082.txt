@@ -1,0 +1,734 @@
+PS C:\Users\damia\Downloads\x-app-template-main> type packages\config-contract\config.ts
+export const config = {
+  "TOKEN_ADDRESS": "0x0dd62dac6abb12bd62a58469b34f4d986697ef19",
+  "CONTRACT_ADDRESS": "0xf2443d37e05d8797a6ac614843d20442327c0b6a",
+  "X2EARN_REWARDS_POOL": "0x5F8f86B8D0Fa93cdaE20936d150175dF0205fB38",
+  "X2EARN_APPS": "0xcB23Eb1bBD5c07553795b9538b1061D0f4ABA153",
+  "APP_ID": "0x899de0d0f0b39e484c8835b2369194c4c102b230c813862db383d44a4efe14d3",
+  "CYCLE_DURATION": 60480,
+  "MAX_SUBMISSIONS_PER_CYCLE": 10
+};
+export const ECO_SOL_ABI = [
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_admin",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_x2EarnRewardsPoolContract",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_cycleDuration",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_maxSubmissionsPerCycle",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "_appId",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "inputs": [],
+    "name": "AccessControlBadConfirmation",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "neededRole",
+        "type": "bytes32"
+      }
+    ],
+    "name": "AccessControlUnauthorizedAccount",
+    "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "cycle",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "ClaimedAllocation",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "newDuration",
+        "type": "uint256"
+      }
+    ],
+    "name": "CycleDurationUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "cycleStartBlock",
+        "type": "uint256"
+      }
+    ],
+    "name": "CycleStarted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "previousAdminRole",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "newAdminRole",
+        "type": "bytes32"
+      }
+    ],
+    "name": "RoleAdminChanged",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "sender",
+        "type": "address"
+      }
+    ],
+    "name": "RoleGranted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "sender",
+        "type": "address"
+      }
+    ],
+    "name": "RoleRevoked",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "participant",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "Submission",
+    "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "DEFAULT_ADMIN_ROLE",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "appId",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "cycleDuration",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getCurrentCycle",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getNextCycleBlock",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      }
+    ],
+    "name": "getRoleAdmin",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "grantRole",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "hasRole",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "participant",
+        "type": "address"
+      }
+    ],
+    "name": "isUserMaxSubmissionsReached",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "lastCycleStartBlock",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "maxSubmissionsPerCycle",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "nextCycle",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "participant",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "registerValidSubmission",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "address",
+        "name": "callerConfirmation",
+        "type": "address"
+      }
+    ],
+    "name": "renounceRole",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "revokeRole",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "rewards",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "rewardsLeft",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "_appId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "setAppId",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_maxSubmissionsPerCycle",
+        "type": "uint256"
+      }
+    ],
+    "name": "setMaxSubmissionsPerCycle",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_nextCycle",
+        "type": "uint256"
+      }
+    ],
+    "name": "setNextCycle",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "setRewardsAmount",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "submissions",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes4",
+        "name": "interfaceId",
+        "type": "bytes4"
+      }
+    ],
+    "name": "supportsInterface",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "totalSubmissions",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "triggerCycle",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "cycle",
+        "type": "uint256"
+      }
+    ],
+    "name": "withdrawRewards",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "x2EarnRewardsPoolContract",
+    "outputs": [
+      {
+        "internalType": "contract IX2EarnRewardsPool",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+] as const;
+PS C:\Users\damia\Downloads\x-app-template-main> type apps\contracts\scripts\deploy.ts
+import { ethers, network } from 'hardhat';
+import { updateConfig, config } from '@repo/config-contract';
+import { getABI } from '../utils/abi';
+
+export async function deploy() {
+    const deployer = (await ethers.getSigners())[0];
+    console.log(`Deploying on ${network.name} with wallet ${deployer.address}...`);
+
+    let REWARD_TOKEN_ADDRESS = config.TOKEN_ADDRESS;
+    let X2EARN_REWARDS_POOL = config.X2EARN_REWARDS_POOL;
+    let X2EARN_APPS = config.X2EARN_APPS;
+    let APP_ID = config.APP_ID;
+
+    // If we are running on the solo network, we need to deploy the mock contracts
+    // and generate the appID
+    if (network.name === 'vechain_solo') {
+        console.log(`Deploying mock RewardToken...`);
+        const RewardTokenContract = await ethers.getContractFactory('B3TR_Mock');
+        const rewardToken = await RewardTokenContract.deploy();
+        await rewardToken.waitForDeployment();
+        REWARD_TOKEN_ADDRESS = await rewardToken.getAddress();
+        console.log(`RewardToken deployed to ${REWARD_TOKEN_ADDRESS}`);
+
+        console.log('Deploying X2EarnApps mock contract...');
+        const X2EarnAppsContract = await ethers.getContractFactory('X2EarnAppsMock');
+        const x2EarnApps = await X2EarnAppsContract.deploy();
+        await x2EarnApps.waitForDeployment();
+        X2EARN_APPS = await x2EarnApps.getAddress();
+        console.log(`X2EarnApps deployed to ${await x2EarnApps.getAddress()}`);
+
+        console.log('Deploying X2EarnRewardsPool mock contract...');
+        const X2EarnRewardsPoolContract = await ethers.getContractFactory('X2EarnRewardsPoolMock');
+        const x2EarnRewardsPool = await X2EarnRewardsPoolContract.deploy(deployer.address, REWARD_TOKEN_ADDRESS, await x2EarnApps.getAddress());
+        await x2EarnRewardsPool.waitForDeployment();
+        X2EARN_REWARDS_POOL = await x2EarnRewardsPool.getAddress();
+        console.log(`X2EarnRewardsPool deployed to ${await x2EarnRewardsPool.getAddress()}`);
+
+        console.log('Adding app in X2EarnApps...');
+        await x2EarnApps.addApp(deployer.address, deployer.address, 'EcoEarn');
+        const appID = await x2EarnApps.hashAppName('EcoEarn');
+        APP_ID = appID;
+        console.log(`AppID: ${appID}`);
+
+        console.log(`Funding contract...`);
+        await rewardToken.approve(await x2EarnRewardsPool.getAddress(), ethers.parseEther('10000'));
+        await x2EarnRewardsPool.deposit(ethers.parseEther('2000'), appID);
+        console.log('Funded');
+    }
+
+    console.log('Deploying EcoEarn contract...');
+    const ecoEarn = await ethers.getContractFactory('EcoEarn');
+
+    const ecoEarnInstance = await ecoEarn.deploy(
+        deployer.address,
+        X2EARN_REWARDS_POOL, // mock in solo, from config in testnet/mainnet
+        config.CYCLE_DURATION,
+        config.MAX_SUBMISSIONS_PER_CYCLE,
+        APP_ID, // mock in solo, from config in testnet/mainnet
+    );
+    await ecoEarnInstance.waitForDeployment();
+
+    const ecoEarnAddress = await ecoEarnInstance.getAddress();
+    console.log(`EcoEarn deployed to: ${ecoEarnAddress}`);
+
+    console.log('To start using the contract, we need to set the rewards amount and switch to the next cycle');
+
+    const rewardsAmountResult = await (await ecoEarnInstance.setRewardsAmount(1000000000000000000000n)).wait();
+
+    console.log('Rewards set reward amount to 1000');
+
+    if (rewardsAmountResult == null || rewardsAmountResult.status !== 1) {
+        throw new Error('Failed to set rewards amount');
+    }
+
+    const nextCycleResult = await (await ecoEarnInstance.setNextCycle(2n)).wait();
+
+    if (nextCycleResult == null || nextCycleResult.status !== 1) {
+        throw new Error('Failed to set next cycle');
+    }
+
+    console.log('Switched to next cycle');
+
+    // In solo network, we need to add the EcoEarn contract as a distributor
+    if (network.name === 'vechain_solo') {
+        console.log('Add EcoEarn contracts as distributor...');
+        const x2EarnApps = await ethers.getContractAt('X2EarnAppsMock', X2EARN_APPS);
+        await x2EarnApps.addRewardDistributor(APP_ID, ecoEarnAddress);
+        console.log('Added');
+    }
+
+    const ecoSolAbi = await getABI('EcoEarn');
+
+    updateConfig(
+        {
+            ...config,
+            CONTRACT_ADDRESS: ecoEarnAddress,
+            TOKEN_ADDRESS: REWARD_TOKEN_ADDRESS,
+        },
+        ecoSolAbi,
+    );
+
+    console.log(`Done`);
+}
+PS C:\Users\damia\Downloads\x-app-template-main> type packages\config-contract\index.ts
+export * from "./config";
+export * from "./updateConfig";
+PS C:\Users\damia\Downloads\x-app-template-main>
