@@ -1,0 +1,48 @@
+PS C:\Users\damia\Downloads\x-app-template-main> type package.json
+{
+  "name": "x-app-template",
+  "private": true,
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "lint": "turbo lint",
+    "lint:fix": "turbo lint:fix",
+    "test": "turbo test",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "contracts:compile": "turbo run compile",
+    "contracts:test": "turbo run contracts:test",
+    "contracts:deploy:solo": "turbo run deploy:solo",
+    "contracts:deploy:testnet": "turbo run deploy:testnet",
+    "contracts:solo-up": "turbo run solo-up",
+    "contracts:solo-down": "turbo run solo-down"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "turbo": "^2.1.2"
+  },
+  "packageManager": "yarn@1.22.21",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
+}
+PS C:\Users\damia\Downloads\x-app-template-main> dir packages 2>nul
+out-file : FileStream was asked to open a device that was not a file. For support for devices like 'com1:' or
+'lpt1:', call CreateFile, then use the FileStream constructors that take an OS handle as an IntPtr.
+At line:1 char:1
++ dir packages 2>nul
++ ~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OpenError: (:) [Out-File], NotSupportedException
+    + FullyQualifiedErrorId : FileOpenFailure,Microsoft.PowerShell.Commands.OutFileCommand
+
+PS C:\Users\damia\Downloads\x-app-template-main> findstr /s /i "CONTRACT_ADDRESS" . 2>nul
+out-file : FileStream was asked to open a device that was not a file. For support for devices like 'com1:' or
+'lpt1:', call CreateFile, then use the FileStream constructors that take an OS handle as an IntPtr.
+At line:1 char:1
++ findstr /s /i "CONTRACT_ADDRESS" . 2>nul
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OpenError: (:) [Out-File], NotSupportedException
+    + FullyQualifiedErrorId : FileOpenFailure,Microsoft.PowerShell.Commands.OutFileCommand
+
+PS C:\Users\damia\Downloads\x-app-template-main>
