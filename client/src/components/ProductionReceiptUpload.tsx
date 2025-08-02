@@ -73,6 +73,14 @@ export function ProductionReceiptUpload({
 
       setUploadProgress(30);
 
+      console.log('[UPLOAD] 📤 Sending validation request...');
+      console.log('[UPLOAD] Request data:', {
+        userId,
+        walletAddress,
+        imageSize: base64.length,
+        hasBase64: !!base64
+      });
+
       // Submit to ReCircle production API with Pierre's validation
       const response = await fetch('/api/receipts/validate', {
         method: 'POST',
@@ -90,12 +98,16 @@ export function ProductionReceiptUpload({
       });
 
       setUploadProgress(70);
+      console.log('[UPLOAD] 📨 Response status:', response.status, response.statusText);
 
       if (!response.ok) {
-        throw new Error('Receipt validation failed');
+        const errorText = await response.text();
+        console.error('[UPLOAD] ❌ Server error response:', errorText);
+        throw new Error(`Server Error ${response.status}: ${errorText}`);
       }
 
       const result: ValidationResult = await response.json();
+      console.log('[UPLOAD] ✅ Validation result:', result);
       setUploadProgress(100);
 
       setValidationResult(result);
@@ -110,16 +122,22 @@ export function ProductionReceiptUpload({
       } else {
         toast({
           title: "Receipt Processed",
-          description: `Validity score: ${result.aiValidation.validityScore}. ${result.aiValidation.reasoning}`,
+          description: `Validity score: ${result.aiValidation?.validityScore || 'N/A'}. ${result.aiValidation?.reasoning || 'Analysis complete'}`,
           variant: result.isValid ? "default" : "destructive",
         });
       }
 
     } catch (error) {
-      console.error('Upload failed:', error);
+      console.error('[UPLOAD] ❌ Upload failed:', error);
+      console.error('[UPLOAD] Error details:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : 'No stack trace',
+        name: error instanceof Error ? error.name : 'Unknown error'
+      });
+      
       toast({
         title: "Upload Failed",
-        description: "Please try again with a clear receipt image.",
+        description: `Error: ${error instanceof Error ? error.message : 'Please try again with a clear receipt image'}`,
         variant: "destructive",
       });
     } finally {

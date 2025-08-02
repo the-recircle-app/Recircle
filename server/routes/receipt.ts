@@ -47,10 +47,17 @@ router.post('/validate', async (req, res) => {
     }
     
     // Use Pierre's OpenAI Vision API for real receipt analysis
+    console.log(`[RECEIPT] 🔍 Starting OpenAI image analysis...`);
+    console.log(`[RECEIPT] Image size: ${image.length} characters`);
+    
     const aiValidation = await pierreOpenAIService.validateImage(image);
     
+    console.log(`[RECEIPT] 🤖 OpenAI validation result:`, aiValidation);
+    
     if (!aiValidation || !('validityFactor' in aiValidation)) {
-      throw new Error('AI validation failed');
+      console.error('[RECEIPT] ❌ AI validation failed - no valid response from OpenAI');
+      console.error('[RECEIPT] Received:', aiValidation);
+      throw new Error('AI validation failed - could not analyze receipt image');
     }
     
     const validityScore = aiValidation.validityFactor;
