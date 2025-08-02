@@ -1,0 +1,50 @@
+PS C:\Users\damia\Downloads\x-app-template-main> echo # PORT > apps\backend\.env
+
+cmdlet Write-Output at command pipeline position 1
+Supply values for the following parameters:
+InputObject[0]: nd\.env
+InputObject[1]: echo ADMIN_MNEMONIC = abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about >> apps\backend\.env
+InputObject[2]: echo ADMIN_ADDRESS = 0x0000000000000000000000000000000000000000 >> apps\backend\.env
+InputObject[3]: echo. >> apps\backend\.env
+InputObject[4]: echo # NETWORK >> apps\backend\.env
+InputObject[5]: echo NETWORK_URL = http://localhost:8669 >> apps\backend\.env
+InputObject[6]: echo NETWORK_TYPE = solo >> apps\backend\.env
+InputObject[7]: echo. >> apps\backend\.env
+InputObject[8]: echo # CAPTCHA >> apps\backend\.env
+InputObject[9]: echo RECAPTCHA_SECRET_KEY = dummy_key_for_dev >> apps\backend\.env
+InputObject[10]: echo. >> apps\backend\.env
+InputObject[11]: echo # Rewards >> apps\backend\.env
+InputObject[12]: echo REWARD_AMOUNT = 100 >> apps\backend\.env
+InputObject[13]: type apps\backend\.env
+InputObject[14]:
+PS C:\Users\damia\Downloads\x-app-template-main> echo PORT = 8080 >> apps\backend\.env
+PS C:\Users\damia\Downloads\x-app-template-main> echo. >> apps\backend\.env
+echo. : The term 'echo.' is not recognized as the name of a cmdlet, function, script file, or operable program.
+Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:1
++ echo. >> apps\backend\.env
++ ~~~~~
+    + CategoryInfo          : ObjectNotFound: (echo.:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Users\damia\Downloads\x-app-template-main> echo # LOG >> apps\backend\.env
+
+cmdlet Write-Output at command pipeline position 1
+Supply values for the following parameters:
+InputObject[0]:
+PS C:\Users\damia\Downloads\x-app-template-main> echo LOG_FORMAT = dev >> apps\backend\.env
+PS C:\Users\damia\Downloads\x-app-template-main> echo LOG_DIR = ../logs >> apps\backend\.env
+PS C:\Users\damia\Downloads\x-app-template-main> echo. >> apps\backend\.env
+echo. : The term 'echo.' is not recognized as the name of a cmdlet, function, script file, or operable program.
+Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:1
++ echo. >> apps\backend\.env
++ ~~~~~
+    + CategoryInfo          : ObjectNotFound: (echo.:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Users\damia\Downloads\x-app-template-main> echo # CORS >> apps\backend\.env
+
+cmdlet Write-Output at command pipeline position 1
+Supply values for the following parameters:
+InputObject[0]:
