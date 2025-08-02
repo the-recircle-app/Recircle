@@ -120,9 +120,12 @@ export function ProductionReceiptUpload({
           description: `Earned ${result.actualReward} B3TR tokens for sustainable transportation!`,
         });
       } else {
+        const validityScore = result.aiValidation?.validityScore ?? result.confidence ?? 0;
+        const reasoning = result.aiValidation?.reasoning ?? result.reasons?.[0] ?? 'Analysis complete';
+        
         toast({
           title: "Receipt Processed",
-          description: `Validity score: ${result.aiValidation?.validityScore || 'N/A'}. ${result.aiValidation?.reasoning || 'Analysis complete'}`,
+          description: `Validity score: ${validityScore.toFixed(2)}. ${reasoning}`,
           variant: result.isValid ? "default" : "destructive",
         });
       }
