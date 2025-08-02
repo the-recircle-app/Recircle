@@ -27,7 +27,19 @@ router.post('/validate', async (req, res) => {
     console.log(`[RECEIPT] Wallet: ${walletAddress}`);
     
     if (!image) {
-      return res.status(400).json({ error: 'Receipt image is required' });
+      console.error('[RECEIPT] No image data received in request body');
+      return res.status(400).json({ error: 'Missing or invalid image data. Please provide base64 encoded image.' });
+    }
+    
+    // Validate base64 image format
+    if (typeof image !== 'string' || image.length < 100) {
+      console.error('[RECEIPT] Invalid image data:', {
+        hasImage: !!image,
+        imageType: typeof image,
+        imageLength: image?.length || 0,
+        firstChars: image?.substring(0, 50) || 'none'
+      });
+      return res.status(400).json({ error: 'Missing or invalid image data. Please provide base64 encoded image.' });
     }
     
     if (!walletAddress) {

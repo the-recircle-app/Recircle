@@ -55,12 +55,19 @@ export function ProductionReceiptUpload({
 
     try {
       // Convert file to base64
-      const base64 = await new Promise<string>((resolve) => {
+      const base64 = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => {
           const result = reader.result as string;
-          resolve(result.split(',')[1]); // Remove data:image/jpeg;base64, prefix
+          if (!result) {
+            reject(new Error('Failed to read file'));
+            return;
+          }
+          const base64Data = result.split(',')[1]; // Remove data:image/jpeg;base64, prefix
+          console.log('[UPLOAD] File converted to base64, size:', base64Data.length, 'chars');
+          resolve(base64Data);
         };
+        reader.onerror = () => reject(new Error('Failed to read file'));
         reader.readAsDataURL(file);
       });
 
