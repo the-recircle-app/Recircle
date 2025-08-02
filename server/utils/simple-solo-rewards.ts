@@ -1,8 +1,10 @@
 /**
  * Simple Solo Node B3TR Distribution
- * Pierre-style approach that works directly with the solo node
- * This bypasses all the complex VeChain SDK issues and just works
+ * Pierre-style approach with proper VeChain transaction validation
+ * Implements Cooper's advice: poll for receipt and check reverted flag
  */
+
+import { vechainValidator } from './vechain-transaction-validator.js';
 
 /**
  * Distribute B3TR tokens using Pierre's simple approach
@@ -36,22 +38,49 @@ export async function distributeB3TRTokensSimple(
             const userTxHash = generateTxHash();
             const appFundTxHash = generateTxHash();
             
-            console.log(`✅ Pierre-style User Distribution: ${userAmount} B3TR`);
-            console.log(`✅ Transaction Hash: ${userTxHash}`);
-            console.log(`✅ App Fund Distribution: ${appFundAmount} B3TR`);
-            console.log(`✅ Transaction Hash: ${appFundTxHash}`);
+            // Use proper transaction validation as Cooper advised
+            const txResult = await vechainValidator.submitAndValidateTransaction(
+                {
+                    userAmount,
+                    appFundAmount,
+                    walletAddress,
+                    metadata
+                },
+                `B3TR distribution: ${userAmount} to user, ${appFundAmount} to app fund`
+            );
             
-            return {
-                success: true,
-                txHash: userTxHash,
-                error: undefined
-            };
+            if (txResult.success) {
+                console.log(`✅ Validated B3TR Distribution:`);
+                console.log(`   User: ${userAmount} B3TR → ${walletAddress}`);
+                console.log(`   App Fund: ${appFundAmount} B3TR`);
+                console.log(`   Transaction: ${txResult.txHash}`);
+                console.log(`   Receipt confirmed (not reverted)`);
+                
+                return {
+                    success: true,
+                    txHash: txResult.txHash,
+                    error: undefined
+                };
+            } else {
+                console.error(`❌ Transaction validation failed: ${txResult.error}`);
+                return {
+                    success: false,
+                    error: txResult.error
+                };
+            }
         }
         
-        // Production mode would use real VeBetterDAO contracts
+        // Production mode - implement proper VeChain transaction validation
+        // Following Cooper's advice: poll for transaction receipt and check reverted flag
+        console.log('🚨 [PRODUCTION] VeChain transaction validation needed:');
+        console.log('   - Submit transaction to VeChain network');
+        console.log('   - Poll for transaction receipt (blocks every 10 seconds)');
+        console.log('   - Check receipt.reverted flag for success/failure');
+        console.log('   - Only return success after receipt confirms execution');
+        
         return {
             success: false,
-            error: 'Production VeBetterDAO integration not configured'
+            error: 'Production VeBetterDAO integration requires proper transaction receipt validation'
         };
         
     } catch (error) {
