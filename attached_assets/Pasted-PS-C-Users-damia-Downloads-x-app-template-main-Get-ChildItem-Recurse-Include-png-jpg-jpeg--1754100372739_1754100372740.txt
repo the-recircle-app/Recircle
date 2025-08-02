@@ -1,0 +1,218 @@
+PS C:\Users\damia\Downloads\x-app-template-main> Get-ChildItem -Recurse -Include *.png,*.jpg,*.jpeg
+
+
+    Directory: C:\Users\damia\Downloads\x-app-template-main\apps\frontend\public
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----         9/13/2024  11:12 AM         197836 ecology-bag-with-leaves.png
+-a----         9/13/2024  11:12 AM         238314 logo.png
+
+
+    Directory: C:\Users\damia\Downloads\x-app-template-main\node_modules\@jest\reporters\assets
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----          8/1/2025   4:56 PM           3157 jest_logo.png
+
+
+    Directory: C:\Users\damia\Downloads\x-app-template-main\node_modules\@pm2\io\pres
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----          8/1/2025   4:56 PM          11535 io-black.png
+-a----          8/1/2025   4:56 PM          11720 io-white.png
+
+
+    Directory: C:\Users\damia\Downloads\x-app-template-main\node_modules\@truffle\codec\dist\docs\media
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----          8/1/2025   4:57 PM          95332 example-struct-decoding.png
+
+
+    Directory: C:\Users\damia\Downloads\x-app-template-main\node_modules\@trufflesuite\chromafi\examples
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----          8/1/2025   4:57 PM          24271 figure-00.png
+-a----          8/1/2025   4:57 PM          54697 figure-01.png
+-a----          8/1/2025   4:57 PM          32312 figure-02.png
+-a----          8/1/2025   4:57 PM         122271 figure-03.png
+-a----          8/1/2025   4:57 PM          27423 figure-04.png
+-a----          8/1/2025   4:57 PM          55508 figure-05.png
+-a----          8/1/2025   4:57 PM         184840 figure-06.png
+
+
+    Directory: C:\Users\damia\Downloads\x-app-template-main\node_modules\@trufflesuite\chromafi
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----          8/1/2025   4:57 PM        1294002 chromafi-logo.png
+
+
+    Directory: C:\Users\damia\Downloads\x-app-template-main\node_modules\content-hash\demo
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----          8/1/2025   4:57 PM          71845 gear.png
+
+
+    Directory: C:\Users\damia\Downloads\x-app-template-main\node_modules\croner
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----          8/1/2025   4:56 PM           8382 croner.png
+
+
+    Directory: C:\Users\damia\Downloads\x-app-template-main\node_modules\ganache-cli\resources\icons
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----          8/1/2025   4:55 PM           6287 ganache-cli-128x128.png
+
+
+    Directory: C:\Users\damia\Downloads\x-app-template-main\node_modules\hamt-sharding\docs\assets\images
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----          8/1/2025   4:57 PM           9615 icons.png
+-a----          8/1/2025   4:57 PM          28144 icons@2x.png
+-a----          8/1/2025   4:57 PM            480 widgets.png
+-a----          8/1/2025   4:57 PM            855 widgets@2x.png
+
+
+    Directory: C:\Users\damia\Downloads\x-app-template-main\node_modules\highlight.js\scss
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----          8/1/2025   4:57 PM          18198 brown-papersq.png
+-a----          8/1/2025   4:57 PM           1186 pojoaque.jpg
+-a----          8/1/2025   4:57 PM            486 school-book.png
+
+
+    Directory: C:\Users\damia\Downloads\x-app-template-main\node_modules\highlight.js\styles
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----          8/1/2025   4:57 PM          18198 brown-papersq.png
+-a----          8/1/2025   4:57 PM           1186 pojoaque.jpg
+-a----          8/1/2025   4:57 PM            486 school-book.png
+
+
+    Directory: C:\Users\damia\Downloads\x-app-template-main\node_modules\istanbul-reports\lib\html\assets
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----          8/1/2025   4:57 PM            445 favicon.png
+-a----          8/1/2025   4:57 PM            138 sort-arrow-sprite.png
+
+
+    Directory: C:\Users\damia\Downloads\x-app-template-main\node_modules\istanbul-reports\lib\html-spa\assets
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----          8/1/2025   4:57 PM            138 sort-arrow-sprite.png
+
+
+    Directory: C:\Users\damia\Downloads\x-app-template-main\node_modules\lottie-web\test\animations\footage\images
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----          8/1/2025   4:56 PM          14897 img_0.jpg
+-a----          8/1/2025   4:56 PM         157887 img_1.jpg
+
+
+    Directory: C:\Users\damia\Downloads\x-app-template-main\node_modules\oboe
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----          8/1/2025   4:57 PM          14032 logo.png
+
+
+    Directory: C:\Users\damia\Downloads\x-app-template-main\node_modules\pngjs\coverage\lcov-report
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----          8/1/2025   4:57 PM            540 favicon.png
+-a----          8/1/2025   4:57 PM            209 sort-arrow-sprite.png
+
+
+    Directory: C:\Users\damia\Downloads\x-app-template-main\node_modules\sc-istanbul\lib\assets
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----          8/1/2025   4:56 PM            209 sort-arrow-sprite.png
+
+
+    Directory: C:\Users\damia\Downloads\x-app-template-main\node_modules\swagger-jsdoc\docusaurus\static\img
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----          8/1/2025   4:55 PM           5142 docusaurus.png
+-a----          8/1/2025   4:55 PM         107629 screenshot.png
+
+
+    Directory: C:\Users\damia\Downloads\x-app-template-main\node_modules\swagger-ui-dist
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----          8/1/2025   4:55 PM            665 favicon-16x16.png
+-a----          8/1/2025   4:55 PM            628 favicon-32x32.png
+
+
+    Directory: C:\Users\damia\Downloads\x-app-template-main\node_modules\swarm-js\examples\uploader_dapp
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----          8/1/2025   4:57 PM            304 ethereum_icon.png
+
+
+    Directory: C:\Users\damia\Downloads\x-app-template-main\node_modules\ts-command-line-args\coverage\lcov-report
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----          8/1/2025   4:56 PM            540 favicon.png
+-a----          8/1/2025   4:56 PM            209 sort-arrow-sprite.png
+
+
+    Directory: C:\Users\damia\Downloads\x-app-template-main\node_modules\undici\docs\assets
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----          8/1/2025   4:56 PM          47090 lifecycle-diagram.png
+
+
+    Directory: C:\Users\damia\Downloads\x-app-template-main\node_modules\x-dapp-frontend\public
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----         9/13/2024  11:12 AM         197836 ecology-bag-with-leaves.png
+-a----         9/13/2024  11:12 AM         238314 logo.png
+
+
+PS C:\Users\damia\Downloads\x-app-template-main>
