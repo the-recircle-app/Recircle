@@ -1,0 +1,46 @@
+PS C:\Users\damia\Downloads\x-app-template-main> dir packages
+
+
+    Directory: C:\Users\damia\Downloads\x-app-template-main\packages
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----          8/1/2025   4:46 PM                config-contract
+d-----          8/1/2025   4:46 PM                config-typescript
+d-----          8/1/2025   4:57 PM                utils
+
+
+PS C:\Users\damia\Downloads\x-app-template-main> Get-ChildItem -Recurse -Include "*.ts","*.js","*.json" | Select-String "CONTRACT_ADDRESS"
+
+apps\backend\src\utils\thor.ts:11:  config.CONTRACT_ADDRESS,
+apps\contracts\scripts\deploy.ts:96:            CONTRACT_ADDRESS: ecoEarnAddress,
+node_modules\@nomicfoundation\edr\index.d.ts:632:  setCallOverrideCallback(callOverrideCallback:
+(contract_address: Buffer, data: Buffer) => Promise<CallOverrideResult | undefined>): void
+node_modules\@repo\config-contract\config.ts:3:  "CONTRACT_ADDRESS": "0xf2443d37e05d8797a6ac614843d20442327c0b6a",
+node_modules\@repo\contracts\scripts\deploy.ts:96:            CONTRACT_ADDRESS: ecoEarnAddress,
+node_modules\ethers\lib.commonjs\address\index.js:22:var contract_address_js_1 = require("./contract-address.js");
+node_modules\ethers\lib.commonjs\address\index.js:23:Object.defineProperty(exports, "getCreateAddress", {
+enumerable: true, get: function () { return contract_address_js_1.getCreateAddress; } });
+node_modules\ethers\lib.commonjs\address\index.js:24:Object.defineProperty(exports, "getCreate2Address", {
+enumerable: true, get: function () { return contract_address_js_1.getCreate2Address; } });
+node_modules\x-dapp-backend\src\utils\thor.ts:11:  config.CONTRACT_ADDRESS,
+packages\config-contract\config.ts:3:  "CONTRACT_ADDRESS": "0xf2443d37e05d8797a6ac614843d20442327c0b6a",
+
+
+PS C:\Users\damia\Downloads\x-app-template-main> dir packages\config-contract 2>$null
+
+
+    Directory: C:\Users\damia\Downloads\x-app-template-main\packages\config-contract
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----         9/13/2024  11:12 AM          12032 config.ts
+-a----         9/13/2024  11:12 AM             58 index.ts
+-a----         9/13/2024  11:12 AM            237 package-lock.json
+-a----         9/13/2024  11:12 AM            179 package.json
+-a----         9/13/2024  11:12 AM            381 updateConfig.ts
+
+
+PS C:\Users\damia\Downloads\x-app-template-main>
