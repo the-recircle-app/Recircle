@@ -4,6 +4,7 @@ import { pierreOpenAIService } from '../utils/pierre-openai-service';
 import { pierreContractsService } from '../utils/pierre-contracts-service';
 import { submissionSchema, type Submission } from '../../shared/pierre-vebetterdao-types';
 import { VeBetterDAOConfig } from '../../shared/pierre-vebetterdao-types';
+import { distributeB3TRTokensSimple } from '../utils/simple-solo-rewards.js';
 
 export class PierreSubmissionController {
   async submitReceipt(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -45,12 +46,28 @@ export class PierreSubmissionController {
       // Step 3: Token distribution if validity threshold met (Pierre's pattern)
       let tokenDistributed = false;
       if (validityFactor > VeBetterDAOConfig.VALIDITY_THRESHOLD) {
-        console.log(`✅ Validity score ${validityFactor} > ${VeBetterDAOConfig.VALIDITY_THRESHOLD}, would distribute tokens...`);
+        console.log(`✅ Validity score ${validityFactor} > ${VeBetterDAOConfig.VALIDITY_THRESHOLD}, distributing real B3TR tokens...`);
         
-        // For testing, simulate successful token distribution
-        tokenDistributed = true;
-        console.log(`🎯 [TESTING] Simulated B3TR token distribution to ${submissionRequest.address}`);
-        console.log(`🎯 [TESTING] Would distribute ${VeBetterDAOConfig.REWARD_AMOUNT} B3TR tokens`);
+        try {
+          // Use the existing ReCircle blockchain service to distribute tokens
+          const rewardAmount = parseFloat(VeBetterDAOConfig.REWARD_AMOUNT);
+          const distributionResult = await distributeB3TRTokensSimple(
+            submissionRequest.deviceID, 
+            submissionRequest.address, 
+            rewardAmount, 
+            'Pierre VeBetterDAO receipt validation reward'
+          );
+          
+          if (!distributionResult.success) {
+            throw new Error(distributionResult.error || 'Token distribution failed');
+          }
+          tokenDistributed = true;
+          console.log(`🎯 ✅ Successfully distributed ${VeBetterDAOConfig.REWARD_AMOUNT} B3TR tokens to ${submissionRequest.address}`);
+        } catch (error) {
+          console.error(`🎯 ❌ Token distribution failed:`, error);
+          // Continue processing but mark as not distributed
+          tokenDistributed = false;
+        }
         
       } else {
         console.log(`❌ Validity score ${validityFactor} <= ${VeBetterDAOConfig.VALIDITY_THRESHOLD}, no tokens distributed`);
