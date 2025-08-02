@@ -1,0 +1,82 @@
+PS C:\Users\damia> cd C:\Users\damia\Downloads\x-app-template-main
+PS C:\Users\damia\Downloads\x-app-template-main> pwd
+
+Path
+----
+C:\Users\damia\Downloads\x-app-template-main
+
+
+PS C:\Users\damia\Downloads\x-app-template-main> type apps\backend\.env^C
+PS C:\Users\damia\Downloads\x-app-template-main> echo PORT=8080 > apps\backend\.env
+PS C:\Users\damia\Downloads\x-app-template-main> echo LOG_FORMAT=dev >> apps\backend\.env
+PS C:\Users\damia\Downloads\x-app-template-main> echo LOG_DIR=../logs >> apps\backend\.env
+PS C:\Users\damia\Downloads\x-app-template-main> echo ORIGIN=http://localhost:8082 >> apps\backend\.env
+PS C:\Users\damia\Downloads\x-app-template-main> echo CREDENTIALS=true >> apps\backend\.env
+PS C:\Users\damia\Downloads\x-app-template-main> echo OPENAI_API_KEY=dummy_key_for_dev >> apps\backend\.env
+PS C:\Users\damia\Downloads\x-app-template-main> echo MAX_FILE_SIZE=10mb >> apps\backend\.env
+PS C:\Users\damia\Downloads\x-app-template-main> echo ADMIN_MNEMONIC=abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about >> apps\backend\.env
+PS C:\Users\damia\Downloads\x-app-template-main> echo ADMIN_ADDRESS=0x0000000000000000000000000000000000000000 >> apps\backend\.env
+PS C:\Users\damia\Downloads\x-app-template-main> echo NETWORK_URL=http://localhost:8669 >> apps\backend\.env
+PS C:\Users\damia\Downloads\x-app-template-main> echo NETWORK_TYPE=solo >> apps\backend\.env
+PS C:\Users\damia\Downloads\x-app-template-main> echo RECAPTCHA_SECRET_KEY=dummy_key_for_dev >> apps\backend\.env
+PS C:\Users\damia\Downloads\x-app-template-main> echo REWARD_AMOUNT=100 >> apps\backend\.env
+PS C:\Users\damia\Downloads\x-app-template-main> type apps\backend\.env
+PORT=8080
+LOG_FORMAT=dev
+LOG_DIR=../logs
+ORIGIN=http://localhost:8082
+CREDENTIALS=true
+OPENAI_API_KEY=dummy_key_for_dev
+MAX_FILE_SIZE=10mb
+ADMIN_MNEMONIC=abandon
+abandon
+abandon
+abandon
+abandon
+abandon
+abandon
+abandon
+abandon
+abandon
+abandon
+about
+ADMIN_ADDRESS=0x0000000000000000000000000000000000000000
+NETWORK_URL=http://localhost:8669
+NETWORK_TYPE=solo
+RECAPTCHA_SECRET_KEY=dummy_key_for_dev
+REWARD_AMOUNT=100
+PS C:\Users\damia\Downloads\x-app-template-main> yarn dev
+yarn run v1.22.22
+$ turbo dev
+turbo 2.1.2
+
+• Packages in scope: @repo/config-contract, @repo/contracts, @repo/typescript-config, @repo/utils, x-dapp-backend, x-dapp-frontend
+• Running dev in 6 packages
+• Remote caching disabled
+x-dapp-frontend:dev: cache bypass, force executing 93fd8919363c273d
+x-dapp-backend:dev: cache bypass, force executing c6bd8b88eb62b87b
+x-dapp-frontend:dev: yarn run v1.22.22
+x-dapp-backend:dev: yarn run v1.22.22
+x-dapp-frontend:dev: $ vite --port 8082 --host
+x-dapp-backend:dev: warning package.json: No license field
+x-dapp-backend:dev: warning package.json: "dependencies" has dependency "ethers" with range "^6.12.0" that collides with a dependency in "devDependencies" of the same name with version "^6.11.1"
+x-dapp-backend:dev: $ cross-env NODE_ENV=development nodemon
+x-dapp-frontend:dev:
+x-dapp-frontend:dev:   VITE v5.2.11  ready in 372 ms
+x-dapp-frontend:dev:
+x-dapp-frontend:dev:   ➜  Local:   http://localhost:8082/
+x-dapp-frontend:dev:   ➜  Network: http://172.27.80.1:8082/
+x-dapp-frontend:dev:   ➜  Network: http://192.168.12.101:8082/
+x-dapp-backend:dev: [nodemon] 2.0.22
+x-dapp-backend:dev: [nodemon] to restart at any time, enter `rs`
+x-dapp-backend:dev: [nodemon] watching path(s): src\**\* .env
+x-dapp-backend:dev: [nodemon] watching extensions: js,ts,json
+x-dapp-backend:dev: [nodemon] starting `ts-node -r tsconfig-paths/register --transpile-only src/server.ts`
+x-dapp-backend:dev: ================================
+x-dapp-backend:dev:  Missing environment variables:
+x-dapp-backend:dev:     ADMIN_MNEMONIC: undefined
+x-dapp-backend:dev:     OPENAI_API_KEY: undefined
+x-dapp-backend:dev: ================================
+x-dapp-backend:dev:
+x-dapp-backend:dev:  Exiting with error code 1
+x-dapp-backend:dev: [nodemon] app crashed - waiting for file changes before starting...
