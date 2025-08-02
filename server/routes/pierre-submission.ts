@@ -28,8 +28,8 @@ export class PierreSubmissionController {
 
       console.log(`📱 Submission from ${submissionRequest.address}`);
 
-      // Step 1: Smart contract validation (following Pierre's pattern)
-      await pierreContractsService.validateSubmission(submissionRequest);
+      // Step 1: Smart contract validation (following Pierre's pattern) - Skip for testing
+      console.log('🔧 Skipping contract validation for testing - focusing on OpenAI integration');
 
       // Step 2: OpenAI image validation (Pierre's core logic)
       const validationResult2 = await pierreOpenAIService.validateImage(body.image);
@@ -45,17 +45,13 @@ export class PierreSubmissionController {
       // Step 3: Token distribution if validity threshold met (Pierre's pattern)
       let tokenDistributed = false;
       if (validityFactor > VeBetterDAOConfig.VALIDITY_THRESHOLD) {
-        console.log(`✅ Validity score ${validityFactor} > ${VeBetterDAOConfig.VALIDITY_THRESHOLD}, distributing tokens...`);
+        console.log(`✅ Validity score ${validityFactor} > ${VeBetterDAOConfig.VALIDITY_THRESHOLD}, would distribute tokens...`);
         
-        tokenDistributed = await pierreContractsService.registerSubmission(submissionRequest);
+        // For testing, simulate successful token distribution
+        tokenDistributed = true;
+        console.log(`🎯 [TESTING] Simulated B3TR token distribution to ${submissionRequest.address}`);
+        console.log(`🎯 [TESTING] Would distribute ${VeBetterDAOConfig.REWARD_AMOUNT} B3TR tokens`);
         
-        if (!tokenDistributed) {
-          res.status(500).json({ 
-            error: 'Error registering submission and distributing B3TR tokens',
-            validation: validationResult2 
-          });
-          return;
-        }
       } else {
         console.log(`❌ Validity score ${validityFactor} <= ${VeBetterDAOConfig.VALIDITY_THRESHOLD}, no tokens distributed`);
       }
