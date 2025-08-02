@@ -1,10 +1,11 @@
 /**
- * Receipt API Routes - Public Interface Demo
- * Demonstrates Express endpoints for receipt processing
- * Internal logic redacted for privacy – available in private repo
+ * Receipt API Routes - ReCircle Production System
+ * Real OpenAI Vision API integration with VeBetterDAO token distribution
  */
 
 import express from 'express';
+import { pierreOpenAIService } from '../utils/pierre-openai-service.js';
+import { distributeB3TRTokensSimple } from '../utils/simple-solo-rewards.js';
 
 const router = express.Router();
 
@@ -22,23 +23,82 @@ router.post('/validate', async (req, res) => {
   try {
     const { userId, walletAddress, image, storeHint, purchaseDate, amount } = req.body;
     
-    // Internal validation logic redacted for privacy
-    // Production version includes sophisticated AI analysis
+    console.log(`[RECEIPT] Processing receipt validation for user ${userId}`);
+    console.log(`[RECEIPT] Wallet: ${walletAddress}`);
     
+    if (!image) {
+      return res.status(400).json({ error: 'Receipt image is required' });
+    }
+    
+    if (!walletAddress) {
+      return res.status(400).json({ error: 'Wallet address is required for token distribution' });
+    }
+    
+    // Use Pierre's OpenAI Vision API for real receipt analysis
+    const aiValidation = await pierreOpenAIService.validateImage(image);
+    
+    if (!aiValidation || !('validityFactor' in aiValidation)) {
+      throw new Error('AI validation failed');
+    }
+    
+    const validityScore = aiValidation.validityFactor;
+    const isValid = validityScore > 0.5; // Pierre's threshold
+    
+    console.log(`[RECEIPT] AI Validity Score: ${validityScore}`);
+    console.log(`[RECEIPT] Receipt Valid: ${isValid}`);
+    
+    // Calculate reward based on validity (Pierre's model)
+    const baseReward = 10; // B3TR tokens
+    const estimatedReward = isValid ? baseReward * validityScore : 0;
+    
+    let tokenDistributed = false;
+    let txHash = null;
+    
+    // Distribute B3TR tokens if receipt is valid (Pierre's pattern)
+    if (isValid && estimatedReward > 0) {
+      try {
+        const distributionResult = await distributeB3TRTokensSimple(
+          userId,
+          walletAddress,
+          estimatedReward,
+          `ReCircle sustainable transportation receipt validation`
+        );
+        
+        if (distributionResult.success) {
+          tokenDistributed = true;
+          txHash = distributionResult.txHash;
+          console.log(`[RECEIPT] ✅ Distributed ${estimatedReward} B3TR tokens to ${walletAddress}`);
+        }
+      } catch (error) {
+        console.error(`[RECEIPT] Token distribution failed:`, error);
+        // Continue processing but mark as not distributed
+      }
+    }
+    
+    // Return comprehensive validation result (ReCircle format)
     const validationResult = {
-      isValid: true,
-      storeName: "Demo Store",
-      isSustainableStore: true,
-      confidence: 0.95,
-      estimatedReward: 8.0,
-      reasons: ["Demo response for GitHub showcase"],
-      category: "thrift_store",
-      sentForManualReview: false
+      isValid,
+      storeName: "Transportation Service", // For transportation receipts
+      isSustainableStore: isValid,
+      confidence: aiValidation.confidence || 0.7,
+      estimatedReward: Math.round(estimatedReward * 100) / 100,
+      actualReward: tokenDistributed ? estimatedReward : 0,
+      reasons: [aiValidation.reasoning || "AI analysis completed"],
+      category: "transportation",
+      sentForManualReview: false,
+      tokenDistributed,
+      txHash,
+      aiValidation: {
+        validityScore,
+        reasoning: aiValidation.reasoning,
+        confidence: aiValidation.confidence
+      }
     };
     
     res.json(validationResult);
   } catch (error) {
-    res.status(500).json({ error: 'Validation failed' });
+    console.error('[RECEIPT] Validation error:', error);
+    res.status(500).json({ error: 'Receipt validation failed' });
   }
 });
 
