@@ -1,0 +1,22 @@
+PS C:\Users\damia\Downloads\x-app-template-main> yarn install
+yarn install v1.22.22
+[1/4] Resolving packages...
+[2/4] Fetching packages...
+warning ipfs-car@0.6.2: Invalid bin entry for "🚘" (in "ipfs-car").
+[3/4] Linking dependencies...
+warning "workspace-aggregator-01473f80-2d78-43e7-95ec-0b2b9297ba07 > @repo/contracts > @nomiclabs/hardhat-truffle5@2.0.7" has unmet peer dependency "web3@^1.0.0-beta.36".
+warning "workspace-aggregator-01473f80-2d78-43e7-95ec-0b2b9297ba07 > @repo/contracts > @nomiclabs/hardhat-web3@2.0.0" has unmet peer dependency "web3@^1.0.0-beta.36".
+warning "workspace-aggregator-01473f80-2d78-43e7-95ec-0b2b9297ba07 > @repo/contracts > react-slot-counter@2.3.2" has unmet peer dependency "react@>=16.8.0".
+warning "workspace-aggregator-01473f80-2d78-43e7-95ec-0b2b9297ba07 > @repo/contracts > react-slot-counter@2.3.2" has unmet peer dependency "react-dom@>=16.8.0".
+warning "workspace-aggregator-01473f80-2d78-43e7-95ec-0b2b9297ba07 > @repo/contracts > ts-node@10.9.2" has unmet peer dependency "@types/node@*".
+warning "workspace-aggregator-01473f80-2d78-43e7-95ec-0b2b9297ba07 > @repo/contracts > @nomicfoundation/hardhat-toolbox@3.0.0" has unmet peer dependency "@types/node@>=12.0.0".
+warning "workspace-aggregator-01473f80-2d78-43e7-95ec-0b2b9297ba07 > @repo/contracts > @nomiclabs/hardhat-truffle5 > @nomiclabs/truffle-contract@4.5.10" has unmet peer dependency "web3@^1.2.1".
+warning "workspace-aggregator-01473f80-2d78-43e7-95ec-0b2b9297ba07 > @repo/contracts > @nomiclabs/hardhat-truffle5 > @nomiclabs/truffle-contract@4.5.10" has unmet peer dependency "web3-core-helpers@^1.2.1".
+warning "workspace-aggregator-01473f80-2d78-43e7-95ec-0b2b9297ba07 > @repo/contracts > @nomiclabs/hardhat-truffle5 > @nomiclabs/truffle-contract@4.5.10" has unmet peer dependency "web3-core-promievent@^1.2.1".
+warning "workspace-aggregator-01473f80-2d78-43e7-95ec-0b2b9297ba07 > @repo/contracts > @nomiclabs/hardhat-truffle5 > @nomiclabs/truffle-contract@4.5.10" has unmet peer dependency "web3-eth-abi@^1.2.1".
+warning "workspace-aggregator-01473f80-2d78-43e7-95ec-0b2b9297ba07 > @repo/contracts > @nomiclabs/hardhat-truffle5 > @nomiclabs/truffle-contract@4.5.10" has unmet peer dependency "web3-utils@^1.2.1".
+warning "workspace-aggregator-01473f80-2d78-43e7-95ec-0b2b9297ba07 > x-dapp-backend > swagger-jsdoc > swagger-parser > @apidevtools/swagger-parser@10.0.3" has unmet peer dependency "openapi-types@>=7".
+[4/4] Building fresh packages...
+success Saved lockfile.
+Done in 214.24s.
+PS C:\Users\damia\Downloads\x-app-template-main>
