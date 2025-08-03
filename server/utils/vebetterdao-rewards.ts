@@ -5,7 +5,7 @@
  */
 
 import { ethers } from "ethers";
-import { VeChainThorClient, initializeVeChainThor } from './vechain-thor-integration.js';
+import { distributeRealB3TRPierreStyle, testPierreStyleConnection } from './pierre-inspired-real-blockchain.js';
 
 // Real B3TR distribution using working solo node
 import { distributeSoloB3TR, isSoloNodeAvailable } from './solo-node-b3tr.js';
@@ -845,7 +845,47 @@ export async function executeVeBetterDAORewards(
     console.log(`[VEBETTERDAO] ${isDevelopment ? 'Development' : 'Production'} mode distribution starting...`);
     
     try {
-        // Use real B3TR distribution in solo mode
+        // PRIORITY 1: Try Pierre-style REAL blockchain distribution first
+        const hasRealCredentials = process.env.VECHAIN_MNEMONIC || process.env.DISTRIBUTOR_MNEMONIC || process.env.DISTRIBUTOR_PRIVATE_KEY;
+        
+        if (hasRealCredentials) {
+            console.log('[VEBETTERDAO] 🚀 Attempting Pierre-style REAL VeChain blockchain distribution');
+            
+            try {
+                const totalB3TR = receiptsApproved; // 1 B3TR per approved receipt
+                const realResult = await distributeRealB3TRPierreStyle(walletAddress, totalB3TR, 1);
+                
+                if (realResult.success) {
+                    console.log('[VEBETTERDAO] ✅ REAL blockchain distribution successful!');
+                    return {
+                        success: true,
+                        user: {
+                            wallet: walletAddress,
+                            amount: realResult.userReward,
+                            txHash: realResult.transactions.user || '',
+                            success: true
+                        },
+                        appFund: {
+                            wallet: process.env.APP_FUND_WALLET || '0x119761865b79bea9e7924edaa630942322ca09d1',
+                            amount: realResult.appReward,
+                            txHash: realResult.transactions.app || '',
+                            success: true
+                        },
+                        creatorFund: null,
+                        totalDistributed: totalB3TR,
+                        error: null,
+                        network: 'vechain-testnet',
+                        explorerUrls: realResult.explorerUrls
+                    };
+                } else {
+                    console.log('[VEBETTERDAO] ⚠️ Real blockchain failed, trying solo fallback:', realResult.error);
+                }
+            } catch (error) {
+                console.log('[VEBETTERDAO] ⚠️ Real blockchain error, trying solo fallback:', error.message);
+            }
+        }
+
+        // FALLBACK 1: Use real B3TR distribution in solo mode
         if (isDevelopment && isSoloB3TRDeployed()) {
             console.log('[VEBETTERDAO] 🎯 Using Real B3TR distribution on Solo Node');
             
@@ -882,9 +922,9 @@ export async function executeVeBetterDAORewards(
             };
         }
         
-        // Fallback to Pierre-style distribution if solo not available
+        // FALLBACK 2: Pierre-style distribution if solo not available
         if (isDevelopment && await isSoloNodeAvailable()) {
-            console.log('[VEBETTERDAO] 🧪 Fallback to Pierre-style distribution');
+            console.log('[VEBETTERDAO] 🧪 Final fallback to Pierre-style distribution');
             return await distributeSoloB3TR(walletAddress, receiptsApproved, totalSpent);
         }
         
