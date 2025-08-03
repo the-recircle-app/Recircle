@@ -109,9 +109,18 @@ export async function testSoloVeBetterDAO(): Promise<SoloDistributionResult> {
 }
 
 /**
- * Check if Solo node is available
+ * Check if Solo node is available and should be used for VeBetterDAO
+ * Returns false if real VeBetterDAO credentials are available
  */
 export async function isSoloVeBetterDAOAvailable(): Promise<boolean> {
+    // If real VeBetterDAO credentials are available, prioritize them over solo node
+    const hasRealCredentials = process.env.VECHAIN_MNEMONIC || process.env.VECHAIN_PRIVATE_KEY || process.env.DISTRIBUTOR_PRIVATE_KEY;
+    
+    if (hasRealCredentials) {
+        console.log('[SOLO-VEBETTERDAO] Real VeChain credentials detected - prioritizing real VeBetterDAO over solo node');
+        return false; // Don't use solo node when real credentials are available
+    }
+    
     try {
         const response = await fetch(`${SOLO_BASE_URL}/solo/status`);
         const status = await response.json();

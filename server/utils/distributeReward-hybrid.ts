@@ -420,9 +420,86 @@ async function executeVeBetterDAODistribution({
   console.log(`[BLOCKCHAIN] VeBetterDAO distribution started for ${txIdentifier}`);
   
   // PIERRE-STYLE DEVELOPMENT TESTING: Check if solo node is available first
+  // Check if we have real VeBetterDAO credentials first
+  const hasRealCredentials = process.env.VECHAIN_MNEMONIC || process.env.VECHAIN_PRIVATE_KEY || process.env.DISTRIBUTOR_PRIVATE_KEY;
+  
+  if (hasRealCredentials) {
+    console.log(`[BLOCKCHAIN] 🚀 Real VeChain credentials detected - using real VeBetterDAO distribution`);
+    console.log(`[BLOCKCHAIN] Distributor wallet: ${process.env.REWARD_DISTRIBUTOR_WALLET}`);
+    console.log(`[BLOCKCHAIN] Using X2EarnRewardsPool: ${process.env.X2EARNREWARDSPOOL_ADDRESS}`);
+    
+    try {
+      // Use real VeBetterDAO distribution for user reward
+      const userResult = await distributeVeBetterDAOReward({
+        recipient,
+        amount: parseFloat(userAmount),
+        receiptData: {
+          storeName: proofValues[1] || 'ReCircle App',
+          category: proofValues[3] || 'transportation',
+          totalAmount: parseFloat(userAmount),
+          confidence: parseFloat(proofValues[2]) || 0.9,
+          ipfsHash: proofValues[0] || 'real_vebetterdao_distribution'
+        },
+        environmentalImpact: {
+          co2SavedGrams: parseInt(impactValues[0]) || 100,
+          sustainabilityCategory: impactValues[1] || 'green_transportation'
+        }
+      });
+      
+      // Use real VeBetterDAO distribution for app fund
+      const appResult = await distributeVeBetterDAOReward({
+        recipient: APP_FUND_WALLET,
+        amount: parseFloat(appAmount),
+        receiptData: {
+          storeName: 'ReCircle App Fund',
+          category: 'app_fund',
+          totalAmount: parseFloat(appAmount),
+          confidence: 1.0,
+          ipfsHash: 'app_fund_distribution'
+        },
+        environmentalImpact: {
+          co2SavedGrams: parseInt(impactValues[0]) || 100,
+          sustainabilityCategory: 'platform_sustainability'
+        }
+      });
+      
+      if (userResult.success && appResult.success) {
+        console.log(`[BLOCKCHAIN] ✅ Real VeBetterDAO distribution complete`);
+        console.log(`[BLOCKCHAIN] User: ${userResult.txHash}`);
+        console.log(`[BLOCKCHAIN] App: ${appResult.txHash}`);
+        
+        // Log the successful real VeBetterDAO distributions
+        logRewardDistribution(recipient, userAmount, userResult.txHash || 'real-vebetterdao-user', `REAL-USER-${txIdentifier}`, true);
+        logRewardDistribution(APP_FUND_WALLET, appAmount, appResult.txHash || 'real-vebetterdao-app', `REAL-APP-${txIdentifier}`, true);
+        
+        return {
+          success: true,
+          hash: userResult.txHash,
+          appHash: appResult.txHash,
+          message: 'Real VeBetterDAO distribution completed successfully',
+          distribution: {
+            user: userAmount,
+            app: appAmount
+          },
+          status: 'completed_blockchain',
+          approach: 'real_vebetterdao'
+        };
+      } else {
+        console.log(`[BLOCKCHAIN] ❌ Real VeBetterDAO distribution failed - falling back to Pierre-style`);
+        console.log(`[BLOCKCHAIN] User result: ${JSON.stringify(userResult)}`);
+        console.log(`[BLOCKCHAIN] App result: ${JSON.stringify(appResult)}`);
+      }
+      
+    } catch (error) {
+      console.error(`[BLOCKCHAIN] Real VeBetterDAO distribution error:`, error);
+      console.log(`[BLOCKCHAIN] Falling back to Pierre-style testing environment`);
+    }
+  }
+  
+  // Only use Pierre-style as fallback when real credentials aren't available or failed
   const isDevelopment = process.env.NODE_ENV === 'development';
   if (isDevelopment) {
-    console.log(`[BLOCKCHAIN] 🧪 Development mode - checking Pierre-style solo node availability`);
+    console.log(`[BLOCKCHAIN] 🧪 Using Pierre-style solo node for development testing`);
     
     try {
       // Initialize Pierre's setup (this will check if solo node is running)

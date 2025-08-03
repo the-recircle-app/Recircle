@@ -93,33 +93,60 @@ async function createTestnetProvider() {
 // Create a lazy provider that connects when needed
 let providerInstance: ethers.JsonRpcProvider | null = null;
 
+// Import bip39 for mnemonic derivation
+import { mnemonicToSeedSync } from 'bip39';
+import { HDNodeWallet } from 'ethers';
+
 // — Distributor wallet factory function —
 async function getDistributorWallet() {
   if (!providerInstance) {
     providerInstance = await createTestnetProvider();
   }
-  return new ethers.Wallet(process.env.DISTRIBUTOR_PRIVATE_KEY!, providerInstance);
+  
+  // Use mnemonic if available, fallback to private key
+  if (process.env.VECHAIN_MNEMONIC) {
+    console.log(`[WALLET] Deriving distributor wallet from mnemonic`);
+    const seed = mnemonicToSeedSync(process.env.VECHAIN_MNEMONIC);
+    const hdWallet = HDNodeWallet.fromSeed(seed);
+    // Use VeChain standard derivation path to get 0xF1f72b305b7bf7b25e85D356927aF36b88dC84Ee
+    const derivedWallet = hdWallet.derivePath("m/44'/818'/0'/0/0");
+    console.log(`[WALLET] Derived distributor address: ${derivedWallet.address}`);
+    return derivedWallet.connect(providerInstance);
+  } else if (process.env.DISTRIBUTOR_PRIVATE_KEY) {
+    console.log(`[WALLET] Using distributor private key`);
+    return new ethers.Wallet(process.env.DISTRIBUTOR_PRIVATE_KEY, providerInstance);
+  } else {
+    throw new Error('No VECHAIN_MNEMONIC or DISTRIBUTOR_PRIVATE_KEY provided');
+  }
 }
 
 // Solo node endpoint for development
 const SOLO_NODE_URL = 'http://localhost:5000/solo';
 
-// Use solo node in development only  
-const DEVELOPMENT_ENDPOINTS = [SOLO_NODE_URL];
+// Updated VeChain testnet endpoints for real distribution
+const VECHAIN_TESTNET_ENDPOINTS = [
+    'https://sync-testnet.vechain.org',
+    'https://testnet.vechain.energy',
+    'https://node-testnet.vechain.energy'
+];
+
+// Use real testnet endpoints when credentials are available, fallback to solo
+const hasRealCredentials = process.env.VECHAIN_MNEMONIC || process.env.VECHAIN_PRIVATE_KEY || process.env.DISTRIBUTOR_PRIVATE_KEY;
+const DEVELOPMENT_ENDPOINTS = hasRealCredentials ? [...VECHAIN_TESTNET_ENDPOINTS, SOLO_NODE_URL] : [SOLO_NODE_URL];
 const PRODUCTION_ENDPOINTS: string[] = []; // Disable external endpoints
 
 const RPC_ENDPOINTS = process.env.NODE_ENV === 'development' ? DEVELOPMENT_ENDPOINTS : PRODUCTION_ENDPOINTS;
 
-// VeBetterDAO Configuration - TESTNET (as confirmed by user's VeWorld)
+// VeBetterDAO Configuration - TESTNET (using provided contract addresses)
 const VEBETTERDAO_CONFIG = {
     APP_ID: process.env.APP_ID || process.env.VITE_TESTNET_APP_ID || '0x90178ff5f95f31644b5e21b11ba6e173ea0d9b9595e675cb84593c0d2df730c1',
-    // TESTNET CONTRACT ADDRESSES (verified from VeBetterDAO docs)
-    X2EARN_APPS: process.env.X2EARN_APPS || '0xcB23Eb1bBD5c07553795b9538b1061D0f4ABA153', // Official testnet address
-    X2EARN_REWARDS_POOL: process.env.X2EARN_REWARDS_POOL || '0x5F8f86B8D0Fa93cdaE20936d150175dF0205fB38', // Use address from .env file
-    XALLOCATION_POOL: process.env.XALLOCATION_POOL || '0x9B9CA9D0C41Add1d204f90BA0E9a6844f1843A84', // Official testnet address
-    B3TR_TOKEN: process.env.TOKEN_ADDRESS || '0x5ef79995FE8a89e0812330E4378eB2660ceDe699', // Official testnet B3TR token address
-    REWARD_DISTRIBUTOR: process.env.VITE_REWARD_DISTRIBUTOR || process.env.REWARD_DISTRIBUTOR_WALLET || '0xF1f72b305b7bf7b25e85D356927aF36b88dC84Ee', // Authorized distributor wallet
-    TREASURY_WALLET: '0x15d009b3a5811fde66f19b2db1d40172d53e5653', // Treasury wallet with 26.59K B3TR tokens
+    // TESTNET CONTRACT ADDRESSES (user-provided)
+    X2EARN_APPS: process.env.X2EARN_APPS || '0xcB23Eb1bBD5c07553795b9538b1061D0f4ABA153',
+    X2EARN_REWARDS_POOL: process.env.X2EARNREWARDSPOOL_ADDRESS || '0x5F8f86B8D0Fa93cdaE20936d150175dF0205fB38',
+    XALLOCATION_POOL: process.env.XALLOCATION_POOL || '0x9B9CA9D0C41Add1d204f90BA0E9a6844f1843A84',
+    B3TR_TOKEN: process.env.B3TR_CONTRACT_ADDRESS || '0xbf64cf86894Ee0877C4e7d03936e35Ee8D8b864F',
+    REWARD_DISTRIBUTOR: process.env.VITE_REWARD_DISTRIBUTOR || process.env.REWARD_DISTRIBUTOR_WALLET || '0xF1f72b305b7bf7b25e85D356927aF36b88dC84Ee',
+    TREASURY_WALLET: '0x15d009b3a5811fde66f19b2db1d40172d53e5653',
     RPC_ENDPOINTS,
     NETWORK: process.env.VECHAIN_NETWORK || 'testnet'
 };
@@ -393,21 +420,42 @@ export async function distributeVeBetterDAOReward(rewardData: RewardDistribution
         // Update rewardData with correct recipient
         rewardData.recipient = recipient;
 
-        // First priority: Use integrated Solo VeBetterDAO system 
-        const soloVeBetterDAOAvailable = await isSoloVeBetterDAOAvailable();
-        if (soloVeBetterDAOAvailable) {
-            console.log('[SOLO-VEBETTERDAO] 🎯 Using integrated Solo node with real B3TR tokens');
-            const soloVeBetterDAOResult = await distributeSoloVeBetterDAO(recipient, amount);
+        // Check if we have real VeBetterDAO credentials first
+        const hasRealCredentials = process.env.VECHAIN_MNEMONIC || process.env.VECHAIN_PRIVATE_KEY || process.env.DISTRIBUTOR_PRIVATE_KEY;
+        
+        if (hasRealCredentials) {
+            console.log('[REAL-VEBETTERDAO] 🚀 Real VeChain credentials detected - using real VeBetterDAO distribution');
+            console.log(`[REAL-VEBETTERDAO] Distributor wallet: ${process.env.REWARD_DISTRIBUTOR_WALLET}`);
+            console.log(`[REAL-VEBETTERDAO] Using X2EarnRewardsPool: ${process.env.X2EARNREWARDSPOOL_ADDRESS}`);
             
-            if (soloVeBetterDAOResult.success) {
-                console.log(`[SOLO-VEBETTERDAO] ✅ Successfully distributed ${amount} real B3TR tokens!`);
-                console.log(`[SOLO-VEBETTERDAO] Transaction hash: ${soloVeBetterDAOResult.txHash}`);
-                return {
-                    success: true,
-                    txHash: soloVeBetterDAOResult.txHash,
-                };
-            } else {
-                console.log(`[SOLO-VEBETTERDAO] ❌ Distribution failed: ${soloVeBetterDAOResult.error}`);
+            try {
+                // Skip solo node - go straight to real VeBetterDAO testnet distribution
+                console.log('[REAL-VEBETTERDAO] Attempting real VeChain testnet distribution...');
+                
+                // Continue to the real ethers.js testnet integration below
+                // (Skip the solo node fallback since we have real credentials)
+                
+            } catch (error) {
+                console.error(`[REAL-VEBETTERDAO] ❌ Real distribution setup failed:`, error);
+                // Continue to solo fallback if real distribution setup fails
+            }
+        } else {
+            // Only use Solo VeBetterDAO if no real credentials are available
+            const soloVeBetterDAOAvailable = await isSoloVeBetterDAOAvailable();
+            if (soloVeBetterDAOAvailable) {
+                console.log('[SOLO-VEBETTERDAO] 🎯 Using integrated Solo node with simulated B3TR tokens');
+                const soloVeBetterDAOResult = await distributeSoloVeBetterDAO(recipient, amount);
+                
+                if (soloVeBetterDAOResult.success) {
+                    console.log(`[SOLO-VEBETTERDAO] ✅ Successfully distributed ${amount} simulated B3TR tokens!`);
+                    console.log(`[SOLO-VEBETTERDAO] Transaction hash: ${soloVeBetterDAOResult.txHash}`);
+                    return {
+                        success: true,
+                        txHash: soloVeBetterDAOResult.txHash,
+                    };
+                } else {
+                    console.log(`[SOLO-VEBETTERDAO] ❌ Distribution failed: ${soloVeBetterDAOResult.error}`);
+                }
             }
         }
 
