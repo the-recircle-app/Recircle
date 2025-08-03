@@ -71,18 +71,42 @@ async function createTestnetProvider() {
   }
   
   // Fallback to external endpoints if Solo node unavailable
-  for (const rpcUrl of TESTNET_RPCS) {
+  for (const rpcUrl of VECHAIN_TESTNET_ENDPOINTS) {
     try {
       console.log(`[ETHERS] Trying VeChain testnet endpoint: ${rpcUrl}`);
-      const provider = new ethers.JsonRpcProvider(rpcUrl, {
-        name: "vechain-testnet", 
-        chainId: Number(process.env.VITE_CHAIN_ID) || 39,
-      });
       
-      // Test the connection
-      await provider.getNetwork();
-      console.log(`[ETHERS] ✅ Connected to ${rpcUrl}`);
-      return provider;
+      // Implement retry logic from VeChain Kit docs
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          const provider = new ethers.JsonRpcProvider(rpcUrl, {
+            name: "vechain-testnet", 
+            chainId: 100010, // Correct VeChain testnet chain ID
+          });
+          
+          // Test the connection with timeout
+          const networkPromise = provider.getNetwork();
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Connection timeout')), 10000)
+          );
+          
+          await Promise.race([networkPromise, timeoutPromise]);
+          console.log(`[ETHERS] ✅ Connected to ${rpcUrl} (attempt ${attempt + 1})`);
+          return provider;
+        } catch (error) {
+          const isRetryable = !error.message.includes('reverted') && 
+                             !error.message.includes('invalid') &&
+                             attempt < 2;
+          
+          if (isRetryable) {
+            const delay = Math.min(1000 * Math.pow(2, attempt), 5000);
+            console.log(`[ETHERS] ⏳ Retrying ${rpcUrl} in ${delay}ms (attempt ${attempt + 1}/3)`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+          } else {
+            console.log(`[ETHERS] ❌ Failed ${rpcUrl}: ${error.message} (final attempt)`);
+            break;
+          }
+        }
+      }
     } catch (error) {
       console.log(`[ETHERS] ❌ Failed ${rpcUrl}: ${error.message}`);
     }
@@ -123,10 +147,10 @@ async function getDistributorWallet() {
 // Solo node endpoint for development
 const SOLO_NODE_URL = 'http://localhost:5000/solo';
 
-// Updated VeChain testnet endpoints for real distribution
+// Updated VeChain testnet endpoints for real distribution (based on 2025 working endpoints)
 const VECHAIN_TESTNET_ENDPOINTS = [
-    'https://sync-testnet.vechain.org',
-    'https://testnet.vechain.energy',
+    'https://sync-testnet.veblocks.net',
+    'https://testnet.veblocks.net',
     'https://node-testnet.vechain.energy'
 ];
 
