@@ -5,6 +5,7 @@
  */
 
 import { ethers } from "ethers";
+import { VeChainThorClient, initializeVeChainThor } from './vechain-thor-integration.js';
 
 // Real B3TR distribution using working solo node
 import { distributeSoloB3TR, isSoloNodeAvailable } from './solo-node-b3tr.js';
