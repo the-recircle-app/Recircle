@@ -18,9 +18,18 @@ export class PierreOpenAIService {
 
   async validateImage(base64Image: string): Promise<ValidationResult | undefined> {
     try {
-      console.log('🔍 Analyzing receipt with OpenAI Vision API...');
+      console.log('🔍 [OPENAI] Starting OpenAI Vision API analysis...');
+      console.log('🔍 [OPENAI] Image size:', base64Image.length, 'characters');
       
-      const response = await this.openai.chat.completions.create({
+      const startTime = Date.now();
+      console.log('🚀 [OPENAI] Making API call to OpenAI...');
+      
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('OpenAI API timeout after 30 seconds')), 30000);
+      });
+      
+      const apiCallPromise = this.openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
           {
@@ -68,27 +77,36 @@ Score 0.0-0.2 for clearly invalid, non-transport, or fraudulent items.`
         max_tokens: 500
       });
 
+      console.log('⏳ [OPENAI] Waiting for API response...');
+      const response = await Promise.race([apiCallPromise, timeoutPromise]);
+      console.log('📨 [OPENAI] API response received');
+
       const content = response.choices[0]?.message?.content;
       if (!content) {
         throw new Error('No response from OpenAI');
       }
 
-      console.log('🤖 OpenAI Raw Response:', content);
+      const elapsed = Date.now() - startTime;
+      console.log(`🤖 [OPENAI] Raw Response (${elapsed}ms):`, content);
 
       // Parse JSON response
       const jsonMatch = content.match(/\{[\s\S]*\}/);
       if (!jsonMatch) {
+        console.error('❌ [OPENAI] No JSON found in response:', content);
         throw new Error('Invalid JSON response from OpenAI');
       }
 
       const result = JSON.parse(jsonMatch[0]) as ValidationResult;
       
-      console.log(`✅ Validation Result: ${result.validityFactor} (${result.reasoning})`);
+      console.log(`✅ [OPENAI] Validation Result: ${result.validityFactor} (${result.reasoning})`);
+      console.log(`✅ [OPENAI] Total processing time: ${elapsed}ms`);
       
       return result;
       
     } catch (error) {
-      console.error('❌ OpenAI validation error:', error);
+      console.error('❌ [OPENAI] Validation error:', error);
+      console.error('❌ [OPENAI] Error type:', error.constructor.name);
+      console.error('❌ [OPENAI] Error message:', error.message);
       
       // Return undefined to match Pierre's error handling pattern
       return undefined;
