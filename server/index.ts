@@ -119,6 +119,7 @@ async function startServer() {
   server.listen(PORT, "0.0.0.0", () => {
     console.log(`ReCircle server running on port ${PORT}`);
     console.log(`Memory optimization enabled: ${memoryOptimizationEnabled || process.env.NODE_ENV === "production"}`);
+    console.log(`Server bound to 0.0.0.0:${PORT} for external access`);
   });
 }
 

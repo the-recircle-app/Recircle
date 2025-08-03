@@ -1,0 +1,23 @@
+[deploy]
+externalPort = 80
+internalPort = 5000
+
+[nix]
+channel = "stable-22_11"
+
+[build]
+run = ["npm", "run", "build"]
+
+[run]
+run = ["./start.sh"]
+
+[env]
+NODE_ENV = "production"
+PORT = "5000"
+
+[deployment]
+build = ["npm", "run", "build"]
+run = ["./start.sh"]
+
+[autoscale]
+enabled = true

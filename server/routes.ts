@@ -74,9 +74,9 @@ import { distributeSoloB3TR, isSoloNodeAvailable, testSoloB3TR } from "./utils/s
 // VeChain addresses for creator wallet and app sustainability fund
 // These are loaded from environment variables for security and flexibility
 // The REWARD_DISTRIBUTOR_WALLET signs transactions but is never a recipient
-const CREATOR_FUND_WALLET = process.env.CREATOR_FUND_WALLET || '';
-const APP_FUND_WALLET = process.env.APP_FUND_WALLET || '';
-const REWARD_DISTRIBUTOR_WALLET = process.env.REWARD_DISTRIBUTOR_WALLET || '';
+const CREATOR_FUND_WALLET = process.env.CREATOR_FUND_WALLET || '0x87c844e3314396ca43e5a6065e418d26a09db02b';
+const APP_FUND_WALLET = process.env.APP_FUND_WALLET || '0x119761865b79bea9e7924edaa630942322ca09d1';
+const REWARD_DISTRIBUTOR_WALLET = process.env.REWARD_DISTRIBUTOR_WALLET || '0xF1f72b305b7bf7b25e85D356927aF36b88dC84Ee';
 
 // Debug log to ensure we're using the correct values from environment
 console.log(`Server initialized with wallet addresses: 
@@ -87,14 +87,27 @@ console.log(`Server initialized with wallet addresses:
 
 // Log warning if wallet addresses are not configured (except in test environments)
 if (process.env.NODE_ENV !== "test") {
+  const missingVars = [];
+  
   if (!REWARD_DISTRIBUTOR_WALLET) {
-    console.warn('⚠️  REWARD_DISTRIBUTOR_WALLET not configured - blockchain distributions will fail');
+    missingVars.push('REWARD_DISTRIBUTOR_WALLET');
   }
   if (!CREATOR_FUND_WALLET) {
-    console.error("ERROR: Creator fund wallet address not configured. Set CREATOR_FUND_WALLET in environment variables.");
+    missingVars.push('CREATOR_FUND_WALLET');
   }
   if (!APP_FUND_WALLET) {
-    console.error("ERROR: App fund wallet address not configured. Set APP_FUND_WALLET in environment variables.");
+    missingVars.push('APP_FUND_WALLET');
+  }
+  if (!process.env.VECHAIN_PRIVATE_KEY && !process.env.DISTRIBUTOR_PRIVATE_KEY) {
+    missingVars.push('VECHAIN_PRIVATE_KEY or DISTRIBUTOR_PRIVATE_KEY');
+  }
+  
+  if (missingVars.length > 0) {
+    console.warn('⚠️ Contract not initialized - missing configuration affecting blockchain functionality');
+    console.warn('Missing blockchain configuration variables:', missingVars.join(', '));
+    console.warn('Real blockchain transactions may fail without proper configuration');
+  } else {
+    console.log('✅ All blockchain configuration variables are set');
   }
 }
 import { analyzeReceiptImage } from "./utils/openai";
@@ -121,6 +134,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Apply general rate limiting to all API routes
   app.use('/api', generalRateLimit);
+  
+  // Health check endpoint for deployment readiness
+  app.get('/health', (req: Request, res: Response) => {
+    const health = {
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      memory: process.memoryUsage(),
+      environment: process.env.NODE_ENV || 'development',
+      port: process.env.PORT || 5000,
+      blockchain: {
+        configured: !!(process.env.VECHAIN_PRIVATE_KEY || process.env.DISTRIBUTOR_PRIVATE_KEY),
+        wallets: {
+          creator: !!process.env.CREATOR_FUND_WALLET,
+          app: !!process.env.APP_FUND_WALLET,
+          distributor: !!process.env.REWARD_DISTRIBUTOR_WALLET
+        }
+      }
+    };
+    res.status(200).json(health);
+  });
   
   // Add secure wallet address endpoint
   app.get("/api/wallet-addresses", (req: Request, res: Response) => {
