@@ -1,0 +1,29 @@
+[INFO] (#Ext) -  Starting ContentScriptController listener...
+content-scripts.iife.js:47 Attempting in inject VeWorld iFrame container...
+content-scripts.iife.js:47 VeWorld iFrame container created
+VM34 home:107 [PRELOAD] DAppKit comprehensive polyfills installed
+vechain-C1F7HB_K.js:3676 MIXPANEL PEOPLE REQUEST (QUEUED, PENDING IDENTIFY):
+vechain-C1F7HB_K.js:3676 Object
+index-ROGWeQlF.js:282 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+index-ROGWeQlF.js:287 🟢 [UNIFIED] VeWorld extension detected
+index-ROGWeQlF.js:358 Preloading wallet addresses...
+index-ROGWeQlF.js:282 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+index-ROGWeQlF.js:261 Wallet addresses loaded from API
+index-ROGWeQlF.js:282 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+index-ROGWeQlF.js:341 Available environment variables in frontend:
+index-ROGWeQlF.js:341 VITE_CREATOR_FUND_WALLET: not set
+index-ROGWeQlF.js:341 VITE_APP_FUND_WALLET: not set
+feature_collector.js:23 using deprecated parameters for the initialization function; pass a single object instead
+M @ feature_collector.js:23Understand this warning
+index-ROGWeQlF.js:277 Refreshed user token balance: 0
+index-ROGWeQlF.js:341 Transactions page refreshed token balance: 0
+index-ROGWeQlF.js:287 🟢 [UNIFIED] VeWorld extension detected
+index-ROGWeQlF.js:291 [UPLOAD] File converted to base64, size: 197256 chars
+index-ROGWeQlF.js:291 [UPLOAD] 📤 Sending validation request...
+index-ROGWeQlF.js:291 [UPLOAD] Request data: Object
+index-ROGWeQlF.js:291 [UPLOAD] 📨 Response status: 200 
+index-ROGWeQlF.js:291 [UPLOAD] ✅ Validation result: Object
+index-ROGWeQlF.js:291 [SCAN] Production validation complete: Object
+index-ROGWeQlF.js:282 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+index-ROGWeQlF.js:277 Refreshed user token balance: 0
+index-ROGWeQlF.js:282 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops

@@ -14,6 +14,8 @@ run = ["./start.sh"]
 [env]
 NODE_ENV = "production"
 PORT = "5000"
+VITE_CREATOR_FUND_WALLET = "0x87c844e3314396ca43e5a6065e418d26a09db02b"
+VITE_APP_FUND_WALLET = "0x119761865b79bea9e7924edaa630942322ca09d1"
 
 [deployment]
 build = ["npm", "run", "build"]
