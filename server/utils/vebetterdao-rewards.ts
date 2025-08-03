@@ -149,7 +149,8 @@ const SOLO_NODE_URL = 'http://localhost:5000/solo';
 
 // Updated VeChain testnet endpoints for real distribution (based on 2025 working endpoints)
 const VECHAIN_TESTNET_ENDPOINTS = [
-    'https://sync-testnet.veblocks.net',
+    'https://vethor-node-test.vechaindev.com',
+    'https://sync-testnet.veblocks.net', 
     'https://testnet.veblocks.net',
     'https://node-testnet.vechain.energy'
 ];
