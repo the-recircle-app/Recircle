@@ -147,17 +147,15 @@ async function getDistributorWallet() {
 // Solo node endpoint for development
 const SOLO_NODE_URL = 'http://localhost:5000/solo';
 
-// Updated VeChain testnet endpoints for real distribution (based on 2025 working endpoints)
-const VECHAIN_TESTNET_ENDPOINTS = [
-    'https://vethor-node-test.vechaindev.com',
-    'https://sync-testnet.veblocks.net', 
+// VeChain Thor REST API endpoints (working with proper Thor SDK)
+const VECHAIN_THOR_ENDPOINTS = [
     'https://testnet.veblocks.net',
-    'https://node-testnet.vechain.energy'
+    'https://sync-testnet.veblocks.net'
 ];
 
 // Use real testnet endpoints when credentials are available, fallback to solo
 const hasRealCredentials = process.env.VECHAIN_MNEMONIC || process.env.VECHAIN_PRIVATE_KEY || process.env.DISTRIBUTOR_PRIVATE_KEY;
-const DEVELOPMENT_ENDPOINTS = hasRealCredentials ? [...VECHAIN_TESTNET_ENDPOINTS, SOLO_NODE_URL] : [SOLO_NODE_URL];
+const DEVELOPMENT_ENDPOINTS = hasRealCredentials ? [...VECHAIN_THOR_ENDPOINTS, SOLO_NODE_URL] : [SOLO_NODE_URL];
 const PRODUCTION_ENDPOINTS: string[] = []; // Disable external endpoints
 
 const RPC_ENDPOINTS = process.env.NODE_ENV === 'development' ? DEVELOPMENT_ENDPOINTS : PRODUCTION_ENDPOINTS;

@@ -1,0 +1,109 @@
+Here’s a Replit Task Card you can paste into your Replit shell.
+It does not change your code—it only runs read-only checks to diagnose redirects vs. valid Thor REST responses.
+
+🧪 Replit Task Card — Diagnose Testnet Redirects (No Code Changes)
+bash
+Copy
+Edit
+# ──────────────────────────────────────────────────────────────────
+# 0) CONFIG: set your testnet host (HTTPS!) — replace the placeholder
+# Examples:
+#   https://testnet.vechain.org
+#   https://node-testnet.vechain.org
+# ──────────────────────────────────────────────────────────────────
+TESTNET_BASE="https://<YOUR-TESTNET-HOST>"
+
+echo "Using TESTNET_BASE = $TESTNET_BASE"
+echo
+
+# Helper: prints code + any redirect target
+probe () {
+  local URL="$1"
+  echo "▶ $URL"
+  curl -sS -o /dev/null -D - -w "\nHTTP_CODE:%{http_code}\nREDIRECT:%{redirect_url}\n\n" "$URL" || true
+}
+
+# Helper: shows first line to detect HTML vs JSON
+peek () {
+  local URL="$1"
+  echo "peek $URL"
+  (curl -sS "$URL" | head -n 1) || true
+  echo
+}
+
+# ──────────────────────────────────────────────────────────────────
+# 1) Check a CORRECT Thor REST path (should be 200 + JSON, no redirect)
+# ──────────────────────────────────────────────────────────────────
+probe "$TESTNET_BASE/v1/node/status"
+peek  "$TESTNET_BASE/v1/node/status"
+
+# ──────────────────────────────────────────────────────────────────
+# 2) Check BEST BLOCK (should be JSON)
+# ──────────────────────────────────────────────────────────────────
+probe "$TESTNET_BASE/v1/blocks/best"
+peek  "$TESTNET_BASE/v1/blocks/best"
+
+# ──────────────────────────────────────────────────────────────────
+# 3) DELIBERATE WRONG CALLS (common redirect causes)
+#    A) Root path “/” (often redirects to /doc or returns HTML)
+# ──────────────────────────────────────────────────────────────────
+probe "$TESTNET_BASE/"
+peek  "$TESTNET_BASE/"
+
+#    B) Old path “/api/node/status” (should 404 or redirect)
+probe "$TESTNET_BASE/api/node/status"
+peek  "$TESTNET_BASE/api/node/status"
+
+# ──────────────────────────────────────────────────────────────────
+# 4) Verify HTTPS requirement (if you have an HTTP variant, expect 301/302/307)
+#    Only run if you KNOW an http:// form exists; otherwise skip.
+# ──────────────────────────────────────────────────────────────────
+if [[ "$TESTNET_BASE" =~ ^https:// ]]; then
+  HTTP_BASE="$(echo "$TESTNET_BASE" | sed 's#^https://#http://#')"
+  echo "HTTP test against: $HTTP_BASE (may redirect to https)"
+  probe "$HTTP_BASE/v1/node/status"
+fi
+
+# ──────────────────────────────────────────────────────────────────
+# 5) If your app uses ETH JSON-RPC (ethers.js style), this will NOT work on Thor REST.
+#    Posting to "/" typically returns HTML or a redirect.
+# ──────────────────────────────────────────────────────────────────
+echo "Posting eth_chainId to root (expected: NOT JSON-RPC):"
+curl -sS -i -X POST "$TESTNET_BASE/" \
+  -H 'Content-Type: application/json' \
+  -d '{"jsonrpc":"2.0","method":"eth_chainId","params":[],"id":1}' | head -n 20
+echo
+
+# ──────────────────────────────────────────────────────────────────
+# 6) Server-side fetch (no CORS), show if redirects happen and where.
+#    This uses Node's built-in fetch; does not write files.
+# ──────────────────────────────────────────────────────────────────
+node - <<'NODE'
+const base = process.env.TESTNET_BASE || '';
+if (!base) { console.error('Set TESTNET_BASE env first.'); process.exit(1); }
+
+(async () => {
+  const url = `${base}/v1/node/status`;
+  const res = await fetch(url, { redirect: 'manual' });
+  console.log('Node fetch:', url);
+  console.log('status:', res.status);
+  console.log('location:', res.headers.get('location'));
+  const text = await res.text();
+  console.log('body starts with:', text.slice(0, 60).replace(/\n/g,' '), '\n');
+})();
+NODE
+How to read results
+
+Good (expected):
+
+…/v1/node/status and …/v1/blocks/best return HTTP 200 and the first line looks like JSON ({ or [).
+
+Redirects:
+
+If the code is 301/302/307 and REDIRECT: points to https://… → you were using http:// somewhere.
+
+If it points to /doc/… → you posted to the wrong path (root or non-API path).
+
+HTML:
+
+If peek shows <!doctype html> or <html… → you’re not hitting the JSON API.
