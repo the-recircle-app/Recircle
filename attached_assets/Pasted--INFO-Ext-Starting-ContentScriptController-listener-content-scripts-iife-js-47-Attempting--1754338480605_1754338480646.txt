@@ -1,0 +1,51 @@
+[INFO] (#Ext) -  Starting ContentScriptController listener...
+content-scripts.iife.js:47 Attempting in inject VeWorld iFrame container...
+content-scripts.iife.js:47 VeWorld iFrame container created
+VM13:107 [PRELOAD] DAppKit comprehensive polyfills installed
+vechain-CNxfLC-1.js:3676 MIXPANEL PEOPLE REQUEST (QUEUED, PENDING IDENTIFY):
+vechain-CNxfLC-1.js:3676 Object
+index-DPJMQr1E.js:282 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+index-DPJMQr1E.js:358 Preloading wallet addresses...
+index-DPJMQr1E.js:282 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+index-DPJMQr1E.js:261 Wallet addresses loaded from API
+index-DPJMQr1E.js:282 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+index-DPJMQr1E.js:287 🟢 [UNIFIED] VeWorld extension detected
+content-scripts.iife.js:1 [INFO] (#Ext) -  Opening VeWorld iFrame
+main-4nDhOBGd.js:4454 Starting popup...
+VeWorldAPI-4uUsNIg_.js:6 [INFO] (#Ext) -  Mixpanel initialized
+VeWorldAPI-4uUsNIg_.js:6 [INFO] (#Ext) -  Adding Tab Close Event Listener
+VeWorldAPI-4uUsNIg_.js:6 [INFO] (#Ext) -  Adding invalid context listener
+VeWorldAPI-4uUsNIg_.js:6 [INFO] (#Ext) -  Attempting to unlock wallet
+VeWorldAPI-4uUsNIg_.js:6 [INFO] (#Ext) -  Adding invalid context listener
+VeWorldAPI-4uUsNIg_.js:6 [INFO] (#Ext) -  Could not auto unlock wallet
+VeWorldAPI-4uUsNIg_.js:6 [WARN] (#Ext) -  Websocket closed
+warn @ VeWorldAPI-4uUsNIg_.js:6Understand this warning
+VeWorldAPI-4uUsNIg_.js:6 [INFO] (#Ext) -  Beat WS open on:  WebSocket
+VeWorldAPI-4uUsNIg_.js:6 [INFO] (#Ext) -  Beat WS open on:  WebSocket
+index-DPJMQr1E.js:291 [UPLOAD] File converted to base64, size: 197256 chars
+index-DPJMQr1E.js:291 [UPLOAD] 📤 Sending validation request...
+index-DPJMQr1E.js:291 [UPLOAD] Request data: Object
+index-DPJMQr1E.js:291 [UPLOAD] 📨 Validation response status: 200
+index-DPJMQr1E.js:291 [UPLOAD] ✅ Validation result: {isValid: true, storeName: 'Lyft', isThriftStore: true, isSustainableStore: true, sustainableCategory: 'ride_share', …}
+index-DPJMQr1E.js:291 [UPLOAD] 🚀 Receipt validated successfully - submitting for blockchain distribution...
+index-DPJMQr1E.js:291  POST https://www.recirclerewards.app/api/receipts 400 (Bad Request)
+(anonymous) @ index-DPJMQr1E.js:291Understand this error
+index-DPJMQr1E.js:291 [UPLOAD] 📨 Submission response status: 400
+index-DPJMQr1E.js:291 [UPLOAD] ❌ Submission error response: {"message":"Missing required fields","details":{"storeId":"missing","userId":"string","amount":"number","purchaseDate":"string"}}
+(anonymous) @ index-DPJMQr1E.js:291Understand this error
+index-DPJMQr1E.js:291 [UPLOAD] ⚠️ Proceeding with validation result despite submission issues
+(anonymous) @ index-DPJMQr1E.js:291Understand this warning
+index-DPJMQr1E.js:291 [SCAN] Production validation complete: {isValid: true, storeName: 'Lyft', isThriftStore: true, isSustainableStore: true, sustainableCategory: 'ride_share', …}
+index-DPJMQr1E.js:291 [UPLOAD] ❌ Upload failed: ReferenceError: result is not defined
+    at index-DPJMQr1E.js:291:11616
+(anonymous) @ index-DPJMQr1E.js:291Understand this error
+index-DPJMQr1E.js:291 [UPLOAD] Error details: {message: 'result is not defined', stack: 'ReferenceError: result is not defined\n    at https…clerewards.app/assets/index-DPJMQr1E.js:291:11616', name: 'ReferenceError'}
+(anonymous) @ index-DPJMQr1E.js:291Understand this error
+index-DPJMQr1E.js:282 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+index-DPJMQr1E.js:277 Refreshed user token balance: 0
+index-DPJMQr1E.js:282 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+ServiceWorker.iife.js:2 [INFO] (#Ext) -  sw: Starting service worker...
+ServiceWorker.iife.js:2 [INFO] (#Ext) -  Started Auto Lock worker
+ServiceWorker.iife.js:2 [INFO] (#Ext) -  sw: Service worker started! 1
+ServiceWorker.iife.js:2 [INFO] (#Ext) -  Content script already registered {allFrames: false, id: 'VeWorldAPI', js: Array(1), matchOriginAsFallback: false, matches: Array(3), …}
+Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.Understand this error

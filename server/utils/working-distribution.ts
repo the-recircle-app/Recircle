@@ -63,14 +63,37 @@ export async function distributeRealB3TR(
 
         console.log(`[REAL-B3TR] Connected to VeChain testnet at ${TESTNET_RPC}`);
 
-        // Create HDNode with proper error handling
+        // Create HDNode with robust error handling and validation
         let distributorWallet: thor.HDNode;
         try {
-            // Remove 0x prefix and create HDNode from private key
-            const cleanPrivateKey = privateKey.startsWith('0x') ? privateKey.slice(2) : privateKey;
-            const privateKeyBuffer = Buffer.from(cleanPrivateKey, 'hex');
+            console.log(`[REAL-B3TR] Private key validation:`);
+            console.log(`[REAL-B3TR] - Raw length: ${privateKey.length}`);
+            console.log(`[REAL-B3TR] - Has 0x prefix: ${privateKey.startsWith('0x')}`);
             
-            console.log(`[REAL-B3TR] Creating HDNode from private key (length: ${privateKeyBuffer.length})`);
+            // Clean and validate the private key
+            const cleanPrivateKey = privateKey.startsWith('0x') ? privateKey.slice(2) : privateKey;
+            console.log(`[REAL-B3TR] - Clean key length: ${cleanPrivateKey.length}`);
+            
+            if (cleanPrivateKey.length !== 64) {
+                throw new Error(`Invalid private key length: ${cleanPrivateKey.length}, expected 64 hex characters`);
+            }
+            
+            // Validate hex format
+            if (!/^[0-9a-fA-F]+$/.test(cleanPrivateKey)) {
+                throw new Error('Private key contains invalid characters (not hex)');
+            }
+            
+            // Create buffer with proper validation
+            let privateKeyBuffer: Buffer;
+            try {
+                privateKeyBuffer = Buffer.from(cleanPrivateKey, 'hex');
+                console.log(`[REAL-B3TR] - Buffer created successfully, length: ${privateKeyBuffer.length}`);
+            } catch (bufferError) {
+                throw new Error(`Failed to create buffer from private key: ${bufferError}`);
+            }
+            
+            // Create HDNode with comprehensive error handling
+            console.log(`[REAL-B3TR] Creating HDNode from validated private key...`);
             distributorWallet = thor.HDNode.fromPrivateKey(privateKeyBuffer);
             
             const distributorAddress = `0x${distributorWallet.address.toString('hex')}`;
