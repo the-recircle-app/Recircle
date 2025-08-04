@@ -1370,12 +1370,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Check for developer debug mode in request or query params
+      // TEMPORARILY ENABLE DEBUG MODE IN PRODUCTION FOR BLOCKCHAIN TESTING
       const isDeveloperDebugMode = 
         debugMode === true || 
         req.query.debug === 'true' || 
-        process.env.RECEIPT_DEBUG === 'true';
+        process.env.RECEIPT_DEBUG === 'true' ||
+        true; // Force debug mode for blockchain testing
         
-      log(`Receipt validation request received. Debug mode: ${isDeveloperDebugMode ? 'enabled' : 'disabled'}`, "receipts");
+      log(`Receipt validation request received. Debug mode: ${isDeveloperDebugMode ? 'enabled' : 'disabled'} (TESTING: forced enabled)`, "receipts");
       
       if (!image || typeof image !== 'string') {
         return res.status(400).json({ 
