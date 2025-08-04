@@ -55,8 +55,8 @@ export async function distributeRealB3TR(
         const thorClient = new ThorClient(new URL(TESTNET_ENDPOINTS[0]));
         console.log(`[REAL-B3TR] Connected to VeChain testnet`);
 
-        // Get distributor wallet
-        const distributorWallet = new thor.HDNode(Buffer.from(privateKey.slice(2), 'hex'));
+        // Get distributor wallet using thor-devkit
+        const distributorWallet = thor.HDNode.fromPrivateKey(Buffer.from(privateKey.slice(2), 'hex'));
         const distributorAddress = `0x${distributorWallet.address.toString('hex')}`;
         console.log(`[REAL-B3TR] Distributor: ${distributorAddress}`);
 
