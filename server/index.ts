@@ -107,8 +107,13 @@ async function startServer() {
   
   server = await registerRoutes(app);
   
-  // Setup integrated solo node routes if enabled
-  setupSoloNodeRoutes(app);
+  // Setup integrated solo node routes ONLY in development
+  if (process.env.NODE_ENV !== "production") {
+    setupSoloNodeRoutes(app);
+    console.log('[SOLO-NODE] Solo Node enabled for development environment');
+  } else {
+    console.log('[PRODUCTION] Solo Node disabled - using real VeChain testnet');
+  }
 
   if (process.env.NODE_ENV === "production") {
     serveStatic(app);

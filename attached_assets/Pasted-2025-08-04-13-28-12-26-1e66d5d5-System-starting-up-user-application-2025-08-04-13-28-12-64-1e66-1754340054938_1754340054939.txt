@@ -1,0 +1,114 @@
+2025-08-04 13:28:12.26
+1e66d5d5
+System
+starting up user application
+2025-08-04 13:28:12.64
+1e66d5d5
+System
+forwarding local port 5000 to external port 80 (mapped as 1104)
+2025-08-04 13:28:15.25
+1e66d5d5
+User
+> rest-express@1.0.0 start
+2025-08-04 13:28:15.25
+1e66d5d5
+User
+> NODE_ENV=production node dist/index.js
+2025-08-04 13:28:20.69
+1e66d5d5
+User
+[STORAGE] Using PostgreSQL storage for production
+2025-08-04 13:28:20.79
+1e66d5d5
+User
+8:28:20 PM [openai] OpenAI client initialized successfully
+2025-08-04 13:28:20.86
+1e66d5d5
+User
+[BLOCKCHAIN] ✅ Using private key for wallet: 0xF1f72b305b7bf7b25e85D356927aF36b88dC84Ee
+2025-08-04 13:28:20.86
+1e66d5d5
+User
+[BLOCKCHAIN] Real blockchain transactions enabled
+2025-08-04 13:28:20.86
+1e66d5d5
+User
+Server initialized with wallet addresses:
+2025-08-04 13:28:20.86
+1e66d5d5
+User
+- REWARD_DISTRIBUTOR_WALLET: 0xF1f72b305b7bf7b25e85D356927aF36b88dC84Ee
+2025-08-04 13:28:20.86
+1e66d5d5
+User
+- CREATOR_FUND_WALLET: 0x87c844e3314396ca43e5a6065e418d26a09db02b
+2025-08-04 13:28:20.86
+1e66d5d5
+User
+- APP_FUND_WALLET: 0x119761865b79bea9e7924edaa630942322ca09d1
+2025-08-04 13:28:20.86
+1e66d5d5
+User
+✅ All blockchain configuration variables are set
+2025-08-04 13:28:20.86
+1e66d5d5
+User
+Initializing memory optimization for production
+2025-08-04 13:28:20.86
+1e66d5d5
+User
+[MEMORY] Environment configured for runtime:
+2025-08-04 13:28:20.86
+1e66d5d5
+User
+[MEMORY] NODE_OPTIONS: --expose-gc --max-old-space-size=4096 --max-semi-space-size=128
+2025-08-04 13:28:20.86
+1e66d5d5
+User
+[MEMORY] UV_THREADPOOL_SIZE: 64
+2025-08-04 13:28:20.86
+1e66d5d5
+User
+[MEMORY] ⚠️ Garbage collection not available - memory monitoring disabled
+2025-08-04 13:28:20.86
+1e66d5d5
+User
+[MEMORY] To enable: restart with NODE_OPTIONS="--expose-gc"
+2025-08-04 13:28:20.88
+1e66d5d5
+User
+⚠️ Contract not initialized - missing configuration
+2025-08-04 13:28:20.88
+1e66d5d5
+User
+[SOLO-NODE] 🔍 Checking solo mode setup: {
+2025-08-04 13:28:20.88
+1e66d5d5
+User
+VITE_SOLO_MODE_ENABLED: "'true'",
+2025-08-04 13:28:20.88
+1e66d5d5
+User
+SOLO_MODE_ENABLED: "'true'",
+2025-08-04 13:28:20.88
+1e66d5d5
+User
+NODE_ENV: "'production'",
+2025-08-04 13:28:20.88
+1e66d5d5
+User
+viteEnabled: true,
+2025-08-04 13:28:20.88
+1e66d5d5
+User
+soloEnabled: true,
+2025-08-04 13:28:20.88
+1e66d5d5
+User
+isDev: false,
+2025-08-04 13:28:20.88
+1e66d5d5
+User
+finalSoloEnabled: true
+2025-08-04 13:28:20.88
+1e66d5

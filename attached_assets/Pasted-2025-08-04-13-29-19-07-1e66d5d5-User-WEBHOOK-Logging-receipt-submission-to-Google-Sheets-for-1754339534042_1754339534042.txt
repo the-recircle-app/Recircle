@@ -1,0 +1,106 @@
+2025-08-04 13:29:19.07
+1e66d5d5
+User
+[WEBHOOK] 📊 Logging receipt submission to Google Sheets for Waymo - Receipt ID: 82
+2025-08-04 13:29:19.08
+1e66d5d5
+User
+[WEBHOOK] Google Sheets logging triggered - Event Type: submission
+2025-08-04 13:29:19.08
+1e66d5d5
+User
+[WEBHOOK] Purchase date transformed: Mon Aug 04 2025 00:00:00 GMT+0000 (Coordinated Universal Time) → 2025-08-04
+2025-08-04 13:29:19.08
+1e66d5d5
+User
+[WEBHOOK] Using sustainability category: re-use item
+2025-08-04 13:29:19.08
+1e66d5d5
+User
+[WEBHOOK] Validation passed for required fields: storeName, purchaseDate, amount, tokenReward, containsPreOwnedItems, paymentMethod, preOwnedKeywordsFound, sustainabilityCategory
+2025-08-04 13:29:19.08
+1e66d5d5
+User
+8:29:19 PM [webhooks] Sending webhook to Google Sheets for submission event - Receipt ID: 82
+2025-08-04 13:29:19.08
+1e66d5d5
+User
+[WEBHOOK PAYLOAD] Store: Waymo, Date: 2025-08-04, Amount: 8.3, PreOwned: false, Reward: 8.8, Category: re-use item
+2025-08-04 13:29:19.08
+1e66d5d5
+User
+[WEBHOOK PAYLOAD FULL] {"receiptId":82,"receipt_id":82,"storeName":"Waymo","store_name":"Waymo","storeId":1,"store_id":1,"userId":30,"user_id":30,"username":"user_799kveh9","walletAddress":"0xD7f75A0A1287ab2916848909C8531a0eA9412800","wallet_address":"0xD7f75A0A1287ab2916848909C8531a0eA9412800","purchaseAmount":8.3,"purchase_amount":8.3,"purchaseDate":"2025-08-04","purchase_date":"2025-08-04","receiptCategory":"re-use item","receipt_category":"re-use item","containsPreOwned":false,"contains_pre_owned":false,"preOwnedKeywordsFound":"","pre_owned_keywords_found":"","sustainabilityTags":"re-use item","sustainability_tags":"re-use item","paymentMethod":{},"payment_method":{},"paymentIsDigital":false,"payment_is_digital":false,"paymentCardLastFour":null,"payment_card_last_four":null,"isVechainVisa":false,"is_vechain_visa":false,"baseReward":8,"base_reward":8,"streakMultiplier":1.1,"streak_multiplier":1.1,"digitalPaymentBonus":0,"digital_payment_bonus":0,"vechainVisaBonus":0,"vechain_visa_bonus":0,"finalReward":8.8,"final_reward":8.8,"tokenReward":8.8,"confidenceScore":0,"confidence_score":0,"validationReasons":"","validation_reasons":"","isAcceptable":true,"is_acceptable":true,"userStreak":0,"user_streak":0,"tokenBalance":0,"token_balance":0,"timestamp":"2025-08-04T20:29:19.081Z","eventType":"submission","event_type":"submission","isTestMode":false,"is_test_mode":false,"appVersion":"1.0.4","app_version":"1.0.4","debugHasReceipt":true,"_debug_has_receipt":true,"debugHasUser":true,"_debug_has_user":true,"debugHasRewards":true,"_debug_has_rewards":true,"debugWebhookAttemptTime":"2025-08-04T20:29:19.081Z","_debug_webhook_attempt_time":"2025-08-04T20:29:19.081Z"}
+2025-08-04 13:29:19.08
+1e66d5d5
+User
+[WEBHOOK] Sending request to: https://script.google.com/macros/s/AKfycbzDqopOu-WNEt9vxOn9Qrm0aD4K9gOnzj7AgRw-zXLJ8BtYk5_0V8d0dDyv816J-Eb3/exec
+2025-08-04 13:29:19.43
+1e66d5d5
+User
+[WEBHOOK] Response not OK: Status 404, Text:
+ Drive
+Sorry, unable to open the file at this time.
+
+Please check the address and try again.
+
+Get stuff done with Google Drive
+
+Apps in Google Drive make it easy to create, store and share online documents, spreadsheets, presentations and more.
+
+Learn more at drive.google.com/start/apps.
+
+2025-08-04 13:29:19.44
+1e66d5d5
+User
+[WEBHOOK ERROR] Google Sheets webhook failed with status 404:
+ Drive
+Sorry, unable to open the file at this time.
+
+Please check the address and try again.
+
+Get stuff done with Google Drive
+
+Apps in Google Drive make it easy to create, store and share online documents, spreadsheets, presentations and more.
+
+Learn more at drive.google.com/start/apps.
+
+2025-08-04 13:29:19.44
+1e66d5d5
+User
+[WEBHOOK ERROR DETAILS] {
+2025-08-04 13:29:19.44
+1e66d5d5
+User
+eventType: 'submission',
+2025-08-04 13:29:19.44
+1e66d5d5
+User
+receiptId: 82,
+2025-08-04 13:29:19.44
+1e66d5d5
+User
+storeName: 'Waymo',
+2025-08-04 13:29:19.44
+1e66d5d5
+User
+errorType: 'Error',
+2025-08-04 13:29:19.44
+1e66d5d5
+User
+timestamp: '2025-08-04T20:29:19.440Z'
+2025-08-04 13:29:19.44
+1e66d5d5
+User
+}
+2025-08-04 13:29:19.44
+1e66d5d5
+User
+8:29:19 PM [webhooks] ⚠️ Error sending receipt data to Google Sheets: Google Sheets webhook failed with status 404: <!DOCTYPE html><html lang="en"><head><meta name="description" content="Web word processing, presentations and spreadsheets"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0"><link rel="shortcut icon" href="//docs.google.com/favicon.ico"><title>Page Not Found</title><meta name="referrer" content="origin"><link href="//fonts.googleapis.com/css?family=Product+Sans" rel="stylesheet" type="text/css" nonce="bpcaOwrrEt7_Phf74kVIGg"><style nonce="bpcaOwrrEt7_Phf74kVIGg">.goog-inline-block{position:relative;display:-moz-inline-box;display:inline-block}* html .goog-inline-block{display:inline}*:first-child+html .goog-inline-block{display:inline}#drive-logo{margin:18px 0;position:absolute;white-space:nowrap}.docs-drivelogo-img{background-image:url(//ssl.gstatic.com/images/branding/googlelogo/1x/googlelogo_color_116x41dp.png);-webkit-background-size:116px 41px;background-size:116px 41px;display:inline-block;height:41px;vertical-align:bottom;width:116px}.docs-drivelogo-text{color:#000;display:inline-block;opacity:.54;text-decoration:none;font-family:"Product Sans",Arial,Helvetica,sans-serif;font-size:32px;text-rendering:optimizeLegibility;position:relative;top:-6px;left:-7px;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}@media (-webkit-min-device-pixel-ratio:1.5),(min-resolution:144dpi){.docs-drivelogo-img{background-image:url(//ssl.gstatic.com/images/branding/googlelogo/2x/googlelogo_color_116x41dp.png)}}sentinel{}</style><style type="text/css" nonce="bpcaOwrrEt7_Phf74kVIGg">body {background-color: #fff; font-family: Arial,sans-serif; font-size: 13px; margin: 0; padding: 0;}a, a:link, a:visited {color: #112ABB;}</style><style type="text/css" nonce="bpcaOwrrEt7_Phf74kVIGg">.errorMessage {font-size: 12pt; font-weight: bold; line-height: 150%;}</style></head><body><div id="outerContainer"><div id="innerContainer"><div style="position: absolute; top: -80px;"><div id="drive-logo"><a href="/"><span class="docs-drivelogo-img" title="Google logo"></span><span class="docs-drivelogo-text">&nbsp;Drive</span></a></div></div><div align="center"><p class="errorMessage" style="padding-top: 50px">Sorry, unable to open the file at this time.</p><p> Please check the address and try again. </p><div style="background: #F0F6FF; border: 1px solid black; margin-top: 35px; padding: 10px 125px; width: 300px;"><p><strong>Get stuff done with Google Drive</strong></p><p>Apps in Google Drive make it easy to create, store and share online documents, spreadsheets, presentations and more.</p><p>Learn more at <a href="https://drive.google.com/start/apps">drive.google.com/start/apps</a>.</p></div></div></div></div></body><style nonce="bpcaOwrrEt7_Phf74kVIGg">html {height: 100%; overflow: auto;}body {height: 100%; overflow: auto;}#outerContainer {margin: auto; max-width: 750px;}#innerContainer {margin-bottom: 20px; margin-left: 40px; margin-right: 40px; margin-top: 80px; position: relative;}</style></html>
+2025-08-04 13:29:19.44
+1e66d5d5
+User
+[WEBHOOK] ✅ Receipt submission webhook completed in 362ms
+
+Wrap
+
+Colors
