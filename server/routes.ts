@@ -3326,7 +3326,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               console.log(`[BLOCKCHAIN] Attempting REAL B3TR distribution to VeChain testnet`);
               console.log(`[BLOCKCHAIN] FORCE TEST - Distribution will execute regardless of confidence`);
               
-              const { distributeRealB3TR } = await import('./utils/simple-real-distribution-fixed.js');
+              const { distributeRealB3TR } = await import('./utils/working-distribution.js');
               
               // CRITICAL FIX: Log the raw amount being passed to verify 18-decimal conversion
               console.log(`[BLOCKCHAIN] 🔍 RAW AMOUNT DEBUG:`);

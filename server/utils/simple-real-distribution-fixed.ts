@@ -57,6 +57,11 @@ export async function distributeRealB3TR(
 
         // Check credentials
         const privateKey = process.env.DISTRIBUTOR_PRIVATE_KEY;
+        console.log(`[REAL-B3TR] Environment check:`);
+        console.log(`[REAL-B3TR] - DISTRIBUTOR_PRIVATE_KEY: ${privateKey ? 'SET' : 'MISSING'}`);
+        console.log(`[REAL-B3TR] - B3TR_CONTRACT_ADDRESS: ${CONTRACTS.B3TR_TOKEN ? 'SET' : 'MISSING'}`);
+        console.log(`[REAL-B3TR] - X2EARNREWARDSPOOL_ADDRESS: ${CONTRACTS.X2EARN_REWARDS_POOL ? 'SET' : 'MISSING'}`);
+        
         if (!privateKey || !CONTRACTS.B3TR_TOKEN || !CONTRACTS.X2EARN_REWARDS_POOL) {
             throw new Error('Missing VeBetterDAO credentials or contract addresses');
         }
@@ -74,24 +79,24 @@ export async function distributeRealB3TR(
         const appReward = totalAmount * 0.3;
         const appFundAddress = process.env.APP_FUND_WALLET || '0x119761865b79bea9e7924edaa630942322ca09d1';
 
-        // Convert to wei (18 decimals for B3TR token)
-        const userAmountWei = thor.units.parseEther(userReward.toString());
-        const appAmountWei = thor.units.parseEther(appReward.toString());
+        // Convert to wei (18 decimals for B3TR token) - Using ethers for conversion
+        const userAmountWei = BigInt(userReward * 1e18).toString();
+        const appAmountWei = BigInt(appReward * 1e18).toString();
 
         console.log(`[REAL-B3TR] User: ${userReward} B3TR (${userAmountWei} wei) → ${recipientAddress}`);
         console.log(`[REAL-B3TR] App: ${appReward} B3TR (${appAmountWei} wei) → ${appFundAddress}`);
 
-        // Prepare transaction data for user transfer
-        const userTransferData = thor.abi.encodeFunction(ERC20_TRANSFER_ABI, recipientAddress, userAmountWei);
-        const appTransferData = thor.abi.encodeFunction(ERC20_TRANSFER_ABI, appFundAddress, appAmountWei);
+        // Prepare transaction data for user transfer using correct thor-devkit ABI encoding
+        const userTransferData = thor.abi.encodeFunction(ERC20_TRANSFER_ABI, [recipientAddress, userAmountWei]);
+        const appTransferData = thor.abi.encodeFunction(ERC20_TRANSFER_ABI, [appFundAddress, appAmountWei]);
 
         // Get latest block for transaction building
         const response = await fetch(`${TESTNET_RPC}/blocks/best`);
         const bestBlock = await response.json();
         console.log(`[REAL-B3TR] Using block ${bestBlock.number} as reference`);
 
-        // Build user transaction
-        const userTxBody = {
+        // Build user transaction using thor-devkit Transaction.Body
+        const userTxBody: thor.Transaction.Body = {
             chainTag: 0x27, // VeChain testnet
             blockRef: bestBlock.id.slice(0, 18),
             expiration: 32,
@@ -106,7 +111,7 @@ export async function distributeRealB3TR(
             nonce: Date.now()
         };
 
-        // Sign user transaction
+        // Sign user transaction using thor-devkit methods
         const userTx = new thor.Transaction(userTxBody);
         const userSigningHash = userTx.signingHash();
         const userSignature = distributorWallet.sign(userSigningHash);
