@@ -1,0 +1,103 @@
+[INFO] (#Ext) -  Starting ContentScriptController listener...
+content-scripts.iife.js:47 Attempting in inject VeWorld iFrame container...
+content-scripts.iife.js:47 VeWorld iFrame container created
+VM13:107 [PRELOAD] DAppKit comprehensive polyfills installed
+vechain-CNxfLC-1.js:3676 MIXPANEL PEOPLE REQUEST (QUEUED, PENDING IDENTIFY):
+vechain-CNxfLC-1.js:3676 Object
+index-Divq_9D2.js:282 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+index-Divq_9D2.js:358 Preloading wallet addresses...
+index-Divq_9D2.js:282 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+index-Divq_9D2.js:261 Wallet addresses loaded from API
+index-Divq_9D2.js:282 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+content-scripts.iife.js:1 [INFO] (#Ext) -  Opening VeWorld iFrame
+content-scripts.iife.js:1 [INFO] (#Ext) -  Closing VeWorld iFrame
+index-Divq_9D2.js:287 🟢 [UNIFIED] VeWorld extension detected
+index-Divq_9D2.js:291 [UPLOAD] File converted to base64, size: 192236 chars
+index-Divq_9D2.js:291 [UPLOAD] 📤 Sending validation request...
+index-Divq_9D2.js:291 [UPLOAD] Request data: Object
+index-Divq_9D2.js:291 [UPLOAD] 📨 Validation response status: 200
+index-Divq_9D2.js:291 [UPLOAD] ✅ Validation result: {isValid: true, storeName: 'Lyft', isThriftStore: true, isSustainableStore: true, sustainableCategory: 'ride_share', …}
+index-Divq_9D2.js:291 [UPLOAD] 🚀 Receipt validated successfully - submitting for blockchain distribution...
+index-Divq_9D2.js:291  POST https://www.recirclerewards.app/api/receipts 400 (Bad Request)
+(anonymous) @ index-Divq_9D2.js:291Understand this error
+index-Divq_9D2.js:291 [UPLOAD] 📨 Submission response status: 400
+index-Divq_9D2.js:291 [UPLOAD] ❌ Submission error response: {"message":"Duplicate receipt detected. Please try with a new receipt.","details":"This appears to be the same receipt you've already submitted. Each purchase can only be rewarded once.","duplicateReceiptId":82,"isDuplicate":true}
+(anonymous) @ index-Divq_9D2.js:291Understand this error
+index-Divq_9D2.js:291 [UPLOAD] ⚠️ Proceeding with validation result despite submission issues
+(anonymous) @ index-Divq_9D2.js:291Understand this warning
+index-Divq_9D2.js:291 [SCAN] Production validation complete: {isValid: true, storeName: 'Lyft', isThriftStore: true, isSustainableStore: true, sustainableCategory: 'ride_share', …}
+index-Divq_9D2.js:282 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+index-Divq_9D2.js:277 Refreshed user token balance: 18.8
+index-Divq_9D2.js:282 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+index-Divq_9D2.js:287 🟢 [UNIFIED] VeWorld extension detected
+index-Divq_9D2.js:291 [UPLOAD] File converted to base64, size: 168376 chars
+index-Divq_9D2.js:291 [UPLOAD] 📤 Sending validation request...
+index-Divq_9D2.js:291 [UPLOAD] Request data: {userId: '30', walletAddress: '30', imageSize: 168376, hasBase64: true}
+index-Divq_9D2.js:291 [UPLOAD] 📨 Validation response status: 200
+index-Divq_9D2.js:291 [UPLOAD] ✅ Validation result: {isValid: true, storeName: 'Waymo', isThriftStore: true, isSustainableStore: true, sustainableCategory: 'ride_share', …}
+index-Divq_9D2.js:291 [UPLOAD] 🚀 Receipt validated successfully - submitting for blockchain distribution...
+index-Divq_9D2.js:291  POST https://www.recirclerewards.app/api/receipts 400 (Bad Request)
+(anonymous) @ index-Divq_9D2.js:291
+await in (anonymous)
+(anonymous) @ index-Divq_9D2.js:291
+(anonymous) @ index-Divq_9D2.js:291
+Promise.then
+(anonymous) @ index-Divq_9D2.js:291
+(anonymous) @ index-Divq_9D2.js:289
+(anonymous) @ index-Divq_9D2.js:289
+xc @ vendor-BRGH1Yg5.js:29
+Nc @ vendor-BRGH1Yg5.js:29
+zc @ vendor-BRGH1Yg5.js:29
+ui @ vendor-BRGH1Yg5.js:29
+Ws @ vendor-BRGH1Yg5.js:29
+(anonymous) @ vendor-BRGH1Yg5.js:29
+Eo @ vendor-BRGH1Yg5.js:32
+ms @ vendor-BRGH1Yg5.js:29
+Rl @ vendor-BRGH1Yg5.js:29
+Gu @ vendor-BRGH1Yg5.js:29
+Wc @ vendor-BRGH1Yg5.js:29Understand this error
+index-Divq_9D2.js:291 [UPLOAD] 📨 Submission response status: 400
+index-Divq_9D2.js:291 [UPLOAD] ❌ Submission error response: {"message":"Duplicate receipt detected. Please try with a new receipt.","details":"This appears to be the same receipt you've already submitted. Each purchase can only be rewarded once.","duplicateReceiptId":82,"isDuplicate":true}
+(anonymous) @ index-Divq_9D2.js:291
+await in (anonymous)
+(anonymous) @ index-Divq_9D2.js:291
+(anonymous) @ index-Divq_9D2.js:291
+Promise.then
+(anonymous) @ index-Divq_9D2.js:291
+(anonymous) @ index-Divq_9D2.js:289
+(anonymous) @ index-Divq_9D2.js:289
+xc @ vendor-BRGH1Yg5.js:29
+Nc @ vendor-BRGH1Yg5.js:29
+zc @ vendor-BRGH1Yg5.js:29
+ui @ vendor-BRGH1Yg5.js:29
+Ws @ vendor-BRGH1Yg5.js:29
+(anonymous) @ vendor-BRGH1Yg5.js:29
+Eo @ vendor-BRGH1Yg5.js:32
+ms @ vendor-BRGH1Yg5.js:29
+Rl @ vendor-BRGH1Yg5.js:29
+Gu @ vendor-BRGH1Yg5.js:29
+Wc @ vendor-BRGH1Yg5.js:29Understand this error
+index-Divq_9D2.js:291 [UPLOAD] ⚠️ Proceeding with validation result despite submission issues
+(anonymous) @ index-Divq_9D2.js:291
+await in (anonymous)
+(anonymous) @ index-Divq_9D2.js:291
+(anonymous) @ index-Divq_9D2.js:291
+Promise.then
+(anonymous) @ index-Divq_9D2.js:291
+(anonymous) @ index-Divq_9D2.js:289
+(anonymous) @ index-Divq_9D2.js:289
+xc @ vendor-BRGH1Yg5.js:29
+Nc @ vendor-BRGH1Yg5.js:29
+zc @ vendor-BRGH1Yg5.js:29
+ui @ vendor-BRGH1Yg5.js:29
+Ws @ vendor-BRGH1Yg5.js:29
+(anonymous) @ vendor-BRGH1Yg5.js:29
+Eo @ vendor-BRGH1Yg5.js:32
+ms @ vendor-BRGH1Yg5.js:29
+Rl @ vendor-BRGH1Yg5.js:29
+Gu @ vendor-BRGH1Yg5.js:29
+Wc @ vendor-BRGH1Yg5.js:29Understand this warning
+index-Divq_9D2.js:291 [SCAN] Production validation complete: {isValid: true, storeName: 'Waymo', isThriftStore: true, isSustainableStore: true, sustainableCategory: 'ride_share', …}
+index-Divq_9D2.js:282 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+index-Divq_9D2.js:277 Refreshed user token balance: 18.8
+index-Divq_9D2.js:282 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
