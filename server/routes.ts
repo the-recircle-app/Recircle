@@ -3292,6 +3292,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // This ensures VeBetterDAO compliance with mandatory fund distribution
           console.log(`[BLOCKCHAIN] Triggering 70/30 distribution for receipt ${newReceipt.id}`);
           console.log(`[BLOCKCHAIN] Receipt needsManualReview: ${needsManualReview}, shouldAwardTokens: ${shouldAwardTokens}`);
+          console.log(`[BLOCKCHAIN] FORCED EXECUTION - About to execute blockchain distribution`);
           
           try {
             // Get user wallet address for distribution
@@ -3323,6 +3324,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               
               // REAL BLOCKCHAIN DISTRIBUTION: Use simple real B3TR distribution
               console.log(`[BLOCKCHAIN] Attempting REAL B3TR distribution to VeChain testnet`);
+              console.log(`[BLOCKCHAIN] FORCE TEST - Distribution will execute regardless of confidence`);
               
               const { distributeRealB3TR } = await import('./utils/simple-real-distribution.js');
               
