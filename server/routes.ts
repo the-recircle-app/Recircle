@@ -2693,9 +2693,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
           }
           
-          // Match on store ID
+          // Match on store ID AND store name for better duplicate detection
           const numericStoreId = typeof storeId === 'string' ? parseInt(storeId) : storeId;
-          const sameStore = receipt.storeId === numericStoreId;
+          const sameStoreId = receipt.storeId === numericStoreId;
+          
+          // Also check store name to differentiate between different companies
+          const sameStoreName = (receipt.storeName?.toLowerCase() || '') === (storeName?.toLowerCase() || '');
+          const sameStore = sameStoreId && sameStoreName;
           
           // Match on amount (with small tolerance for rounding errors)
           let sameAmount = false;
@@ -2722,9 +2726,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           // Consider it a duplicate if:
           // - Same image (100) is absolutely a duplicate
-          // - Store+amount (70) is almost certainly a duplicate (same transaction)
-          // - Store+date (60) is probably a duplicate (same day transaction at same store)
-          return similarityScore >= 60 || sameImage; // Image match is always a duplicate
+          // - Store+amount+date (90) is almost certainly a duplicate (exact same transaction)
+          // Raised threshold to 90 to avoid false positives between different companies
+          return similarityScore >= 90 || sameImage; // Image match is always a duplicate
         });
         
         if (potentialDuplicates.length > 0) {
