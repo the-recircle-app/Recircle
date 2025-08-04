@@ -119,12 +119,14 @@ export function ProductionReceiptUpload({
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            userId,
+            userId: parseInt(userId),
             walletAddress,
-            image: base64,
-            storeHint: 'transportation',
-            purchaseDate: new Date().toISOString().split('T')[0],
+            storeId: 1, // Default store ID for sustainable transportation
+            storeName: validationResult.storeName || 'Transportation Service',
             amount: validationResult.estimatedReward || 0,
+            purchaseDate: new Date().toISOString().split('T')[0],
+            category: validationResult.category || 'ride_share',
+            imageUrl: null,
             isTestMode: true // Enable for blockchain testing
           }),
         });
@@ -157,19 +159,19 @@ export function ProductionReceiptUpload({
       onValidationComplete(validationResult);
 
       // Show success/failure toast
-      if (result.tokenDistributed) {
+      if (validationResult.tokenDistributed) {
         toast({
           title: "Success!",
-          description: `Earned ${result.actualReward} B3TR tokens for sustainable transportation!`,
+          description: `Earned ${validationResult.actualReward} B3TR tokens for sustainable transportation!`,
         });
       } else {
-        const validityScore = result.aiValidation?.validityScore ?? result.confidence ?? 0;
-        const reasoning = result.aiValidation?.reasoning ?? result.reasons?.[0] ?? 'Analysis complete';
+        const validityScore = validationResult.aiValidation?.validityScore ?? validationResult.confidence ?? 0;
+        const reasoning = validationResult.aiValidation?.reasoning ?? validationResult.reasons?.[0] ?? 'Analysis complete';
         
         toast({
           title: "Receipt Processed",
           description: `Validity score: ${validityScore.toFixed(2)}. ${reasoning}`,
-          variant: result.isValid ? "default" : "destructive",
+          variant: validationResult.isValid ? "default" : "destructive",
         });
       }
 
