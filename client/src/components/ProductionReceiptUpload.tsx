@@ -81,8 +81,8 @@ export function ProductionReceiptUpload({
         hasBase64: !!base64
       });
 
-      // Submit to ReCircle production API with Pierre's validation
-      const response = await fetch('/api/receipts/validate', {
+      // First validate the receipt
+      const validationResponse = await fetch('/api/receipts/validate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -97,21 +97,64 @@ export function ProductionReceiptUpload({
         }),
       });
 
-      setUploadProgress(70);
-      console.log('[UPLOAD] 📨 Response status:', response.status, response.statusText);
+      setUploadProgress(50);
+      console.log('[UPLOAD] 📨 Validation response status:', validationResponse.status);
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('[UPLOAD] ❌ Server error response:', errorText);
-        throw new Error(`Server Error ${response.status}: ${errorText}`);
+      if (!validationResponse.ok) {
+        const errorText = await validationResponse.text();
+        console.error('[UPLOAD] ❌ Validation error response:', errorText);
+        throw new Error(`Validation Error ${validationResponse.status}: ${errorText}`);
       }
 
-      const result: ValidationResult = await response.json();
-      console.log('[UPLOAD] ✅ Validation result:', result);
-      setUploadProgress(100);
+      const validationResult: ValidationResult = await validationResponse.json();
+      console.log('[UPLOAD] ✅ Validation result:', validationResult);
+      
+      // If validation passes and receipt is acceptable, submit it for blockchain distribution
+      if (validationResult.isValid && validationResult.estimatedReward > 0) {
+        console.log('[UPLOAD] 🚀 Receipt validated successfully - submitting for blockchain distribution...');
+        
+        const submissionResponse = await fetch('/api/receipts', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId,
+            walletAddress,
+            image: base64,
+            storeHint: 'transportation',
+            purchaseDate: new Date().toISOString().split('T')[0],
+            amount: validationResult.estimatedReward || 0,
+            isTestMode: true // Enable for blockchain testing
+          }),
+        });
 
-      setValidationResult(result);
-      onValidationComplete(result);
+        setUploadProgress(90);
+        console.log('[UPLOAD] 📨 Submission response status:', submissionResponse.status);
+
+        if (!submissionResponse.ok) {
+          const errorText = await submissionResponse.text();
+          console.error('[UPLOAD] ❌ Submission error response:', errorText);
+          // Don't throw error here - validation was successful, submission might have minor issues
+          console.warn('[UPLOAD] ⚠️ Proceeding with validation result despite submission issues');
+        } else {
+          const submissionResult = await submissionResponse.json();
+          console.log('[UPLOAD] ✅ Submission result:', submissionResult);
+          
+          // Update validation result with submission data
+          validationResult.tokenDistributed = true;
+          validationResult.actualReward = submissionResult.tokenReward || validationResult.estimatedReward;
+          if (submissionResult.txHash) {
+            validationResult.txHash = submissionResult.txHash;
+          }
+        }
+      } else {
+        console.log('[UPLOAD] ⚠️ Receipt validation failed or no reward - skipping blockchain submission');
+      }
+
+      setUploadProgress(100);
+      setValidationResult(validationResult);
+      onValidationComplete(validationResult);
 
       // Show success/failure toast
       if (result.tokenDistributed) {
