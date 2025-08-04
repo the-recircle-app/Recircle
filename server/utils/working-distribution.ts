@@ -39,8 +39,11 @@ export async function distributeRealB3TR(
     network: string;
     error?: string;
 }> {
+    console.log(`[REAL-B3TR] 🔥 DISTRIBUTION FUNCTION CALLED - Starting error-resistant distribution`);
+    
     try {
         console.log(`[REAL-B3TR] 🚀 Starting real B3TR distribution`);
+        console.log(`[REAL-B3TR] Recipient: ${recipientAddress}`);
         console.log(`[REAL-B3TR] Total: ${totalAmount} B3TR → User: ${totalAmount * 0.7}, App: ${totalAmount * 0.3}`);
 
         // Check environment variables with detailed logging

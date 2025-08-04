@@ -3326,10 +3326,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
               }
               
               // REAL BLOCKCHAIN DISTRIBUTION: Use simple real B3TR distribution
+              console.log(`[BLOCKCHAIN] 🚀 Triggering 70/30 distribution for receipt #${newReceipt.id}`);
               console.log(`[BLOCKCHAIN] Attempting REAL B3TR distribution to VeChain testnet`);
               console.log(`[BLOCKCHAIN] FORCE TEST - Distribution will execute regardless of confidence`);
               
+              console.log(`[BLOCKCHAIN] About to import working-distribution module...`);
               const { distributeRealB3TR } = await import('./utils/working-distribution.js');
+              console.log(`[BLOCKCHAIN] Module imported successfully`);
               
               // CRITICAL FIX: Log the raw amount being passed to verify 18-decimal conversion
               console.log(`[BLOCKCHAIN] 🔍 RAW AMOUNT DEBUG:`);
@@ -3360,7 +3363,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
               console.log(`[BLOCKCHAIN] ⚠️ Skipping distribution - no wallet address or zero reward`);
             }
           } catch (distributionError) {
-            console.error(`[BLOCKCHAIN] ❌ Distribution error:`, distributionError);
+            console.error(`[BLOCKCHAIN] ❌ CRITICAL Distribution error:`, distributionError);
+            console.error(`[BLOCKCHAIN] Error details:`, {
+              message: distributionError instanceof Error ? distributionError.message : String(distributionError),
+              stack: distributionError instanceof Error ? distributionError.stack : undefined,
+              name: distributionError instanceof Error ? distributionError.name : undefined
+            });
             // Don't fail the receipt submission if blockchain distribution fails
             // The user still gets their database balance updated
           }

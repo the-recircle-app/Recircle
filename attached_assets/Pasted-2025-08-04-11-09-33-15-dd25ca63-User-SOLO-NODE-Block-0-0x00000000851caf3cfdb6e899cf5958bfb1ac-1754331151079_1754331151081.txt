@@ -1,0 +1,119 @@
+2025-08-04 11:09:33.15
+dd25ca63
+User
+[SOLO-NODE] Block #0: 0x00000000851caf3cfdb6e899cf5958bfb1ac3413d346d43539627e6be7ec1b4a
+2025-08-04 11:09:33.15
+dd25ca63
+User
+[SOLO-NODE] 💰 Pre-funded accounts available:
+2025-08-04 11:09:33.15
+dd25ca63
+User
+[SOLO-NODE] Account 1: 0x7567d83b7b8d80addcb281a71d54fc7b3364ffed
+2025-08-04 11:09:33.15
+dd25ca63
+User
+[SOLO-NODE] Account 2: 0xd3ae78222beadb038203be21ed5ce7c9b1bff602
+2025-08-04 11:09:33.15
+dd25ca63
+User
+[SOLO-NODE] Account 3: 0x733b7269443c70de16bbf9b0615307884bcc5636
+2025-08-04 11:09:33.15
+dd25ca63
+User
+[SOLO-NODE] 🪙 B3TR Token deployed at: 0x5ef79995fe8a89e0812330e4378eb2660cede699
+2025-08-04 11:09:33.15
+dd25ca63
+User
+[SOLO-NODE] Each account has 100,000 B3TR tokens for testing
+2025-08-04 11:09:33.15
+dd25ca63
+User
+[SOLO-NODE] ✅ Solo Node integrated into Express server
+2025-08-04 11:09:33.15
+dd25ca63
+User
+[SOLO-NODE] 🌐 Available at /solo/* endpoints
+2025-08-04 11:09:33.15
+dd25ca63
+User
+ReCircle server running on port 5000
+2025-08-04 11:09:33.15
+dd25ca63
+User
+Memory optimization enabled: true
+2025-08-04 11:09:33.15
+dd25ca63
+User
+Server bound to 0.0.0.0:5000 for external access
+2025-08-04 11:09:52.96
+dd25ca63
+User
+Wallet addresses accessed from IP: 35.225.171.39
+2025-08-04 11:10:21.45
+dd25ca63
+User
+6:10:21 PM [receipts] Receipt validation request received. Debug mode: enabled (TESTING: forced enabled)
+2025-08-04 11:10:21.45
+dd25ca63
+User
+6:10:21 PM [receipts] Starting receipt validation with AI...
+2025-08-04 11:10:21.45
+dd25ca63
+User
+6:10:21 PM [openai] Starting OpenAI receipt analysis with model: gpt-4-turbo...
+2025-08-04 11:10:21.45
+dd25ca63
+User
+6:10:21 PM [openai] OpenAI request timeout set to 40s with 3 retries
+2025-08-04 11:10:30.49
+dd25ca63
+User
+6:10:30 PM [openai] OpenAI response received in 9.035s (829 chars)
+2025-08-04 11:10:30.49
+dd25ca63
+User
+6:10:30 PM [receipts] Receipt date validation passed: 2025-07-13 (2025-07-13) is 22 days old (TESTING MODE: 30 day limit)
+2025-08-04 11:10:30.72
+dd25ca63
+User
+6:10:30 PM [receipts] Receipt from sustainable store (lyft, category: ride_share) is acceptable
+2025-08-04 11:10:30.72
+dd25ca63
+User
+Applied digital payment bonus: +0.3 B3TR for using Apple Pay (Visa)
+2025-08-04 11:10:30.72
+dd25ca63
+User
+6:10:30 PM [receipts] Estimated reward calculation:
+2025-08-04 11:10:30.72
+dd25ca63
+User
+- Base reward: 8 B3TR
+2025-08-04 11:10:30.72
+dd25ca63
+User
+- Digital payment bonus: 0.3 B3TR
+2025-08-04 11:10:30.72
+dd25ca63
+User
+- VeChain Visa bonus: 0 B3TR
+2025-08-04 11:10:30.72
+dd25ca63
+User
+- Total payment bonuses: 0.3 B3TR
+2025-08-04 11:10:30.72
+dd25ca63
+User
+- Final estimated reward: 8.3 B3TR
+2025-08-04 11:10:30.72
+dd25ca63
+User
+2025-08-04 11:10:30.72
+dd25ca63
+User
+6:10:30 PM [receipts] Correcting old date in validation data: 2025-07-13 → 2025-08-04
+2025-08-04 11:11:51.94
+7da06d4d
+System
+system: received signal terminated
