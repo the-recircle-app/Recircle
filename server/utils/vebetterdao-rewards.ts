@@ -840,7 +840,7 @@ export async function executeVeBetterDAORewards(
     walletAddress: string, 
     receiptsApproved: number,
     totalSpent: number
-): Promise<DistributionResult> {
+): Promise<any> {
     const isDevelopment = process.env.NODE_ENV === 'development';
     console.log(`[VEBETTERDAO] ${isDevelopment ? 'Development' : 'Production'} mode distribution starting...`);
     
@@ -881,7 +881,7 @@ export async function executeVeBetterDAORewards(
                     console.log('[VEBETTERDAO] ⚠️ Real blockchain failed, trying solo fallback:', realResult.error);
                 }
             } catch (error) {
-                console.log('[VEBETTERDAO] ⚠️ Real blockchain error, trying solo fallback:', error.message);
+                console.log('[VEBETTERDAO] ⚠️ Real blockchain error, trying solo fallback:', error instanceof Error ? error.message : String(error));
             }
         }
 
@@ -922,10 +922,10 @@ export async function executeVeBetterDAORewards(
             };
         }
         
-        // FALLBACK 2: Pierre-style distribution if solo not available
+        // FALLBACK 2: Pierre-style distribution if solo not available  
         if (isDevelopment && await isSoloNodeAvailable()) {
             console.log('[VEBETTERDAO] 🧪 Final fallback to Pierre-style distribution');
-            return await distributeSoloB3TR(walletAddress, receiptsApproved, totalSpent);
+            return await distributeSoloB3TR(walletAddress, receiptsApproved);
         }
         
         // Production VeBetterDAO distribution logic here...

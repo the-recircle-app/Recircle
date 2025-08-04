@@ -61,7 +61,7 @@ export async function distributeRealB3TRPierreStyle(
         // Get distributor wallet (Pierre's approach)
         const distributorWallet = privateKey ? 
             new thor.HDNode(Buffer.from(privateKey.slice(2), 'hex')) :
-            thor.HDNode.fromMnemonic(mnemonic.split(' '));
+            thor.HDNode.fromMnemonic(mnemonic?.split(' ') || []);
         
         const distributorAddress = `0x${distributorWallet.address.toString('hex')}`;
         console.log(`[PIERRE-REAL] Distributor: ${distributorAddress}`);

@@ -54,6 +54,7 @@ import {
   authRateLimit,
   adminRateLimit 
 } from "./middlewares/rateLimiting";
+import productionTestRoutes from './routes/production-test.js';
 import { 
   calculateReceiptReward, 
   calculateStoreAdditionReward, 
