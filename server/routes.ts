@@ -3324,10 +3324,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 console.log(`[BLOCKCHAIN] LOW CONFIDENCE (${confidenceLevel}) - Using manual review`);
               }
               
-              // REAL BLOCKCHAIN DISTRIBUTION: Use actual VeBetterDAO smart contract
-              console.log(`[BLOCKCHAIN] Attempting REAL VeBetterDAO smart contract distribution`);
+              // REAL BLOCKCHAIN DISTRIBUTION: Use simple real B3TR distribution
+              console.log(`[BLOCKCHAIN] Attempting REAL B3TR distribution to VeChain testnet`);
               
-              const { distributeVeBetterDAOReward } = await import('./utils/vebetterdao-rewards.ts');
+              const { distributeRealB3TR } = await import('./utils/simple-real-distribution.js');
               
               // CRITICAL FIX: Log the raw amount being passed to verify 18-decimal conversion
               console.log(`[BLOCKCHAIN] 🔍 RAW AMOUNT DEBUG:`);
@@ -3335,75 +3335,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
               console.log(`[BLOCKCHAIN] - totalRewards type: ${typeof totalRewards}`);
               console.log(`[BLOCKCHAIN] - Expected wei units: ${totalRewards} × 10^18 = ${ethers.parseEther(totalRewards.toString())}`);
               
-              // Prepare VeBetterDAO distribution data
-              const vebetterDAOData = {
-                recipient: userWalletAddress,
-                amount: totalRewards, // This will be converted to wei in vebetterdao-rewards.ts
-                receiptData: {
-                  storeName: receiptStoreInfo?.name || "Transportation Service",
-                  category: receiptStoreInfo?.category || "sustainable_transportation",
-                  totalAmount: receiptData.amount,
-                  confidence: confidenceLevel,
-                  ipfsHash: newReceipt.imageUrl || undefined
-                },
-                environmentalImpact: {
-                  co2SavedGrams: Math.floor(totalRewards * 100), // Estimate based on transportation reward
-                  sustainabilityCategory: "sustainable_transportation"
-                }
-              };
+              // Execute real B3TR distribution with 70/30 split
+              const distributionResult = await distributeRealB3TR(
+                userWalletAddress,
+                totalRewards,
+                submittedUserId
+              );
               
-              // Execute REAL VeBetterDAO smart contract call
-              console.log(`[BLOCKCHAIN] 🚀 Calling distributeVeBetterDAOReward with:`, JSON.stringify(vebetterDAOData, null, 2));
-              
-              let distributionResult;
-              try {
-                distributionResult = await distributeVeBetterDAOReward(vebetterDAOData);
-                console.log(`[BLOCKCHAIN] 📋 VeBetterDAO distribution result:`, JSON.stringify(distributionResult, null, 2));
-                console.log(`[BLOCKCHAIN] 🔍 Distribution success check: distributionResult.success = ${distributionResult?.success}`);
-                console.log(`[BLOCKCHAIN] 🔍 Distribution txHash: ${distributionResult?.txHash}`);
-              } catch (distributionError) {
-                console.error(`[BLOCKCHAIN] ❌ VeBetterDAO distribution function error:`, distributionError);
-                distributionResult = { 
-                  success: false, 
-                  error: distributionError.message,
-                  txHash: null 
-                };
+              if (distributionResult.success) {
+                console.log(`[BLOCKCHAIN] ✅ Real B3TR distribution successful!`);
+                console.log(`[BLOCKCHAIN] User TX: ${distributionResult.transactions.user}`);
+                console.log(`[BLOCKCHAIN] App TX: ${distributionResult.transactions.app}`);
+                console.log(`[BLOCKCHAIN] Explorer URLs:`);
+                console.log(`[BLOCKCHAIN] - User: ${distributionResult.explorerUrls.user}`);
+                console.log(`[BLOCKCHAIN] - App: ${distributionResult.explorerUrls.app}`);
+              } else {
+                console.log(`[BLOCKCHAIN] ❌ Real B3TR distribution failed: ${distributionResult.error}`);
+                console.log(`[BLOCKCHAIN] Falling back to local token balance update only`);
               }
 
-              if (distributionResult?.success === true) {
-                console.log(`[BLOCKCHAIN] ✅ REAL VeBetterDAO distribution successful!`);
-                console.log(`[BLOCKCHAIN] Transaction Hash: ${distributionResult.txHash}`);
-                console.log(`[BLOCKCHAIN] User received: ${totalRewards} B3TR tokens`);
-                
-                // Update the receipt transaction with the real VeChain blockchain hash
-                if (receiptTransaction && distributionResult.txHash) {
-                  console.log(`[BLOCKCHAIN] 🔄 Updating receipt transaction ${receiptTransaction.id} with real hash: ${distributionResult.txHash}`);
-                  // Note: Transaction update temporarily disabled due to storage interface mismatch
-                  console.log(`[BLOCKCHAIN] ✅ Receipt transaction created with VeChain hash: ${distributionResult.txHash}`);
-                } else {
-                  console.error(`[BLOCKCHAIN] ⚠️ Cannot update transaction hash - receiptTransaction: ${!!receiptTransaction}, txHash: ${distributionResult.txHash}`);
-                }
-              } else {
-                console.error(`[BLOCKCHAIN] ❌ VeBetterDAO distribution failed: ${distributionResult.error || 'Unknown error'}`);
-                
-                // CRITICAL: Don't fall back to pending transactions for high-confidence receipts
-                // This was the bug preventing automatic token distribution
-                if (confidenceLevel >= 0.85) {
-                  console.log(`[BLOCKCHAIN] 🚀 FIXED: High confidence receipt - treating as successful for automatic token distribution`);
-                  
-                  // Update receipt transaction with VeBetterDAO hash anyway for user experience
-                  if (receiptTransaction) {
-                    // Note: Transaction update temporarily disabled due to storage interface mismatch
-                    console.log(`[BLOCKCHAIN] ✅ Receipt transaction logged for user experience`);
-                  }
-                } else {
-                  console.log(`[BLOCKCHAIN] 🔄 Falling back to pending transaction system for manual review`);
-                  
-                  // Only fall back to hybrid system for lower confidence receipts
-                  // Note: Hybrid distribution temporarily disabled due to import issues
-                  console.log(`[BLOCKCHAIN] 🔄 Would fall back to hybrid distribution for manual review`);
-                }
-              }
             } else {
               console.log(`[BLOCKCHAIN] ⚠️ Skipping distribution - no wallet address or zero reward`);
             }
