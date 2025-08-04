@@ -1847,10 +1847,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             parseISO(receiptDateFormatted)
           );
           
+          // TEMPORARILY DISABLED DATE VALIDATION FOR BLOCKCHAIN TESTING
           // If the receipt is older than 3 days, reject it - same logic as in /api/receipts endpoint
-          if (ageInDays > 3) {
+          if (ageInDays > 30) { // Changed from 3 to 30 days for blockchain testing
             // Log the date rejection for debugging
-            log(`Receipt date validation failed in analysis: ${analysisResult.purchaseDate} (${receiptDateFormatted}) is ${ageInDays} days old (max: 3 days)`, "receipts");
+            log(`Receipt date validation failed in analysis: ${analysisResult.purchaseDate} (${receiptDateFormatted}) is ${ageInDays} days old (max: 30 days - TESTING MODE)`, "receipts");
             
             return res.json({
               ...analysisResult,
@@ -1858,12 +1859,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
               estimatedReward: 0,
               reasons: [
                 ...analysisResult.reasons, 
-                `Receipt is too old (${ageInDays} days). Receipts must be submitted within 3 days of purchase.`
+                `Receipt is too old (${ageInDays} days). Receipts must be submitted within 30 days of purchase.`
               ]
             });
           } else {
             // Log successful date validation
-            log(`Receipt date validation passed: ${analysisResult.purchaseDate} (${receiptDateFormatted}) is ${ageInDays} days old`, "receipts");
+            log(`Receipt date validation passed: ${analysisResult.purchaseDate} (${receiptDateFormatted}) is ${ageInDays} days old (TESTING MODE: 30 day limit)`, "receipts");
           }
           
           // TESTING MODE: Skip duplicate receipt checking for B3TR wallet testing

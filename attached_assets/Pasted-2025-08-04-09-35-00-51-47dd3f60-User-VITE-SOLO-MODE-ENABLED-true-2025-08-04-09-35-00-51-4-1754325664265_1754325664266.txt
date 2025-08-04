@@ -1,0 +1,124 @@
+2025-08-04 09:35:00.51
+47dd3f60
+User
+VITE_SOLO_MODE_ENABLED: "'true'",
+2025-08-04 09:35:00.51
+47dd3f60
+User
+SOLO_MODE_ENABLED: "'true'",
+2025-08-04 09:35:00.51
+47dd3f60
+User
+NODE_ENV: "'production'",
+2025-08-04 09:35:00.51
+47dd3f60
+User
+viteEnabled: true,
+2025-08-04 09:35:00.51
+47dd3f60
+User
+soloEnabled: true,
+2025-08-04 09:35:00.51
+47dd3f60
+User
+isDev: false,
+2025-08-04 09:35:00.51
+47dd3f60
+User
+finalSoloEnabled: true
+2025-08-04 09:35:00.51
+47dd3f60
+User
+}
+2025-08-04 09:35:00.51
+47dd3f60
+User
+[SOLO-NODE] 🚀 Setting up integrated VeChain Solo Node routes
+2025-08-04 09:35:00.51
+47dd3f60
+User
+[SOLO-NODE] 🔧 Initializing Solo Node Genesis State...
+2025-08-04 09:35:00.51
+47dd3f60
+User
+[SOLO-NODE] ✅ Genesis block created
+2025-08-04 09:35:00.51
+47dd3f60
+User
+[SOLO-NODE] Block #0: 0x00000000851caf3cfdb6e899cf5958bfb1ac3413d346d43539627e6be7ec1b4a
+2025-08-04 09:35:00.51
+47dd3f60
+User
+[SOLO-NODE] 💰 Pre-funded accounts available:
+2025-08-04 09:35:00.51
+47dd3f60
+User
+[SOLO-NODE] Account 1: 0x7567d83b7b8d80addcb281a71d54fc7b3364ffed
+2025-08-04 09:35:00.51
+47dd3f60
+User
+[SOLO-NODE] Account 2: 0xd3ae78222beadb038203be21ed5ce7c9b1bff602
+2025-08-04 09:35:00.51
+47dd3f60
+User
+[SOLO-NODE] Account 3: 0x733b7269443c70de16bbf9b0615307884bcc5636
+2025-08-04 09:35:00.51
+47dd3f60
+User
+[SOLO-NODE] 🪙 B3TR Token deployed at: 0x5ef79995fe8a89e0812330e4378eb2660cede699
+2025-08-04 09:35:00.51
+47dd3f60
+User
+[SOLO-NODE] Each account has 100,000 B3TR tokens for testing
+2025-08-04 09:35:00.51
+47dd3f60
+User
+[SOLO-NODE] ✅ Solo Node integrated into Express server
+2025-08-04 09:35:00.51
+47dd3f60
+User
+[SOLO-NODE] 🌐 Available at /solo/* endpoints
+2025-08-04 09:35:00.52
+47dd3f60
+User
+ReCircle server running on port 5000
+2025-08-04 09:35:00.52
+47dd3f60
+User
+Memory optimization enabled: true
+2025-08-04 09:35:00.52
+47dd3f60
+User
+Server bound to 0.0.0.0:5000 for external access
+2025-08-04 09:35:25.16
+47dd3f60
+User
+Wallet addresses accessed from IP: 34.170.236.4
+2025-08-04 09:36:04.59
+47dd3f60
+User
+4:36:04 PM [receipts] Receipt validation request received. Debug mode: disabled
+2025-08-04 09:36:04.59
+47dd3f60
+User
+4:36:04 PM [receipts] Starting receipt validation with AI...
+2025-08-04 09:36:04.59
+47dd3f60
+User
+4:36:04 PM [openai] Starting OpenAI receipt analysis with model: gpt-4-turbo...
+2025-08-04 09:36:04.59
+47dd3f60
+User
+4:36:04 PM [openai] OpenAI request timeout set to 40s with 3 retries
+2025-08-04 09:36:13.31
+47dd3f60
+User
+4:36:13 PM [openai] OpenAI response received in 8.719s (849 chars)
+2025-08-04 09:36:13.31
+47dd3f60
+User
+4:36:13 PM [receipts] Receipt date validation failed in analysis: 2025-07-13 (2025-07-13) is 22 days old (max: 3 days)
+
+Wrap
+
+Colors
