@@ -1,0 +1,25 @@
+[INFO] (#Ext) -  Starting ContentScriptController listener...
+content-scripts.iife.js:47 Attempting in inject VeWorld iFrame container...
+content-scripts.iife.js:47 VeWorld iFrame container created
+VM13:107 [PRELOAD] DAppKit comprehensive polyfills installed
+vechain-CNxfLC-1.js:3676 MIXPANEL PEOPLE REQUEST (QUEUED, PENDING IDENTIFY):
+vechain-CNxfLC-1.js:3676 Object
+index-Divq_9D2.js:282 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+index-Divq_9D2.js:358 Preloading wallet addresses...
+index-Divq_9D2.js:282 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+index-Divq_9D2.js:261 Wallet addresses loaded from API
+index-Divq_9D2.js:282 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+index-Divq_9D2.js:287 🟢 [UNIFIED] VeWorld extension detected
+index-Divq_9D2.js:291 [UPLOAD] File converted to base64, size: 163488 chars
+index-Divq_9D2.js:291 [UPLOAD] 📤 Sending validation request...
+index-Divq_9D2.js:291 [UPLOAD] Request data: Object
+index-Divq_9D2.js:291 [UPLOAD] 📨 Validation response status: 200
+index-Divq_9D2.js:291 [UPLOAD] ✅ Validation result: {isValid: true, storeName: 'Waymo', isThriftStore: true, isSustainableStore: true, sustainableCategory: 'ride_share', …}
+index-Divq_9D2.js:291 [UPLOAD] 🚀 Receipt validated successfully - submitting for blockchain distribution...
+index-Divq_9D2.js:291 [UPLOAD] 📨 Submission response status: 201
+index-Divq_9D2.js:291 [UPLOAD] ✅ Submission result: {id: 83, storeId: 1, userId: 30, amount: 8.3, purchaseDate: '2025-08-05T00:00:00.000Z', …}
+index-Divq_9D2.js:291 [SCAN] Production validation complete: {isValid: true, storeName: 'Waymo', isThriftStore: true, isSustainableStore: true, sustainableCategory: 'ride_share', …}
+index-Divq_9D2.js:282 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+index-Divq_9D2.js:277 Refreshed user token balance: 27.6
+index-Divq_9D2.js:282 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+index-Divq_9D2.js:282 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
