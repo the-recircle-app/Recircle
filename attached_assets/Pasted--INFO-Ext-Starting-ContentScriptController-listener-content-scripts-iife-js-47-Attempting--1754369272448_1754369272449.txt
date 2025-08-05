@@ -1,0 +1,55 @@
+[INFO] (#Ext) -  Starting ContentScriptController listener...
+content-scripts.iife.js:47 Attempting in inject VeWorld iFrame container...
+content-scripts.iife.js:47 VeWorld iFrame container created
+VM13:107 [PRELOAD] DAppKit comprehensive polyfills installed
+vechain-CNxfLC-1.js:3676 MIXPANEL PEOPLE REQUEST (QUEUED, PENDING IDENTIFY):
+vechain-CNxfLC-1.js:3676 Object
+index-Divq_9D2.js:282 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+index-Divq_9D2.js:358 Preloading wallet addresses...
+index-Divq_9D2.js:282 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+index-Divq_9D2.js:261 Wallet addresses loaded from API
+index-Divq_9D2.js:282 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+content-scripts.iife.js:1 [INFO] (#Ext) -  Opening VeWorld iFrame
+content-scripts.iife.js:1 [INFO] (#Ext) -  Closing VeWorld iFrame
+index-Divq_9D2.js:287 🟢 [UNIFIED] VeWorld extension detected
+index-Divq_9D2.js:287 🔴 [UNIFIED] Starting disconnect...
+index-Divq_9D2.js:263 Error disconnecting from VeWorld: TypeError: window.vechain.disconnect is not a function
+    at Object.disconnectWallet (index-Divq_9D2.js:263:1264)
+    at g (index-Divq_9D2.js:277:6026)
+    at u (index-Divq_9D2.js:287:27143)
+    at Object.xc (vendor-BRGH1Yg5.js:29:9852)
+    at Nc (vendor-BRGH1Yg5.js:29:10006)
+    at zc (vendor-BRGH1Yg5.js:29:10063)
+    at ui (vendor-BRGH1Yg5.js:29:31422)
+    at Ws (vendor-BRGH1Yg5.js:29:31839)
+    at vendor-BRGH1Yg5.js:29:36751
+    at Eo (vendor-BRGH1Yg5.js:32:36725)
+disconnectWallet @ index-Divq_9D2.js:263Understand this warning
+index-Divq_9D2.js:282 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+index-Divq_9D2.js:287 🔴 [UNIFIED] Disconnect completed successfully
+index-Divq_9D2.js:287 🟢 [UNIFIED] Starting wallet connection...
+index-Divq_9D2.js:287 🟢 [UNIFIED] VeWorld extension detected, attempting connection...
+VeWorldAPI.js:1 [ERROR] (#Localhost) -  Attempt failed  Object
+error @ VeWorldAPI.js:1Understand this error
+VeWorldAPI.js:1 [INFO] (#Localhost) -  Opening VeWorld iFrame
+index-Divq_9D2.js:277 [WALLET] Connect called with walletType: extension, explicit address: 0xAbEf6032B9176C186F6BF984f548bdA53349f70a
+index-Divq_9D2.js:277 [WALLET] Connecting to wallet: 0xAbEf6032B9176C186F6BF984f548bdA53349f70a using extension
+index-Divq_9D2.js:282 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+api/users/wallet/0xAbEf6032B9176C186F6BF984f548bdA53349f70a:1  Failed to load resource: the server responded with a status of 404 ()Understand this error
+index-Divq_9D2.js:287 🟢 [UNIFIED] Successfully connected via VeWorld extension: 0xAbEf6032B9176C186F6BF984f548bdA53349f70a
+3index-Divq_9D2.js:282 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+VeWorldAPI.js:1 [INFO] (#Localhost) -  Closing VeWorld iFrame
+index-Divq_9D2.js:291 [UPLOAD] File converted to base64, size: 197256 chars
+index-Divq_9D2.js:291 [UPLOAD] 📤 Sending validation request...
+index-Divq_9D2.js:291 [UPLOAD] Request data: Object
+content-scripts.iife.js:1 [INFO] (#Ext) -  Opening VeWorld iFrame
+content-scripts.iife.js:1 [INFO] (#Ext) -  Closing VeWorld iFrame
+index-Divq_9D2.js:291 [UPLOAD] 📨 Validation response status: 200
+index-Divq_9D2.js:291 [UPLOAD] ✅ Validation result: Object
+index-Divq_9D2.js:291 [UPLOAD] 🚀 Receipt validated successfully - submitting for blockchain distribution...
+index-Divq_9D2.js:291 [UPLOAD] 📨 Submission response status: 201
+index-Divq_9D2.js:291 [UPLOAD] ✅ Submission result: Object
+index-Divq_9D2.js:291 [SCAN] Production validation complete: Object
+index-Divq_9D2.js:282 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+index-Divq_9D2.js:277 Refreshed user token balance: 18.8
+index-Divq_9D2.js:282 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops

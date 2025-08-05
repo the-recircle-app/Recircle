@@ -63,8 +63,9 @@ export async function distributeRealB3TR(
 
         console.log(`[REAL-B3TR] Connected to VeChain testnet at ${TESTNET_RPC}`);
 
-        // Create HDNode with robust error handling and validation
-        let distributorWallet: thor.HDNode;
+        // Create wallet using thor.secp256k1 directly (HDNode.fromPrivateKey has issues)
+        let distributorPrivateKey: Buffer;
+        let distributorAddress: string;
         try {
             console.log(`[REAL-B3TR] Private key validation:`);
             console.log(`[REAL-B3TR] - Raw length: ${privateKey.length}`);
@@ -84,24 +85,22 @@ export async function distributeRealB3TR(
             }
             
             // Create buffer with proper validation
-            let privateKeyBuffer: Buffer;
             try {
-                privateKeyBuffer = Buffer.from(cleanPrivateKey, 'hex');
-                console.log(`[REAL-B3TR] - Buffer created successfully, length: ${privateKeyBuffer.length}`);
+                distributorPrivateKey = Buffer.from(cleanPrivateKey, 'hex');
+                console.log(`[REAL-B3TR] - Buffer created successfully, length: ${distributorPrivateKey.length}`);
             } catch (bufferError) {
                 throw new Error(`Failed to create buffer from private key: ${bufferError}`);
             }
             
-            // Create HDNode with comprehensive error handling
-            console.log(`[REAL-B3TR] Creating HDNode from validated private key...`);
-            distributorWallet = thor.HDNode.fromPrivateKey(privateKeyBuffer);
-            
-            const distributorAddress = `0x${distributorWallet.address.toString('hex')}`;
+            // Derive public key and address using thor.secp256k1
+            console.log(`[REAL-B3TR] Deriving address from private key...`);
+            const publicKey = thor.secp256k1.derivePublicKey(distributorPrivateKey);
+            distributorAddress = thor.address.fromPublicKey(publicKey);
             console.log(`[REAL-B3TR] Distributor wallet: ${distributorAddress}`);
-        } catch (hdError) {
-            console.log(`[REAL-B3TR] HDNode creation failed:`, hdError);
-            const errorMessage = hdError instanceof Error ? hdError.message : String(hdError);
-            throw new Error(`HDNode creation failed: ${errorMessage}`);
+        } catch (cryptoError) {
+            console.log(`[REAL-B3TR] Wallet creation failed:`, cryptoError);
+            const errorMessage = cryptoError instanceof Error ? cryptoError.message : String(cryptoError);
+            throw new Error(`Wallet creation failed: ${errorMessage}`);
         }
 
         // Calculate 70/30 split
@@ -181,12 +180,12 @@ export async function distributeRealB3TR(
         // Sign transactions
         console.log(`[REAL-B3TR] Signing user transaction...`);
         const userTx = new thor.Transaction(userTxBody);
-        const userSignature = thor.secp256k1.sign(userTx.signingHash(), distributorWallet.privateKey!);
+        const userSignature = thor.secp256k1.sign(userTx.signingHash(), distributorPrivateKey);
         userTx.signature = userSignature;
 
         console.log(`[REAL-B3TR] Signing app transaction...`);
         const appTx = new thor.Transaction(appTxBody);
-        const appSignature = thor.secp256k1.sign(appTx.signingHash(), distributorWallet.privateKey!);
+        const appSignature = thor.secp256k1.sign(appTx.signingHash(), distributorPrivateKey);
         appTx.signature = appSignature;
 
         // Submit transactions
