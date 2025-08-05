@@ -3342,7 +3342,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               console.log(`[BLOCKCHAIN] 🔍 RAW AMOUNT DEBUG:`);
               console.log(`[BLOCKCHAIN] - totalRewards (raw): ${totalRewards}`);
               console.log(`[BLOCKCHAIN] - totalRewards type: ${typeof totalRewards}`);
-              console.log(`[BLOCKCHAIN] - Expected wei units: ${totalRewards} × 10^18 = ${ethers.parseEther(totalRewards.toString())}`);
+              console.log(`[BLOCKCHAIN] - Expected wei units: ${totalRewards} × 10^18`);
               
               // Execute real B3TR distribution with 70/30 split
               const distributionResult = await distributeRealB3TR(

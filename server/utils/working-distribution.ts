@@ -100,7 +100,8 @@ export async function distributeRealB3TR(
             console.log(`[REAL-B3TR] Distributor wallet: ${distributorAddress}`);
         } catch (hdError) {
             console.log(`[REAL-B3TR] HDNode creation failed:`, hdError);
-            throw new Error(`HDNode creation failed: ${hdError.message}`);
+            const errorMessage = hdError instanceof Error ? hdError.message : String(hdError);
+            throw new Error(`HDNode creation failed: ${errorMessage}`);
         }
 
         // Calculate 70/30 split
@@ -146,7 +147,7 @@ export async function distributeRealB3TR(
         const baseNonce = Date.now();
 
         // User transaction
-        const userTxBody: thor.Transaction.Body = {
+        const userTxBody = {
             chainTag: 0x27,
             blockRef: bestBlock.id.slice(0, 18),
             expiration: 32,
@@ -162,7 +163,7 @@ export async function distributeRealB3TR(
         };
 
         // App transaction
-        const appTxBody: thor.Transaction.Body = {
+        const appTxBody = {
             chainTag: 0x27,
             blockRef: bestBlock.id.slice(0, 18),
             expiration: 32,
@@ -180,12 +181,12 @@ export async function distributeRealB3TR(
         // Sign transactions
         console.log(`[REAL-B3TR] Signing user transaction...`);
         const userTx = new thor.Transaction(userTxBody);
-        const userSignature = distributorWallet.sign(userTx.signingHash());
+        const userSignature = thor.secp256k1.sign(userTx.signingHash(), distributorWallet.privateKey!);
         userTx.signature = userSignature;
 
         console.log(`[REAL-B3TR] Signing app transaction...`);
         const appTx = new thor.Transaction(appTxBody);
-        const appSignature = distributorWallet.sign(appTx.signingHash());
+        const appSignature = thor.secp256k1.sign(appTx.signingHash(), distributorWallet.privateKey!);
         appTx.signature = appSignature;
 
         // Submit transactions
