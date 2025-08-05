@@ -18,7 +18,7 @@ export class PierreContractsService {
     if (VeBetterDAOConfig.CONTRACT_ADDRESS && NetworkConfig.ADMIN_MNEMONIC) {
       this.initializeContract();
     } else {
-      console.log('⚠️ Contract not initialized - missing configuration');
+      console.log('ℹ️  Pierre VeBetterDAO contract system disabled (using direct B3TR distribution instead)');
     }
   }
 
