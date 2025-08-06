@@ -196,9 +196,22 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       }
       
       setAddress(walletInfo.address);
-      setTokenBalance(userData.tokenBalance);
       setUserId(userData.id);
       setIsConnected(true);
+      
+      // Read real wallet B3TR balance instead of database balance
+      try {
+        const { readWalletB3TRBalance, readWalletB3TRBalanceAPI } = await import("../lib/blockchain-balance");
+        let realBalance = await readWalletB3TRBalance(walletInfo.address);
+        if (realBalance === 0) {
+          realBalance = await readWalletB3TRBalanceAPI(walletInfo.address);
+        }
+        console.log(`[WALLET] Initial real B3TR balance: ${realBalance}`);
+        setTokenBalance(realBalance);
+      } catch (error) {
+        console.error("[WALLET] Error reading initial balance, using database fallback:", error);
+        setTokenBalance(userData.tokenBalance);
+      }
       
       // Save connection in localStorage with multiple keys for reliability
       localStorage.setItem("walletAddress", walletInfo.address);
@@ -295,35 +308,53 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Refresh token balance from the server
+  // Refresh token balance from the real VeWorld wallet (like Mugshot)
   const refreshTokenBalance = async (): Promise<number> => {
-    if (!userId || !isConnected) {
+    if (!address || !isConnected) {
       return tokenBalance;
     }
     
     try {
-      // Fetch latest user data with no-cache headers to ensure fresh data
-      const response = await fetch(`/api/users/${userId}`, {
-        credentials: "include",
-        headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0'
-        }
-      });
+      // Import the blockchain balance reader
+      const { readWalletB3TRBalance, readWalletB3TRBalanceAPI } = await import("../lib/blockchain-balance");
       
-      if (response.ok) {
-        const userData: User = await response.json();
-        console.log("Refreshed user token balance:", userData.tokenBalance);
-        
-        // Update token balance state
-        setTokenBalance(userData.tokenBalance);
-        return userData.tokenBalance;
-      } else {
-        throw new Error("Failed to fetch updated user data");
+      // Try Connex first (direct VeWorld connection)
+      let realWalletBalance = await readWalletB3TRBalance(address);
+      
+      // If Connex fails, try REST API fallback
+      if (realWalletBalance === 0) {
+        realWalletBalance = await readWalletB3TRBalanceAPI(address);
       }
+      
+      console.log(`[WALLET] Real B3TR balance for ${address}: ${realWalletBalance}`);
+      
+      // Update token balance state with real wallet balance
+      setTokenBalance(realWalletBalance);
+      return realWalletBalance;
     } catch (error) {
-      console.error("Error refreshing token balance:", error);
+      console.error("Error refreshing real wallet token balance:", error);
+      
+      // Fallback to database balance if blockchain reading fails
+      try {
+        const response = await fetch(`/api/users/${userId}`, {
+          credentials: "include",
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          }
+        });
+        
+        if (response.ok) {
+          const userData: User = await response.json();
+          console.log("[WALLET] Fallback to database balance:", userData.tokenBalance);
+          setTokenBalance(userData.tokenBalance);
+          return userData.tokenBalance;
+        }
+      } catch (fallbackError) {
+        console.error("Error with fallback balance:", fallbackError);
+      }
+      
       return tokenBalance; // Return current balance on error
     }
   };

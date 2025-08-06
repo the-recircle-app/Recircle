@@ -518,6 +518,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // VeChain contract call endpoint for reading B3TR balances
+  app.post("/api/vechain/call", async (req: Request, res: Response) => {
+    try {
+      const { contractAddress, data } = req.body;
+      
+      // Use our Thor client or solo node for contract calls
+      const response = await fetch(`${process.env.VECHAIN_NODE_URL || 'http://localhost:8669'}/accounts/${contractAddress}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          data: data,
+          caller: null
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`VeChain call failed: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      return res.json(result);
+    } catch (error) {
+      console.error("[VECHAIN] Contract call error:", error);
+      return res.status(500).json({ 
+        error: "Failed to call VeChain contract",
+        details: error.message
+      });
+    }
+  });
+
   // Test endpoint for VeBetterDAO distribution function
   app.post("/api/test/vebetterdao", async (req: Request, res: Response) => {
     try {

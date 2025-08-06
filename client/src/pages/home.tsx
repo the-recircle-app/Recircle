@@ -251,44 +251,7 @@ const Home = () => {
             }}
           />
 
-          {/* Direct Token Redemption - Only show for meaningful balances */}
-          {isConnected && tokenBalance >= 5 && (
-            <ActivityCard
-              title="⚡ Redeem Pending Tokens"
-              description={`Convert your ${tokenBalance.toFixed(1)} database tokens to real blockchain B3TR`}
-              icon={
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-                  <path d="M2 17l10 5 10-5"/>
-                  <path d="M2 12l10 5 10-5"/>
-                  <circle cx="12" cy="12" r="2"/>
-                </svg>
-              }
-              color="#EF4444"
-              path=""
-              showReward={false}
-              onClick={async () => {
-                if (!userId || !address) return;
-                
-                console.log('[HOMEPAGE-REDEEM] Using backend redemption with distributor wallet');
-                
-                const response = await fetch('/api/redeem-pending-tokens', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ userId, walletAddress: address })
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                  alert(`✅ Success! ${result.amount} B3TR distributed. TX: ${result.txHash?.slice(0, 10)}...`);
-                  refreshTokenBalance();
-                } else {
-                  alert(`❌ Redemption failed: ${result.error}`);
-                }
-              }}
-            />
-          )}
+
         </div>
       </div>
       
