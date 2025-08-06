@@ -534,22 +534,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const thorNodeUrl = isSoloAddress 
         ? (process.env.VECHAIN_NODE_URL || 'http://localhost:8669')
-        : 'https://testnet.veblocks.net';
+        : 'https://testnet.vechain.org';
       
       console.log(`[VECHAIN] Calling Thor API at: ${thorNodeUrl}/accounts/${contractAddress}`);
       console.log(`[VECHAIN] Call data: ${data}, caller: ${caller}`);
       
+      // Use the correct VeChain Thor API format for contract calls
       const response = await fetch(`${thorNodeUrl}/accounts/${contractAddress}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          clauses: [{
-            to: contractAddress,
-            value: '0x0',
-            data: data
-          }],
-          caller: caller || null,
-          gas: 400000 // Sufficient gas for balanceOf calls
+          data: data,
+          caller: caller || null
         })
       });
       

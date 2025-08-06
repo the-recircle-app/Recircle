@@ -1,0 +1,72 @@
+[INFO] (#Ext) -  Starting ContentScriptController listener...
+content-scripts.iife.js:47 Attempting in inject VeWorld iFrame container...
+content-scripts.iife.js:47 VeWorld iFrame container created
+VM17:107 [PRELOAD] DAppKit comprehensive polyfills installed
+chunk-SKRUXVEK.js?v=565e5f42:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+@vechain_vechain-kit.js?v=565e5f42:121236 MIXPANEL PEOPLE REQUEST (QUEUED, PENDING IDENTIFY):
+@vechain_vechain-kit.js?v=565e5f42:121236 Object
+chunk-6BWUGDXF.js?v=565e5f42:23 Lit is in dev mode. Not recommended for production! See https://lit.dev/msg/dev-mode for more information.
+issueWarning @ chunk-6BWUGDXF.js?v=565e5f42:23Understand this warning
+VeChainStateBridge.tsx:16 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+App.tsx:206 Preloading wallet addresses...
+vechain.ts:437 Development mode: Creating mock Connex after delay
+VeChainStateBridge.tsx:16 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+App.tsx:206 Preloading wallet addresses...
+vechain.ts:437 Development mode: Creating mock Connex after delay
+VeChainStateBridge.tsx:16 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+vechain.ts:52 Wallet addresses loaded from API
+VeChainStateBridge.tsx:16 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+2UnifiedWalletButton.tsx:18 🟢 [UNIFIED] VeWorld extension detected
+2vechain.ts:442 Real VeWorld providers found - aborting mock creation
+UnifiedWalletButton.tsx:73 🔴 [UNIFIED] Starting disconnect...
+vechain.ts:284 Error disconnecting from VeWorld: TypeError: window.vechain.disconnect is not a function
+    at Object.disconnectWallet (vechain.ts:282:30)
+    at disconnect (WalletContext.tsx:255:23)
+    at handleDisconnect (UnifiedWalletButton.tsx:77:13)
+    at HTMLUnknownElement.callCallback2 (chunk-SKRUXVEK.js?v=565e5f42:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-SKRUXVEK.js?v=565e5f42:3699:24)
+    at invokeGuardedCallback (chunk-SKRUXVEK.js?v=565e5f42:3733:39)
+    at invokeGuardedCallbackAndCatchFirstError (chunk-SKRUXVEK.js?v=565e5f42:3736:33)
+    at executeDispatch (chunk-SKRUXVEK.js?v=565e5f42:7014:11)
+    at processDispatchQueueItemsInOrder (chunk-SKRUXVEK.js?v=565e5f42:7034:15)
+    at processDispatchQueue (chunk-SKRUXVEK.js?v=565e5f42:7043:13)
+disconnectWallet @ vechain.ts:284Understand this warning
+VeChainStateBridge.tsx:16 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+UnifiedWalletButton.tsx:78 🔴 [UNIFIED] Disconnect completed successfully
+2UnifiedWalletButton.tsx:18 🟢 [UNIFIED] VeWorld extension detected
+UnifiedWalletButton.tsx:26 🟢 [UNIFIED] Starting wallet connection...
+UnifiedWalletButton.tsx:32 🟢 [UNIFIED] VeWorld extension detected, attempting connection...
+VeChainStateBridge.tsx:16 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+ServiceWorker.iife.js:2 [INFO] (#Ext) -  sw: Starting service worker...
+ServiceWorker.iife.js:2 [INFO] (#Ext) -  Started Auto Lock worker
+ServiceWorker.iife.js:2 [INFO] (#Ext) -  sw: Service worker started! 1
+ServiceWorker.iife.js:2 [INFO] (#Ext) -  Content script already registered Object
+VeWorldAPI.js:1 [ERROR] (#Localhost) -  Attempt failed  Object
+error @ VeWorldAPI.js:1Understand this error
+VeWorldAPI.js:1 [INFO] (#Localhost) -  Opening VeWorld iFrame
+main-4nDhOBGd.js:4454 Starting popup...
+VeWorldAPI-4uUsNIg_.js:6 [INFO] (#Ext) -  Mixpanel initialized
+VeWorldAPI-4uUsNIg_.js:6 [INFO] (#Ext) -  Adding Tab Close Event Listener
+VeWorldAPI-4uUsNIg_.js:6 [INFO] (#Ext) -  Adding invalid context listener
+VeWorldAPI-4uUsNIg_.js:6 [INFO] (#Ext) -  Attempting to unlock wallet
+VeWorldAPI-4uUsNIg_.js:6 [INFO] (#Ext) -  Adding invalid context listener
+WalletContext.tsx:150 [WALLET] Connect called with walletType: extension, explicit address: 0xAbEf6032B9176C186F6BF984f548bdA53349f70a
+WalletContext.tsx:169 [WALLET] Connecting to wallet: 0xAbEf6032B9176C186F6BF984f548bdA53349f70a using extension
+2VeChainStateBridge.tsx:16 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+VeWorldAPI-4uUsNIg_.js:6 [WARN] (#Ext) -  Websocket closed
+warn @ VeWorldAPI-4uUsNIg_.js:6Understand this warning
+blockchain-balance.ts:91 [BALANCE] Calling Thor API for 0xAbEf6032B9176C186F6BF984f548bdA53349f70a with contract 0xbf64cf86894Ee0877C4e7d03936e35Ee8D8b864F
+api/vechain/call:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)Understand this error
+blockchain-balance.ts:127 [BALANCE] Error reading wallet B3TR balance via Thor API: Error: VeChain API call failed: 500
+    at readWalletB3TRBalanceAPI (blockchain-balance.ts:105:13)
+    at async getCachedB3TRBalance (blockchain-balance.ts:152:17)
+    at async connect (WalletContext.tsx:205:29)
+    at async handleConnect (UnifiedWalletButton.tsx:41:27)
+readWalletB3TRBalanceAPI @ blockchain-balance.ts:127Understand this error
+blockchain-balance.ts:42 [BALANCE] Connex not available, will try API method
+WalletContext.tsx:206 [WALLET] Initial real B3TR balance: 0 B3TR
+UnifiedWalletButton.tsx:44 🟢 [UNIFIED] Successfully connected via VeWorld extension: 0xAbEf6032B9176C186F6BF984f548bdA53349f70a
+VeChainStateBridge.tsx:16 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+VeWorldAPI-4uUsNIg_.js:6 [INFO] (#Ext) -  Beat WS open on:  WebSocket
+VeWorldAPI-4uUsNIg_.js:6 [INFO] (#Ext) -  Beat WS open on:  WebSocket
+VeChainStateBridge.tsx:16 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
