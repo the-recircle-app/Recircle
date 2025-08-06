@@ -39,7 +39,23 @@ export default function ProductionWalletConnect({ onConnect }: ProductionWalletC
       const httpsCheck = isHTTPS();
       const veWorldCheck = isVeWorldBrowser();
       const connexCheck = typeof window.connex !== 'undefined';
-      const ready = httpsCheck && veWorldCheck && connexCheck;
+      
+      // For mobile VeWorld, don't require immediate connex availability
+      const userAgent = navigator.userAgent.toLowerCase();
+      const isMobileVeWorld = userAgent.includes('veworld') || userAgent.includes('vechain');
+      
+      // Mobile VeWorld is ready if HTTPS + VeWorld browser detected
+      // Desktop needs HTTPS + VeWorld + Connex
+      const ready = httpsCheck && veWorldCheck && (isMobileVeWorld || connexCheck);
+
+      console.log('[ENV CHECK]', {
+        https: httpsCheck,
+        veworld: veWorldCheck,
+        connex: connexCheck,
+        mobile: isMobileVeWorld,
+        ready,
+        userAgent: navigator.userAgent
+      });
 
       setEnvironmentStatus({
         https: httpsCheck,
@@ -59,9 +75,9 @@ export default function ProductionWalletConnect({ onConnect }: ProductionWalletC
 
     checkEnvironment();
 
-    // Check periodically for connex injection
+    // Check periodically for provider injection
     const interval = setInterval(checkEnvironment, 1000);
-    const timeout = setTimeout(() => clearInterval(interval), 10000);
+    const timeout = setTimeout(() => clearInterval(interval), 15000);
 
     return () => {
       clearInterval(interval);
@@ -70,26 +86,54 @@ export default function ProductionWalletConnect({ onConnect }: ProductionWalletC
   }, []);
 
   const connectWallet = useCallback(async () => {
-    if (!environmentStatus.ready) {
-      setError("Environment not ready for wallet connection");
-      return;
-    }
-
     setIsConnecting(true);
     setError(null);
 
     try {
-      console.log('=== Production VeWorld Connection ===');
+      console.log('=== Mobile VeWorld Connection ===');
       console.log('User Agent:', navigator.userAgent);
+      console.log('Window object keys:', Object.keys(window).filter(k => k.includes('ve') || k.includes('con')));
       console.log('Available providers:', {
         connex: !!window.connex,
         vechain: !!window.vechain
       });
 
       let address: string | null = null;
+      const isMobile = /Mobi|Android/i.test(navigator.userAgent);
 
-      // Method 1: Try Connex vendor signing (most reliable for VeWorld)
-      if (window.connex && window.connex.vendor) {
+      // Wait for providers to load (mobile VeWorld may need time)
+      if (isMobile && !window.connex && !window.vechain) {
+        console.log('Waiting for mobile providers to load...');
+        for (let i = 0; i < 20; i++) {
+          await new Promise(resolve => setTimeout(resolve, 500));
+          if (window.connex || window.vechain) {
+            console.log(`Provider loaded after ${(i + 1) * 500}ms`);
+            break;
+          }
+        }
+      }
+
+      // Method 1: Manual address prompt for mobile VeWorld
+      if (isMobile && !address) {
+        console.log('Mobile device detected - using manual address entry');
+        const manualAddress = prompt(
+          'VeWorld Mobile Connection:\n\n' +
+          'Please copy your wallet address from VeWorld and paste it here.\n\n' +
+          'To find your address:\n' +
+          '1. Open VeWorld app\n' +
+          '2. Tap on your wallet name at the top\n' +
+          '3. Copy the address (starts with 0x)\n\n' +
+          'Paste your wallet address:'
+        );
+        
+        if (manualAddress && manualAddress.length === 42 && manualAddress.startsWith('0x')) {
+          address = manualAddress;
+          console.log('✅ Manual address entered:', address);
+        }
+      }
+
+      // Method 2: Try Connex vendor signing
+      if (!address && window.connex && window.connex.vendor) {
         console.log('Attempting Connex vendor method...');
         try {
           const cert = window.connex.vendor.sign('cert', {
@@ -110,7 +154,7 @@ export default function ProductionWalletConnect({ onConnect }: ProductionWalletC
         }
       }
 
-      // Method 2: Try thor account method  
+      // Method 3: Try thor account method  
       if (!address && window.connex && window.connex.thor) {
         console.log('Attempting Connex thor account method...');
         try {
@@ -124,11 +168,10 @@ export default function ProductionWalletConnect({ onConnect }: ProductionWalletC
         }
       }
 
-      // Method 3: Try VeChain provider if available
+      // Method 4: Try VeChain provider properties
       if (!address && window.vechain) {
         console.log('Attempting VeChain provider method...');
         try {
-          // Check various VeChain provider properties
           if (window.vechain.selectedAddress) {
             address = window.vechain.selectedAddress;
             console.log('✅ VeChain selectedAddress:', address);
