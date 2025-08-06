@@ -282,12 +282,12 @@ const AddStore = () => {
 
   // Handle cancel button
   const handleCancel = () => {
-    setLocation("/");
+    setLocation("/home");
   };
 
   // Handle return to dashboard button
   const handleReturnToDashboard = () => {
-    setLocation("/");
+    setLocation("/home");
   };
 
   // Format coordinates for display

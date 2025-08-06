@@ -8,7 +8,7 @@ interface BackButtonProps {
 }
 
 const BackButton: React.FC<BackButtonProps> = ({ 
-  href = "/", 
+  href = "/home", 
   label = "Back" 
 }) => {
   return (

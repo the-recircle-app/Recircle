@@ -3,7 +3,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { WalletProvider } from "./context/WalletContext";
+import { WalletProvider, useWallet } from "./context/WalletContext";
 import { AchievementProvider } from "./context/AchievementContext";
 
 import { VeChainStateBridge } from "./components/VeChainStateBridge";
@@ -61,10 +61,23 @@ function Layout({ children }: { children: React.ReactNode }) {
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
+// Smart routing component that shows Welcome only for disconnected users
+function SmartWelcomeRoute() {
+  const { isConnected } = useWallet();
+  
+  // If wallet is connected, redirect to home (activity cards)
+  if (isConnected) {
+    return <Home />;
+  }
+  
+  // If wallet is disconnected, show welcome page
+  return <Welcome />;
+}
+
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Welcome} />
+      <Route path="/" component={SmartWelcomeRoute} />
       <Route path="/home" component={Home} />
       <Route path="/connect-wallet" component={ConnectWallet} />
       <Route path="/join" component={JoinWithReferral} />
