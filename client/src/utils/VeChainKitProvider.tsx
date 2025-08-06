@@ -18,20 +18,8 @@ export function VeChainKitProviderWrapper({ children }: Props) {
         { method: "dappkit", gridColumn: 4 },
       ]}
       dappKit={{
-        allowedWallets: ["veworld", "wallet-connect", "sync2"],
-        walletConnectOptions: {
-          projectId:
-            // Using VeBetterDAO App ID as fallback for now
-            import.meta.env.VITE_NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || 
-            import.meta.env.VITE_APP_ID || 
-            "0x90178ff5f95f31644b5e21b11ba6e173ea0d9b9595e675cb84593c0d2df730c1",
-          metadata: {
-            name: "ReCircle",
-            description: "Sustainable transportation rewards platform on VeChain",
-            url: typeof window !== "undefined" ? window.location.origin : "",
-            icons: ["https://path-to-logo.png"],
-          },
-        },
+        allowedWallets: ["veworld", "sync2"],
+        // Removed WalletConnect for simplicity - VeWorld mobile app should work directly
       }}
       darkMode={true}
       language="en"
