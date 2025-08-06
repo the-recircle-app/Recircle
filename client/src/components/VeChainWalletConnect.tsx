@@ -31,19 +31,44 @@ const VeChainWalletConnect: React.FC = () => {
   }, []);
 
   const connectWallet = async () => {
-    if (!provider) {
-      setError('VeWorld wallet not detected. Please use VeWorld browser or install VeWorld extension.');
-      return;
-    }
-
     setConnectionState('connecting');
     setError(null);
 
     try {
+      // Check for mobile Connex first (created by mobile fix)
+      const connex = (window as any).connex;
+      const provider = (window as any).vechain;
+      
+      if (!provider && !connex) {
+        setError('VeWorld wallet not detected. Please use VeWorld browser or install VeWorld extension.');
+        return;
+      }
+
       let walletAddress: string | null = null;
 
-      // Method 1: Modern VeWorld (desktop extension)
-      if (provider.request) {
+      // Method 1: Try Connex authentication (works with mobile fix)
+      if (connex && connex.vendor && connex.vendor.sign) {
+        try {
+          console.log('[WALLET] Attempting Connex authentication...');
+          const cert = await connex.vendor.sign('cert', {
+            purpose: 'identification',
+            payload: {
+              type: 'text',
+              content: 'ReCircle Authentication'
+            }
+          }).request();
+          
+          if (cert && cert.annex && cert.annex.signer) {
+            walletAddress = cert.annex.signer;
+            console.log('[WALLET] Connex authentication success:', walletAddress);
+          }
+        } catch (err) {
+          console.log('[WALLET] Connex authentication failed:', err);
+        }
+      }
+
+      // Method 2: Modern VeWorld (desktop extension)
+      if (!walletAddress && provider && provider.request) {
         try {
           const accounts = await provider.request({ method: 'eth_requestAccounts' });
           walletAddress = accounts[0];
@@ -52,8 +77,8 @@ const VeChainWalletConnect: React.FC = () => {
         }
       }
 
-      // Method 2: Mobile VeWorld enable method
-      if (!walletAddress && provider.enable) {
+      // Method 3: Mobile VeWorld enable method
+      if (!walletAddress && provider && provider.enable) {
         try {
           await provider.enable();
           
@@ -70,8 +95,8 @@ const VeChainWalletConnect: React.FC = () => {
         }
       }
 
-      // Method 3: Check direct address properties
-      if (!walletAddress) {
+      // Method 4: Check direct address properties
+      if (!walletAddress && provider) {
         walletAddress = provider.selectedAddress || provider.accounts?.[0] || null;
       }
 
