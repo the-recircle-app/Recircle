@@ -251,8 +251,8 @@ const Home = () => {
             }}
           />
 
-          {/* Direct Token Redemption */}
-          {isConnected && tokenBalance > 0 && (
+          {/* Direct Token Redemption - Only show for meaningful balances */}
+          {isConnected && tokenBalance >= 5 && (
             <ActivityCard
               title="⚡ Redeem Pending Tokens"
               description={`Convert your ${tokenBalance.toFixed(1)} database tokens to real blockchain B3TR`}
