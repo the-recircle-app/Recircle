@@ -8,7 +8,7 @@ import { useWallet } from "../context/WalletContext";
  * Eliminates the mixed old/new logic causing disconnect issues
  */
 export function UnifiedWalletButton() {
-  const { connect, disconnect, tokenBalance, isConnected, address } = useWallet();
+  const { connect, disconnect, tokenBalance, isConnected, walletAddress } = useWallet();
   const [isLoading, setIsLoading] = useState(false);
 
   // Check for VeWorld extension on component mount
@@ -27,40 +27,42 @@ export function UnifiedWalletButton() {
     setIsLoading(true);
     
     try {
-      // Use the EXACT working connectVeWorldWallet utility
-      const { connectVeWorldWallet } = await import('@/utils/veworld-connector');
-      const result = await connectVeWorldWallet();
-      
-      if (result.error) {
-        throw new Error(result.error);
-      }
-      
-      if (result.address) {
-        // Connect to app context with the proven working method
-        const success = await connect("VeWorld", result.address);
+      // Try VeWorld extension first
+      if (window.vechain) {
+        console.log("🟢 [UNIFIED] VeWorld extension detected, attempting connection...");
         
-        if (success) {
-          console.log("🟢 [UNIFIED] Successfully connected:", result.address);
+        // Request accounts from extension
+        const accounts = await window.vechain.request({ 
+          method: 'eth_requestAccounts' 
+        });
+        
+        if (accounts && accounts.length > 0) {
+          // Connect to app context
+          const success = await connect("extension", accounts[0]);
+          
+          if (success) {
+            console.log("🟢 [UNIFIED] Successfully connected via VeWorld extension:", accounts[0]);
+            return;
+          } else {
+            throw new Error("App context connection failed");
+          }
         } else {
-          throw new Error("App context connection failed");
+          throw new Error("No accounts returned from extension");
         }
       } else {
-        throw new Error('No wallet address received');
+        // No extension detected - provide instructions
+        console.log("🟢 [UNIFIED] No extension detected");
+        alert("Please install VeWorld browser extension or use VeWorld mobile app to connect your wallet.");
       }
-      
     } catch (error) {
       console.error("🟢 [UNIFIED] Connection failed:", error);
       
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      
-      if (errorMessage.includes("User rejected") || errorMessage.includes("User denied")) {
+      if (error.message?.includes("User rejected")) {
         alert("Connection cancelled. Please try again and approve the connection request.");
-      } else if (errorMessage.includes("VeWorld not detected")) {
-        alert("VeWorld not detected. Use the in-app browser.");
-      } else if (errorMessage.includes("Wrong network")) {
-        alert("Wrong network. Switch to VeChain testnet.");
+      } else if (error.message?.includes("No accounts")) {
+        alert("Please unlock your VeWorld extension and try again.");
       } else {
-        alert("Wallet connection failed. Please make sure VeWorld is unlocked and try again.");
+        alert("Wallet connection failed. Please make sure you have VeWorld installed.");
       }
     } finally {
       setIsLoading(false);
@@ -68,34 +70,33 @@ export function UnifiedWalletButton() {
   };
 
   const handleDisconnect = async () => {
-    console.log("🟢 [UNIFIED] Disconnecting wallet...");
-    await disconnect();
+    console.log("🔴 [UNIFIED] Starting disconnect...");
+    setIsLoading(true);
+    
+    try {
+      await disconnect();
+      console.log("🔴 [UNIFIED] Disconnect completed successfully");
+    } catch (error) {
+      console.error("🔴 [UNIFIED] Disconnect failed:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  if (isConnected && address) {
+  if (isConnected) {
     return (
-      <div className="bg-gray-800 rounded-lg p-4 w-full max-w-md mx-auto">
+      <div className="p-4 bg-gray-800 rounded-lg">
         <div className="text-center">
-          <div className="mb-4">
-            <h3 className="text-white font-semibold mb-2">Wallet Connected</h3>
-            <p className="text-gray-400 text-sm break-all">
-              {address.slice(0, 6)}...{address.slice(-4)}
-            </p>
-          </div>
-          
-          <div className="mb-4 p-3 bg-green-900/30 rounded-lg border border-green-700/50">
-            <div className="flex items-center justify-center space-x-2">
-              <span className="text-green-400 font-bold text-lg">{tokenBalance}</span>
-              <span className="text-green-300 text-sm">B3TR</span>
-            </div>
-            <p className="text-green-400 text-xs mt-1">Your Balance</p>
-          </div>
-          
-          <Button
-            onClick={handleDisconnect}
-            className="w-full bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg"
+          <h3 className="text-lg font-bold text-green-400 mb-2">✅ Wallet Connected</h3>
+          <p className="text-gray-300 text-sm mb-4">Balance: {tokenBalance} B3TR</p>
+          <Button 
+            onClick={handleDisconnect} 
+            variant="outline" 
+            size="sm"
+            disabled={isLoading}
+            className="bg-white text-gray-900 border-gray-300 hover:bg-gray-100"
           >
-            Disconnect
+            {isLoading ? "Disconnecting..." : "Disconnect Wallet"}
           </Button>
         </div>
       </div>
@@ -103,11 +104,14 @@ export function UnifiedWalletButton() {
   }
 
   return (
-    <div className="bg-gray-800 rounded-lg p-4 w-full max-w-md mx-auto">
+    <div className="p-4 bg-gray-800 rounded-lg">
       <div className="text-center">
-        <h3 className="text-white font-semibold mb-4">Connect Your Wallet</h3>
+        <h3 className="text-lg font-bold text-gray-100 mb-4">Connect Your Wallet</h3>
+        <p className="text-gray-300 text-sm mb-4">
+          Connect to start earning B3TR tokens
+        </p>
         
-        <Button
+        <Button 
           onClick={handleConnect}
           className="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
           disabled={isLoading}

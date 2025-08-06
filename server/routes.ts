@@ -518,59 +518,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // VeChain Thor REST API endpoint for reading VIP-180 token balances (like B3TR)
-  app.post("/api/vechain/call", async (req: Request, res: Response) => {
-    try {
-      const { contractAddress, data, caller } = req.body;
-      
-      // Use Thor REST API pattern for VIP-180 contract calls (following VeChain docs)
-      // For wallet balance reading, always use testnet since real wallets exist there
-      // Solo node is only for testing with pre-funded development accounts
-      const isSoloAddress = caller && [
-        '0x7567d83b7b8d80addcb281a71d54fc7b3364ffed',
-        '0xd3ae78222beadb038203be21ed5ce7c9b1bff602', 
-        '0x733b7269443c70de16bbf9b0615307884bcc5636'
-      ].includes(caller.toLowerCase());
-      
-      const thorNodeUrl = isSoloAddress 
-        ? (process.env.VECHAIN_NODE_URL || 'http://localhost:8669')
-        : 'https://testnet.vechain.org';
-      
-      console.log(`[VECHAIN] Calling Thor API at: ${thorNodeUrl}/accounts/${contractAddress}`);
-      console.log(`[VECHAIN] Call data: ${data}, caller: ${caller}`);
-      
-      // Use the correct VeChain Thor API format for contract calls
-      const response = await fetch(`${thorNodeUrl}/accounts/${contractAddress}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          data: data,
-          caller: caller || null
-        })
-      });
-      
-      if (!response.ok) {
-        throw new Error(`VeChain Thor API call failed: ${response.status}`);
-      }
-      
-      const result = await response.json();
-      
-      // Return the contract call result in the expected format
-      return res.json({
-        data: result.data,
-        gasUsed: result.gasUsed,
-        reverted: result.reverted,
-        vmError: result.vmError || null
-      });
-    } catch (error) {
-      console.error("[VECHAIN] Thor contract call error:", error instanceof Error ? error.message : error);
-      return res.status(500).json({ 
-        error: "Failed to call VeChain contract",
-        details: error instanceof Error ? error.message : "Unknown error"
-      });
-    }
-  });
-
   // Test endpoint for VeBetterDAO distribution function
   app.post("/api/test/vebetterdao", async (req: Request, res: Response) => {
     try {
@@ -2618,8 +2565,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         category,
         paymentMethod,
         cardLastFour,
-        containsPreOwnedItems,
-        referralCode // Add referral code for invite system
+        containsPreOwnedItems
       } = req.body;
       
       // Check daily limit but allow bypass for B3TR wallet testing
@@ -3429,106 +3375,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
             });
             // Don't fail the receipt submission if blockchain distribution fails
             // The user still gets their database balance updated
-          }
-
-          // ===== REFERRAL REWARDS PROCESSING =====
-          // Check if this is a first-time user with a referral code for three-way distribution
-          if (referralCode && shouldAwardFirstReceipt) {
-            console.log(`[REFERRAL] 🎯 Processing referral rewards for first receipt with code: ${referralCode}`);
-            
-            try {
-              // Validate referral code and get inviter information
-              const referralValidation = await fetch(`http://localhost:${process.env.PORT || 5000}/api/referrals/code/${referralCode}`);
-              
-              if (referralValidation.ok) {
-                const referralData = await referralValidation.json();
-                const inviterId = referralData.referrerId;
-                
-                console.log(`[REFERRAL] ✅ Valid referral code from user ${inviterId}`);
-                
-                // Create referral relationship
-                const referralResponse = await fetch(`http://localhost:${process.env.PORT || 5000}/api/referrals`, {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    referrerId: inviterId,
-                    referredId: submittedUserId,
-                    code: referralCode,
-                    status: 'completed'
-                  })
-                });
-                
-                if (referralResponse.ok) {
-                  console.log(`[REFERRAL] 📝 Referral relationship created`);
-                  
-                  // Award referral rewards: 15 B3TR to inviter, 5 B3TR to invitee, 30% to app fund
-                  const inviterReward = 15;
-                  const inviteeReward = 5;
-                  
-                  // Create transaction for inviter reward
-                  await storage.createTransaction({
-                    userId: inviterId,
-                    type: "referral_reward",
-                    amount: inviterReward,
-                    description: `Referral Reward: User ${submittedUserId} completed first receipt`,
-                    referenceId: newReceipt.id,
-                    txHash: `txhash-ref-inviter-${Date.now().toString(16)}`
-                  });
-                  
-                  // Create transaction for invitee reward (in addition to receipt reward)
-                  await storage.createTransaction({
-                    userId: submittedUserId,
-                    type: "referral_reward",
-                    amount: inviteeReward,
-                    description: `Welcome Bonus: Using referral code ${referralCode}`,
-                    referenceId: newReceipt.id,
-                    txHash: `txhash-ref-invitee-${Date.now().toString(16)}`
-                  });
-                  
-                  // Calculate app fund reward (30% of total referral rewards)
-                  const totalReferralRewards = inviterReward + inviteeReward;
-                  const appFundReward = totalReferralRewards * 0.3;
-                  
-                  // Create transaction for app fund sustainability reward
-                  await storage.createTransaction({
-                    userId: null,
-                    type: "sustainability_app",
-                    amount: appFundReward,
-                    description: `App Sustainability (Referral): ${userWalletAddress?.slice(0, 8)}...`,
-                    referenceId: newReceipt.id,
-                    txHash: `txhash-ref-app-${Date.now().toString(16)}`
-                  });
-                  
-                  // Update token balances
-                  const inviterUser = await storage.getUser(inviterId);
-                  if (inviterUser) {
-                    await storage.updateUserTokenBalance(inviterId, inviterUser.tokenBalance + inviterReward);
-                  }
-                  
-                  // Update invitee balance (add to existing balance)
-                  const currentBalance = initialUserData.tokenBalance + totalRewards;
-                  await storage.updateUserTokenBalance(submittedUserId, currentBalance + inviteeReward);
-                  
-                  console.log(`[REFERRAL] 🎉 Three-way distribution complete:`);
-                  console.log(`[REFERRAL] - Inviter ${inviterId}: +${inviterReward} B3TR (matches frontend promise)`);
-                  console.log(`[REFERRAL] - Invitee ${submittedUserId}: +${inviteeReward} B3TR (welcome bonus)`);
-                  console.log(`[REFERRAL] - App Fund: +${appFundReward} B3TR (sustainability)`);
-                  
-                  // Clear referral code from localStorage on next frontend load
-                  // (this will be handled by the frontend when it receives the response)
-                  
-                } else {
-                  console.log(`[REFERRAL] ❌ Failed to create referral relationship`);
-                }
-              } else {
-                console.log(`[REFERRAL] ⚠️ Invalid referral code: ${referralCode}`);
-              }
-            } catch (referralError) {
-              console.error(`[REFERRAL] ❌ Error processing referral rewards:`, referralError);
-              // Don't fail the receipt submission if referral processing fails
-            }
-          } else if (referralCode && !shouldAwardFirstReceipt) {
-            console.log(`[REFERRAL] ℹ️ Referral code provided but not first receipt - skipping referral rewards`);
           }
         } else {
           console.log(`NOT updating token balance because receipt needs manual review. Current balance: ${initialUserData.tokenBalance}`);
@@ -4842,7 +4688,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`Rewards for approved receipt (70/30 distribution):
         - Total reward amount: ${totalRawReward} B3TR
         - User reward: ${finalReward} B3TR (70% of total)
-        - App fund: ${distributionRewards.appFundReward} B3TR (30% of total)
+        - App fund: ${txResult?.appAmount || (totalRawReward * 0.3)} B3TR (30% of total)
         - Distribution model: 70/30 (user/app fund)
       `);
       
@@ -5184,7 +5030,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Create transaction for app sustainability reward (30% of total using 70/30 model)
-      // This is handled by the 70/30 distribution system automatically
+      if (txResult?.appAmount > 0) {
+        await storage.createTransaction({
+          userId: null,
+          type: "sustainability_app",
+          amount: txResult.appAmount,
+          description: `App Fund (Google Sheet Store): ${APP_FUND_WALLET.slice(0, 8)}...`,
+          referenceId: null,
+          txHash: txResult.appHash || `txhash-gsa-${Date.now().toString(16)}`
+        });
+      }
       
       // App fund transaction already handled by hybrid system above
       
@@ -5193,7 +5048,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         - Total base reward: ${baseRewardAmount} B3TR
         - After streak multiplier: ${streakMultipliedAmount} B3TR
         - User portion: ${userReward} B3TR (70% of total)
-        - App fund: ${streakMultipliedAmount * 0.3} B3TR (30% of total)
+        - App fund: ${txResult?.appAmount || (streakMultipliedAmount * 0.3)} B3TR (30% of total)
         - Distribution model: 70/30 (user/app fund)
       `);
       
@@ -5328,7 +5183,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { ethers } = await import('ethers');
       const endpoints = [
         'https://sync-testnet.vechain.org',
-        'https://testnet.vechain.org',
+        'https://testnet.veblocks.net',
         'https://node-testnet.vechain.energy',
         'https://testnet.vecha.in'
       ];
@@ -5608,6 +5463,101 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // New endpoint: Redeem pending tokens - directly convert database balance to blockchain tokens
+  app.post("/api/redeem-pending-tokens", async (req: Request, res: Response) => {
+    try {
+      const { userId, walletAddress } = req.body;
+      
+      if (!walletAddress) {
+        return res.status(400).json({ success: false, error: 'Missing walletAddress' });
+      }
+
+      // Find user by wallet address if userId not provided
+      let actualUserId = userId;
+      if (!actualUserId) {
+        const userByWallet = await storage.getUserByWalletAddress(walletAddress);
+        if (userByWallet) {
+          actualUserId = userByWallet.id;
+        } else {
+          return res.status(404).json({ success: false, error: 'No user found with this wallet address' });
+        }
+      }
+
+      // Get user's current database balance
+      const user = await storage.getUser(actualUserId);
+      if (!user) {
+        return res.status(404).json({ success: false, error: 'User not found' });
+      }
+
+      const pendingBalance = user.tokenBalance || 0;
+      if (pendingBalance <= 0) {
+        return res.status(400).json({ success: false, error: 'No pending tokens to redeem' });
+      }
+
+      console.log(`[REDEEM] User ${actualUserId} attempting to redeem ${pendingBalance} B3TR tokens to wallet ${walletAddress}`);
+      console.log('[REDEEM] Debug info:', {
+        walletAddress,
+        actualUserId,
+        pendingBalance,
+        userExists: !!user
+      });
+
+      // Attempt direct blockchain distribution
+      const { distributeVeBetterDAOReward } = await import('./utils/vebetterdao-rewards.js');
+      const blockchainResult = await distributeVeBetterDAOReward({
+        recipient: walletAddress,
+        amount: pendingBalance,
+        receiptData: {
+          storeName: 'Direct Token Redemption',
+          category: 'pending_balance_conversion',
+          totalAmount: pendingBalance,
+          confidence: 1.0,
+          ipfsHash: `redeem-${actualUserId}-${Date.now()}`
+        },
+        environmentalImpact: {
+          co2SavedGrams: Math.floor(pendingBalance * 100),
+          sustainabilityCategory: 'token_redemption'
+        }
+      });
+
+      if (blockchainResult.success) {
+        // CRITICAL: Clear the user's balance since we've processed the redemption
+        await storage.updateUserTokenBalance(actualUserId, 0);
+        
+        // Create transaction record for the redemption
+        await storage.createTransaction({
+          userId: actualUserId,
+          type: 'pending_redemption',
+          amount: -pendingBalance, // Negative amount to show tokens were deducted
+          description: `Redeemed ${pendingBalance} B3TR tokens to blockchain wallet`,
+          txHash: blockchainResult.txHash,
+          status: 'completed'
+        });
+
+        console.log(`[REDEEM] ✅ Successfully redeemed ${pendingBalance} B3TR for user ${actualUserId} - Balance cleared`);
+        
+        res.json({
+          success: true,
+          txHash: blockchainResult.txHash,
+          amount: pendingBalance,
+          message: `Successfully redeemed ${pendingBalance} B3TR tokens to your VeWorld wallet`
+        });
+      } else {
+        console.log(`[REDEEM] ❌ Blockchain redemption failed: ${blockchainResult.error}`);
+        res.status(500).json({
+          success: false,
+          error: `Blockchain redemption failed: ${blockchainResult.error}`
+        });
+      }
+
+    } catch (error) {
+      console.error('[REDEEM] Redemption endpoint error:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Unknown redemption error' 
+      });
+    }
+  });
 
   // Simple test endpoint to verify VeBetterDAO is configured correctly
   app.get('/api/test/vebetterdao', adminRateLimit, async (req: Request, res: Response) => {
@@ -6054,14 +6004,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 </html>`;
     res.send(testPage);
   });
-
-  // Analytics routes for admin dashboard
-  const { createAnalyticsRoutes } = await import('./routes/analytics');
-  app.use('/api/analytics', createAnalyticsRoutes(storage));
-
-  // Employee tracking routes for admin
-  const { createEmployeeTrackingRoutes } = await import('./routes/employee-tracking');
-  app.use('/api', createEmployeeTrackingRoutes(storage));
 
   const httpServer = createServer(app);
   return httpServer;

@@ -10,38 +10,6 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Progress
 
-**August 6, 2025 - PRODUCTION LAUNCH READY**:
-- ✅ COMPLETE END-TO-END SYSTEM OPERATIONAL: Real B3TR token distribution working
-- ✅ Fixed manual review webhook processing (txResult bug resolved)
-- ✅ Professional README.md created showcasing all capabilities
-- ✅ Secure GitHub repository with comprehensive documentation
-- ✅ Google Apps Scripts fully integrated and tested
-- ✅ All VeChain endpoints optimized for reliability (testnet.vechain.org)
-- ✅ Production URL ready: www.recirclerewards.app
-- ✅ Community announcement prepared for VeBetterDAO
-- 🎯 Result: Production-ready platform distributing real B3TR tokens to users
-
-**August 6, 2025**:
-- ✅ INVITE SYSTEM INTEGRATION COMPLETE: Three-way token distribution now fully automated
-  - Referral codes captured during join flow and stored in localStorage
-  - Receipt upload system checks for referral codes during submission
-  - Backend processes referral rewards for first-time users automatically
-  - Three-way distribution: 15 B3TR to inviter + 5 B3TR to invitee + app fund reward
-  - Referral code cleared from localStorage after successful use
-  - Updated social media share messages to focus on sustainable transportation
-- ✅ MAJOR BREAKTHROUGH: Implemented real VeWorld wallet balance reading like Mugshot
-- ✅ Token balance now reads actual B3TR from user's VeWorld wallet instead of database
-- ✅ Following official VeChain documentation patterns for Connex balanceOf calls
-- ✅ Added intelligent caching (30s) to prevent excessive blockchain calls
-- ✅ CLEANUP COMPLETE: Removed all legacy redeem components and endpoints
-  - Deleted redeem.tsx, redeem-modern.tsx, VeChainKitRedeemButton.tsx
-  - Removed /api/redeem-pending-tokens endpoint from server
-  - Eliminated "Redeem Pending Tokens" button and all redeem routes
-- ✅ Clean navigation flow: Welcome page only shows when wallet disconnected
-- ✅ Fixed visual alignment issues on welcome page (transportation icons & bullet points)
-- ✅ Backend VeChain Thor REST API endpoint for balance reading fallback
-- 🎯 Result: Complete invite system + real wallet balance system + eliminated unnecessary manual redemption
-
 **August 5, 2025**: 
 - ✅ COMPLETE SUCCESS: Real B3TR blockchain distribution working in production!
 - ✅ Fixed HDNode creation error using thor.secp256k1 + thor.address approach
@@ -98,10 +66,9 @@ Preferred communication style: Simple, everyday language.
 
 ### Blockchain Integration
 - **Network**: VeChain Thor blockchain (testnet/mainnet ready)
-- **Token**: B3TR tokens (VIP-180 standard) distributed via VeBetterDAO
-- **Distribution Model**: 70% to users, 30% to app fund
+- **Token**: B3TR tokens distributed via VeBetterDAO
+- **Distribution Model**: 70% to users, 15% to creator fund, 15% to app fund (Note: this has been updated to 70% user, 30% app fund)
 - **Wallet Support**: VeWorld wallet integration via Connex SDK
-- **Token Standard**: VIP-180 (VeChain's enhanced version of ERC-20)
 
 ### Key Features
 - **Receipt Validation**: Multi-tier system with auto-approval (e.g., ride-share) and manual review for others. Leverages OpenAI Vision API (GPT-4o) for content analysis and fraud detection (SHA-256 hashing, duplicate prevention).

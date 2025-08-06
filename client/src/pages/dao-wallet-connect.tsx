@@ -39,7 +39,7 @@ export default function DAOWalletConnectPage() {
     // Automatically navigate to home page after 3 seconds
     setTimeout(() => {
       console.log('Redirecting to home page after connection');
-      setLocation('/home');
+      setLocation('/');
     }, 3000);
   };
 

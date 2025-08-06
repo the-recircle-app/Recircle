@@ -12,7 +12,7 @@ const CONTRACTS = {
 };
 
 // Working VeChain testnet RPC endpoint
-const TESTNET_RPC = 'https://testnet.vechain.org';
+const TESTNET_RPC = 'https://testnet.veblocks.net';
 
 // ERC20 transfer function signature
 const ERC20_TRANSFER_SIG = 'transfer(address,uint256)';

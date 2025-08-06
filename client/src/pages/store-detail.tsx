@@ -119,12 +119,12 @@ export default function StoreDetail() {
   const handleShareStore = () => {
     if (!store) return;
     
-    const storeName = store.name || 'This transportation hub';
+    const storeName = store.name || 'This thrift store';
     
     // Create share data
     const shareData = {
       title: `${storeName} on ReWardrobe`,
-      text: `Check out ${storeName}, a sustainable transportation hub on ReCircle! Use eco-friendly transport and earn B3TR rewards.`,
+      text: `Check out ${storeName}, a thrift store on ReWardrobe! Recycle your clothing and earn rewards.`,
       url: window.location.href
     };
     
@@ -280,7 +280,7 @@ export default function StoreDetail() {
                 <div className="mb-4">
                   <h3 className="font-semibold text-sm text-gray-700 mb-2">Store Description</h3>
                   <p className="text-gray-600 text-sm">
-                    {store.name || 'This location'} is a sustainable transportation hub located in {store.city || 'the city'}, {store.state || 'the area'}. They offer eco-friendly transportation services including electric vehicle rentals, bike sharing, and public transit connections. Using their services supports environmental sustainability through reduced carbon emissions.
+                    {store.name || 'This store'} is a thrift store located in {store.city || 'the city'}, {store.state || 'the area'}. They offer a wide variety of pre-loved items including clothing, furniture, books, and household goods at affordable prices. Shopping here supports environmental sustainability through recycling and reuse.
                   </p>
                 </div>
                 
@@ -424,7 +424,7 @@ export default function StoreDetail() {
               </svg>
               <div>
                 <p className="font-medium">Demo Store Notice</p>
-                <p className="mt-1">This is a demo transportation hub located in San Francisco, CA. When viewing directions, it will show the actual San Francisco location.</p>
+                <p className="mt-1">This is a demo thrift store located in San Francisco, CA. When viewing directions, it will show the actual San Francisco location.</p>
               </div>
             </div>
           </div>

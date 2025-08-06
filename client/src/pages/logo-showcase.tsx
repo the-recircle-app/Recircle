@@ -9,7 +9,7 @@ const LogoShowcase: React.FC = () => {
     <div className="min-h-screen bg-gray-900 text-white">
       <div className="container mx-auto px-4 py-12">
         <div className="mb-6 flex">
-          <Link href="/home" className="text-blue-400 hover:text-blue-300 flex items-center mb-8">
+          <Link href="/" className="text-blue-400 hover:text-blue-300 flex items-center mb-8">
             <svg 
               xmlns="http://www.w3.org/2000/svg" 
               className="h-5 w-5 mr-1" 

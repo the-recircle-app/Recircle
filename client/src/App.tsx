@@ -3,7 +3,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { WalletProvider, useWallet } from "./context/WalletContext";
+import { WalletProvider } from "./context/WalletContext";
 import { AchievementProvider } from "./context/AchievementContext";
 
 import { VeChainStateBridge } from "./components/VeChainStateBridge";
@@ -21,11 +21,10 @@ import AddStoreForm from "./pages/add-store-form";
 import InviteFriend from "./pages/invite-friend";
 import TransactionExplorer from "./pages/transactions";
 import JoinWithReferral from "./pages/join-with-referral";
-
+import Redeem from "./pages/redeem";
+import ModernRedeem from "./pages/redeem-modern";
 import LogoShowcase from "./pages/logo-showcase";
 import PendingSubmissionsAdmin from "./pages/admin/pending-submissions";
-import AdminAnalytics from "./pages/admin-analytics";
-import AdminEmployeeTracking from "./pages/admin-employee-tracking";
 import TestAutoConnect from "./pages/test-auto-connect";
 import TestWalletConnect from "./pages/test-wallet-connect";
 import DebugWallet from "./pages/debug-wallet";
@@ -47,7 +46,6 @@ import VeWorldDebugPage from "./pages/VeWorldDebugPage";
 import TermsOfService from "./pages/terms-of-service";
 import SoloSetupPage from "./pages/solo-setup";
 import { PierreVeBetterDAOTest } from "./pages/pierre-vebetterdao-test";
-import MobileDebug from "./pages/mobile-debug";
 import { useEffect } from "react";
 import { vechain } from "./lib/vechain";
 
@@ -63,23 +61,10 @@ function Layout({ children }: { children: React.ReactNode }) {
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
-// Smart routing component that shows Welcome only for disconnected users
-function SmartWelcomeRoute() {
-  const { isConnected } = useWallet();
-  
-  // If wallet is connected, redirect to home (activity cards)
-  if (isConnected) {
-    return <Home />;
-  }
-  
-  // If wallet is disconnected, show welcome page
-  return <Welcome />;
-}
-
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={SmartWelcomeRoute} />
+      <Route path="/" component={Welcome} />
       <Route path="/home" component={Home} />
       <Route path="/connect-wallet" component={ConnectWallet} />
       <Route path="/join" component={JoinWithReferral} />
@@ -98,14 +83,11 @@ function Router() {
       <Route path="/vechain-kit-test" component={VeChainKitTest} />
       <Route path="/debug" component={Debug} />
       <Route path="/veworld-debug" component={VeWorldDebugPage} />
-      <Route path="/mobile-debug" component={MobileDebug} />
       <Route path="/pierre-vebetterdao-test" component={PierreVeBetterDAOTest} />
       
       {/* Admin routes */}
       <Route path="/admin/pending-submissions" component={PendingSubmissionsAdmin} />
       <Route path="/admin/debug-tools" component={DebugToolsPage} />
-      <Route path="/admin/analytics" component={AdminAnalytics} />
-      <Route path="/admin/employees" component={AdminEmployeeTracking} />
       
       {/* Protected routes - require wallet connection */}
       <Route path="/scan">
@@ -158,7 +140,16 @@ function Router() {
           <ContractStatus />
         </ProtectedRoute>
       </Route>
-
+      <Route path="/redeem">
+        <ProtectedRoute>
+          <Redeem />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/redeem-modern">
+        <ProtectedRoute>
+          <ModernRedeem />
+        </ProtectedRoute>
+      </Route>
       <Route path="/impact-explorer">
         <ProtectedRoute>
           <ImpactExplorer />

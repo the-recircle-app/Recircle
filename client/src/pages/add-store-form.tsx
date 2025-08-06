@@ -232,7 +232,7 @@ const AddStoreForm = () => {
 
   // Handle cancel button
   const handleCancel = () => {
-    setLocation("/home");
+    setLocation("/");
   };
 
   return (

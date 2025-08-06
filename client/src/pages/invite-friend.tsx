@@ -113,7 +113,7 @@ const InviteFriend = () => {
   };
 
   const handleShareSocial = (platform: string) => {
-    const shareText = "Join ReCircle and earn B3TR tokens for sustainable transportation! Use my invite code to get started.";
+    const shareText = "Join ReCircle and earn B3TR tokens for recycling clothes! Use my invite code to get started.";
     const shareUrl = inviteLink;
     
     // Open appropriate share URL based on platform

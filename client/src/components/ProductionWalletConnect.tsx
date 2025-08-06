@@ -39,17 +39,7 @@ export default function ProductionWalletConnect({ onConnect }: ProductionWalletC
       const httpsCheck = isHTTPS();
       const veWorldCheck = isVeWorldBrowser();
       const connexCheck = typeof window.connex !== 'undefined';
-      
-      // Environment is ready if we have HTTPS and VeWorld browser
-      const ready = httpsCheck && veWorldCheck;
-
-      console.log('[ENV CHECK]', {
-        https: httpsCheck,
-        veworld: veWorldCheck,
-        connex: connexCheck,
-        ready,
-        userAgent: navigator.userAgent
-      });
+      const ready = httpsCheck && veWorldCheck && connexCheck;
 
       setEnvironmentStatus({
         https: httpsCheck,
@@ -69,9 +59,9 @@ export default function ProductionWalletConnect({ onConnect }: ProductionWalletC
 
     checkEnvironment();
 
-    // Check periodically for provider injection
+    // Check periodically for connex injection
     const interval = setInterval(checkEnvironment, 1000);
-    const timeout = setTimeout(() => clearInterval(interval), 15000);
+    const timeout = setTimeout(() => clearInterval(interval), 10000);
 
     return () => {
       clearInterval(interval);
@@ -89,35 +79,28 @@ export default function ProductionWalletConnect({ onConnect }: ProductionWalletC
     setError(null);
 
     try {
-      console.log('=== Production VeWorld Connection ===');
-      console.log('Using proven mobile connection logic...');
+      const connex = window.connex;
       
-      // Use the working connectVeWorldWallet function
-      const { connectVeWorldWallet } = await import('@/utils/veworld-connector');
-      const result = await connectVeWorldWallet();
+      // Request account access
+      const account = await connex.thor.account.getSelected();
       
-      if (result.error) {
-        throw new Error(result.error);
-      }
-      
-      if (result.address) {
-        const address = result.address;
-        console.log("✅ Wallet connected:", address);
-        setWalletAddress(address);
-        localStorage.setItem("walletAddress", address);
+      if (account && account.address) {
+        console.log("Wallet connected:", account.address);
+        setWalletAddress(account.address);
+        localStorage.setItem("walletAddress", account.address);
         
         // Connect to main wallet context
-        await connect("connex", address, { skipCelebration: true });
+        await connect("connex", account.address, { skipCelebration: true });
         
         if (onConnect) {
           onConnect();
         }
       } else {
-        throw new Error('No wallet address received');
+        setError("No wallet selected. Please select a wallet in VeWorld app.");
       }
     } catch (err) {
       console.error("Wallet connection failed:", err);
-      setError("Connection failed. Please ensure VeWorld wallet is connected and unlocked.");
+      setError("Connection failed. Please ensure you have a wallet selected in VeWorld.");
     } finally {
       setIsConnecting(false);
     }

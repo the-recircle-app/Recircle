@@ -716,18 +716,18 @@ const TransactionExplorer = () => {
                                   if (isTestTx) {
                                     // Show a prominent toast message explaining that it's a test transaction
                                     toast({
-                                      title: "VeChain Transaction",
-                                      description: "Opening VeChain Explorer to view this transaction on the blockchain.",
-                                      variant: "default",
-                                      duration: 3000,
+                                      title: "Test Transaction - Not on Blockchain",
+                                      description: "This is a simulated test transaction that doesn't exist on the actual blockchain. Opening the VeChain Explorer homepage instead.",
+                                      variant: "destructive", // Use warning style to make it prominent
+                                      duration: 8000, // Show longer to ensure user sees it
                                     });
                                     
-                                    // Add modal dialog for real transaction viewing
+                                    // Add modal dialog to make it even more clear
                                     const confirmRedirect = window.confirm(
-                                      "VECHAIN TRANSACTION:\n\n" +
-                                      "Opening VeChain Explorer to view this transaction on the blockchain.\n\n" +
-                                      "This transaction has been recorded on the VeChain testnet.\n\n" +
-                                      "Click OK to view the transaction details."
+                                      "TEST TRANSACTION NOTICE:\n\n" +
+                                      "This is a test transaction that doesn't exist on the VeChain blockchain.\n\n" +
+                                      "In the live app, real transactions will display in the VeChain Explorer.\n\n" +
+                                      "Click OK to open the VeChain Explorer homepage instead."
                                     );
                                     
                                     if (confirmRedirect) {

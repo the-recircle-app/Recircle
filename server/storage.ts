@@ -3,10 +3,7 @@ import {
   sustainableStores, Store, InsertStore,
   receipts, Receipt, InsertReceipt,
   transactions, Transaction, InsertTransaction,
-  referrals, Referral, InsertReferral,
-  reviewEmployees, ReviewEmployee, InsertReviewEmployee,
-  workSessions, WorkSession, InsertWorkSession,
-  reviewActions, ReviewAction, InsertReviewAction
+  referrals, Referral, InsertReferral
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, sql, desc } from "drizzle-orm";
@@ -25,8 +22,6 @@ export interface IStorage {
   generateReferralCode(userId: number): Promise<string>;
   getUserReferralCode(userId: number): Promise<string | null>;
   getUsers(): Promise<User[]>;
-  getAllUsers(): Promise<User[]>;
-  getAllReceipts(): Promise<Receipt[]>;
   
   // Development and testing methods
   deleteUserTransactions(userId: number): Promise<boolean>;
@@ -60,27 +55,6 @@ export interface IStorage {
   createReferral(referral: InsertReferral): Promise<Referral>;
   updateReferralStatus(id: number, status: string): Promise<Referral | undefined>;
   getUserReferralCount(userId: number): Promise<number>;
-
-  // Employee tracking methods
-  getEmployee(id: number): Promise<ReviewEmployee | undefined>;
-  getEmployees(): Promise<ReviewEmployee[]>;
-  getActiveEmployees(): Promise<ReviewEmployee[]>;
-  createEmployee(employee: InsertReviewEmployee): Promise<ReviewEmployee>;
-  updateEmployee(id: number, updates: Partial<ReviewEmployee>): Promise<ReviewEmployee | undefined>;
-
-  // Work session methods
-  getWorkSession(id: number): Promise<WorkSession | undefined>;
-  getEmployeeWorkSessions(employeeId: number): Promise<WorkSession[]>;
-  getActiveWorkSessions(): Promise<WorkSession[]>;
-  createWorkSession(session: InsertWorkSession): Promise<WorkSession>;
-  endWorkSession(id: number, reviewsCompleted: number, notes?: string): Promise<WorkSession | undefined>;
-  updateWorkSessionReviewCount(id: number, reviewsCompleted: number): Promise<WorkSession | undefined>;
-
-  // Review action methods
-  getReviewAction(id: number): Promise<ReviewAction | undefined>;
-  getEmployeeReviewActions(employeeId: number, date?: Date): Promise<ReviewAction[]>;
-  getWorkSessionReviewActions(workSessionId: number): Promise<ReviewAction[]>;
-  createReviewAction(action: InsertReviewAction): Promise<ReviewAction>;
 }
 
 export class MemStorage implements IStorage {
@@ -89,18 +63,12 @@ export class MemStorage implements IStorage {
   private receipts: Map<number, Receipt>;
   private transactions: Map<number, Transaction>;
   private referrals: Map<number, Referral>;
-  private employees: Map<number, ReviewEmployee>;
-  private workSessions: Map<number, WorkSession>;
-  private reviewActions: Map<number, ReviewAction>;
   
   private userIdCounter: number;
   private storeIdCounter: number;
   private receiptIdCounter: number;
   private transactionIdCounter: number;
   private referralIdCounter: number;
-  private employeeIdCounter: number;
-  private workSessionIdCounter: number;
-  private reviewActionIdCounter: number;
 
   constructor() {
     this.users = new Map();
@@ -108,18 +76,12 @@ export class MemStorage implements IStorage {
     this.receipts = new Map();
     this.transactions = new Map();
     this.referrals = new Map();
-    this.employees = new Map();
-    this.workSessions = new Map();
-    this.reviewActions = new Map();
     
     this.userIdCounter = 103; // Start after our test users
     this.storeIdCounter = 1;
     this.receiptIdCounter = 3; // Start after sample receipts
     this.transactionIdCounter = 3; // Start after sample transactions
     this.referralIdCounter = 1;
-    this.employeeIdCounter = 1;
-    this.workSessionIdCounter = 1;
-    this.reviewActionIdCounter = 1;
 
     // Initialize with transportation services
     this.initializeTransportationData();
@@ -714,150 +676,6 @@ export class MemStorage implements IStorage {
   async getUsers(): Promise<User[]> {
     return Array.from(this.users.values());
   }
-
-  async getAllUsers(): Promise<User[]> {
-    return Array.from(this.users.values());
-  }
-
-  async getAllReceipts(): Promise<Receipt[]> {
-    return Array.from(this.receipts.values());
-  }
-
-  // Employee tracking methods
-  async getEmployee(id: number): Promise<ReviewEmployee | undefined> {
-    return this.employees.get(id);
-  }
-
-  async getEmployees(): Promise<ReviewEmployee[]> {
-    return Array.from(this.employees.values());
-  }
-
-  async getActiveEmployees(): Promise<ReviewEmployee[]> {
-    return Array.from(this.employees.values()).filter(emp => emp.isActive);
-  }
-
-  async createEmployee(insertEmployee: InsertReviewEmployee): Promise<ReviewEmployee> {
-    const id = this.employeeIdCounter++;
-    const employee: ReviewEmployee = {
-      id,
-      name: insertEmployee.name,
-      email: insertEmployee.email,
-      isActive: insertEmployee.isActive ?? true,
-      hourlyRate: insertEmployee.hourlyRate ?? null,
-      createdAt: new Date(),
-      lastActiveAt: insertEmployee.lastActiveAt ?? null
-    };
-    
-    this.employees.set(id, employee);
-    return employee;
-  }
-
-  async updateEmployee(id: number, updates: Partial<ReviewEmployee>): Promise<ReviewEmployee | undefined> {
-    const employee = await this.getEmployee(id);
-    if (!employee) return undefined;
-    
-    const updatedEmployee = { ...employee, ...updates };
-    this.employees.set(id, updatedEmployee);
-    return updatedEmployee;
-  }
-
-  // Work session methods
-  async getWorkSession(id: number): Promise<WorkSession | undefined> {
-    return this.workSessions.get(id);
-  }
-
-  async getEmployeeWorkSessions(employeeId: number): Promise<WorkSession[]> {
-    return Array.from(this.workSessions.values()).filter(session => session.employeeId === employeeId);
-  }
-
-  async getActiveWorkSessions(): Promise<WorkSession[]> {
-    return Array.from(this.workSessions.values()).filter(session => session.isActive);
-  }
-
-  async createWorkSession(insertSession: InsertWorkSession): Promise<WorkSession> {
-    const id = this.workSessionIdCounter++;
-    const session: WorkSession = {
-      id,
-      employeeId: insertSession.employeeId,
-      startTime: insertSession.startTime,
-      endTime: insertSession.endTime || null,
-      isActive: insertSession.isActive ?? true,
-      reviewsCompleted: insertSession.reviewsCompleted ?? 0,
-      notes: insertSession.notes || null,
-      createdAt: new Date()
-    };
-    
-    this.workSessions.set(id, session);
-    return session;
-  }
-
-  async endWorkSession(id: number, reviewsCompleted: number, notes?: string): Promise<WorkSession | undefined> {
-    const session = await this.getWorkSession(id);
-    if (!session) return undefined;
-    
-    const updatedSession = { 
-      ...session, 
-      endTime: new Date(),
-      isActive: false,
-      reviewsCompleted,
-      notes: notes || session.notes || null
-    };
-    
-    this.workSessions.set(id, updatedSession);
-    return updatedSession;
-  }
-
-  async updateWorkSessionReviewCount(id: number, reviewsCompleted: number): Promise<WorkSession | undefined> {
-    const session = await this.getWorkSession(id);
-    if (!session) return undefined;
-    
-    const updatedSession = { ...session, reviewsCompleted };
-    this.workSessions.set(id, updatedSession);
-    return updatedSession;
-  }
-
-  // Review action methods
-  async getReviewAction(id: number): Promise<ReviewAction | undefined> {
-    return this.reviewActions.get(id);
-  }
-
-  async getEmployeeReviewActions(employeeId: number, date?: Date): Promise<ReviewAction[]> {
-    let actions = Array.from(this.reviewActions.values()).filter(action => action.employeeId === employeeId);
-    
-    if (date) {
-      const targetDate = new Date(date);
-      const startOfDay = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate());
-      const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000);
-      
-      actions = actions.filter(action => {
-        const actionDate = new Date(action.completedAt);
-        return actionDate >= startOfDay && actionDate < endOfDay;
-      });
-    }
-    
-    return actions;
-  }
-
-  async getWorkSessionReviewActions(workSessionId: number): Promise<ReviewAction[]> {
-    return Array.from(this.reviewActions.values()).filter(action => action.workSessionId === workSessionId);
-  }
-
-  async createReviewAction(insertAction: InsertReviewAction): Promise<ReviewAction> {
-    const id = this.reviewActionIdCounter++;
-    const action: ReviewAction = {
-      id,
-      employeeId: insertAction.employeeId,
-      workSessionId: insertAction.workSessionId,
-      receiptId: insertAction.receiptId,
-      action: insertAction.action,
-      timeSpent: insertAction.timeSpent || null,
-      notes: insertAction.notes || null,
-      completedAt: new Date()
-    };
-    
-    this.reviewActions.set(id, action);
-    return action;
-  }
 }
 
 // PostgreSQL Storage Implementation
@@ -1055,106 +873,6 @@ export class PgStorage implements IStorage {
 
   async getUsers(): Promise<User[]> {
     return await db.select().from(users);
-  }
-
-  async getAllUsers(): Promise<User[]> {
-    return await db.select().from(users);
-  }
-
-  async getAllReceipts(): Promise<Receipt[]> {
-    return await db.select().from(receipts);
-  }
-
-  // Employee tracking methods - PgStorage implementation
-  async getEmployee(id: number): Promise<ReviewEmployee | undefined> {
-    const result = await db.select().from(reviewEmployees).where(eq(reviewEmployees.id, id)).limit(1);
-    return result[0];
-  }
-
-  async getEmployees(): Promise<ReviewEmployee[]> {
-    return await db.select().from(reviewEmployees);
-  }
-
-  async getActiveEmployees(): Promise<ReviewEmployee[]> {
-    return await db.select().from(reviewEmployees).where(eq(reviewEmployees.isActive, true));
-  }
-
-  async createEmployee(insertEmployee: InsertReviewEmployee): Promise<ReviewEmployee> {
-    const result = await db.insert(reviewEmployees).values(insertEmployee).returning();
-    return result[0];
-  }
-
-  async updateEmployee(id: number, updates: Partial<ReviewEmployee>): Promise<ReviewEmployee | undefined> {
-    const result = await db.update(reviewEmployees).set(updates).where(eq(reviewEmployees.id, id)).returning();
-    return result[0];
-  }
-
-  async getWorkSession(id: number): Promise<WorkSession | undefined> {
-    const result = await db.select().from(workSessions).where(eq(workSessions.id, id)).limit(1);
-    return result[0];
-  }
-
-  async getEmployeeWorkSessions(employeeId: number): Promise<WorkSession[]> {
-    return await db.select().from(workSessions).where(eq(workSessions.employeeId, employeeId));
-  }
-
-  async getActiveWorkSessions(): Promise<WorkSession[]> {
-    return await db.select().from(workSessions).where(eq(workSessions.isActive, true));
-  }
-
-  async createWorkSession(insertSession: InsertWorkSession): Promise<WorkSession> {
-    const result = await db.insert(workSessions).values(insertSession).returning();
-    return result[0];
-  }
-
-  async endWorkSession(id: number, reviewsCompleted: number, notes?: string): Promise<WorkSession | undefined> {
-    const updates: any = {
-      endTime: new Date(),
-      isActive: false,
-      reviewsCompleted
-    };
-    if (notes) updates.notes = notes;
-    
-    const result = await db.update(workSessions).set(updates).where(eq(workSessions.id, id)).returning();
-    return result[0];
-  }
-
-  async updateWorkSessionReviewCount(id: number, reviewsCompleted: number): Promise<WorkSession | undefined> {
-    const result = await db.update(workSessions).set({ reviewsCompleted }).where(eq(workSessions.id, id)).returning();
-    return result[0];
-  }
-
-  async getReviewAction(id: number): Promise<ReviewAction | undefined> {
-    const result = await db.select().from(reviewActions).where(eq(reviewActions.id, id)).limit(1);
-    return result[0];
-  }
-
-  async getEmployeeReviewActions(employeeId: number, date?: Date): Promise<ReviewAction[]> {
-    let query = db.select().from(reviewActions).where(eq(reviewActions.employeeId, employeeId));
-    
-    if (date) {
-      const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-      const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000);
-      
-      query = query.where(
-        and(
-          eq(reviewActions.employeeId, employeeId),
-          sql`${reviewActions.completedAt} >= ${startOfDay}`,
-          sql`${reviewActions.completedAt} < ${endOfDay}`
-        )
-      );
-    }
-    
-    return await query;
-  }
-
-  async getWorkSessionReviewActions(workSessionId: number): Promise<ReviewAction[]> {
-    return await db.select().from(reviewActions).where(eq(reviewActions.workSessionId, workSessionId));
-  }
-
-  async createReviewAction(insertAction: InsertReviewAction): Promise<ReviewAction> {
-    const result = await db.insert(reviewActions).values(insertAction).returning();
-    return result[0];
   }
 }
 

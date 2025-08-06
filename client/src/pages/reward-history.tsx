@@ -45,7 +45,7 @@ interface UserStats {
 }
 
 const categoryIcons = {
-  'transportation': ShoppingBag,
+  'thrift_store': ShoppingBag,
   'gaming_preowned': Gamepad2,
   'rideshare': Car,
   'ev_rental': Car,
@@ -54,7 +54,7 @@ const categoryIcons = {
 };
 
 const categoryColors = {
-  'transportation': 'bg-green-100 text-green-800',
+  'thrift_store': 'bg-green-100 text-green-800',
   'gaming_preowned': 'bg-blue-100 text-blue-800',
   'rideshare': 'bg-purple-100 text-purple-800',
   'ev_rental': 'bg-emerald-100 text-emerald-800',
@@ -95,7 +95,7 @@ export default function RewardHistory() {
           {
             id: 1,
             amount: 8.5,
-            category: 'transportation',
+            category: 'thrift_store',
             storeName: 'Goodwill Industries',
             date: new Date().toISOString(),
             status: 'completed' as const,
@@ -145,7 +145,7 @@ export default function RewardHistory() {
 
   const getCategoryLabel = (category: string) => {
     switch (category) {
-      case 'transportation': return 'Transportation';
+      case 'thrift_store': return 'Thrift Store';
       case 'gaming_preowned': return 'Pre-owned Gaming';
       case 'rideshare': return 'Rideshare';
       case 'ev_rental': return 'EV Rental';

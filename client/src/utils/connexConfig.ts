@@ -11,7 +11,7 @@ export interface ConnexConfig {
 
 // VeChain Testnet Configuration
 export const TESTNET_CONFIG: ConnexConfig = {
-  nodeUrl: 'https://testnet.vechain.org',
+  nodeUrl: 'https://testnet.veblocks.net',
   network: 'test',
   genesis: {
     number: 0,
@@ -41,15 +41,7 @@ export const isHTTPS = (): boolean => {
 // Check if we're in VeWorld in-app browser
 export const isVeWorldBrowser = (): boolean => {
   if (typeof window === 'undefined') return false;
-  
-  // Check for VeChain provider (the reliable working method)
-  const hasVeChain = typeof window.vechain !== 'undefined';
-  
-  // Check for connex provider
-  const hasConnex = typeof window.connex !== 'undefined';
-  
-  // VeWorld is available if we have the vechain provider
-  return hasVeChain || hasConnex;
+  return typeof window.connex !== 'undefined';
 };
 
 // Check if we're in a proper testnet environment

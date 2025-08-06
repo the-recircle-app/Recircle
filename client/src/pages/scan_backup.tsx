@@ -1684,8 +1684,8 @@ Thank you for riding!`;
                 Your {(() => {
                   const category = form.getValues("category");
                   switch(category) {
-                    case "transportation":
-                      return "sustainable transportation";
+                    case "thrift_clothing":
+                      return "thrift clothing";
                     case "used_video_games":
                       return "used video games";
                     case "used_books":

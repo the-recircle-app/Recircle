@@ -5,8 +5,8 @@ import { log } from '../vite';
 const GOOGLE_SHEETS_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbzDqopOu-WNEt9vxOn9Qrm0aD4K9gOnzj7AgRw-zXLJ8BtYk5_0V8d0dDyv816J-Eb3/exec';
 
 // Google Sheets App Script webhook for manual review when AI validation fails
-// Updated with your specific pending reviews web app URL
-const MANUAL_REVIEW_WEBHOOK_URL = process.env.MANUAL_REVIEW_WEBHOOK_URL || 'https://script.google.com/macros/s/AKfycby7EJkU8PwZRRUJZeD0hH2YIKRT10O02QdbCzT0vKDXc49vMRLkepQ4AIbTdMRCiHSV/exec';
+// Updated to use the new receipt collection sheet URL
+const MANUAL_REVIEW_WEBHOOK_URL = process.env.MANUAL_REVIEW_WEBHOOK_URL || 'https://script.google.com/macros/s/AKfycbxpPTrjbN0kmMppz_XOpti-kTDA9dpriLC81h1XYIhpPaRZI6sImPc0soooCWyP1UIMcQ/exec';
 
 // Google Sheets App Script webhook for updating receipt approval status
 const RECEIPT_APPROVAL_WEBHOOK_URL = process.env.RECEIPT_APPROVAL_WEBHOOK_URL || GOOGLE_SHEETS_WEBHOOK_URL;

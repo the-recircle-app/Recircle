@@ -68,7 +68,7 @@ const ShareAchievement: React.FC<ShareAchievementProps> = ({
   
   if (!achievement) return null;
   
-  const shareText = `I just earned the "${achievement.title}" achievement on B3TR! ${achievement.impactMessage} #B3TR #Sustainability #SustainableTransportation`;
+  const shareText = `I just earned the "${achievement.title}" achievement on B3TR! ${achievement.impactMessage} #B3TR #Sustainability #ThriftShopping`;
   
   // Generate a sharing URL
   const shareUrl = encodeURIComponent(`https://b3tr.app/share?ach=${achievement.type}`);

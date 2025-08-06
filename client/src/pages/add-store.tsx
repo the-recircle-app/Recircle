@@ -218,7 +218,7 @@ const AddStore = () => {
       
       toast({
         title: "Store Added",
-        description: "The transportation location has been added successfully",
+        description: "The thrift store has been added successfully",
       });
       
       // Invalidate any queries that rely on user data
@@ -282,12 +282,12 @@ const AddStore = () => {
 
   // Handle cancel button
   const handleCancel = () => {
-    setLocation("/home");
+    setLocation("/");
   };
 
   // Handle return to dashboard button
   const handleReturnToDashboard = () => {
-    setLocation("/home");
+    setLocation("/");
   };
 
   // Format coordinates for display
@@ -331,7 +331,7 @@ const AddStore = () => {
               )}
             </CardTitle>
             <CardDescription className="text-sm text-gray-600">
-              Earn B3TR tokens by adding verified sustainable transportation locations
+              Earn ReWardrobe tokens by adding verified thrift store locations
             </CardDescription>
           </CardHeader>
           
