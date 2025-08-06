@@ -46,6 +46,7 @@ import VeWorldDebugPage from "./pages/VeWorldDebugPage";
 import TermsOfService from "./pages/terms-of-service";
 import SoloSetupPage from "./pages/solo-setup";
 import { PierreVeBetterDAOTest } from "./pages/pierre-vebetterdao-test";
+import { DebugPage } from "./pages/DebugPage";
 import { useEffect } from "react";
 import { vechain } from "./lib/vechain";
 
@@ -84,6 +85,7 @@ function Router() {
       <Route path="/debug" component={Debug} />
       <Route path="/veworld-debug" component={VeWorldDebugPage} />
       <Route path="/pierre-vebetterdao-test" component={PierreVeBetterDAOTest} />
+      <Route path="/mobile-debug" component={DebugPage} />
       
       {/* Admin routes */}
       <Route path="/admin/pending-submissions" component={PendingSubmissionsAdmin} />
