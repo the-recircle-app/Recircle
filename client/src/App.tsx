@@ -51,7 +51,8 @@ import VeChainKitTestPage from "./pages/VeChainKitTestPage";
 import { useEffect } from "react";
 import { vechain } from "./lib/vechain";
 import { mobileConnexInit } from "./lib/mobile-connex-init";
-import { VeChainKitProviderWrapper } from "./components/VeChainKitProvider";
+// Temporarily disabled VeChain Kit due to build issues
+// import { VeChainKitProviderWrapper } from "./components/VeChainKitProvider";
 
 function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -89,7 +90,8 @@ function Router() {
       <Route path="/veworld-debug" component={VeWorldDebugPage} />
       <Route path="/pierre-vebetterdao-test" component={PierreVeBetterDAOTest} />
       <Route path="/mobile-debug" component={DebugPage} />
-      <Route path="/vechain-kit-mobile-test" component={VeChainKitTestPage} />
+      {/* Temporarily disabled due to build issues */}
+      {/* <Route path="/vechain-kit-mobile-test" component={VeChainKitTestPage} /> */}
       
       {/* Admin routes */}
       <Route path="/admin/pending-submissions" component={PendingSubmissionsAdmin} />
@@ -225,19 +227,17 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <VeChainKitProviderWrapper>
-        <WalletProvider>
-          <VeChainStateBridge />
-          <AchievementProvider>
-            <TooltipProvider>
-              <Layout>
-                <Router />
-              </Layout>
-              <Toaster />
-            </TooltipProvider>
-          </AchievementProvider>
-        </WalletProvider>
-      </VeChainKitProviderWrapper>
+      <WalletProvider>
+        <VeChainStateBridge />
+        <AchievementProvider>
+          <TooltipProvider>
+            <Layout>
+              <Router />
+            </Layout>
+            <Toaster />
+          </TooltipProvider>
+        </AchievementProvider>
+      </WalletProvider>
     </QueryClientProvider>
   );
 }
