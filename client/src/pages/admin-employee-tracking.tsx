@@ -234,7 +234,7 @@ const AdminEmployeeTracking = () => {
           
           <div className="flex gap-3">
             <Link href="/admin/analytics">
-              <Button variant="outline" className="flex items-center gap-2">
+              <Button variant="default" className="flex items-center gap-2">
                 <BarChart3 className="h-4 w-4" />
                 Analytics
               </Button>

@@ -25,6 +25,7 @@ export interface IStorage {
   generateReferralCode(userId: number): Promise<string>;
   getUserReferralCode(userId: number): Promise<string | null>;
   getUsers(): Promise<User[]>;
+  getAllUsers(): Promise<User[]>;
   
   // Development and testing methods
   deleteUserTransactions(userId: number): Promise<boolean>;
@@ -713,6 +714,10 @@ export class MemStorage implements IStorage {
     return Array.from(this.users.values());
   }
 
+  async getAllUsers(): Promise<User[]> {
+    return Array.from(this.users.values());
+  }
+
   // Employee tracking methods
   async getEmployee(id: number): Promise<ReviewEmployee | undefined> {
     return this.employees.get(id);
@@ -790,7 +795,7 @@ export class MemStorage implements IStorage {
       endTime: new Date(),
       isActive: false,
       reviewsCompleted,
-      notes: notes ?? session.notes
+      notes: notes || session.notes || null
     };
     
     this.workSessions.set(id, updatedSession);

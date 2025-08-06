@@ -108,7 +108,7 @@ const AdminAnalytics = () => {
             <p className="text-gray-600">Track your platform's user activity and growth</p>
           </div>
           <Link href="/admin/employees">
-            <Button variant="outline" className="flex items-center gap-2">
+            <Button variant="default" className="flex items-center gap-2">
               <UserCog className="h-4 w-4" />
               Employee Tracking
             </Button>
