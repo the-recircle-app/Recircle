@@ -34,6 +34,11 @@ export function DebugPage() {
       isVeWorld: navigator.userAgent.includes('VeWorld'),
       isSync2: navigator.userAgent.includes('Sync2'),
       isSync: navigator.userAgent.includes('Sync'),
+      isInApp: navigator.userAgent.includes('VeWorld') || navigator.userAgent.includes('Sync'),
+      
+      // Mobile-specific checks
+      touchSupport: 'ontouchstart' in window,
+      orientation: screen.orientation?.type || 'unknown',
       
       // Browser Detection
       isChrome: navigator.userAgent.includes('Chrome'),
@@ -49,6 +54,11 @@ export function DebugPage() {
       url: window.location.href,
       protocol: window.location.protocol,
       host: window.location.host,
+      
+      // Mobile wallet specific checks
+      hasVeWorldBridge: typeof (win as any).vechain?.request === 'function',
+      veWorldMethods: (win as any).vechain ? Object.keys((win as any).vechain) : [],
+      dappKitStatus: typeof (win as any).DAppKit !== 'undefined',
     };
 
     // Check for wallet providers
@@ -68,13 +78,32 @@ export function DebugPage() {
       info.walletProviders.push('window.vechain');
     }
 
-    // Check for DAppKit providers
-    const dappKitProviders = ['veworld', 'sync2', 'sync'];
+    // Check for DAppKit providers and mobile-specific providers
+    const dappKitProviders = ['veworld', 'sync2', 'sync', 'DAppKit'];
     dappKitProviders.forEach(provider => {
       if (win[provider]) {
         info.walletProviders.push(provider);
       }
     });
+    
+    // Mobile wallet bridge checks
+    if ((win as any).vechain?.request) {
+      info.walletProviders.push('VeWorld Bridge');
+    }
+    
+    // Check for ReCircle-specific wallet state
+    const localStorage = win.localStorage;
+    if (localStorage) {
+      try {
+        info.storedWalletData = {
+          hasStoredWallet: !!localStorage.getItem('wallet_address'),
+          hasConnexState: !!localStorage.getItem('connex_state'),
+          walletEvents: localStorage.getItem('wallet_events')?.length || 0
+        };
+      } catch (e) {
+        info.storageError = 'Cannot access localStorage';
+      }
+    }
 
     setDebugInfo(info);
     setIsRefreshing(false);
@@ -124,6 +153,14 @@ export function DebugPage() {
               status: signMethod ? 'PASS' : 'FAIL',
               details: signMethod ? 'Sign method found' : 'Sign method missing'
             });
+            
+            // Test certificate method for mobile wallet
+            const certMethod = win.connex.vendor.sign('cert');
+            results.tests.push({
+              name: 'Certificate Method Available',
+              status: certMethod ? 'PASS' : 'FAIL',
+              details: certMethod ? 'Certificate method found' : 'Certificate method missing'
+            });
           } catch (e: any) {
             results.tests.push({
               name: 'Sign Method Test',
@@ -143,6 +180,37 @@ export function DebugPage() {
           name: 'Connex Available',
           status: 'FAIL',
           details: 'Connex not found on window object'
+        });
+      }
+      
+      // Test VeWorld mobile bridge
+      if ((win as any).vechain?.request) {
+        try {
+          results.tests.push({
+            name: 'VeWorld Bridge Available',
+            status: 'PASS',
+            details: 'VeWorld request method found'
+          });
+          
+          // Test accounts method
+          const accounts = (win as any).vechain.request({ method: 'eth_accounts' });
+          results.tests.push({
+            name: 'Accounts Method Test',
+            status: accounts ? 'PASS' : 'FAIL',
+            details: accounts ? 'Can request accounts' : 'Cannot request accounts'
+          });
+        } catch (e: any) {
+          results.tests.push({
+            name: 'VeWorld Bridge Test',
+            status: 'ERROR',
+            details: e?.message || 'Bridge test failed'
+          });
+        }
+      } else {
+        results.tests.push({
+          name: 'VeWorld Bridge Available',
+          status: 'FAIL',
+          details: 'VeWorld bridge not found - mobile connection may be broken'
         });
       }
       
@@ -175,7 +243,7 @@ export function DebugPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
-            Mobile Debug Console
+            Mobile Wallet Connection Debug
             <div className="space-x-2">
               <Button 
                 onClick={collectDebugInfo}
@@ -211,10 +279,12 @@ export function DebugPage() {
                   debugInfo.isEdge ? 'Edge' : 'Unknown'
                 }</div>
                 <div><strong>Environment:</strong> {
-                  debugInfo.isVeWorld ? 'VeWorld' :
-                  debugInfo.isSync2 ? 'Sync2' :
-                  debugInfo.isSync ? 'Sync' : 'Browser'
+                  debugInfo.isVeWorld ? 'VeWorld App' :
+                  debugInfo.isSync2 ? 'Sync2 App' :
+                  debugInfo.isSync ? 'Sync App' : 'Mobile Browser'
                 }</div>
+                <div><strong>In-App:</strong> {debugInfo.isInApp ? '✅ Yes' : '❌ No'}</div>
+                <div><strong>Touch:</strong> {debugInfo.touchSupport ? '✅ Supported' : '❌ Not detected'}</div>
               </CardContent>
             </Card>
 
@@ -227,10 +297,25 @@ export function DebugPage() {
                 <div><strong>Connex:</strong> {debugInfo.connexExists ? '✅ Available' : '❌ Missing'}</div>
                 <div><strong>Version:</strong> {debugInfo.connexVersion}</div>
                 <div><strong>Providers:</strong> {debugInfo.walletProviders?.join(', ') || 'None'}</div>
-                <div><strong>Methods:</strong> {debugInfo.connexMethods?.slice(0, 3)?.join(', ')}...</div>
+                <div><strong>Bridge:</strong> {debugInfo.hasVeWorldBridge ? '✅ Available' : '❌ Missing'}</div>
+                <div><strong>DAppKit:</strong> {debugInfo.dappKitStatus ? '✅ Available' : '❌ Missing'}</div>
               </CardContent>
             </Card>
           </div>
+
+          {/* Storage Info */}
+          {debugInfo.storedWalletData && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Mobile Wallet Storage</CardTitle>
+              </CardHeader>
+              <CardContent className="text-xs space-y-1">
+                <div><strong>Stored Wallet:</strong> {debugInfo.storedWalletData.hasStoredWallet ? '✅ Found' : '❌ Missing'}</div>
+                <div><strong>Connex State:</strong> {debugInfo.storedWalletData.hasConnexState ? '✅ Found' : '❌ Missing'}</div>
+                <div><strong>Wallet Events:</strong> {debugInfo.storedWalletData.walletEvents} events</div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Wallet Tests */}
           {debugInfo.walletTests && (
