@@ -47,11 +47,10 @@ import SoloSetupPage from "./pages/solo-setup";
 import { PierreVeBetterDAOTest } from "./pages/pierre-vebetterdao-test";
 import { useEffect } from "react";
 import { vechain } from "./lib/vechain";
-import { ThemeProvider } from "./components/theme-provider";
 
 function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex flex-col h-full min-h-screen bg-background text-foreground">
+    <div className="flex flex-col h-full min-h-screen bg-gray-900 text-gray-100">
       <main className="flex-1 overflow-y-auto">
         {children}
       </main>
@@ -208,21 +207,19 @@ function App() {
   }, []);
 
   return (
-    <ThemeProvider defaultTheme="dark" storageKey="recircle-ui-theme">
-      <QueryClientProvider client={queryClient}>
-        <WalletProvider>
-          <VeChainStateBridge />
-          <AchievementProvider>
-            <TooltipProvider>
-              <Layout>
-                <Router />
-              </Layout>
-              <Toaster />
-            </TooltipProvider>
-          </AchievementProvider>
-        </WalletProvider>
-      </QueryClientProvider>
-    </ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <WalletProvider>
+        <VeChainStateBridge />
+        <AchievementProvider>
+          <TooltipProvider>
+            <Layout>
+              <Router />
+            </Layout>
+            <Toaster />
+          </TooltipProvider>
+        </AchievementProvider>
+      </WalletProvider>
+    </QueryClientProvider>
   );
 }
 
