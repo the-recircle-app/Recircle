@@ -11,6 +11,7 @@ import ActivityCard from "../components/ActivityCard";
 import SupportFooter from "../components/SupportFooter";
 import TokenBalanceRefresher from "../components/TokenBalanceRefresher";
 import UnifiedWalletButton from "../components/UnifiedWalletButton";
+import { ThemeToggle } from "../components/theme-toggle";
 import { Link, useLocation } from "wouter";
 
 const Home = () => {
@@ -120,9 +121,10 @@ const Home = () => {
         />
       )} */}
       
-      {/* Unified Wallet Button - Always shown */}
-      <div className="p-4 border-b border-gray-700">
+      {/* Header with Wallet Button and Theme Toggle */}
+      <div className="p-4 border-b border-gray-700 flex justify-between items-center">
         <UnifiedWalletButton />
+        <ThemeToggle />
       </div>
 
       {/* Progress banner */}
