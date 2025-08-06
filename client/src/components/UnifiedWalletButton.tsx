@@ -27,108 +27,41 @@ export function UnifiedWalletButton() {
     setIsLoading(true);
     
     try {
-      // Wait for VeWorld providers to be available
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Use the EXACT working connectVeWorldWallet utility
+      const { connectVeWorldWallet } = await import('@/utils/veworld-connector');
+      const result = await connectVeWorldWallet();
       
-      const connex = (window as any).connex;
-      const vechain = (window as any).vechain;
+      if (result.error) {
+        throw new Error(result.error);
+      }
       
-      let walletAddress = null;
-
-      // Method 1: Try desktop VeWorld extension first
-      if (vechain && typeof vechain.request === "function") {
-        try {
-          console.log("🟢 [UNIFIED] Attempting desktop extension connection");
-          const accounts = await vechain.request({ method: 'eth_requestAccounts' });
-          
-          if (accounts && accounts.length > 0) {
-            walletAddress = accounts[0];
-            console.log("🟢 [UNIFIED] Connected via desktop extension:", walletAddress);
-          }
-        } catch (error) {
-          console.log("🟢 [UNIFIED] Desktop extension failed:", error);
-        }
-      }
-
-      // Method 2: Try Connex vendor API (VeWorld mobile primary method)
-      if (!walletAddress && connex && connex.vendor && connex.vendor.sign) {
-        try {
-          console.log("🟢 [UNIFIED] Attempting Connex vendor connection");
-          
-          const certResult = await connex.vendor.sign('cert', {
-            purpose: 'identification',
-            payload: {
-              type: 'text',
-              content: 'Connect to ReCircle - Sustainable Transportation Rewards'
-            }
-          }).request();
-          
-          if (certResult && certResult.annex && certResult.annex.signer) {
-            walletAddress = certResult.annex.signer;
-            console.log("🟢 [UNIFIED] Connected via Connex vendor:", walletAddress);
-          }
-        } catch (error) {
-          console.log("🟢 [UNIFIED] Connex vendor failed:", error);
-        }
-      }
-
-      // Method 3: Try VeChain direct request (fallback for older mobile versions)
-      if (!walletAddress && vechain && vechain.request) {
-        try {
-          console.log("🟢 [UNIFIED] Attempting VeChain direct request");
-          
-          const accounts = await vechain.request({
-            method: 'eth_requestAccounts'
-          });
-          
-          if (accounts && accounts.length > 0) {
-            walletAddress = accounts[0];
-            console.log("🟢 [UNIFIED] Connected via VeChain request:", walletAddress);
-          }
-        } catch (error) {
-          console.log("🟢 [UNIFIED] VeChain request failed:", error);
-        }
-      }
-
-      // Method 4: Try legacy VeChain sign method
-      if (!walletAddress && vechain && vechain.sign) {
-        try {
-          console.log("🟢 [UNIFIED] Attempting VeChain sign method");
-          
-          const signResult = await vechain.sign('cert', {
-            purpose: 'identification',
-            payload: {
-              type: 'text',
-              content: 'Connect to ReCircle'
-            }
-          });
-          
-          if (signResult && signResult.annex && signResult.annex.signer) {
-            walletAddress = signResult.annex.signer;
-            console.log("🟢 [UNIFIED] Connected via VeChain sign:", walletAddress);
-          }
-        } catch (error) {
-          console.log("🟢 [UNIFIED] VeChain sign failed:", error);
-        }
-      }
-
-      if (walletAddress) {
-        // Connect to the app with the wallet address - use "VeWorld" as the method name
-        const success = await connect('VeWorld', walletAddress, { skipCelebration: false });
+      if (result.address) {
+        // Connect to app context with the proven working method
+        const success = await connect("VeWorld", result.address);
         
-        if (!success) {
-          throw new Error('Failed to register wallet with app');
+        if (success) {
+          console.log("🟢 [UNIFIED] Successfully connected:", result.address);
+        } else {
+          throw new Error("App context connection failed");
         }
-        
-        console.log("🟢 [UNIFIED] Successfully connected:", walletAddress);
       } else {
-        throw new Error('No connection method worked. VeWorld providers may not be available.');
+        throw new Error('No wallet address received');
       }
-
+      
     } catch (error) {
       console.error("🟢 [UNIFIED] Connection failed:", error);
-      const errorMessage = error instanceof Error ? error.message : 'Connection failed';
-      alert(`VeWorld connection failed: ${errorMessage}`);
+      
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      
+      if (errorMessage.includes("User rejected") || errorMessage.includes("User denied")) {
+        alert("Connection cancelled. Please try again and approve the connection request.");
+      } else if (errorMessage.includes("VeWorld not detected")) {
+        alert("VeWorld not detected. Use the in-app browser.");
+      } else if (errorMessage.includes("Wrong network")) {
+        alert("Wrong network. Switch to VeChain testnet.");
+      } else {
+        alert("Wallet connection failed. Please make sure VeWorld is unlocked and try again.");
+      }
     } finally {
       setIsLoading(false);
     }
