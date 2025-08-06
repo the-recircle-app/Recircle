@@ -79,28 +79,88 @@ export default function ProductionWalletConnect({ onConnect }: ProductionWalletC
     setError(null);
 
     try {
-      const connex = window.connex;
-      
-      // Request account access
-      const account = await connex.thor.account.getSelected();
-      
-      if (account && account.address) {
-        console.log("Wallet connected:", account.address);
-        setWalletAddress(account.address);
-        localStorage.setItem("walletAddress", account.address);
+      console.log('=== Production VeWorld Connection ===');
+      console.log('User Agent:', navigator.userAgent);
+      console.log('Available providers:', {
+        connex: !!window.connex,
+        vechain: !!window.vechain
+      });
+
+      let address: string | null = null;
+
+      // Method 1: Try Connex vendor signing (most reliable for VeWorld)
+      if (window.connex && window.connex.vendor) {
+        console.log('Attempting Connex vendor method...');
+        try {
+          const cert = window.connex.vendor.sign('cert', {
+            purpose: 'identification',
+            payload: {
+              type: 'text',
+              content: 'Connect to ReCircle for B3TR rewards'
+            }
+          });
+          
+          const result = await cert.request();
+          if (result && result.annex && result.annex.signer) {
+            address = result.annex.signer;
+            console.log('✅ Connex vendor success:', address);
+          }
+        } catch (err) {
+          console.log('❌ Connex vendor failed:', err);
+        }
+      }
+
+      // Method 2: Try thor account method  
+      if (!address && window.connex && window.connex.thor) {
+        console.log('Attempting Connex thor account method...');
+        try {
+          const account = await window.connex.thor.account.getSelected();
+          if (account && account.address) {
+            address = account.address;
+            console.log('✅ Thor account success:', address);
+          }
+        } catch (err) {
+          console.log('❌ Thor account failed:', err);
+        }
+      }
+
+      // Method 3: Try VeChain provider if available
+      if (!address && window.vechain) {
+        console.log('Attempting VeChain provider method...');
+        try {
+          // Check various VeChain provider properties
+          if (window.vechain.selectedAddress) {
+            address = window.vechain.selectedAddress;
+            console.log('✅ VeChain selectedAddress:', address);
+          } else if (window.vechain.address) {
+            address = window.vechain.address;
+            console.log('✅ VeChain address:', address);
+          } else if (window.vechain.account) {
+            address = window.vechain.account;
+            console.log('✅ VeChain account:', address);
+          }
+        } catch (err) {
+          console.log('❌ VeChain provider failed:', err);
+        }
+      }
+
+      if (address && address.length === 42 && address.startsWith('0x')) {
+        console.log("✅ Wallet connected:", address);
+        setWalletAddress(address);
+        localStorage.setItem("walletAddress", address);
         
         // Connect to main wallet context
-        await connect("connex", account.address, { skipCelebration: true });
+        await connect("connex", address, { skipCelebration: true });
         
         if (onConnect) {
           onConnect();
         }
       } else {
-        setError("No wallet selected. Please select a wallet in VeWorld app.");
+        setError("No wallet address found. Please ensure VeWorld is connected and unlocked, then try again.");
       }
     } catch (err) {
       console.error("Wallet connection failed:", err);
-      setError("Connection failed. Please ensure you have a wallet selected in VeWorld.");
+      setError("Connection failed. Please ensure VeWorld wallet is connected and unlocked.");
     } finally {
       setIsConnecting(false);
     }

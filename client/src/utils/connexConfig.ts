@@ -41,7 +41,19 @@ export const isHTTPS = (): boolean => {
 // Check if we're in VeWorld in-app browser
 export const isVeWorldBrowser = (): boolean => {
   if (typeof window === 'undefined') return false;
-  return typeof window.connex !== 'undefined';
+  
+  // Check for VeWorld mobile app user agent
+  const userAgent = navigator.userAgent.toLowerCase();
+  const isVeWorldMobile = userAgent.includes('veworld') || userAgent.includes('vechain');
+  
+  // Check for connex provider (desktop extension or mobile)
+  const hasConnex = typeof window.connex !== 'undefined';
+  
+  // Check for VeChain provider (alternative injection method)
+  const hasVeChain = typeof window.vechain !== 'undefined';
+  
+  // VeWorld is available if we have mobile user agent or blockchain providers
+  return isVeWorldMobile || hasConnex || hasVeChain;
 };
 
 // Check if we're in a proper testnet environment
