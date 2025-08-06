@@ -17,14 +17,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { VeChainKitRedeemButton } from '@/components/VeChainKitB3TRTransfer';
-import { useWallet as useVeChainKitWallet } from '@vechain/vechain-kit';
+// VeChain Kit temporarily disabled due to build issues
+// import { VeChainKitRedeemButton } from '@/components/VeChainKitB3TRTransfer';
+// import { useWallet as useVeChainKitWallet } from '@vechain/vechain-kit';
 import { apiRequest } from '@/lib/queryClient';
 
 const RedeemPage: React.FC = () => {
   const { toast } = useToast();
   const { isConnected, userId, tokenBalance, refreshUserData } = useWallet();
-  const { account } = useVeChainKitWallet();
+  // const { account } = useVeChainKitWallet(); // Temporarily disabled
   const [confirmOpen, setConfirmOpen] = useState<boolean>(false);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
 

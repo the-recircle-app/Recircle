@@ -2,18 +2,19 @@ import React from 'react';
 import { Link } from 'wouter';
 import { useToast } from '@/hooks/use-toast';
 import { useWallet } from '@/context/WalletContext';
-import { useWallet as useVeChainKitWallet } from '@vechain/vechain-kit';
+// import { useWallet as useVeChainKitWallet } from '@vechain/vechain-kit'; // Temporarily disabled
 import TokenIcon from '@/components/TokenIcon';
 import BackButton from '@/components/BackButton';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { VeChainKitRedeemButton, useB3TRToWei } from '@/components/VeChainKitB3TRTransfer';
+// import { VeChainKitRedeemButton, useB3TRToWei } from '@/components/VeChainKitB3TRTransfer'; // Temporarily disabled
 import { apiRequest } from '@/lib/queryClient';
 
 const ModernRedeemPage: React.FC = () => {
   const { toast } = useToast();
   const { isConnected, userId, tokenBalance, refreshUserData } = useWallet();
-  const { account } = useVeChainKitWallet();
+  // const { account } = useVeChainKitWallet(); // Temporarily disabled
+  const account = null; // Fallback until VeChain Kit is restored
 
   if (!isConnected) {
     return (

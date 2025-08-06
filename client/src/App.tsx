@@ -35,7 +35,7 @@ import MinimalConnect from "./pages/minimal-connect";
 import WalletDebugPage from "./pages/wallet-debug";
 import VeWorldTestPage from "./pages/veworld-test";
 import WalletConnectProductionPage from "./pages/wallet-connect-production";
-import VeChainKitTest from "./pages/vechain-kit-test";
+// Removed VeChain Kit test page due to build issues
 import HelpPage from "./pages/help";
 import FeedbackPage from "./pages/feedback";
 import RewardHistory from "./pages/reward-history";
@@ -47,7 +47,7 @@ import TermsOfService from "./pages/terms-of-service";
 import SoloSetupPage from "./pages/solo-setup";
 import { PierreVeBetterDAOTest } from "./pages/pierre-vebetterdao-test";
 import { DebugPage } from "./pages/DebugPage";
-import VeChainKitTestPage from "./pages/VeChainKitTestPage";
+// Removed VeChain Kit test page due to build issues
 import { useEffect } from "react";
 import { vechain } from "./lib/vechain";
 import { mobileConnexInit } from "./lib/mobile-connex-init";
@@ -85,7 +85,7 @@ function Router() {
       <Route path="/veworld-test" component={VeWorldTestPage} />
       <Route path="/help" component={HelpPage} />
       <Route path="/feedback" component={FeedbackPage} />
-      <Route path="/vechain-kit-test" component={VeChainKitTest} />
+      {/* Removed VeChain Kit test due to build issues */}
       <Route path="/debug" component={Debug} />
       <Route path="/veworld-debug" component={VeWorldDebugPage} />
       <Route path="/pierre-vebetterdao-test" component={PierreVeBetterDAOTest} />
