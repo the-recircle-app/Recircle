@@ -1,12 +1,13 @@
 import { useEffect } from 'react';
 import { useLocation } from 'wouter';
-import { OfficialVeChainWallet, useVeChainWallet } from '@/components/OfficialVeChainWallet';
+import VeChainWalletConnect from '@/components/VeChainWalletConnect';
+import { useWallet } from '@/context/WalletContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
 
 export default function ConnectWalletPage() {
   const [, setLocation] = useLocation();
-  const { isConnected } = useVeChainWallet();
+  const { isConnected } = useWallet();
 
   // Auto-redirect to home page if already connected
   useEffect(() => {
@@ -32,7 +33,7 @@ export default function ConnectWalletPage() {
         {/* Left side - Connect Form */}
         <div className="w-full md:w-1/2 p-4 md:p-8 flex items-center justify-center">
           <div className="w-full max-w-md">
-            <OfficialVeChainWallet variant="detailed" />
+            <VeChainWalletConnect />
           </div>
         </div>
         

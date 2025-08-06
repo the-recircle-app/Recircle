@@ -24,7 +24,7 @@ import { apiRequest } from '@/lib/queryClient';
 
 const RedeemPage: React.FC = () => {
   const { toast } = useToast();
-  const { isConnected, userId, tokenBalance, refreshUserData } = useWallet();
+  const { isConnected, userId, tokenBalance, refreshUserData, walletAddress } = useWallet();
   // const { account } = useVeChainKitWallet(); // Temporarily disabled
   const [confirmOpen, setConfirmOpen] = useState<boolean>(false);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);

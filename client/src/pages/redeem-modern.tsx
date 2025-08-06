@@ -12,9 +12,26 @@ import { apiRequest } from '@/lib/queryClient';
 
 const ModernRedeemPage: React.FC = () => {
   const { toast } = useToast();
-  const { isConnected, userId, tokenBalance, refreshUserData } = useWallet();
+  const { isConnected, userId, tokenBalance, refreshUserData, walletAddress } = useWallet();
   // const { account } = useVeChainKitWallet(); // Temporarily disabled
-  const account = null; // Fallback until VeChain Kit is restored
+  const account = walletAddress ? { address: walletAddress } : null; // Use existing wallet address
+
+  const handleRedeemAllTokens = async () => {
+    if (!walletAddress || tokenBalance <= 0) {
+      toast({
+        title: "Cannot redeem",
+        description: "No tokens available or wallet not connected",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    toast({
+      title: "Redemption Coming Soon",
+      description: "VeChain Kit integration is being restored",
+      variant: "default",
+    });
+  };
 
   if (!isConnected) {
     return (
@@ -128,16 +145,19 @@ const ModernRedeemPage: React.FC = () => {
               <TokenIcon value={tokenBalance} />
               <span>Available Balance</span>
             </div>
-            <span className="text-sm text-gray-500">Connected: {account.address.substring(0, 6)}...{account.address.substring(-4)}</span>
+            <span className="text-sm text-gray-500">Connected: {account?.address?.substring(0, 6)}...{account?.address?.substring(-4)}</span>
           </div>
           
           <div className="space-y-4">
             {tokenBalance > 0 ? (
-              <VeChainKitRedeemButton 
-                userAddress={account.address}
-                rewardAmount={tokenBalance}
-                onSuccess={() => handleRedeemSuccess}
-              />
+              <Button 
+                onClick={handleRedeemAllTokens}
+                disabled={tokenBalance <= 0}
+                className="w-full"
+                size="lg"
+              >
+                Claim {tokenBalance.toFixed(2)} B3TR Tokens
+              </Button>
             ) : (
               <Button disabled className="w-full">
                 No tokens available to redeem
