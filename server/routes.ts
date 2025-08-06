@@ -3452,8 +3452,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 if (referralResponse.ok) {
                   console.log(`[REFERRAL] 📝 Referral relationship created`);
                   
-                  // Award referral rewards: 5 B3TR to inviter, 5 B3TR to invitee, 30% to app fund
-                  const inviterReward = 5;
+                  // Award referral rewards: 15 B3TR to inviter, 5 B3TR to invitee, 30% to app fund
+                  const inviterReward = 15;
                   const inviteeReward = 5;
                   
                   // Create transaction for inviter reward
@@ -3501,9 +3501,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   await storage.updateUserTokenBalance(submittedUserId, currentBalance + inviteeReward);
                   
                   console.log(`[REFERRAL] 🎉 Three-way distribution complete:`);
-                  console.log(`[REFERRAL] - Inviter ${inviterId}: +${inviterReward} B3TR`);
-                  console.log(`[REFERRAL] - Invitee ${submittedUserId}: +${inviteeReward} B3TR (bonus)`);
-                  console.log(`[REFERRAL] - App Fund: +${appFundReward} B3TR`);
+                  console.log(`[REFERRAL] - Inviter ${inviterId}: +${inviterReward} B3TR (matches frontend promise)`);
+                  console.log(`[REFERRAL] - Invitee ${submittedUserId}: +${inviteeReward} B3TR (welcome bonus)`);
+                  console.log(`[REFERRAL] - App Fund: +${appFundReward} B3TR (sustainability)`);
                   
                   // Clear referral code from localStorage on next frontend load
                   // (this will be handled by the frontend when it receives the response)
