@@ -1,0 +1,63 @@
+[INFO] (#Ext) -  Starting ContentScriptController listener...
+content-scripts.iife.js:47 Attempting in inject VeWorld iFrame container...
+content-scripts.iife.js:47 VeWorld iFrame container created
+VM16:107 [PRELOAD] DAppKit comprehensive polyfills installed
+chunk-SKRUXVEK.js?v=565e5f42:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+@vechain_vechain-kit.js?v=565e5f42:121236 MIXPANEL PEOPLE REQUEST (QUEUED, PENDING IDENTIFY):
+@vechain_vechain-kit.js?v=565e5f42:121236 Object
+chunk-6BWUGDXF.js?v=565e5f42:23 Lit is in dev mode. Not recommended for production! See https://lit.dev/msg/dev-mode for more information.
+issueWarning @ chunk-6BWUGDXF.js?v=565e5f42:23Understand this warning
+VeChainStateBridge.tsx:16 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+App.tsx:206 Preloading wallet addresses...
+vechain.ts:437 Development mode: Creating mock Connex after delay
+VeChainStateBridge.tsx:16 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+App.tsx:206 Preloading wallet addresses...
+vechain.ts:437 Development mode: Creating mock Connex after delay
+VeChainStateBridge.tsx:16 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+api/users/wallet/0x61E7d0c2B25706bE3485980F39A3a994A8207aCf:1  Failed to load resource: the server responded with a status of 404 (Not Found)Understand this error
+api/users/wallet/0x61E7d0c2B25706bE3485980F39A3a994A8207aCf:1  Failed to load resource: the server responded with a status of 404 (Not Found)Understand this error
+vechain.ts:52 Wallet addresses loaded from API
+VeChainStateBridge.tsx:16 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+2UnifiedWalletButton.tsx:18 🟢 [UNIFIED] VeWorld extension detected
+VeChainStateBridge.tsx:16 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+2vechain.ts:442 Real VeWorld providers found - aborting mock creation
+UnifiedWalletButton.tsx:73 🔴 [UNIFIED] Starting disconnect...
+vechain.ts:284 Error disconnecting from VeWorld: TypeError: window.vechain.disconnect is not a function
+    at Object.disconnectWallet (vechain.ts:282:30)
+    at disconnect (WalletContext.tsx:255:23)
+    at handleDisconnect (UnifiedWalletButton.tsx:77:13)
+    at HTMLUnknownElement.callCallback2 (chunk-SKRUXVEK.js?v=565e5f42:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-SKRUXVEK.js?v=565e5f42:3699:24)
+    at invokeGuardedCallback (chunk-SKRUXVEK.js?v=565e5f42:3733:39)
+    at invokeGuardedCallbackAndCatchFirstError (chunk-SKRUXVEK.js?v=565e5f42:3736:33)
+    at executeDispatch (chunk-SKRUXVEK.js?v=565e5f42:7014:11)
+    at processDispatchQueueItemsInOrder (chunk-SKRUXVEK.js?v=565e5f42:7034:15)
+    at processDispatchQueue (chunk-SKRUXVEK.js?v=565e5f42:7043:13)
+disconnectWallet @ vechain.ts:284Understand this warning
+VeChainStateBridge.tsx:16 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+UnifiedWalletButton.tsx:78 🔴 [UNIFIED] Disconnect completed successfully
+2UnifiedWalletButton.tsx:18 🟢 [UNIFIED] VeWorld extension detected
+UnifiedWalletButton.tsx:26 🟢 [UNIFIED] Starting wallet connection...
+UnifiedWalletButton.tsx:32 🟢 [UNIFIED] VeWorld extension detected, attempting connection...
+VeChainStateBridge.tsx:16 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+VeWorldAPI.js:1 [ERROR] (#Localhost) -  Attempt failed  Object
+error @ VeWorldAPI.js:1Understand this error
+VeWorldAPI.js:1 [INFO] (#Localhost) -  Opening VeWorld iFrame
+WalletContext.tsx:150 [WALLET] Connect called with walletType: extension, explicit address: 0xAbEf6032B9176C186F6BF984f548bdA53349f70a
+WalletContext.tsx:169 [WALLET] Connecting to wallet: 0xAbEf6032B9176C186F6BF984f548bdA53349f70a using extension
+VeChainStateBridge.tsx:16 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+api/users/wallet/0xAbEf6032B9176C186F6BF984f548bdA53349f70a:1  Failed to load resource: the server responded with a status of 404 (Not Found)Understand this error
+VeChainStateBridge.tsx:16 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+blockchain-balance.ts:78 [BALANCE] Calling Thor API for 0xAbEf6032B9176C186F6BF984f548bdA53349f70a with contract 0x5ef79995fe8a89e0812330e4378eb2660cede699
+api/vechain/call:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)Understand this error
+blockchain-balance.ts:114 [BALANCE] Error reading wallet B3TR balance via Thor API: Error: VeChain API call failed: 500
+    at readWalletB3TRBalanceAPI (blockchain-balance.ts:92:13)
+    at async getCachedB3TRBalance (blockchain-balance.ts:139:17)
+    at async connect (WalletContext.tsx:205:29)
+    at async handleConnect (UnifiedWalletButton.tsx:41:27)
+readWalletB3TRBalanceAPI @ blockchain-balance.ts:114Understand this error
+blockchain-balance.ts:30 [BALANCE] Connex not available, will try API method
+WalletContext.tsx:206 [WALLET] Initial real B3TR balance: 0 B3TR
+UnifiedWalletButton.tsx:44 🟢 [UNIFIED] Successfully connected via VeWorld extension: 0xAbEf6032B9176C186F6BF984f548bdA53349f70a
+2VeChainStateBridge.tsx:16 [BRIDGE] VeChainStateBridge temporarily disabled to fix desktop connection loops
+VeWorldAPI.js:1 [INFO] (#Localhost) -  Closing VeWorld iFrame

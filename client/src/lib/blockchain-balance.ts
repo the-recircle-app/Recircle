@@ -5,8 +5,20 @@
  */
 
 // B3TR contract address on VeChain (VIP-180 token)
-// Use environment variable if available, fallback to testnet address
-const B3TR_CONTRACT_ADDRESS = import.meta.env.VITE_B3TR_CONTRACT_ADDRESS || "0x5ef79995fe8a89e0812330e4378eb2660cede699";
+// Use production testnet address for real wallets, solo address for development wallets
+const getB3TRContractAddress = (walletAddress: string) => {
+  const soloDevAddresses = [
+    '0x7567d83b7b8d80addcb281a71d54fc7b3364ffed',
+    '0xd3ae78222beadb038203be21ed5ce7c9b1bff602', 
+    '0x733b7269443c70de16bbf9b0615307884bcc5636'
+  ];
+  
+  const isSoloAddress = soloDevAddresses.includes(walletAddress.toLowerCase());
+  
+  return isSoloAddress 
+    ? "0x5ef79995fe8a89e0812330e4378eb2660cede699" // Solo node B3TR
+    : (import.meta.env.VITE_B3TR_CONTRACT_ADDRESS || "0xbf64cf86894Ee0877C4e7d03936e35Ee8D8b864F"); // Testnet B3TR
+};
 
 // Standard VIP-180 balanceOf ABI (compatible with ERC-20 but enhanced for VeChain)
 const BALANCE_OF_ABI = {
@@ -75,14 +87,15 @@ export async function readWalletB3TRBalanceAPI(walletAddress: string): Promise<n
     const paddedAddress = walletAddress.slice(2).padStart(64, '0');
     const callData = balanceOfSelector + paddedAddress;
     
-    console.log(`[BALANCE] Calling Thor API for ${walletAddress} with contract ${B3TR_CONTRACT_ADDRESS}`);
+    const contractAddress = getB3TRContractAddress(walletAddress);
+    console.log(`[BALANCE] Calling Thor API for ${walletAddress} with contract ${contractAddress}`);
     
     // Call our backend VeChain proxy API
     const response = await fetch('/api/vechain/call', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contractAddress: B3TR_CONTRACT_ADDRESS,
+        contractAddress: contractAddress,
         data: callData,
         caller: walletAddress
       })

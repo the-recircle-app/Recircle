@@ -524,10 +524,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { contractAddress, data, caller } = req.body;
       
       // Use Thor REST API pattern for VIP-180 contract calls (following VeChain docs)
-      // Default to VeChain testnet for production, solo node for development
-      const thorNodeUrl = process.env.NODE_ENV === 'production' 
-        ? 'https://testnet.vechain.org' 
-        : (process.env.VECHAIN_NODE_URL || 'http://localhost:8669');
+      // For wallet balance reading, always use testnet since real wallets exist there
+      // Solo node is only for testing with pre-funded development accounts
+      const isSoloAddress = caller && [
+        '0x7567d83b7b8d80addcb281a71d54fc7b3364ffed',
+        '0xd3ae78222beadb038203be21ed5ce7c9b1bff602', 
+        '0x733b7269443c70de16bbf9b0615307884bcc5636'
+      ].includes(caller.toLowerCase());
+      
+      const thorNodeUrl = isSoloAddress 
+        ? (process.env.VECHAIN_NODE_URL || 'http://localhost:8669')
+        : 'https://testnet.veblocks.net';
       
       console.log(`[VECHAIN] Calling Thor API at: ${thorNodeUrl}/accounts/${contractAddress}`);
       console.log(`[VECHAIN] Call data: ${data}, caller: ${caller}`);
