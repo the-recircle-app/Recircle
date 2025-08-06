@@ -113,6 +113,10 @@ export function ProductionReceiptUpload({
       if (validationResult.isValid && validationResult.estimatedReward > 0) {
         console.log('[UPLOAD] 🚀 Receipt validated successfully - submitting for blockchain distribution...');
         
+        // Check for referral code from localStorage for invite system
+        const referralCode = localStorage.getItem('referralCode');
+        console.log('[UPLOAD] 🎯 Referral code check:', referralCode ? `Found: ${referralCode}` : 'None found');
+        
         const submissionResponse = await fetch('/api/receipts', {
           method: 'POST',
           headers: {
@@ -123,6 +127,7 @@ export function ProductionReceiptUpload({
             walletAddress,
             storeId: 1, // Default store ID for sustainable transportation
             storeName: validationResult.storeName || 'Transportation Service',
+            referralCode: referralCode, // Include referral code for invite rewards
             amount: validationResult.estimatedReward || 0,
             purchaseDate: new Date().toISOString().split('T')[0],
             category: validationResult.category || 'ride_share',
@@ -148,6 +153,13 @@ export function ProductionReceiptUpload({
           validationResult.actualReward = submissionResult.tokenReward || validationResult.estimatedReward;
           if (submissionResult.txHash) {
             validationResult.txHash = submissionResult.txHash;
+          }
+          
+          // Clear referral code from localStorage after successful first receipt submission
+          // This prevents the same referral code from being used multiple times
+          if (referralCode) {
+            localStorage.removeItem('referralCode');
+            console.log('[UPLOAD] 🧹 Cleared referral code from localStorage after successful submission');
           }
         }
       } else {

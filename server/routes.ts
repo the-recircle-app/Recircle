@@ -2609,7 +2609,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         category,
         paymentMethod,
         cardLastFour,
-        containsPreOwnedItems
+        containsPreOwnedItems,
+        referralCode // Add referral code for invite system
       } = req.body;
       
       // Check daily limit but allow bypass for B3TR wallet testing
@@ -3419,6 +3420,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
             });
             // Don't fail the receipt submission if blockchain distribution fails
             // The user still gets their database balance updated
+          }
+
+          // ===== REFERRAL REWARDS PROCESSING =====
+          // Check if this is a first-time user with a referral code for three-way distribution
+          if (referralCode && shouldAwardFirstReceipt) {
+            console.log(`[REFERRAL] 🎯 Processing referral rewards for first receipt with code: ${referralCode}`);
+            
+            try {
+              // Validate referral code and get inviter information
+              const referralValidation = await fetch(`http://localhost:${process.env.PORT || 5000}/api/referrals/code/${referralCode}`);
+              
+              if (referralValidation.ok) {
+                const referralData = await referralValidation.json();
+                const inviterId = referralData.referrerId;
+                
+                console.log(`[REFERRAL] ✅ Valid referral code from user ${inviterId}`);
+                
+                // Create referral relationship
+                const referralResponse = await fetch(`http://localhost:${process.env.PORT || 5000}/api/referrals`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    referrerId: inviterId,
+                    referredId: submittedUserId,
+                    code: referralCode,
+                    status: 'completed'
+                  })
+                });
+                
+                if (referralResponse.ok) {
+                  console.log(`[REFERRAL] 📝 Referral relationship created`);
+                  
+                  // Award referral rewards: 5 B3TR to inviter, 5 B3TR to invitee, 30% to app fund
+                  const inviterReward = 5;
+                  const inviteeReward = 5;
+                  
+                  // Create transaction for inviter reward
+                  await storage.createTransaction({
+                    userId: inviterId,
+                    type: "referral_reward",
+                    amount: inviterReward,
+                    description: `Referral Reward: User ${submittedUserId} completed first receipt`,
+                    referenceId: newReceipt.id,
+                    txHash: `txhash-ref-inviter-${Date.now().toString(16)}`
+                  });
+                  
+                  // Create transaction for invitee reward (in addition to receipt reward)
+                  await storage.createTransaction({
+                    userId: submittedUserId,
+                    type: "referral_reward",
+                    amount: inviteeReward,
+                    description: `Welcome Bonus: Using referral code ${referralCode}`,
+                    referenceId: newReceipt.id,
+                    txHash: `txhash-ref-invitee-${Date.now().toString(16)}`
+                  });
+                  
+                  // Calculate app fund reward (30% of total referral rewards)
+                  const totalReferralRewards = inviterReward + inviteeReward;
+                  const appFundReward = totalReferralRewards * 0.3;
+                  
+                  // Create transaction for app fund sustainability reward
+                  await storage.createTransaction({
+                    userId: null,
+                    type: "sustainability_app",
+                    amount: appFundReward,
+                    description: `App Sustainability (Referral): ${userWalletAddress?.slice(0, 8)}...`,
+                    referenceId: newReceipt.id,
+                    txHash: `txhash-ref-app-${Date.now().toString(16)}`
+                  });
+                  
+                  // Update token balances
+                  const inviterUser = await storage.getUser(inviterId);
+                  if (inviterUser) {
+                    await storage.updateUserTokenBalance(inviterId, inviterUser.tokenBalance + inviterReward);
+                  }
+                  
+                  // Update invitee balance (add to existing balance)
+                  const currentBalance = initialUserData.tokenBalance + totalRewards;
+                  await storage.updateUserTokenBalance(submittedUserId, currentBalance + inviteeReward);
+                  
+                  console.log(`[REFERRAL] 🎉 Three-way distribution complete:`);
+                  console.log(`[REFERRAL] - Inviter ${inviterId}: +${inviterReward} B3TR`);
+                  console.log(`[REFERRAL] - Invitee ${submittedUserId}: +${inviteeReward} B3TR (bonus)`);
+                  console.log(`[REFERRAL] - App Fund: +${appFundReward} B3TR`);
+                  
+                  // Clear referral code from localStorage on next frontend load
+                  // (this will be handled by the frontend when it receives the response)
+                  
+                } else {
+                  console.log(`[REFERRAL] ❌ Failed to create referral relationship`);
+                }
+              } else {
+                console.log(`[REFERRAL] ⚠️ Invalid referral code: ${referralCode}`);
+              }
+            } catch (referralError) {
+              console.error(`[REFERRAL] ❌ Error processing referral rewards:`, referralError);
+              // Don't fail the receipt submission if referral processing fails
+            }
+          } else if (referralCode && !shouldAwardFirstReceipt) {
+            console.log(`[REFERRAL] ℹ️ Referral code provided but not first receipt - skipping referral rewards`);
           }
         } else {
           console.log(`NOT updating token balance because receipt needs manual review. Current balance: ${initialUserData.tokenBalance}`);
