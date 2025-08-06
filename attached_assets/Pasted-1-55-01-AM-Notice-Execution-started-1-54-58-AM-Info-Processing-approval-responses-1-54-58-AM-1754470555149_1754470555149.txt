@@ -1,0 +1,35 @@
+1:55:01 AM	Notice	Execution started
+1:54:58 AM	Info	🔄 Processing approval responses...
+1:54:58 AM	Info	Headers found: [ 'Timestamp',
+  'Email Address',
+  'Receipt ID',
+  'User ID',
+  'Wallet Address',
+  'Transportation Service',
+  'Amount',
+  'Decision',
+  'Admin Notes (Optional)',
+  'Processing Status',
+  'Processing Notes',
+  'Processed',
+  'Processed At' ]
+1:54:58 AM	Info	✅ Processing approval for receipt TEST_001
+1:54:58 AM	Info	Webhook response for TEST_001: 500
+1:54:58 AM	Error	❌ Failed to process TEST_001: 500 - {"success":false,"message":"Failed to process receipt approval","error_code":"SERVER_ERROR","error_message":"txResult is not defined","timestamp":"2025-08-06T08:54:58.565Z"}
+1:54:58 AM	Info	✅ Processing approval for receipt TEST_001
+1:54:58 AM	Info	Webhook response for TEST_001: 500
+1:54:58 AM	Error	❌ Failed to process TEST_001: 500 - {"success":false,"message":"Failed to process receipt approval","error_code":"SERVER_ERROR","error_message":"txResult is not defined","timestamp":"2025-08-06T08:54:58.711Z"}
+1:54:58 AM	Info	✅ Processing approval for receipt TEST_002
+1:54:58 AM	Info	Webhook response for TEST_002: 500
+1:54:58 AM	Error	❌ Failed to process TEST_002: 500 - {"success":false,"message":"Failed to process receipt approval","error_code":"SERVER_ERROR","error_message":"txResult is not defined","timestamp":"2025-08-06T08:54:58.795Z"}
+1:54:58 AM	Info	✅ Processing approval for receipt TEST_003
+1:54:58 AM	Info	Webhook response for TEST_003: 404
+1:54:58 AM	Error	❌ Failed to process TEST_003: 404 - {"success":false,"message":"User with ID 3 not found","error_code":"USER_NOT_FOUND"}
+1:54:58 AM	Info	✅ Processing approval for receipt TEST_003
+1:54:58 AM	Info	Webhook response for TEST_003: 404
+1:54:58 AM	Error	❌ Failed to process TEST_003: 404 - {"success":false,"message":"User with ID 3 not found","error_code":"USER_NOT_FOUND"}
+1:54:58 AM	Info	✅ Processing approval for receipt Test 123
+1:54:59 AM	Info	Webhook response for Test 123: 404
+1:54:59 AM	Error	❌ Failed to process Test 123: 404 - {"success":false,"message":"User with ID 103 not found","error_code":"USER_NOT_FOUND"}
+1:54:59 AM	Info	✅ Processing complete. Processed 0 approvals.
+1:55:02 AM	Notice	Execution completed

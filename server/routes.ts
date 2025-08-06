@@ -4842,7 +4842,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`Rewards for approved receipt (70/30 distribution):
         - Total reward amount: ${totalRawReward} B3TR
         - User reward: ${finalReward} B3TR (70% of total)
-        - App fund: ${txResult?.appAmount || (totalRawReward * 0.3)} B3TR (30% of total)
+        - App fund: ${distributionRewards.appFundReward} B3TR (30% of total)
         - Distribution model: 70/30 (user/app fund)
       `);
       
@@ -5184,16 +5184,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Create transaction for app sustainability reward (30% of total using 70/30 model)
-      if (txResult?.appAmount > 0) {
-        await storage.createTransaction({
-          userId: null,
-          type: "sustainability_app",
-          amount: txResult.appAmount,
-          description: `App Fund (Google Sheet Store): ${APP_FUND_WALLET.slice(0, 8)}...`,
-          referenceId: null,
-          txHash: txResult.appHash || `txhash-gsa-${Date.now().toString(16)}`
-        });
-      }
+      // This is handled by the 70/30 distribution system automatically
       
       // App fund transaction already handled by hybrid system above
       
@@ -5202,7 +5193,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         - Total base reward: ${baseRewardAmount} B3TR
         - After streak multiplier: ${streakMultipliedAmount} B3TR
         - User portion: ${userReward} B3TR (70% of total)
-        - App fund: ${txResult?.appAmount || (streakMultipliedAmount * 0.3)} B3TR (30% of total)
+        - App fund: ${streakMultipliedAmount * 0.3} B3TR (30% of total)
         - Distribution model: 70/30 (user/app fund)
       `);
       
