@@ -11,7 +11,7 @@ export interface ConnexConfig {
 
 // VeChain Testnet Configuration
 export const TESTNET_CONFIG: ConnexConfig = {
-  nodeUrl: 'https://testnet.veblocks.net',
+  nodeUrl: 'https://testnet.vechain.org',
   network: 'test',
   genesis: {
     number: 0,

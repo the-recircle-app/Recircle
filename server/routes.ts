@@ -5337,7 +5337,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { ethers } = await import('ethers');
       const endpoints = [
         'https://sync-testnet.vechain.org',
-        'https://testnet.veblocks.net',
+        'https://testnet.vechain.org',
         'https://node-testnet.vechain.energy',
         'https://testnet.vecha.in'
       ];
