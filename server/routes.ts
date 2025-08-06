@@ -6055,6 +6055,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.send(testPage);
   });
 
+  // Analytics routes for admin dashboard
+  const { createAnalyticsRoutes } = await import('./routes/analytics');
+  app.use('/api/analytics', createAnalyticsRoutes(storage));
+
   const httpServer = createServer(app);
   return httpServer;
 }

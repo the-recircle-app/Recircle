@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { IStorage } from '../storage';
+import type { IStorage } from '../storage';
 
 export function createAnalyticsRoutes(storage: IStorage) {
   const router = Router();
