@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useLocation } from 'wouter';
-import VeChainWalletConnect from '@/components/VeChainWalletConnect';
+import SmartWalletConnect from '@/components/SmartWalletConnect';
 import { useWallet } from '@/context/WalletContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
@@ -17,7 +17,8 @@ export default function ConnectWalletPage() {
   }, [isConnected, setLocation]);
 
   // Handle successful connection
-  const handleConnected = () => {
+  const handleConnected = (address: string) => {
+    console.log('[CONNECT-PAGE] Wallet connected:', address);
     // Navigate to home page after connection
     setTimeout(() => {
       setLocation('/');
@@ -33,7 +34,7 @@ export default function ConnectWalletPage() {
         {/* Left side - Connect Form */}
         <div className="w-full md:w-1/2 p-4 md:p-8 flex items-center justify-center">
           <div className="w-full max-w-md">
-            <VeChainWalletConnect />
+            <SmartWalletConnect onConnect={handleConnected} />
           </div>
         </div>
         

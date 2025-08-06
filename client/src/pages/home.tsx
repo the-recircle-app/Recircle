@@ -10,7 +10,7 @@ import BottomNavigation from "../components/BottomNavigation";
 import ActivityCard from "../components/ActivityCard";
 import SupportFooter from "../components/SupportFooter";
 import TokenBalanceRefresher from "../components/TokenBalanceRefresher";
-import UnifiedWalletButton from "../components/UnifiedWalletButton";
+import SmartWalletConnect from "../components/SmartWalletConnect";
 import { Link, useLocation } from "wouter";
 
 const Home = () => {
@@ -122,7 +122,7 @@ const Home = () => {
       
       {/* Unified Wallet Button - Always shown */}
       <div className="p-4 border-b border-gray-700">
-        <UnifiedWalletButton />
+        <SmartWalletConnect />
       </div>
 
       {/* Progress banner */}
