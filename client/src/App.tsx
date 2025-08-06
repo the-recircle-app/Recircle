@@ -49,6 +49,7 @@ import { PierreVeBetterDAOTest } from "./pages/pierre-vebetterdao-test";
 import { DebugPage } from "./pages/DebugPage";
 import { useEffect } from "react";
 import { vechain } from "./lib/vechain";
+import { mobileConnexInit } from "./lib/mobile-connex-init";
 
 function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -203,6 +204,20 @@ function App() {
     
     // Initialize development mode VeWorld simulation
     vechain.initializeDevelopmentMode();
+    
+    // Initialize mobile Connex for VeWorld app
+    const initMobileWallet = async () => {
+      try {
+        const success = await mobileConnexInit.initializeMobileConnex();
+        if (success) {
+          console.log('[APP] Mobile Connex initialized successfully');
+        }
+      } catch (error) {
+        console.log('[APP] Mobile Connex initialization skipped:', error.message);
+      }
+    };
+    
+    initMobileWallet();
   }, []);
 
   return (

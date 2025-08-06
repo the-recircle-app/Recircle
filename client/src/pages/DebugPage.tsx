@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { mobileConnexInit } from '../lib/mobile-connex-init';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -104,6 +105,9 @@ export function DebugPage() {
         info.storageError = 'Cannot access localStorage';
       }
     }
+
+    // Mobile Connex initialization status
+    info.mobileConnexStatus = mobileConnexInit.getStatus();
 
     setDebugInfo(info);
     setIsRefreshing(false);
@@ -211,6 +215,16 @@ export function DebugPage() {
           name: 'VeWorld Bridge Available',
           status: 'FAIL',
           details: 'VeWorld bridge not found - mobile connection may be broken'
+        });
+
+        // Test mobile Connex initialization
+        const mobileStatus = mobileConnexInit.getStatus();
+        results.tests.push({
+          name: 'Mobile Connex Initialization',
+          status: mobileStatus.success ? 'PASS' : (mobileStatus.attempted ? 'FAIL' : 'SKIP'),
+          details: mobileStatus.attempted 
+            ? (mobileStatus.success ? 'Mobile Connex created successfully' : 'Mobile Connex creation failed')
+            : 'Mobile Connex initialization not attempted'
         });
       }
       
