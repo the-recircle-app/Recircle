@@ -362,7 +362,7 @@ export default function EcoImpactDashboard() {
                 <TreePine className="h-4 w-4 text-primary" />
               </div>
               <div>
-                <span className="font-medium">Add more thrift stores to the map</span>
+                <span className="font-medium">Add more transportation hubs to the map</span>
                 <p className="text-sm text-muted-foreground">
                   Help others discover great sustainable shopping locations
                 </p>

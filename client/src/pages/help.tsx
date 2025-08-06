@@ -16,7 +16,7 @@ const HelpPage: React.FC = () => {
     },
     {
       question: "How do I earn B3TR tokens?",
-      answer: "You can earn B3TR tokens by scanning receipts from thrift store purchases, referring friends to join ReCircle, and maintaining a daily streak by using the app regularly."
+      answer: "You can earn B3TR tokens by scanning receipts from sustainable transportation (ride-share, public transit, electric vehicle rentals), referring friends to join ReCircle, and maintaining a daily streak by using the app regularly."
     },
     {
       question: "Why do I need to connect a wallet?",
@@ -24,7 +24,7 @@ const HelpPage: React.FC = () => {
     },
     {
       question: "How do I scan my receipt?",
-      answer: "After making a purchase at a thrift store, navigate to the 'Scan' tab, take a clear photo of your receipt, and our system will validate it to award you B3TR tokens."
+      answer: "After using sustainable transportation services, navigate to the 'Scan' tab, take a clear photo of your receipt, and our system will validate it to award you B3TR tokens."
     },
     {
       question: "What happens if my receipt isn't recognized?",

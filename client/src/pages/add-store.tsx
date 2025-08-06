@@ -218,7 +218,7 @@ const AddStore = () => {
       
       toast({
         title: "Store Added",
-        description: "The thrift store has been added successfully",
+        description: "The transportation location has been added successfully",
       });
       
       // Invalidate any queries that rely on user data
@@ -331,7 +331,7 @@ const AddStore = () => {
               )}
             </CardTitle>
             <CardDescription className="text-sm text-gray-600">
-              Earn ReWardrobe tokens by adding verified thrift store locations
+              Earn B3TR tokens by adding verified sustainable transportation locations
             </CardDescription>
           </CardHeader>
           

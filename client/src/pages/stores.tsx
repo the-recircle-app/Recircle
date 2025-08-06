@@ -26,7 +26,7 @@ const Stores = () => {
 
   // Get all sustainable transportation partners
   const { data: stores = [], isLoading } = useQuery<ThriftStore[]>({
-    queryKey: ['/api/thrift-stores'],
+    queryKey: ['/api/transportation-hubs'],
   });
 
   // Get user location
