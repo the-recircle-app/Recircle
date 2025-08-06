@@ -59,6 +59,7 @@
     "@types/qrcode": "^1.5.5",
     "@vechain/connex": "^2.1.0",
     "@vechain/dapp-kit": "^2.0.2",
+    "@vechain/dapp-kit-react": "^2.0.3",
     "@vechain/hardhat-ethers": "^0.1.9",
     "@vechain/hardhat-vechain": "^0.1.9",
     "@vechain/sdk-core": "^2.0.2",

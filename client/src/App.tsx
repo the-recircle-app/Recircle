@@ -47,9 +47,11 @@ import TermsOfService from "./pages/terms-of-service";
 import SoloSetupPage from "./pages/solo-setup";
 import { PierreVeBetterDAOTest } from "./pages/pierre-vebetterdao-test";
 import { DebugPage } from "./pages/DebugPage";
+import VeChainKitTestPage from "./pages/VeChainKitTestPage";
 import { useEffect } from "react";
 import { vechain } from "./lib/vechain";
 import { mobileConnexInit } from "./lib/mobile-connex-init";
+import { VeChainKitProviderWrapper } from "./components/VeChainKitProvider";
 
 function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -87,6 +89,7 @@ function Router() {
       <Route path="/veworld-debug" component={VeWorldDebugPage} />
       <Route path="/pierre-vebetterdao-test" component={PierreVeBetterDAOTest} />
       <Route path="/mobile-debug" component={DebugPage} />
+      <Route path="/vechain-kit-mobile-test" component={VeChainKitTestPage} />
       
       {/* Admin routes */}
       <Route path="/admin/pending-submissions" component={PendingSubmissionsAdmin} />
@@ -213,7 +216,7 @@ function App() {
           console.log('[APP] Mobile Connex initialized successfully');
         }
       } catch (error) {
-        console.log('[APP] Mobile Connex initialization skipped:', error.message);
+        console.log('[APP] Mobile Connex initialization skipped:', (error as Error).message);
       }
     };
     
@@ -222,17 +225,19 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <WalletProvider>
-        <VeChainStateBridge />
-        <AchievementProvider>
-          <TooltipProvider>
-            <Layout>
-              <Router />
-            </Layout>
-            <Toaster />
-          </TooltipProvider>
-        </AchievementProvider>
-      </WalletProvider>
+      <VeChainKitProviderWrapper>
+        <WalletProvider>
+          <VeChainStateBridge />
+          <AchievementProvider>
+            <TooltipProvider>
+              <Layout>
+                <Router />
+              </Layout>
+              <Toaster />
+            </TooltipProvider>
+          </AchievementProvider>
+        </WalletProvider>
+      </VeChainKitProviderWrapper>
     </QueryClientProvider>
   );
 }

@@ -1,0 +1,183 @@
+VeChain Builders Logo
+Academy
+
+Templates
+
+Integrations
+
+Documentation
+
+VeBetter
+
+Events
+
+Search...
+
+
+VeChain Kit: Social Login & Smart Accounts
+
+VeChainKit: Set Up
+
+Add Social Login
+
+Fee Delegation
+
+VeChain Kit Certificate
+
+VeChain Kit: Social Login & Smart Accounts
+
+Add Social Login
+Set up social login using VeChainKit by adding the WalletButton, wrapping your app with VeChainKitProvider, and configuring environment variables with WalletConnect.
+
+Adding WalletButton to Your App Header
+We'll be adding the social login to the header of our app. In your header, add the WalletButton component from the VeChain Kit. 
+
+Your header should now look like this:
+
+"use client";
+import React from "react";
+import { WalletButton } from "@vechain/vechain-kit";
+export default function AppHeader() {
+  return (
+    <header className="bg-white text-black flex items-center justify-between px-6 py-4 shadow">
+      <a className="text-2xl font-semibold">
+        My App
+        </a>
+      <WalletButton />
+    </header>
+  );
+}
+Wrapping Your App with the VeChainKit Provider
+To enable wallet login, blockchain access, and VeChainKit hooks across your entire app, you need to wrap your app with the VeChainKitProvider.
+
+First, create a VeKitProvider.tsx in your utils folder.
+
+This is where you should include the following code:
+
+'use client';
+import {VeChainKitProvider} from "@vechain/vechain-kit";
+export function VeChainKitProviderWrapper({children}: any) {
+ return (
+   <VeChainKitProvider
+     feeDelegation={{
+       delegatorUrl: "https://sponsor-testnet.vechain.energy/by/441",
+       // set to false if you want to delegate ONLY social login transactions
+       // social login transactions sponsorship is currently mandatory
+       delegateAllTransactions: false,
+     }}
+     loginMethods={[
+       {method: "vechain", gridColumn: 4},
+       {method: "dappkit", gridColumn: 4},
+     ]}
+     dappKit={{
+       allowedWallets: ["veworld", "wallet-connect", "sync2"],
+       walletConnectOptions: {
+         projectId:
+           // Get this on https://cloud.reown.com/sign-in
+           process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID!,
+         metadata: {
+           name: "React Dapp Template",
+           description: "This is the description of your app visible in VeWorld upon connection request.",
+           url: typeof window !== "undefined" ? window.location.origin : "",
+           icons: ["https://path-to-logo.png"],
+         },
+       },
+     }}
+     darkMode={false}
+     language="en"
+     network={{
+       type: "test",
+     }}
+   >
+     {children}
+   </VeChainKitProvider>
+ );
+}
+This makes wallet data, hooks, and UI components work across your app.
+
+The next important thing is to create the NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID.
+
+Create an .env file. Here, you’ll need to add the environment variables to make this work. First, start by adding NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID.
+
+Go to https://cloud.reown.com/sign-in to get your wallet connect project ID. 
+
+Once you’ve made your Reown account, create a Testnet app.
+
+Navigate to the Reown Cloud dashboard to get the Project ID.
+
+Add the project ID to the .env file.
+
+Finally, all you have to do is go to your layout.tsx where you need to import the VeChainKitProviderWrapper as well as the AppHeader from utils/header.
+
+Add VeChainKitProviderWrapper to the <body> in layout.tsx:
+
+import { VeChainKitProviderWrapper } from "../../utils/veKitProvider";
+import AppHeader from "../../utils/header";    <html lang="en">
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        <VeChainKitProviderWrapper>
+          <AppHeader />
+          {children}
+        </VeChainKitProviderWrapper>
+      </body>
+    </html>
+  );
+}
+And that’s all we need for now. In the next lesson, you’ll look at Fee Delegation as a final step to include social login in your app.
+
+Debugging Tip: TypeScript “any” Error
+If you see this error:
+
+Unexpected any. Specify a different type. (eslint@typescript-eslint/no-explicit-any)
+It means TypeScript is expecting a defined prop type for children. To resolve this, import ReactNode from "react" into your VeChainKitProvider.tsx file:
+
+import { ReactNode } from "react";
+type Props = { children: ReactNode };
+Replace any with a Props type. Your script should look like this:
+'use client';
+import {VeChainKitProvider} from "@vechain/vechain-kit";
+import { ReactNode } from "react";
+type Props = { children: ReactNode };
+export function VeChainKitProviderWrapper({children}: Props) {
+ return (
+   <VeChainKitProvider
+// rest of the script
+>
+     {children}
+   </VeChainKitProvider>
+ );
+}
+VeChainKit: Set Up
+
+Fee Delegation
+
+Join our Telegram
+
+VeChain Builders · © 2025
+
+Privacy Policy
+
+Terms of service
+
+All rights reserved
+
+VeChain Foundation
+
+X/Twitter
+
+LinkedIn
+
+TikTok
+
+Instagram
+
+GitHub
+
+VeChain Builders
+
+X/Twitter
+
+Telegram
+
+Add Social Login - VeChain Builders Academy
