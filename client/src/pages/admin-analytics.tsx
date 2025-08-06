@@ -4,7 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Users, Receipt, Coins, TrendingUp, Calendar, Activity } from 'lucide-react';
+import { Users, Receipt, Coins, TrendingUp, Calendar, Activity, UserCog } from 'lucide-react';
+import { Link } from 'wouter';
 
 interface AnalyticsData {
   totalUsers: number;
@@ -101,9 +102,17 @@ const AdminAnalytics = () => {
       <div className="max-w-6xl mx-auto space-y-6">
         
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">ReCircle Analytics Dashboard</h1>
-          <p className="text-gray-600">Track your platform's user activity and growth</p>
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">ReCircle Analytics Dashboard</h1>
+            <p className="text-gray-600">Track your platform's user activity and growth</p>
+          </div>
+          <Link href="/admin/employees">
+            <Button variant="outline" className="flex items-center gap-2">
+              <UserCog className="h-4 w-4" />
+              Employee Tracking
+            </Button>
+          </Link>
         </div>
 
         {/* Overview Cards */}

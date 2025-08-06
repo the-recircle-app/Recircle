@@ -178,4 +178,53 @@ export type ThriftStore = Store;
 export type InsertThriftStore = InsertStore;
 export const thriftStores = sustainableStores;
 
+// Employee tracking for manual review process
+export const reviewEmployees = pgTable("review_employees", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  email: text("email").notNull().unique(),
+  isActive: boolean("is_active").default(true),
+  hourlyRate: doublePrecision("hourly_rate"), // Optional hourly rate for payment tracking
+  createdAt: timestamp("created_at").defaultNow(),
+  lastActiveAt: timestamp("last_active_at"),
+});
+
+// Work sessions for tracking employee time and productivity
+export const workSessions = pgTable("work_sessions", {
+  id: serial("id").primaryKey(),
+  employeeId: integer("employee_id").references(() => reviewEmployees.id),
+  startTime: timestamp("start_time").notNull(),
+  endTime: timestamp("end_time"),
+  isActive: boolean("is_active").default(true), // True if session is currently active
+  reviewsCompleted: integer("reviews_completed").default(0),
+  notes: text("notes"), // Optional notes about the work session
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Track individual review actions by employees
+export const reviewActions = pgTable("review_actions", {
+  id: serial("id").primaryKey(),
+  employeeId: integer("employee_id").references(() => reviewEmployees.id),
+  workSessionId: integer("work_session_id").references(() => workSessions.id),
+  receiptId: integer("receipt_id").references(() => receipts.id),
+  action: text("action").notNull(), // 'approved', 'rejected', 'flagged'
+  timeSpent: integer("time_spent_seconds"), // Time spent on this specific review
+  notes: text("notes"), // Optional notes about the review decision
+  completedAt: timestamp("completed_at").defaultNow(),
+});
+
+// Employee tracking schemas
+export const insertReviewEmployeeSchema = createInsertSchema(reviewEmployees).omit({ id: true, createdAt: true });
+export const insertWorkSessionSchema = createInsertSchema(workSessions).omit({ id: true, createdAt: true });
+export const insertReviewActionSchema = createInsertSchema(reviewActions).omit({ id: true, completedAt: true });
+
+export type InsertReviewEmployee = z.infer<typeof insertReviewEmployeeSchema>;
+export type ReviewEmployee = typeof reviewEmployees.$inferSelect;
+
+export type InsertWorkSession = z.infer<typeof insertWorkSessionSchema>;
+export type WorkSession = typeof workSessions.$inferSelect;
+
+export type InsertReviewAction = z.infer<typeof insertReviewActionSchema>;
+export type ReviewAction = typeof reviewActions.$inferSelect;
+
 // Note: Database indexes will be added in a separate migration for production optimization

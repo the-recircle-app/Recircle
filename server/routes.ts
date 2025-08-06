@@ -6059,6 +6059,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const { createAnalyticsRoutes } = await import('./routes/analytics');
   app.use('/api/analytics', createAnalyticsRoutes(storage));
 
+  // Employee tracking routes for admin
+  const { createEmployeeTrackingRoutes } = await import('./routes/employee-tracking');
+  app.use('/api', createEmployeeTrackingRoutes(storage));
+
   const httpServer = createServer(app);
   return httpServer;
 }

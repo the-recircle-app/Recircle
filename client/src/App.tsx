@@ -25,6 +25,7 @@ import JoinWithReferral from "./pages/join-with-referral";
 import LogoShowcase from "./pages/logo-showcase";
 import PendingSubmissionsAdmin from "./pages/admin/pending-submissions";
 import AdminAnalytics from "./pages/admin-analytics";
+import AdminEmployeeTracking from "./pages/admin-employee-tracking";
 import TestAutoConnect from "./pages/test-auto-connect";
 import TestWalletConnect from "./pages/test-wallet-connect";
 import DebugWallet from "./pages/debug-wallet";
@@ -102,6 +103,7 @@ function Router() {
       <Route path="/admin/pending-submissions" component={PendingSubmissionsAdmin} />
       <Route path="/admin/debug-tools" component={DebugToolsPage} />
       <Route path="/admin/analytics" component={AdminAnalytics} />
+      <Route path="/admin/employees" component={AdminEmployeeTracking} />
       
       {/* Protected routes - require wallet connection */}
       <Route path="/scan">
