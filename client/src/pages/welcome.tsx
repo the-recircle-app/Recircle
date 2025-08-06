@@ -123,21 +123,21 @@ export default function Welcome() {
         <h2 className="text-xl font-bold text-center mb-4 text-gray-900">
           Supported Transportation
         </h2>
-        <div className="flex justify-center gap-6 flex-wrap max-w-sm mx-auto">
-          <div className="text-center">
-            <div className="w-12 h-12 bg-green-200 rounded-full flex items-center justify-center mb-2">
+        <div className="flex justify-center gap-8 flex-wrap max-w-md mx-auto">
+          <div className="flex flex-col items-center text-center min-w-[90px]">
+            <div className="w-12 h-12 bg-green-200 rounded-full flex items-center justify-center mb-2 mx-auto">
               <Car className="w-6 h-6 text-green-800" />
             </div>
             <p className="text-sm font-medium text-gray-800">Rideshare</p>
           </div>
-          <div className="text-center">
-            <div className="w-12 h-12 bg-blue-200 rounded-full flex items-center justify-center mb-2">
+          <div className="flex flex-col items-center text-center min-w-[90px]">
+            <div className="w-12 h-12 bg-blue-200 rounded-full flex items-center justify-center mb-2 mx-auto">
               <Bus className="w-6 h-6 text-blue-800" />
             </div>
             <p className="text-sm font-medium text-gray-800">Public Transit</p>
           </div>
-          <div className="text-center">
-            <div className="w-12 h-12 bg-purple-200 rounded-full flex items-center justify-center mb-2">
+          <div className="flex flex-col items-center text-center min-w-[90px]">
+            <div className="w-12 h-12 bg-purple-200 rounded-full flex items-center justify-center mb-2 mx-auto">
               <Zap className="w-6 h-6 text-purple-800" />
             </div>
             <p className="text-sm font-medium text-gray-800">Electric Vehicles</p>
@@ -151,21 +151,21 @@ export default function Welcome() {
           <h2 className="text-xl font-bold text-center mb-4 text-gray-900">
             Why ReCircle?
           </h2>
-          <div className="space-y-3 text-sm">
-            <div className="flex items-center gap-3">
-              <div className="w-3 h-3 bg-green-600 rounded-full"></div>
+          <div className="space-y-4 text-sm">
+            <div className="flex items-center gap-4">
+              <div className="w-4 h-4 bg-green-600 rounded-full flex-shrink-0"></div>
               <span className="font-medium text-gray-900">Earn up to 18 B3TR tokens per receipt</span>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="w-3 h-3 bg-blue-600 rounded-full"></div>
+            <div className="flex items-center gap-4">
+              <div className="w-4 h-4 bg-blue-600 rounded-full flex-shrink-0"></div>
               <span className="font-medium text-gray-900">Real blockchain tokens with actual value</span>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="w-3 h-3 bg-purple-600 rounded-full"></div>
+            <div className="flex items-center gap-4">
+              <div className="w-4 h-4 bg-purple-600 rounded-full flex-shrink-0"></div>
               <span className="font-medium text-gray-900">Support sustainable transportation</span>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="w-3 h-3 bg-orange-600 rounded-full"></div>
+            <div className="flex items-center gap-4">
+              <div className="w-4 h-4 bg-orange-600 rounded-full flex-shrink-0"></div>
               <span className="font-medium text-gray-900">Track your environmental impact</span>
             </div>
           </div>
