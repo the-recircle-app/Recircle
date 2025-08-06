@@ -21,8 +21,7 @@ import AddStoreForm from "./pages/add-store-form";
 import InviteFriend from "./pages/invite-friend";
 import TransactionExplorer from "./pages/transactions";
 import JoinWithReferral from "./pages/join-with-referral";
-import Redeem from "./pages/redeem";
-import ModernRedeem from "./pages/redeem-modern";
+
 import LogoShowcase from "./pages/logo-showcase";
 import PendingSubmissionsAdmin from "./pages/admin/pending-submissions";
 import TestAutoConnect from "./pages/test-auto-connect";
@@ -153,16 +152,7 @@ function Router() {
           <ContractStatus />
         </ProtectedRoute>
       </Route>
-      <Route path="/redeem">
-        <ProtectedRoute>
-          <Redeem />
-        </ProtectedRoute>
-      </Route>
-      <Route path="/redeem-modern">
-        <ProtectedRoute>
-          <ModernRedeem />
-        </ProtectedRoute>
-      </Route>
+
       <Route path="/impact-explorer">
         <ProtectedRoute>
           <ImpactExplorer />
