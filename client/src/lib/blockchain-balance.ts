@@ -5,7 +5,8 @@
  */
 
 // B3TR contract address on VeChain (VIP-180 token)
-const B3TR_CONTRACT_ADDRESS = "0x5ef79995fe8a89e0812330e4378eb2660cede699";
+// Use environment variable if available, fallback to testnet address
+const B3TR_CONTRACT_ADDRESS = import.meta.env.VITE_B3TR_CONTRACT_ADDRESS || "0x5ef79995fe8a89e0812330e4378eb2660cede699";
 
 // Standard VIP-180 balanceOf ABI (compatible with ERC-20 but enhanced for VeChain)
 const BALANCE_OF_ABI = {
@@ -26,9 +27,11 @@ export async function readWalletB3TRBalance(walletAddress: string): Promise<numb
   try {
     // Check if Connex is available (VeWorld wallet)
     if (!window.connex) {
-      console.log("[BALANCE] Connex not available, falling back to API");
+      console.log("[BALANCE] Connex not available, will try API method");
       return 0;
     }
+    
+    console.log(`[BALANCE] Reading B3TR balance for ${walletAddress} using Connex`);
 
     // Create method instance following VeChain docs pattern
     const balanceOfMethod = window.connex.thor
@@ -71,6 +74,8 @@ export async function readWalletB3TRBalanceAPI(walletAddress: string): Promise<n
     const balanceOfSelector = "0x70a08231"; // balanceOf(address) function selector
     const paddedAddress = walletAddress.slice(2).padStart(64, '0');
     const callData = balanceOfSelector + paddedAddress;
+    
+    console.log(`[BALANCE] Calling Thor API for ${walletAddress} with contract ${B3TR_CONTRACT_ADDRESS}`);
     
     // Call our backend VeChain proxy API
     const response = await fetch('/api/vechain/call', {
@@ -130,12 +135,12 @@ export async function getCachedB3TRBalance(walletAddress: string): Promise<numbe
     return cached.balance;
   }
   
-  // Fetch fresh balance
-  let balance = await readWalletB3TRBalance(walletAddress);
+  // Try API method first for better reliability in development
+  let balance = await readWalletB3TRBalanceAPI(walletAddress);
   
-  // Fallback to API if Connex failed
+  // Fallback to Connex if API failed
   if (balance === 0) {
-    balance = await readWalletB3TRBalanceAPI(walletAddress);
+    balance = await readWalletB3TRBalance(walletAddress);
   }
   
   // Cache the result

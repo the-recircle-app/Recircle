@@ -524,7 +524,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { contractAddress, data, caller } = req.body;
       
       // Use Thor REST API pattern for VIP-180 contract calls (following VeChain docs)
-      const thorNodeUrl = process.env.VECHAIN_NODE_URL || 'http://localhost:8669';
+      // Default to VeChain testnet for production, solo node for development
+      const thorNodeUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://testnet.vechain.org' 
+        : (process.env.VECHAIN_NODE_URL || 'http://localhost:8669');
+      
+      console.log(`[VECHAIN] Calling Thor API at: ${thorNodeUrl}/accounts/${contractAddress}`);
+      console.log(`[VECHAIN] Call data: ${data}, caller: ${caller}`);
       
       const response = await fetch(`${thorNodeUrl}/accounts/${contractAddress}`, {
         method: 'POST',
