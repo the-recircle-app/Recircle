@@ -47,7 +47,7 @@ import TermsOfService from "./pages/terms-of-service";
 import SoloSetupPage from "./pages/solo-setup";
 import { PierreVeBetterDAOTest } from "./pages/pierre-vebetterdao-test";
 import { DebugPage } from "./pages/DebugPage";
-// Removed VeChain Kit test page due to build issues
+import OfficialVeChainKitTest from "./pages/official-vechain-kit-test";
 import { useEffect } from "react";
 import { vechain } from "./lib/vechain";
 import { mobileConnexInit } from "./lib/mobile-connex-init";
@@ -90,8 +90,7 @@ function Router() {
       <Route path="/veworld-debug" component={VeWorldDebugPage} />
       <Route path="/pierre-vebetterdao-test" component={PierreVeBetterDAOTest} />
       <Route path="/mobile-debug" component={DebugPage} />
-      {/* Temporarily disabled due to build issues */}
-      {/* <Route path="/vechain-kit-mobile-test" component={VeChainKitTestPage} /> */}
+      <Route path="/official-vechain-kit" component={OfficialVeChainKitTest} />
       
       {/* Admin routes */}
       <Route path="/admin/pending-submissions" component={PendingSubmissionsAdmin} />

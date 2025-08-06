@@ -1,0 +1,125 @@
+VeChain Builders Logo
+Academy
+
+Templates
+
+Integrations
+
+Documentation
+
+VeBetter
+
+Events
+
+Search...
+
+
+VeChain Kit: Social Login & Smart Accounts
+
+VeChainKit: Set Up
+
+Add Social Login
+
+Fee Delegation
+
+VeChain Kit Certificate
+
+VeChain Kit: Social Login & Smart Accounts
+
+VeChainKit: Set Up
+Learn what VeChainKit is and how to set up your environment using either a prebuilt template or a clean React app.
+
+Intro to VeChainKit & Setting it Up
+In this chapter, we’ll explore the why behind VeChainKit: what it is, what problems it solves, and how it dramatically simplifies onboarding for apps on VeChain.
+
+VeChainKit is the official React-based toolkit that lets you add wallet login (including social login) and blockchain actions to your app in minutes without extensions, complicated configuration, etc. It enables useful options for VeChain devs:
+
+Social Login for wallets like VeWorld (Google, Apple, email, without seed phrase)
+
+Multi-wallet support (VeWorld, Sync2, WalletConnect)
+
+Hooks to sign transactions and read data
+
+UI components like ConnectButton and TransactionModal
+
+Unified account layer that persists across apps
+
+Let’s get straight to building.
+
+Step-by-Step Setup
+To begin building, you must first set up your VeChain Kit environment. You’ve got two options for starting:
+
+Option 1: Use the existing Buy Me a Coffee app template
+If you have your own app or are using the existing app templates, you can skip to the next lesson. 
+
+Option 2: Start from scratch (recommended for hands-on learning)
+Step 1: Create App
+npx create-next-app@latest
+You’ll be prompted to choose your app name and settings. You will also be asked if you want to use several default tools and install dependencies. Accept all.
+
+Once the app is created:
+
+cd your-app-name
+mkdir utils
+The utils folder will store helper functions like wallet logic, signing methods, or VeChainKit configuration. You’ll use this in upcoming lessons.
+
+Step 2: Navigate to your app folder
+cd my-app
+Step 3: Install required packages
+Next, we will install the required packages to set up the VeChain Kit and utilize all the available tools.
+
+npm i @tanstack/react-query@"^5.64.2" 
+       @chakra-ui/react@"^2.8.2" 
+       @vechain/dapp-kit-react@"1.4.1" 
+       @vechain/vechain-kit
+To do this, go to the utils folder of your app, and inside it, create header.tsx
+
+Here’s what you can use:
+
+./utils/header.tsx
+"use client";
+import React from "react";
+export default function AppHeader() {
+  return (
+    <header className="bg-white text-black flex items-center justify-between px-6 py-4 shadow">
+      <a className="text-2xl font-semibold">
+        My App
+        </a>
+    </header>
+  );
+}
+You’re now ready to add VeChainKit components to your app in the next lesson.
+
+VeWorld Wallet and Claiming Testnet Tokens
+
+Add Social Login
+
+Join our Telegram
+
+VeChain Builders · © 2025
+
+Privacy Policy
+
+Terms of service
+
+All rights reserved
+
+VeChain Foundation
+
+X/Twitter
+
+LinkedIn
+
+TikTok
+
+Instagram
+
+GitHub
+
+VeChain Builders
+
+X/Twitter
+
+Telegram
+
+VeChainKit: Set Up - VeChain Builders Academy
