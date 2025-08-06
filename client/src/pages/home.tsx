@@ -230,23 +230,6 @@ const Home = () => {
             }}
           />
           
-          {/* Solo VeWorld Setup */}
-          <ActivityCard
-            title="🎯 Setup VeWorld for Real B3TR"
-            description="Configure VeWorld to see your actual blockchain rewards"
-            icon={
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-                <path d="M2 17l10 5 10-5"/>
-                <path d="M2 12l10 5 10-5"/>
-                <circle cx="12" cy="12" r="2"/>
-              </svg>
-            }
-            color="#8B5CF6"
-            path="/solo-setup"
-            showReward={false}
-            onClick={() => {}}
-          />
 
           {/* Invite Friend */}
           <ActivityCard
