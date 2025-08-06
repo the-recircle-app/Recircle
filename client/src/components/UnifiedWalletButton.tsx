@@ -27,40 +27,36 @@ export function UnifiedWalletButton() {
     setIsLoading(true);
     
     try {
-      // Try VeWorld extension first
-      if (window.vechain) {
-        console.log("🟢 [UNIFIED] VeWorld extension detected, attempting connection...");
+      // Use the proven mobile + desktop connection logic
+      const { connectVeWorldWallet } = await import('@/utils/veworld-connector');
+      const result = await connectVeWorldWallet();
+      
+      if (result.error) {
+        throw new Error(result.error);
+      }
+      
+      if (result.address) {
+        // Connect to app context
+        const success = await connect("connex", result.address);
         
-        // Request accounts from extension
-        const accounts = await window.vechain.request({ 
-          method: 'eth_requestAccounts' 
-        });
-        
-        if (accounts && accounts.length > 0) {
-          // Connect to app context
-          const success = await connect("extension", accounts[0]);
-          
-          if (success) {
-            console.log("🟢 [UNIFIED] Successfully connected via VeWorld extension:", accounts[0]);
-            return;
-          } else {
-            throw new Error("App context connection failed");
-          }
+        if (success) {
+          console.log("🟢 [UNIFIED] Successfully connected wallet:", result.address);
+          return;
         } else {
-          throw new Error("No accounts returned from extension");
+          throw new Error("App context connection failed");
         }
       } else {
-        // No extension detected - provide instructions
-        console.log("🟢 [UNIFIED] No extension detected");
-        alert("Please install VeWorld browser extension or use VeWorld mobile app to connect your wallet.");
+        throw new Error('No wallet address received');
       }
     } catch (error) {
       console.error("🟢 [UNIFIED] Connection failed:", error);
       
       if (error.message?.includes("User rejected")) {
         alert("Connection cancelled. Please try again and approve the connection request.");
-      } else if (error.message?.includes("No accounts")) {
-        alert("Please unlock your VeWorld extension and try again.");
+      } else if (error.message?.includes("VeWorld not detected")) {
+        alert("VeWorld not detected. Use the in-app browser.");
+      } else if (error.message?.includes("Wrong network")) {
+        alert("Wrong network. Switch to VeChain testnet.");
       } else {
         alert("Wallet connection failed. Please make sure you have VeWorld installed.");
       }
