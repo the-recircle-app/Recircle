@@ -26,6 +26,7 @@ export interface IStorage {
   getUserReferralCode(userId: number): Promise<string | null>;
   getUsers(): Promise<User[]>;
   getAllUsers(): Promise<User[]>;
+  getAllReceipts(): Promise<Receipt[]>;
   
   // Development and testing methods
   deleteUserTransactions(userId: number): Promise<boolean>;
@@ -718,6 +719,10 @@ export class MemStorage implements IStorage {
     return Array.from(this.users.values());
   }
 
+  async getAllReceipts(): Promise<Receipt[]> {
+    return Array.from(this.receipts.values());
+  }
+
   // Employee tracking methods
   async getEmployee(id: number): Promise<ReviewEmployee | undefined> {
     return this.employees.get(id);
@@ -1050,6 +1055,14 @@ export class PgStorage implements IStorage {
 
   async getUsers(): Promise<User[]> {
     return await db.select().from(users);
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return await db.select().from(users);
+  }
+
+  async getAllReceipts(): Promise<Receipt[]> {
+    return await db.select().from(receipts);
   }
 
   // Employee tracking methods - PgStorage implementation

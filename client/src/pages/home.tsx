@@ -327,7 +327,7 @@ const Home = () => {
                       return (
                         <>
                           <h3 className="font-bold text-gray-200">First Receipt Scanned</h3>
-                          <p className="text-sm text-gray-400">You've started your re-use journey!</p>
+                          <p className="text-sm text-gray-400">You've started your sustainable transportation journey!</p>
                         </>
                       );
                     } else if (description.includes('five_receipts')) {
