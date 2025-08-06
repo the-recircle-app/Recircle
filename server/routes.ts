@@ -518,12 +518,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // VeChain Thor REST API endpoint for reading B3TR balances
+  // VeChain Thor REST API endpoint for reading VIP-180 token balances (like B3TR)
   app.post("/api/vechain/call", async (req: Request, res: Response) => {
     try {
       const { contractAddress, data, caller } = req.body;
       
-      // Use Thor REST API pattern for contract calls (following VeChain docs)
+      // Use Thor REST API pattern for VIP-180 contract calls (following VeChain docs)
       const thorNodeUrl = process.env.VECHAIN_NODE_URL || 'http://localhost:8669';
       
       const response = await fetch(`${thorNodeUrl}/accounts/${contractAddress}`, {

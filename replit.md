@@ -77,9 +77,10 @@ Preferred communication style: Simple, everyday language.
 
 ### Blockchain Integration
 - **Network**: VeChain Thor blockchain (testnet/mainnet ready)
-- **Token**: B3TR tokens distributed via VeBetterDAO
-- **Distribution Model**: 70% to users, 15% to creator fund, 15% to app fund (Note: this has been updated to 70% user, 30% app fund)
+- **Token**: B3TR tokens (VIP-180 standard) distributed via VeBetterDAO
+- **Distribution Model**: 70% to users, 30% to app fund
 - **Wallet Support**: VeWorld wallet integration via Connex SDK
+- **Token Standard**: VIP-180 (VeChain's enhanced version of ERC-20)
 
 ### Key Features
 - **Receipt Validation**: Multi-tier system with auto-approval (e.g., ride-share) and manual review for others. Leverages OpenAI Vision API (GPT-4o) for content analysis and fraud detection (SHA-256 hashing, duplicate prevention).

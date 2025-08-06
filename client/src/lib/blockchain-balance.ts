@@ -1,12 +1,13 @@
 /**
- * Read real B3TR token balance from VeChain blockchain using official patterns
+ * Read real B3TR token balance from VeChain blockchain using official VIP-180 patterns
  * Based on VeChain docs: https://docs.vechain.org/developer-resources/sdks-and-providers/connex/api-specification
+ * VIP-180 is VeChain's fungible token standard (superset of ERC-20)
  */
 
-// B3TR contract address on VeChain (same on mainnet and testnet for our case)
+// B3TR contract address on VeChain (VIP-180 token)
 const B3TR_CONTRACT_ADDRESS = "0x5ef79995fe8a89e0812330e4378eb2660cede699";
 
-// Standard ERC20 balanceOf ABI (as documented in VeChain guides)
+// Standard VIP-180 balanceOf ABI (compatible with ERC-20 but enhanced for VeChain)
 const BALANCE_OF_ABI = {
   "constant": true,
   "inputs": [{"name": "_owner", "type": "address"}],
@@ -62,11 +63,11 @@ export async function readWalletB3TRBalance(walletAddress: string): Promise<numb
 
 /**
  * Alternative method using VeChain Thor REST API if Connex is not available
- * Following VeChain Thor API specification patterns
+ * Following VeChain Thor API specification patterns for VIP-180 tokens
  */
 export async function readWalletB3TRBalanceAPI(walletAddress: string): Promise<number> {
   try {
-    // Encode the balanceOf call data using standard ERC20 pattern
+    // Encode the balanceOf call data using standard VIP-180 pattern (ERC-20 compatible)
     const balanceOfSelector = "0x70a08231"; // balanceOf(address) function selector
     const paddedAddress = walletAddress.slice(2).padStart(64, '0');
     const callData = balanceOfSelector + paddedAddress;
