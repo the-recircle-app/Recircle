@@ -518,32 +518,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // VeChain contract call endpoint for reading B3TR balances
+  // VeChain Thor REST API endpoint for reading B3TR balances
   app.post("/api/vechain/call", async (req: Request, res: Response) => {
     try {
-      const { contractAddress, data } = req.body;
+      const { contractAddress, data, caller } = req.body;
       
-      // Use our Thor client or solo node for contract calls
-      const response = await fetch(`${process.env.VECHAIN_NODE_URL || 'http://localhost:8669'}/accounts/${contractAddress}`, {
+      // Use Thor REST API pattern for contract calls (following VeChain docs)
+      const thorNodeUrl = process.env.VECHAIN_NODE_URL || 'http://localhost:8669';
+      
+      const response = await fetch(`${thorNodeUrl}/accounts/${contractAddress}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          data: data,
-          caller: null
+          clauses: [{
+            to: contractAddress,
+            value: '0x0',
+            data: data
+          }],
+          caller: caller || null,
+          gas: 400000 // Sufficient gas for balanceOf calls
         })
       });
       
       if (!response.ok) {
-        throw new Error(`VeChain call failed: ${response.status}`);
+        throw new Error(`VeChain Thor API call failed: ${response.status}`);
       }
       
       const result = await response.json();
-      return res.json(result);
+      
+      // Return the contract call result in the expected format
+      return res.json({
+        data: result.data,
+        gasUsed: result.gasUsed,
+        reverted: result.reverted,
+        vmError: result.vmError || null
+      });
     } catch (error) {
-      console.error("[VECHAIN] Contract call error:", error);
+      console.error("[VECHAIN] Thor contract call error:", error instanceof Error ? error.message : error);
       return res.status(500).json({ 
         error: "Failed to call VeChain contract",
-        details: error.message
+        details: error instanceof Error ? error.message : "Unknown error"
       });
     }
   });

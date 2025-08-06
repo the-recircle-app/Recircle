@@ -199,14 +199,11 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       setUserId(userData.id);
       setIsConnected(true);
       
-      // Read real wallet B3TR balance instead of database balance
+      // Read real wallet B3TR balance instead of database balance (like Mugshot)
       try {
-        const { readWalletB3TRBalance, readWalletB3TRBalanceAPI } = await import("../lib/blockchain-balance");
-        let realBalance = await readWalletB3TRBalance(walletInfo.address);
-        if (realBalance === 0) {
-          realBalance = await readWalletB3TRBalanceAPI(walletInfo.address);
-        }
-        console.log(`[WALLET] Initial real B3TR balance: ${realBalance}`);
+        const { getCachedB3TRBalance } = await import("../lib/blockchain-balance");
+        const realBalance = await getCachedB3TRBalance(walletInfo.address);
+        console.log(`[WALLET] Initial real B3TR balance: ${realBalance} B3TR`);
         setTokenBalance(realBalance);
       } catch (error) {
         console.error("[WALLET] Error reading initial balance, using database fallback:", error);
@@ -315,18 +312,13 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     }
     
     try {
-      // Import the blockchain balance reader
-      const { readWalletB3TRBalance, readWalletB3TRBalanceAPI } = await import("../lib/blockchain-balance");
+      // Import the cached blockchain balance reader (like Mugshot pattern)
+      const { getCachedB3TRBalance } = await import("../lib/blockchain-balance");
       
-      // Try Connex first (direct VeWorld connection)
-      let realWalletBalance = await readWalletB3TRBalance(address);
+      // Get real VeWorld wallet balance with intelligent caching
+      const realWalletBalance = await getCachedB3TRBalance(address);
       
-      // If Connex fails, try REST API fallback
-      if (realWalletBalance === 0) {
-        realWalletBalance = await readWalletB3TRBalanceAPI(address);
-      }
-      
-      console.log(`[WALLET] Real B3TR balance for ${address}: ${realWalletBalance}`);
+      console.log(`[WALLET] Refreshed real B3TR balance for ${address}: ${realWalletBalance} B3TR`);
       
       // Update token balance state with real wallet balance
       setTokenBalance(realWalletBalance);
