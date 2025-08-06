@@ -122,7 +122,7 @@ const Home = () => {
       )} */}
       
       {/* Header with Wallet Button and Theme Toggle */}
-      <div className="p-4 border-b border-gray-700 flex justify-between items-center">
+      <div className="p-4 border-b border-border flex justify-between items-center">
         <UnifiedWalletButton />
         <ThemeToggle />
       </div>
@@ -154,9 +154,9 @@ const Home = () => {
 
       <div className="p-4">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="font-bold text-xl text-gray-100">Drive Change, Earn B3TR</h2>
+          <h2 className="font-bold text-xl text-foreground">Drive Change, Earn B3TR</h2>
           <Link href="/achievements">
-            <button className="text-blue-300 text-sm font-medium">
+            <button className="text-primary text-sm font-medium">
               See All
             </button>
           </Link>
