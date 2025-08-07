@@ -14,22 +14,17 @@ export default function SmartWalletConnect({ onConnect }: SmartWalletConnectProp
   const [showMobileKit, setShowMobileKit] = useState(false);
 
   useEffect(() => {
-    // More precise VeWorld mobile app detection
+    // More precise VeWorld mobile app detection - only true mobile VeWorld app
     const userAgent = navigator.userAgent?.toLowerCase() || '';
     const isActualVeWorldMobile = userAgent.includes('veworld') && 
-                                 (userAgent.includes('android') || userAgent.includes('iphone') || userAgent.includes('mobile'));
+                                 (userAgent.includes('android') || userAgent.includes('iphone'));
     
-    // For desktop/development, default to desktop wallet connection
-    const isDesktopEnvironment = !isActualVeWorldMobile && 
-                                (userAgent.includes('chrome') || userAgent.includes('firefox') || userAgent.includes('safari'));
-    
-    // Only use mobile kit for actual VeWorld mobile app
+    // For development/desktop - default to false (desktop mode)
     setIsMobileVeWorld(isActualVeWorldMobile);
     
     console.log('[SMART-WALLET] Detection results:', {
       userAgent: userAgent.substring(0, 50),
       isActualVeWorldMobile,
-      isDesktopEnvironment,
       windowWidth: window.innerWidth,
       finalDecision: isActualVeWorldMobile
     });
