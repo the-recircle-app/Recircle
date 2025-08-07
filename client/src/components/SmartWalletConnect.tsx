@@ -92,6 +92,12 @@ export default function SmartWalletConnect({ onConnect }: SmartWalletConnectProp
 
   const handleMobileConnect = () => {
     console.log('[SMART-WALLET] Switching to VeChain Kit for mobile');
+    // Clear any existing connection state when switching to mobile kit
+    if (address) {
+      localStorage.removeItem("walletAddress");
+      localStorage.removeItem("userId");
+      localStorage.removeItem("connectedWallet");
+    }
     setShowMobileKit(true);
   };
 
@@ -126,14 +132,33 @@ export default function SmartWalletConnect({ onConnect }: SmartWalletConnectProp
       <VeChainKitProviderWrapper>
         <div className="space-y-4">
           <WalletButton />
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => setShowMobileKit(false)}
-            className="text-xs"
-          >
-            Back to desktop mode
-          </Button>
+          <div className="flex space-x-2">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => setShowMobileKit(false)}
+              className="text-xs flex-1"
+            >
+              Back to desktop mode
+            </Button>
+            {address && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => {
+                  // Clear wallet state and reload
+                  localStorage.removeItem("walletAddress");
+                  localStorage.removeItem("userId");
+                  localStorage.removeItem("connectedWallet");
+                  setShowMobileKit(false);
+                  window.location.reload();
+                }}
+                className="text-xs flex-1"
+              >
+                Disconnect & Reset
+              </Button>
+            )}
+          </div>
         </div>
       </VeChainKitProviderWrapper>
     );
