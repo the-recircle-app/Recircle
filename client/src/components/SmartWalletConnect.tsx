@@ -33,9 +33,57 @@ export default function SmartWalletConnect({ onConnect }: SmartWalletConnectProp
   const handleDesktopConnect = async () => {
     console.log('[SMART-WALLET] Using desktop wallet connection');
     try {
-      await connect('veworld', undefined, { skipCelebration: true });
-      if (address && onConnect) {
-        onConnect(address);
+      // Use the standard VeChain connection method
+      const connex = (window as any).connex;
+      const provider = (window as any).vechain;
+      
+      if (!provider && !connex) {
+        throw new Error('VeWorld wallet not detected. Please install VeWorld extension or use VeWorld browser.');
+      }
+
+      let walletAddress: string | null = null;
+
+      // Try Connex authentication first (mobile/browser)
+      if (connex && connex.vendor && connex.vendor.sign) {
+        try {
+          console.log('[SMART-WALLET] Attempting Connex authentication...');
+          const cert = await connex.vendor.sign('cert', {
+            purpose: 'identification',
+            payload: {
+              type: 'text',
+              content: 'ReCircle Authentication'
+            }
+          }).request();
+          
+          if (cert && cert.annex && cert.annex.signer) {
+            walletAddress = cert.annex.signer;
+            console.log('[SMART-WALLET] Connex authentication success:', walletAddress);
+          }
+        } catch (err) {
+          console.log('[SMART-WALLET] Connex authentication failed:', err);
+        }
+      }
+
+      // Try modern VeWorld extension if Connex failed
+      if (!walletAddress && provider && provider.request) {
+        try {
+          const accounts = await provider.request({ method: 'eth_requestAccounts' });
+          walletAddress = accounts[0];
+          console.log('[SMART-WALLET] VeWorld extension connection success:', walletAddress);
+        } catch (err) {
+          console.log('[SMART-WALLET] VeWorld extension failed:', err);
+        }
+      }
+
+      if (!walletAddress) {
+        throw new Error('Failed to connect to VeWorld wallet. Please make sure VeWorld is unlocked.');
+      }
+
+      // Connect using the wallet context with the retrieved address
+      await connect('desktop', walletAddress, { skipCelebration: true });
+      
+      if (onConnect) {
+        onConnect(walletAddress);
       }
     } catch (error) {
       console.error('[SMART-WALLET] Desktop connection failed:', error);
