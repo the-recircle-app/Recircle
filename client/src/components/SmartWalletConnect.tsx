@@ -47,12 +47,28 @@ export default function SmartWalletConnect({ onConnect }: SmartWalletConnectProp
     setShowMobileKit(true);
   };
 
-  // If user is connected, show connected state
+  // If user is connected, show connected state with disconnect option
   if (address) {
     return (
-      <Button variant="outline" disabled>
-        Connected: {address.slice(0, 6)}...{address.slice(-4)}
-      </Button>
+      <div className="space-y-2">
+        <Button variant="outline" disabled className="w-full">
+          Connected: {address.slice(0, 6)}...{address.slice(-4)}
+        </Button>
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={async () => {
+            // Clear wallet state and allow reconnection
+            localStorage.removeItem("walletAddress");
+            localStorage.removeItem("userId");
+            localStorage.removeItem("connectedWallet");
+            window.location.reload();
+          }}
+          className="text-xs w-full"
+        >
+          Disconnect & Reconnect
+        </Button>
+      </div>
     );
   }
 
