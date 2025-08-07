@@ -14,24 +14,24 @@ export default function SmartWalletConnect({ onConnect }: SmartWalletConnectProp
   const [showMobileKit, setShowMobileKit] = useState(false);
 
   useEffect(() => {
-    // Detect if we're in VeWorld mobile app
+    // More precise VeWorld mobile app detection
     const userAgent = navigator.userAgent?.toLowerCase() || '';
-    const isVeWorldApp = userAgent.includes('veworld') || 
-                        userAgent.includes('mobile') && window.innerWidth < 768;
+    const isActualVeWorldMobile = userAgent.includes('veworld') && 
+                                 (userAgent.includes('android') || userAgent.includes('iphone') || userAgent.includes('mobile'));
     
-    // Also check if Connex is available but behaving like mobile
-    const hasConnex = typeof window !== 'undefined' && window.connex;
-    const isMobileContext = window.innerWidth < 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+    // For desktop/development, default to desktop wallet connection
+    const isDesktopEnvironment = !isActualVeWorldMobile && 
+                                (userAgent.includes('chrome') || userAgent.includes('firefox') || userAgent.includes('safari'));
     
-    setIsMobileVeWorld(isVeWorldApp || (hasConnex && isMobileContext));
+    // Only use mobile kit for actual VeWorld mobile app
+    setIsMobileVeWorld(isActualVeWorldMobile);
     
     console.log('[SMART-WALLET] Detection results:', {
       userAgent: userAgent.substring(0, 50),
-      isVeWorldApp,
-      hasConnex,
-      isMobileContext,
+      isActualVeWorldMobile,
+      isDesktopEnvironment,
       windowWidth: window.innerWidth,
-      finalDecision: isVeWorldApp || (hasConnex && isMobileContext)
+      finalDecision: isActualVeWorldMobile
     });
   }, []);
 
@@ -61,8 +61,8 @@ export default function SmartWalletConnect({ onConnect }: SmartWalletConnectProp
     );
   }
 
-  // If we determined this is mobile and user clicked to show kit
-  if (showMobileKit || (isMobileVeWorld && showMobileKit !== false)) {
+  // If user specifically wants to show mobile kit
+  if (showMobileKit) {
     return (
       <VeChainKitProviderWrapper>
         <div className="space-y-4">
@@ -80,7 +80,7 @@ export default function SmartWalletConnect({ onConnect }: SmartWalletConnectProp
     );
   }
 
-  // Default: show appropriate button based on device detection
+  // Default: show desktop connection for development/desktop, only show mobile for actual VeWorld mobile app
   return (
     <div className="space-y-2">
       {isMobileVeWorld ? (
