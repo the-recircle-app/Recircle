@@ -70,6 +70,7 @@ import {
 import { differenceInCalendarDays, format, parseISO } from 'date-fns';
 import { isVeChainVisaCard } from "./utils/receiptUtils";
 import { distributeSoloB3TR, isSoloNodeAvailable, testSoloB3TR } from "./utils/solo-node-b3tr";
+import { distributeTreasuryReward, checkTreasuryFunds, verifyDistributorAuthorization } from "./utils/vebetterdao-treasury";
 
 
 // VeChain addresses for creator wallet and app sustainability fund
@@ -4063,6 +4064,114 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // VeBetterDAO Treasury Test Endpoint
+  app.post("/api/treasury/test-distribution", async (req: Request, res: Response) => {
+    try {
+      const { userAddress, amount, testMode } = req.body;
+      
+      if (!userAddress) {
+        return res.status(400).json({ message: "User address is required" });
+      }
+      
+      if (!amount || amount <= 0) {
+        return res.status(400).json({ message: "Valid amount is required" });
+      }
+      
+      console.log(`🏛️ Testing VeBetterDAO Treasury Distribution:`);
+      console.log(`   User: ${userAddress}`);
+      console.log(`   Amount: ${amount} B3TR`);
+      console.log(`   Test Mode: ${testMode || false}`);
+      
+      // Check treasury authorization
+      const isAuthorized = await verifyDistributorAuthorization();
+      if (!isAuthorized) {
+        return res.status(403).json({ 
+          message: "Distributor not authorized for VeBetterDAO treasury",
+          details: "DISTRIBUTOR_PRIVATE_KEY must be configured and registered with VeBetterDAO"
+        });
+      }
+      
+      // Check available treasury funds
+      const availableFunds = await checkTreasuryFunds();
+      console.log(`💰 Available Treasury Funds: ${availableFunds} B3TR`);
+      
+      // Execute treasury distribution
+      const result = await distributeTreasuryReward(userAddress, amount, `Test distribution: ${new Date().toISOString()}`);
+      
+      if (result.success) {
+        console.log(`✅ Treasury Distribution Test Successful!`);
+        console.log(`   TX Hash: ${result.txHash}`);
+        console.log(`   Method: ${result.method}`);
+        console.log(`   Security: Tokens from VeBetterDAO treasury, not personal wallet`);
+        
+        res.json({
+          success: true,
+          message: "VeBetterDAO treasury distribution successful",
+          details: {
+            method: "treasury-distributeReward",
+            txHash: result.txHash,
+            userAmount: result.userAmount,
+            appAmount: result.appAmount,
+            timestamp: result.timestamp,
+            securityBenefit: "Tokens distributed from VeBetterDAO treasury, not personal wallet",
+            treasuryFunds: availableFunds
+          }
+        });
+      } else {
+        console.error(`❌ Treasury Distribution Test Failed: ${result.error}`);
+        res.status(500).json({
+          success: false,
+          message: "VeBetterDAO treasury distribution failed",
+          error: result.error,
+          method: result.method
+        });
+      }
+      
+    } catch (error) {
+      console.error('Treasury test endpoint error:', error);
+      res.status(500).json({
+        message: 'Treasury test failed',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Treasury Status Check Endpoint
+  app.get("/api/treasury/status", async (req: Request, res: Response) => {
+    try {
+      console.log(`🔍 Checking VeBetterDAO Treasury Status...`);
+      
+      const isAuthorized = await verifyDistributorAuthorization();
+      const availableFunds = await checkTreasuryFunds();
+      
+      const status = {
+        authorized: isAuthorized,
+        availableFunds: availableFunds,
+        treasuryContract: process.env.X2EARNREWARDSPOOL_ADDRESS || 'Not configured',
+        b3trToken: process.env.B3TR_CONTRACT_ADDRESS || 'Not configured',
+        distributorConfigured: !!process.env.DISTRIBUTOR_PRIVATE_KEY,
+        securityModel: "VeBetterDAO Treasury (distributeReward method)",
+        benefits: [
+          "Tokens come from VeBetterDAO treasury, not personal wallet",
+          "Distributor wallet stays empty (just holds gas)",
+          "Cannot distribute more than allocated by VeBetterDAO",
+          "Proper audit trail through VeBetterDAO system"
+        ]
+      };
+      
+      console.log(`📊 Treasury Status: ${isAuthorized ? 'AUTHORIZED' : 'NOT AUTHORIZED'}`);
+      console.log(`💰 Available Funds: ${availableFunds} B3TR`);
+      
+      res.json(status);
+    } catch (error) {
+      console.error('Treasury status check error:', error);
+      res.status(500).json({
+        message: 'Failed to check treasury status',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
   app.patch("/api/referrals/:id/status", async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
