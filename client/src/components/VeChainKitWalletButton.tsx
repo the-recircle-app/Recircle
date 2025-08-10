@@ -4,16 +4,16 @@ import { WalletButton, useWallet as useVeChainKitWallet } from "@vechain/vechain
 import { useWallet } from "../context/WalletContext";
 
 export default function VeChainKitWalletButton() {
-  const { account: kitAccount, connected: kitConnected } = useVeChainKitWallet();
+  const { account: kitAccount } = useVeChainKitWallet();
   const { connect: appConnect, address: appAddress } = useWallet();
 
   useEffect(() => {
     // When VeChain Kit connects, sync with our app's wallet context
-    if (kitConnected && kitAccount && kitAccount !== appAddress) {
-      console.log('[VECHAIN-KIT] Syncing connection to app context:', kitAccount);
-      appConnect('vechain-kit', kitAccount, { skipCelebration: true });
+    if (kitAccount && kitAccount.address && kitAccount.address !== appAddress) {
+      console.log('[VECHAIN-KIT] Syncing connection to app context:', kitAccount.address);
+      appConnect('vechain-kit', kitAccount.address, { skipCelebration: true });
     }
-  }, [kitConnected, kitAccount, appAddress, appConnect]);
+  }, [kitAccount, appAddress, appConnect]);
 
   return <WalletButton />;
 }
