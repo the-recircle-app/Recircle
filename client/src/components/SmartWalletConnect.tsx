@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useWallet } from '../context/WalletContext';
-import { WalletButton } from "@vechain/vechain-kit";
+import VeChainKitWalletButton from './VeChainKitWalletButton';
 import { VeChainKitProviderWrapper } from '../utils/VeChainKitProvider';
 
 interface SmartWalletConnectProps {
@@ -131,7 +131,7 @@ export default function SmartWalletConnect({ onConnect }: SmartWalletConnectProp
     return (
       <VeChainKitProviderWrapper>
         <div className="space-y-4">
-          <WalletButton />
+          <VeChainKitWalletButton />
           <div className="flex space-x-2">
             <Button 
               variant="ghost" 
