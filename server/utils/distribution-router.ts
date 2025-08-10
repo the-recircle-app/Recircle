@@ -47,10 +47,10 @@ export async function distributeRewards(params: DistributionParams): Promise<Dis
       if (result.success) {
         return {
           success: true,
-          userTxHash: result.details?.txHash,
-          appTxHash: result.details?.txHash, // Treasury uses single transaction
-          userAmount: result.details?.userAmount || 0,
-          appAmount: result.details?.appAmount || 0,
+          userTxHash: result.txHash,
+          appTxHash: result.txHash, // Treasury uses single transaction
+          userAmount: result.userAmount || 0,
+          appAmount: result.appAmount || 0,
           method: 'treasury'
         };
       } else {
