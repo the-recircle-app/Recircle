@@ -3335,8 +3335,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               console.log(`[BLOCKCHAIN] Attempting REAL B3TR distribution to VeChain testnet`);
               console.log(`[BLOCKCHAIN] FORCE TEST - Distribution will execute regardless of confidence`);
               
-              console.log(`[BLOCKCHAIN] About to import working-distribution module...`);
-              const { distributeRealB3TR } = await import('./utils/working-distribution.js');
+              console.log(`[BLOCKCHAIN] About to import distribution router module...`);
+              const { distributeTokens } = await import('./utils/distribution-router.js');
               console.log(`[BLOCKCHAIN] Module imported successfully`);
               
               // CRITICAL FIX: Log the raw amount being passed to verify 18-decimal conversion
@@ -3345,8 +3345,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               console.log(`[BLOCKCHAIN] - totalRewards type: ${typeof totalRewards}`);
               console.log(`[BLOCKCHAIN] - Expected wei units: ${totalRewards} × 10^18`);
               
-              // Execute real B3TR distribution with 70/30 split
-              const distributionResult = await distributeRealB3TR(
+              // Execute B3TR distribution with 70/30 split using distribution router
+              const distributionResult = await distributeTokens(
                 userWalletAddress,
                 totalRewards,
                 submittedUserId
