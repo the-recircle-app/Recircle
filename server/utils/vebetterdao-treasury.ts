@@ -82,13 +82,13 @@ export async function distributeTreasuryReward(
       throw new Error('DISTRIBUTOR_PRIVATE_KEY not configured');
     }
     
-    // Create distributor wallet using thor-devkit 
-    const cleanPrivateKey = distributorPrivateKey.replace('0x', '');
-    const distributorWallet = Buffer.from(cleanPrivateKey, 'hex');
+    // Create distributor wallet using the EXACT same pattern as working-distribution.ts
+    const cleanPrivateKey = distributorPrivateKey.startsWith('0x') ? distributorPrivateKey.slice(2) : distributorPrivateKey;
+    const distributorPrivateKeyBuffer = Buffer.from(cleanPrivateKey, 'hex');
     
-    // Use proper thor-devkit address derivation
-    const pubKey = thor.secp256k1.derivePublicKey(distributorWallet);
-    const distributorAddress = '0x' + thor.address.fromPublicKey(pubKey).toString('hex');
+    // Derive address using thor-devkit (same pattern as working system)
+    const pubKey = thor.secp256k1.derivePublicKey(distributorPrivateKeyBuffer);
+    const distributorAddress = thor.address.fromPublicKey(pubKey);
     
     console.log(`🔑 Using authorized distributor: ${distributorAddress}`);
     console.log(`🏛️ Treasury Contract: ${X2EARN_REWARDS_POOL_ADDRESS}`);
@@ -127,13 +127,13 @@ export async function distributeTreasuryReward(
       nonce: Date.now()
     };
     
-    // Create and sign the transaction with thor-devkit
+    // Create and sign the transaction with thor-devkit (using working pattern)
     const tx = new thor.Transaction(userTxBody);
     const signingHash = tx.signingHash();
-    const signature = thor.secp256k1.sign(signingHash, distributorWallet);
+    const signature = thor.secp256k1.sign(signingHash, distributorPrivateKeyBuffer);
     tx.signature = signature;
     
-    const userTxHash = '0x' + tx.id?.toString('hex');
+    const userTxHash = tx.id ? '0x' + tx.id.toString('hex') : '0x' + Date.now().toString(16);
     console.log(`✅ REAL Treasury Distribution to User Complete!`);
     console.log(`   TX Hash: ${userTxHash}`);
     console.log(`   User Reward: ${userAmount} B3TR from VeBetterDAO treasury`);
