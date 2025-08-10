@@ -159,13 +159,68 @@ export async function distributeTreasuryReward(
     }
     
     const userTxHash = submitResult.id || ('0x' + tx.id!.toString('hex'));
-    console.log(`✅ Transaction submitted successfully with hash: ${userTxHash}`);
+    console.log(`✅ User transaction submitted successfully with hash: ${userTxHash}`);
     
-    console.log(`✅ REAL Treasury Distribution to VeChain Network Complete!`);
-    console.log(`   TX Hash: ${userTxHash}`);
-    console.log(`   User Reward: ${userAmount} B3TR from VeBetterDAO treasury`);
+    // Create second transaction for app fund (30% portion)
+    if (appAmount > 0) {
+      console.log(`🏢 Creating app fund transaction for ${appAmount} B3TR`);
+      
+      const appFundAddress = process.env.APP_FUND_WALLET || '0x119761865b79bea9e7924edaa630942322ca09d1';
+      const appProof = JSON.stringify({
+        receiptId: receiptProof,
+        transportationType: "sustainable_transportation", 
+        timestamp: new Date().toISOString(),
+        appFundReward: appAmount
+      });
+      
+      const appFunctionCall = encodeFunctionCall(DISTRIBUTE_REWARD_ABI, [
+        RECIRCLE_APP_ID,           // bytes32 appId  
+        (appAmount * 1e18).toString(), // uint256 amount (convert to wei)
+        appFundAddress,            // address recipient (app fund wallet)
+        appProof                   // string proof
+      ]);
+      
+      // Create app fund transaction
+      const appTxBody = {
+        chainTag: 0x27, // VeChain testnet
+        blockRef: latestBlock.id.slice(0, 18),
+        expiration: 32,
+        clauses: [{
+          to: X2EARN_REWARDS_POOL_ADDRESS,
+          value: '0x0',
+          data: appFunctionCall
+        }],
+        gasPriceCoef: 0,
+        gas: 200000,
+        dependsOn: null,
+        nonce: Date.now() + 1 // Different nonce
+      };
+      
+      const appTx = new thor.Transaction(appTxBody);
+      const appSigningHash = appTx.signingHash();
+      const appSignature = thor.secp256k1.sign(appSigningHash, distributorPrivateKeyBuffer);
+      appTx.signature = appSignature;
+      
+      // Submit app fund transaction
+      const appRawTx = '0x' + appTx.encode().toString('hex');
+      const appSubmitResponse = await fetch('https://testnet.vechain.org/transactions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ raw: appRawTx })
+      });
+      
+      const appSubmitResult = await appSubmitResponse.json();
+      const appTxHash = appSubmitResult.id || ('0x' + appTx.id!.toString('hex'));
+      console.log(`✅ App fund transaction submitted with hash: ${appTxHash}`);
+    }
+    
+    console.log(`✅ COMPLETE Treasury Distribution to VeChain Network!`);
+    console.log(`   User TX: ${userTxHash} (${userAmount} B3TR)`);
+    console.log(`   App Fund: Separate transaction (${appAmount} B3TR)`);
     console.log(`   Network: VeChain Testnet (REAL BLOCKCHAIN)`);
-    console.log(`   Security: Tokens came from official VeBetterDAO treasury, not personal wallet`);
+    console.log(`   Security: Tokens from official VeBetterDAO treasury`);
     
     return {
       success: true,
