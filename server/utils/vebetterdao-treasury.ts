@@ -285,12 +285,22 @@ function encodeFunctionCall(abi: any, params: any[]): string {
 
 /**
  * Verify if distributor is authorized for the app
+ * Based on VeBetterDAO docs: wallet must be added as reward distributor in app settings
  */
 export async function verifyDistributorAuthorization(): Promise<boolean> {
   try {
-    // This would check if the distributor address is authorized
-    // For now, assume it's authorized if we have the private key
-    return !!process.env.DISTRIBUTOR_PRIVATE_KEY;
+    console.log('🔒 AUTHORIZATION REQUIREMENTS FOR VEBETTERDAO TESTNET:');
+    console.log('1. Visit: https://dev.testnet.governance.vebetterdao.org/');
+    console.log('2. Connect your wallet and navigate to your ReCircle app');
+    console.log('3. Add wallet as reward distributor: 0xF1f72b305b7bf7b25e85D356927aF36b88dC84Ee');
+    console.log('4. Without this setup, distributeReward() will revert with authorization error');
+    console.log('');
+    console.log('💡 Current Status: Transactions reach blockchain but fail authorization check');
+    console.log('⚠️  This is expected until distributor wallet is authorized in VeBetterDAO governance');
+    
+    // For now, return false to indicate authorization is needed
+    // This will help track that authorization is the blocking issue
+    return false;
   } catch (error) {
     console.error('Failed to verify distributor authorization:', error);
     return false;
