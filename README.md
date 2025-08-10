@@ -1,9 +1,11 @@
 # ReCircle - Sustainable Transportation Rewards Platform
 
 <div align="center">
-  <img src="client/public/mascot.png" alt="ReCircle Mascot" width="120" height="120">
   
-  **🌍 Rewarding Sustainable Transportation Choices with Blockchain Technology**
+  # 🌍 ReCircle
+  ### Sustainable Transportation Rewards Platform
+  
+  **Rewarding Sustainable Transportation Choices with Blockchain Technology**
   
   [![VeChain](https://img.shields.io/badge/VeChain-Thor-blue)](https://vechain.org)
   [![B3TR](https://img.shields.io/badge/Token-B3TR-green)](https://vebetterdao.org)
