@@ -161,30 +161,40 @@ export async function distributeTreasuryReward(
     const userTxHash = submitResult.id || ('0x' + tx.id!.toString('hex'));
     console.log(`✅ User transaction submitted successfully with hash: ${userTxHash}`);
     
-    // App fund gets tokens via personal wallet (VeBetterDAO treasury is for user rewards only)
+    // Create second VeBetterDAO treasury transaction for app fund (30% portion)
     let appTxHash = '';
     if (appAmount > 0) {
-      console.log(`🏢 Sending app fund ${appAmount} B3TR via personal wallet (VeBetterDAO treasury is for users only)`);
+      console.log(`🏢 Creating VeBetterDAO treasury transaction for app fund: ${appAmount} B3TR`);
       
       const appFundAddress = process.env.APP_FUND_WALLET || '0x119761865b79bea9e7924edaa630942322ca09d1';
+      const appProof = JSON.stringify({
+        receiptId: receiptProof,
+        transportationType: "sustainable_transportation", 
+        timestamp: new Date().toISOString(),
+        appFundReward: appAmount
+      });
       
-      // Use personal wallet for app fund transfer (VeBetterDAO is for user rewards)
-      const appTransferData = createB3TRTransferData(appFundAddress, appAmount);
+      const appFunctionCall = encodeFunctionCall(DISTRIBUTE_REWARD_ABI, [
+        RECIRCLE_APP_ID,           // bytes32 appId  
+        (appAmount * 1e18).toString(), // uint256 amount (convert to wei)
+        appFundAddress,            // address recipient (app fund wallet)
+        appProof                   // string proof
+      ]);
       
-      // Create direct B3TR token transfer transaction
+      // Create app fund VeBetterDAO treasury transaction
       const appTxBody = {
         chainTag: 0x27, // VeChain testnet
         blockRef: latestBlock.id.slice(0, 18),
         expiration: 32,
         clauses: [{
-          to: B3TR_TOKEN_ADDRESS,
+          to: X2EARN_REWARDS_POOL_ADDRESS,
           value: '0x0',
-          data: appTransferData
+          data: appFunctionCall
         }],
         gasPriceCoef: 0,
-        gas: 100000,
+        gas: 200000,
         dependsOn: null,
-        nonce: Date.now() + 1
+        nonce: Date.now() + 1 // Different nonce
       };
       
       const appTx = new thor.Transaction(appTxBody);
@@ -192,7 +202,7 @@ export async function distributeTreasuryReward(
       const appSignature = thor.secp256k1.sign(appSigningHash, distributorPrivateKeyBuffer);
       appTx.signature = appSignature;
       
-      // Submit app fund transaction
+      // Submit app fund VeBetterDAO treasury transaction
       const appRawTx = '0x' + appTx.encode().toString('hex');
       const appSubmitResponse = await fetch('https://testnet.vechain.org/transactions', {
         method: 'POST',
@@ -204,14 +214,14 @@ export async function distributeTreasuryReward(
       
       const appSubmitResult = await appSubmitResponse.json();
       appTxHash = appSubmitResult.id || ('0x' + appTx.id!.toString('hex'));
-      console.log(`✅ App fund direct transfer submitted with hash: ${appTxHash}`);
+      console.log(`✅ App fund VeBetterDAO treasury transaction submitted with hash: ${appTxHash}`);
     }
     
-    console.log(`✅ COMPLETE Hybrid Distribution to VeChain Network!`);
+    console.log(`✅ COMPLETE VeBetterDAO Treasury Distribution to VeChain Network!`);
     console.log(`   User TX: ${userTxHash} (${userAmount} B3TR from VeBetterDAO treasury)`);
-    console.log(`   App Fund TX: ${appTxHash} (${appAmount} B3TR from personal wallet)`);
+    console.log(`   App Fund TX: ${appTxHash} (${appAmount} B3TR from VeBetterDAO treasury)`);
     console.log(`   Network: VeChain Testnet (REAL BLOCKCHAIN)`);
-    console.log(`   Security: Users get VeBetterDAO treasury tokens, app fund via direct transfer`);
+    console.log(`   Security: BOTH transactions use official VeBetterDAO treasury, not personal wallet`);
     
     return {
       success: true,
@@ -219,7 +229,7 @@ export async function distributeTreasuryReward(
       appTxHash,
       userAmount,
       appAmount,
-      method: 'treasury-distributeReward + direct-transfer',
+      method: 'treasury-distributeReward (dual)',
       timestamp: new Date().toISOString()
     };
     
