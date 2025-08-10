@@ -156,7 +156,7 @@ export async function distributeRealB3TR(
                 data: `0x${userTransferData.toString('hex')}`
             }],
             gasPriceCoef: 0,
-            gas: 50000,
+            gas: 150000,
             dependsOn: null,
             nonce: baseNonce
         };
@@ -172,7 +172,7 @@ export async function distributeRealB3TR(
                 data: `0x${appTransferData.toString('hex')}`
             }],
             gasPriceCoef: 0,
-            gas: 50000,
+            gas: 150000,
             dependsOn: null,
             nonce: baseNonce + 1
         };
