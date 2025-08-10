@@ -149,11 +149,17 @@ export async function distributeTreasuryReward(
     });
     
     const submitResult = await submitResponse.json();
-    const userTxHash = submitResult.id || ('0x' + tx.id!.toString('hex'));
+    console.log(`🔍 VeChain submission response:`, JSON.stringify(submitResult));
+    console.log(`🔍 HTTP status:`, submitResponse.status);
     
     if (!submitResponse.ok) {
+      console.error(`❌ Transaction submission failed with status ${submitResponse.status}`);
+      console.error(`❌ Error details:`, JSON.stringify(submitResult));
       throw new Error(`Transaction submission failed: ${JSON.stringify(submitResult)}`);
     }
+    
+    const userTxHash = submitResult.id || ('0x' + tx.id!.toString('hex'));
+    console.log(`✅ Transaction submitted successfully with hash: ${userTxHash}`);
     
     console.log(`✅ REAL Treasury Distribution to VeChain Network Complete!`);
     console.log(`   TX Hash: ${userTxHash}`);

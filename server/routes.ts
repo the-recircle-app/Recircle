@@ -3289,8 +3289,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const shouldAwardTokens = !needsManualReview || isTestModeReceipt;
         
         if (shouldAwardTokens) {
-          const newBalance = initialUserData.tokenBalance + totalRewards;
-          console.log(`${isTestModeReceipt ? 'TEST MODE - ' : ''}Updating user balance: ${initialUserData.tokenBalance} + ${totalRewards} = ${newBalance}`);
+          const newBalance = (initialUserData.tokenBalance || 0) + totalRewards;
+          console.log(`${isTestModeReceipt ? 'TEST MODE - ' : ''}Updating user balance: ${initialUserData.tokenBalance || 0} + ${totalRewards} = ${newBalance}`);
           await storage.updateUserTokenBalance(
             initialUserData.id, 
             newBalance
@@ -3299,32 +3299,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // ===== CRITICAL: TRIGGER REAL BLOCKCHAIN DISTRIBUTION =====
           // FORCE EXECUTION - Real B3TR tokens to actual VeWorld wallet
           console.log(`[BLOCKCHAIN] 🚀 FORCED EXECUTION: Distributing ${totalRewards} B3TR to VeWorld wallet`);
-          console.log(`[BLOCKCHAIN] User wallet: ${initialUserData.walletAddress}`);
+          
+          // Get the wallet address from request body if user data doesn't have it
+          const targetWallet = initialUserData.walletAddress || req.body.walletAddress;
+          console.log(`[BLOCKCHAIN] User wallet: ${targetWallet}`);
           console.log(`[BLOCKCHAIN] Total rewards: ${totalRewards} B3TR`);
           console.log(`[BLOCKCHAIN] Receipt ID: ${newReceipt.id}`);
           
-          // ===== EXECUTE VEBETTERDAO TREASURY DISTRIBUTION =====
-          try {
-            const { distributeRewards } = await import('./utils/distribution-router.js');
-            console.log(`[BLOCKCHAIN] 🏛️ Executing VeBetterDAO Treasury distribution`);
-            console.log(`[BLOCKCHAIN] Amount: ${totalRewards} B3TR to ${initialUserData.walletAddress}`);
-            
-            const distributionResult = await distributeRewards({
-              recipientAddress: initialUserData.walletAddress,
-              totalAmount: totalRewards,
-              isTestMode: false
-            });
-            
-            if (distributionResult.success) {
-              console.log(`[BLOCKCHAIN] ✅ SUCCESS! VeBetterDAO treasury distribution complete!`);
-              console.log(`[BLOCKCHAIN] User TX: ${distributionResult.userTxHash}`);
-              console.log(`[BLOCKCHAIN] App TX: ${distributionResult.appTxHash}`);
-              console.log(`[BLOCKCHAIN] Method: ${distributionResult.method}`);
-            } else {
-              console.log(`[BLOCKCHAIN] ❌ Distribution failed: ${distributionResult.error}`);
+          // Check if we have a valid wallet address
+          if (!targetWallet) {
+            console.error(`[BLOCKCHAIN] ❌ No wallet address found for user ${initialUserData.id}!`);
+            console.error(`[BLOCKCHAIN] ❌ Cannot distribute blockchain tokens without wallet address`);
+          } else {
+            // ===== EXECUTE WORKING BLOCKCHAIN DISTRIBUTION =====
+            try {
+              console.log(`[BLOCKCHAIN] 🚀 EXECUTING WORKING DISTRIBUTION SYSTEM`);
+              console.log(`[BLOCKCHAIN] Distributing ${totalRewards} B3TR to ${targetWallet}`);
+              
+              const { distributeRealB3TR } = await import('./utils/working-distribution.js');
+              
+              const distributionResult = await distributeRealB3TR(
+                targetWallet,
+                totalRewards,
+                initialUserData.id
+              );
+              
+              if (distributionResult.success) {
+                console.log(`[BLOCKCHAIN] ✅ SUCCESS! Real B3TR tokens sent to VeWorld wallet!`);
+                console.log(`[BLOCKCHAIN] User TX: ${distributionResult.transactions.user}`);
+                console.log(`[BLOCKCHAIN] App TX: ${distributionResult.transactions.app}`);
+                console.log(`[BLOCKCHAIN] Network: ${distributionResult.network}`);
+                console.log(`[BLOCKCHAIN] User reward: ${distributionResult.userReward} B3TR`);
+                console.log(`[BLOCKCHAIN] App reward: ${distributionResult.appReward} B3TR`);
+              } else {
+                console.log(`[BLOCKCHAIN] ❌ Distribution failed: ${distributionResult.error}`);
+              }
+            } catch (blockchainError) {
+              console.error(`[BLOCKCHAIN] ❌ Distribution error:`, blockchainError);
             }
-          } catch (blockchainError) {
-            console.error(`[BLOCKCHAIN] ❌ Distribution error:`, blockchainError);
           }
         } else {
           console.log(`NOT updating token balance because receipt needs manual review. Current balance: ${initialUserData.tokenBalance}`);
@@ -4035,6 +4047,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+
+// Test working distribution endpoint - Direct B3TR distribution
+app.post('/api/test-working-distribution', async (req: Request, res: Response) => {
+  try {
+    const { recipientAddress, totalAmount, userId } = req.body;
+    
+    console.log(`[TEST] Testing working distribution: ${totalAmount} B3TR to ${recipientAddress}`);
+    
+    const { distributeRealB3TR } = await import('./utils/working-distribution.js');
+    
+    const result = await distributeRealB3TR(recipientAddress, totalAmount, userId);
+    
+    res.json(result);
+  } catch (error: any) {
+    console.error('[TEST] Working distribution test failed:', error.message);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
 
 app.post("/api/treasury/test-distribution", async (req: Request, res: Response) => {
     try {
