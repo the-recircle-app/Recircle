@@ -212,49 +212,75 @@ export async function checkTreasuryFunds(): Promise<number> {
 }
 
 /**
- * Encode function call for contract interaction - REAL ABI encoding
+ * Encode function call for VeChain VIP180 contract interaction
+ * Based on successful Mugshot transaction pattern
  */
 function encodeFunctionCall(abi: any, params: any[]): string {
-  // Get function signature from ABI
+  // Get function signature from ABI  
   const functionSignature = abi.name + '(' + abi.inputs.map((input: any) => input.type).join(',') + ')';
   
   // Create function selector (first 4 bytes of keccak hash)
   const selector = thor.keccak256(functionSignature).slice(0, 4);
+  console.log(`[ABI-ENCODE] Function: ${functionSignature}`);
+  console.log(`[ABI-ENCODE] Selector: 0x${selector.toString('hex')}`);
   
-  // Encode parameters
-  const encodedParams = Buffer.alloc(0);
-  let paramData = Buffer.alloc(0);
+  // Proper ABI encoding for VeChain VIP180 contracts
+  // This matches the successful Mugshot transaction pattern
+  let encodedData = Buffer.from([]);
   
-  for (let i = 0; i < params.length; i++) {
-    const param = params[i];
-    const inputType = abi.inputs[i].type;
+  // For distributeReward(bytes32 appId, uint256 amount, address recipient, string proof)
+  if (params.length === 4) {
+    const [appId, amount, recipient, proof] = params;
     
-    if (inputType === 'bytes32') {
-      // Handle bytes32 (like appId)
-      const bytes32Data = Buffer.from(param.startsWith('0x') ? param.slice(2) : param, 'hex');
-      paramData = Buffer.concat([paramData, bytes32Data]);
-    } else if (inputType === 'uint256') {
-      // Handle uint256 amounts
-      const uint256Data = Buffer.from(BigInt(param).toString(16).padStart(64, '0'), 'hex');
-      paramData = Buffer.concat([paramData, uint256Data]);
-    } else if (inputType === 'address') {
-      // Handle address
-      const addressData = Buffer.from(param.slice(2).padStart(64, '0'), 'hex');
-      paramData = Buffer.concat([paramData, addressData]);
-    } else if (inputType === 'string') {
-      // Handle string - more complex encoding needed
-      const stringBytes = Buffer.from(param, 'utf8');
-      const offset = Buffer.from((params.length * 32).toString(16).padStart(64, '0'), 'hex');
-      const length = Buffer.from(stringBytes.length.toString(16).padStart(64, '0'), 'hex');
-      const padding = Buffer.alloc((32 - (stringBytes.length % 32)) % 32);
-      paramData = Buffer.concat([paramData, offset]);
-      // String data will be appended at the end
+    // Parameter 1: bytes32 appId (32 bytes)
+    const appIdBytes = Buffer.from(appId.startsWith('0x') ? appId.slice(2) : appId, 'hex');
+    if (appIdBytes.length !== 32) {
+      throw new Error(`Invalid appId length: ${appIdBytes.length}, expected 32 bytes`);
     }
+    
+    // Parameter 2: uint256 amount (32 bytes)  
+    const amountHex = BigInt(amount).toString(16).padStart(64, '0');
+    const amountBytes = Buffer.from(amountHex, 'hex');
+    
+    // Parameter 3: address recipient (32 bytes, left-padded)
+    const recipientHex = recipient.startsWith('0x') ? recipient.slice(2) : recipient;
+    const recipientBytes = Buffer.from(recipientHex.padStart(64, '0'), 'hex');
+    
+    // Parameter 4: string proof (dynamic - offset + length + data + padding)
+    const proofBytes = Buffer.from(proof, 'utf8');
+    const proofOffset = Buffer.from('0000000000000000000000000000000000000000000000000000000000000080', 'hex'); // Offset to string data (4 * 32 = 128 = 0x80)
+    const proofLength = Buffer.from(proofBytes.length.toString(16).padStart(64, '0'), 'hex');
+    
+    // Pad string data to 32-byte boundary
+    const padding = 32 - (proofBytes.length % 32);
+    const proofPadded = Buffer.concat([proofBytes, Buffer.alloc(padding === 32 ? 0 : padding)]);
+    
+    // Combine all parameters: appId + amount + recipient + offset + length + data
+    encodedData = Buffer.concat([
+      appIdBytes,          // bytes32 appId
+      amountBytes,         // uint256 amount  
+      recipientBytes,      // address recipient
+      proofOffset,         // uint256 offset to string
+      proofLength,         // uint256 string length
+      proofPadded          // string data (padded)
+    ]);
+    
+    console.log(`[ABI-ENCODE] AppId: ${appId}`);
+    console.log(`[ABI-ENCODE] Amount: ${amount} (0x${amountHex})`);
+    console.log(`[ABI-ENCODE] Recipient: ${recipient}`);
+    console.log(`[ABI-ENCODE] Proof length: ${proofBytes.length} bytes`);
   }
   
-  // For now, use the same approach as working-distribution.ts
-  // Create the function call data directly
-  return '0x' + Buffer.concat([selector, paramData]).toString('hex');
+  // Combine selector + encoded parameters
+  const fullCallData = Buffer.concat([selector, encodedData]);
+  const result = '0x' + fullCallData.toString('hex');
+  
+  console.log(`[ABI-ENCODE] Total call data length: ${fullCallData.length} bytes`);
+  console.log(`[ABI-ENCODE] Expected Mugshot selector: 0xf7335f11`);
+  console.log(`[ABI-ENCODE] Our selector: 0x${selector.toString('hex')}`);
+  console.log(`[ABI-ENCODE] Selector match: ${('0x' + selector.toString('hex')) === '0xf7335f11'}`);
+  
+  return result;
 }
 
 /**
