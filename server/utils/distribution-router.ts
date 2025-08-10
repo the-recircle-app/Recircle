@@ -10,6 +10,7 @@
 
 // Configuration - set this to choose your distribution method
 const USE_VEBETTERDAO_TREASURY = process.env.USE_VEBETTERDAO_TREASURY === 'true';
+console.log(`[DISTRIBUTION-ROUTER] Treasury mode: ${USE_VEBETTERDAO_TREASURY} (env: ${process.env.USE_VEBETTERDAO_TREASURY})`);
 
 interface DistributionParams {
   recipientAddress: string;

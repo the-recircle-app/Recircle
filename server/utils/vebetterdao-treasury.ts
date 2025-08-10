@@ -127,16 +127,38 @@ export async function distributeTreasuryReward(
       nonce: Date.now()
     };
     
-    // Create and sign the transaction with thor-devkit (using working pattern)
+    // Get latest block reference for transaction
+    const blockResponse = await fetch('https://testnet.vechain.org/blocks/best');
+    const latestBlock = await blockResponse.json();
+    userTxBody.blockRef = latestBlock.id.slice(0, 18); // Use first 8 bytes as blockRef
+    
+    // Create and sign the transaction with thor-devkit
     const tx = new thor.Transaction(userTxBody);
     const signingHash = tx.signingHash();
     const signature = thor.secp256k1.sign(signingHash, distributorPrivateKeyBuffer);
     tx.signature = signature;
     
-    const userTxHash = tx.id ? '0x' + tx.id.toString('hex') : '0x' + Date.now().toString(16);
-    console.log(`✅ REAL Treasury Distribution to User Complete!`);
+    // ACTUALLY SUBMIT TO VECHAIN NETWORK
+    const rawTx = '0x' + tx.encode().toString('hex');
+    const submitResponse = await fetch('https://testnet.vechain.org/transactions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ raw: rawTx })
+    });
+    
+    const submitResult = await submitResponse.json();
+    const userTxHash = submitResult.id || ('0x' + tx.id!.toString('hex'));
+    
+    if (!submitResponse.ok) {
+      throw new Error(`Transaction submission failed: ${JSON.stringify(submitResult)}`);
+    }
+    
+    console.log(`✅ REAL Treasury Distribution to VeChain Network Complete!`);
     console.log(`   TX Hash: ${userTxHash}`);
     console.log(`   User Reward: ${userAmount} B3TR from VeBetterDAO treasury`);
+    console.log(`   Network: VeChain Testnet (REAL BLOCKCHAIN)`);
     console.log(`   Security: Tokens came from official VeBetterDAO treasury, not personal wallet`);
     
     return {

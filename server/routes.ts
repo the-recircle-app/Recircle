@@ -3296,86 +3296,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
             newBalance
           );
 
-          // ===== CRITICAL: TRIGGER 70/30 BLOCKCHAIN DISTRIBUTION =====
-          // This ensures VeBetterDAO compliance with mandatory fund distribution
-          console.log(`[BLOCKCHAIN] Triggering 70/30 distribution for receipt ${newReceipt.id}`);
-          console.log(`[BLOCKCHAIN] Receipt needsManualReview: ${needsManualReview}, shouldAwardTokens: ${shouldAwardTokens}`);
-          console.log(`[BLOCKCHAIN] FORCED EXECUTION - About to execute blockchain distribution`);
+          // ===== CRITICAL: TRIGGER REAL BLOCKCHAIN DISTRIBUTION =====
+          // FORCE EXECUTION - Real B3TR tokens to actual VeWorld wallet
+          console.log(`[BLOCKCHAIN] 🚀 FORCED EXECUTION: Distributing ${totalRewards} B3TR to VeWorld wallet`);
+          console.log(`[BLOCKCHAIN] User wallet: ${initialUserData.walletAddress}`);
+          console.log(`[BLOCKCHAIN] Total rewards: ${totalRewards} B3TR`);
+          console.log(`[BLOCKCHAIN] Receipt ID: ${newReceipt.id}`);
           
+          // ===== EXECUTE VEBETTERDAO TREASURY DISTRIBUTION =====
           try {
-            // Get user wallet address for distribution
-            const userWalletAddress = initialUserData.walletAddress;
+            const { distributeRewards } = await import('./utils/distribution-router.js');
+            console.log(`[BLOCKCHAIN] 🏛️ Executing VeBetterDAO Treasury distribution`);
+            console.log(`[BLOCKCHAIN] Amount: ${totalRewards} B3TR to ${initialUserData.walletAddress}`);
             
-            if (userWalletAddress && totalRewards > 0) {
-              console.log(`[BLOCKCHAIN] Starting distribution: ${totalRewards} B3TR to user ${userWalletAddress}`);
-              
-              // Get store info for receipt metadata
-              const receiptStoreInfo = newReceipt.storeId ? await storage.getStore(newReceipt.storeId) : null;
-              
-              // SMART CONFIDENCE-BASED DISTRIBUTION MODE SELECTION
-              // High confidence (0.85+): Real blockchain distribution immediately
-              // Medium confidence (0.7-0.84): Pending transactions for security
-              // Low confidence (<0.7): Manual review (already handled above)
-              
-              let distributionMode = 'manual_review'; // Default fallback
-              
-              if (confidenceLevel >= 0.85) {
-                distributionMode = 'auto'; // High confidence = real blockchain immediately
-                console.log(`[BLOCKCHAIN] HIGH CONFIDENCE (${confidenceLevel}) - Using real blockchain distribution`);
-              } else if (confidenceLevel >= 0.7) {
-                distributionMode = 'manual_review'; // Medium confidence = pending transactions
-                console.log(`[BLOCKCHAIN] MEDIUM CONFIDENCE (${confidenceLevel}) - Using pending transactions`);
-              } else {
-                distributionMode = 'manual_review'; // Low confidence = manual review
-                console.log(`[BLOCKCHAIN] LOW CONFIDENCE (${confidenceLevel}) - Using manual review`);
-              }
-              
-              // REAL BLOCKCHAIN DISTRIBUTION: Use simple real B3TR distribution
-              console.log(`[BLOCKCHAIN] 🚀 Triggering 70/30 distribution for receipt #${newReceipt.id}`);
-              console.log(`[BLOCKCHAIN] Attempting REAL B3TR distribution to VeChain testnet`);
-              console.log(`[BLOCKCHAIN] FORCE TEST - Distribution will execute regardless of confidence`);
-              
-              console.log(`[BLOCKCHAIN] About to import distribution router module...`);
-              const { distributeTokens } = await import('./utils/distribution-router.js');
-              console.log(`[BLOCKCHAIN] Module imported successfully`);
-              
-              // CRITICAL FIX: Log the raw amount being passed to verify 18-decimal conversion
-              console.log(`[BLOCKCHAIN] 🔍 RAW AMOUNT DEBUG:`);
-              console.log(`[BLOCKCHAIN] - totalRewards (raw): ${totalRewards}`);
-              console.log(`[BLOCKCHAIN] - totalRewards type: ${typeof totalRewards}`);
-              console.log(`[BLOCKCHAIN] - Expected wei units: ${totalRewards} × 10^18`);
-              
-              // Execute B3TR distribution with 70/30 split using distribution router
-              const distributionResult = await distributeTokens({
-                recipientAddress: userWalletAddress,
-                totalAmount: totalRewards,
-                isTestMode: false
-              });
-              
-              if (distributionResult.success) {
-                console.log(`[BLOCKCHAIN] ✅ Real B3TR distribution successful!`);
-                console.log(`[BLOCKCHAIN] User TX: ${distributionResult.transactions.user}`);
-                console.log(`[BLOCKCHAIN] App TX: ${distributionResult.transactions.app}`);
-                console.log(`[BLOCKCHAIN] Explorer URLs:`);
-                console.log(`[BLOCKCHAIN] - User: ${distributionResult.explorerUrls.user}`);
-                console.log(`[BLOCKCHAIN] - App: ${distributionResult.explorerUrls.app}`);
-              } else {
-                console.log(`[BLOCKCHAIN] ❌ Real B3TR distribution failed: ${distributionResult.error}`);
-                console.log(`[BLOCKCHAIN] Falling back to local token balance update only`);
-              }
-
-            } else {
-              console.log(`[BLOCKCHAIN] ⚠️ Skipping distribution - no wallet address or zero reward`);
-            }
-          } catch (distributionError) {
-            console.error(`[BLOCKCHAIN] ❌ CRITICAL Distribution error:`, distributionError);
-            console.error(`[BLOCKCHAIN] Error details:`, {
-              message: distributionError instanceof Error ? distributionError.message : String(distributionError),
-              stack: distributionError instanceof Error ? distributionError.stack : undefined,
-              name: distributionError instanceof Error ? distributionError.name : undefined
+            const distributionResult = await distributeRewards({
+              recipientAddress: initialUserData.walletAddress,
+              totalAmount: totalRewards,
+              isTestMode: false
             });
-            // Don't fail the receipt submission if blockchain distribution fails
-            // The user still gets their database balance updated
+            
+            if (distributionResult.success) {
+              console.log(`[BLOCKCHAIN] ✅ SUCCESS! VeBetterDAO treasury distribution complete!`);
+              console.log(`[BLOCKCHAIN] User TX: ${distributionResult.userTxHash}`);
+              console.log(`[BLOCKCHAIN] App TX: ${distributionResult.appTxHash}`);
+              console.log(`[BLOCKCHAIN] Method: ${distributionResult.method}`);
+            } else {
+              console.log(`[BLOCKCHAIN] ❌ Distribution failed: ${distributionResult.error}`);
+            }
+          } catch (blockchainError) {
+            console.error(`[BLOCKCHAIN] ❌ Distribution error:`, blockchainError);
           }
         } else {
           console.log(`NOT updating token balance because receipt needs manual review. Current balance: ${initialUserData.tokenBalance}`);
