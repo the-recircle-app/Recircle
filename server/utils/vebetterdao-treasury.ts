@@ -161,39 +161,30 @@ export async function distributeTreasuryReward(
     const userTxHash = submitResult.id || ('0x' + tx.id!.toString('hex'));
     console.log(`✅ User transaction submitted successfully with hash: ${userTxHash}`);
     
-    // Create second transaction for app fund (30% portion)
+    // App fund gets tokens via personal wallet (VeBetterDAO treasury is for user rewards only)
+    let appTxHash = '';
     if (appAmount > 0) {
-      console.log(`🏢 Creating app fund transaction for ${appAmount} B3TR`);
+      console.log(`🏢 Sending app fund ${appAmount} B3TR via personal wallet (VeBetterDAO treasury is for users only)`);
       
       const appFundAddress = process.env.APP_FUND_WALLET || '0x119761865b79bea9e7924edaa630942322ca09d1';
-      const appProof = JSON.stringify({
-        receiptId: receiptProof,
-        transportationType: "sustainable_transportation", 
-        timestamp: new Date().toISOString(),
-        appFundReward: appAmount
-      });
       
-      const appFunctionCall = encodeFunctionCall(DISTRIBUTE_REWARD_ABI, [
-        RECIRCLE_APP_ID,           // bytes32 appId  
-        (appAmount * 1e18).toString(), // uint256 amount (convert to wei)
-        appFundAddress,            // address recipient (app fund wallet)
-        appProof                   // string proof
-      ]);
+      // Use personal wallet for app fund transfer (VeBetterDAO is for user rewards)
+      const appTransferData = createB3TRTransferData(appFundAddress, appAmount);
       
-      // Create app fund transaction
+      // Create direct B3TR token transfer transaction
       const appTxBody = {
         chainTag: 0x27, // VeChain testnet
         blockRef: latestBlock.id.slice(0, 18),
         expiration: 32,
         clauses: [{
-          to: X2EARN_REWARDS_POOL_ADDRESS,
+          to: B3TR_TOKEN_ADDRESS,
           value: '0x0',
-          data: appFunctionCall
+          data: appTransferData
         }],
         gasPriceCoef: 0,
-        gas: 200000,
+        gas: 100000,
         dependsOn: null,
-        nonce: Date.now() + 1 // Different nonce
+        nonce: Date.now() + 1
       };
       
       const appTx = new thor.Transaction(appTxBody);
@@ -212,22 +203,23 @@ export async function distributeTreasuryReward(
       });
       
       const appSubmitResult = await appSubmitResponse.json();
-      const appTxHash = appSubmitResult.id || ('0x' + appTx.id!.toString('hex'));
-      console.log(`✅ App fund transaction submitted with hash: ${appTxHash}`);
+      appTxHash = appSubmitResult.id || ('0x' + appTx.id!.toString('hex'));
+      console.log(`✅ App fund direct transfer submitted with hash: ${appTxHash}`);
     }
     
-    console.log(`✅ COMPLETE Treasury Distribution to VeChain Network!`);
-    console.log(`   User TX: ${userTxHash} (${userAmount} B3TR)`);
-    console.log(`   App Fund: Separate transaction (${appAmount} B3TR)`);
+    console.log(`✅ COMPLETE Hybrid Distribution to VeChain Network!`);
+    console.log(`   User TX: ${userTxHash} (${userAmount} B3TR from VeBetterDAO treasury)`);
+    console.log(`   App Fund TX: ${appTxHash} (${appAmount} B3TR from personal wallet)`);
     console.log(`   Network: VeChain Testnet (REAL BLOCKCHAIN)`);
-    console.log(`   Security: Tokens from official VeBetterDAO treasury`);
+    console.log(`   Security: Users get VeBetterDAO treasury tokens, app fund via direct transfer`);
     
     return {
       success: true,
       txHash: userTxHash,
+      appTxHash,
       userAmount,
       appAmount,
-      method: 'treasury-distributeReward',
+      method: 'treasury-distributeReward + direct-transfer',
       timestamp: new Date().toISOString()
     };
     
@@ -336,6 +328,32 @@ function encodeFunctionCall(abi: any, params: any[]): string {
   console.log(`[ABI-ENCODE] Selector match: ${('0x' + selector.toString('hex')) === '0xf7335f11'}`);
   
   return result;
+}
+
+/**
+ * Create B3TR token transfer data for direct transfers (app fund)
+ */
+function createB3TRTransferData(recipientAddress: string, amount: number): string {
+  // ERC20/VIP180 transfer function: transfer(address to, uint256 amount)
+  const transferSignature = 'transfer(address,uint256)';
+  const selector = thor.keccak256(transferSignature).slice(0, 4);
+  
+  // Encode parameters: address (32 bytes) + uint256 amount (32 bytes)
+  const addressBytes = Buffer.from(recipientAddress.slice(2), 'hex');
+  const addressPadded = Buffer.concat([Buffer.alloc(12), addressBytes]); // Left pad to 32 bytes
+  
+  const amountWei = BigInt(amount * 1e18);
+  const amountBytes = Buffer.alloc(32);
+  
+  // Convert BigInt to bytes (big endian)
+  let tempAmount = amountWei;
+  for (let i = 31; i >= 0; i--) {
+    amountBytes[i] = Number(tempAmount & 0xFFn);
+    tempAmount >>= 8n;
+  }
+  
+  const callData = Buffer.concat([selector, addressPadded, amountBytes]);
+  return '0x' + callData.toString('hex');
 }
 
 /**
