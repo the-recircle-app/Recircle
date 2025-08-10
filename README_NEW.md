@@ -104,14 +104,32 @@ DATABASE_URL=postgresql://username:password@localhost:5432/recircle
 # OpenAI (for receipt validation)
 OPENAI_API_KEY=your_openai_api_key
 
-# VeChain Configuration
+# VeBetterDAO Treasury Integration (REQUIRED for blockchain distribution)
+B3TR_CONTRACT_ADDRESS=0xbf64cf86894Ee0877C4e7d03936e35Ee8D8b864F
+X2EARNREWARDSPOOL_ADDRESS=0x4846E4c60Db17e4A4E1D38f1fD5D8b2BE5bF8449
+
+# VeChain Wallet Configuration
+REWARD_DISTRIBUTOR_PRIVATE_KEY=your_distributor_private_key
+REWARD_DISTRIBUTOR_WALLET=0x... # Derived from private key above
+APP_FUND_WALLET=0x119761865b79bea9e7924edaa630942322ca09d1 # Where 30% goes
+CREATOR_FUND_WALLET=0x87c844e3314396ca43e5a6065e418d26a09db02b # Alternative fund wallet
+
+# Network Configuration
 VECHAIN_NETWORK=testnet
-REWARD_DISTRIBUTOR_WALLET=0x...
-APP_FUND_WALLET=0x...
+VECHAIN_RPC_URL=https://testnet.vechain.org
 
 # Google Sheets (optional - for manual review)
 GOOGLE_SHEETS_WEBHOOK_URL=https://...
 ```
+
+### VeBetterDAO Authorization Setup
+**CRITICAL**: Your distributor wallet must be authorized in VeBetterDAO governance:
+
+1. Visit [VeBetterDAO Governance](https://gov.vebetterdao.org)
+2. Connect your distributor wallet (from private key above)
+3. Verify wallet appears in "Distributors" section
+4. Test authorization with a small distribution
+5. Confirm B3TR tokens are distributed from treasury, not personal wallet
 
 ## 📱 User Experience
 
@@ -161,6 +179,9 @@ npm test             # Run test suite
 ### Testing
 The project includes comprehensive testing with 40+ test scripts:
 ```bash
+# Test VeBetterDAO treasury distribution (RECOMMENDED FIRST TEST)
+npm run test:vebetterdao-treasury
+
 # Test blockchain distribution
 npm run test:blockchain
 
@@ -170,6 +191,21 @@ npm run test:receipts
 # Test Google Forms integration
 npm run test:google-forms
 ```
+
+### Reproducing Production Success
+To confirm the VeBetterDAO treasury integration:
+
+1. **Setup Environment**: Use the exact environment variables above
+2. **Authorize Distributor**: Ensure wallet authorized at gov.vebetterdao.org
+3. **Submit Test Receipt**: Upload a transportation receipt
+4. **Verify Distribution**: Check both user wallet AND app fund wallet for B3TR tokens
+5. **Transaction Confirmation**: Verify on VeChain Explorer (transactions may take 2-5 minutes)
+
+**Expected Results**:
+- User receives 70% of reward from VeBetterDAO treasury
+- App fund receives 30% of reward from VeBetterDAO treasury
+- No personal wallet balance is consumed
+- Real B3TR tokens confirmed in VeWorld wallet
 
 ## 🚀 Deployment
 
@@ -217,10 +253,15 @@ npm run test:google-forms
 ## 📚 Documentation
 
 - [Architecture Guide](./ARCHITECTURE.md)
+- [Production Checkpoint - Aug 10, 2025](./PRODUCTION_CHECKPOINT_AUG_10.md) ⭐ **LATEST SUCCESS**
 - [Deployment Guide](./DEPLOYMENT.md)
 - [API Documentation](./API_DOCUMENTATION.md)
 - [VeChain Integration](./VECHAIN_INTEGRATION.md)
+- [VeBetterDAO Treasury Solution](./VEBETTERDAO_SOLUTION.md)
 - [Changelog](./CHANGELOG.md)
+
+### 🎯 Latest Achievement (August 10, 2025)
+**CONFIRMED SUCCESS**: Pure VeBetterDAO treasury integration with both user rewards (70%) and app fund (30%) distributed from official VeBetterDAO treasury. Transaction 0x3c623fef33356af9002e4f0bf5c193d7308565b07ded5482f992b900f255f86a confirmed successful distribution of 6 B3TR to app fund wallet.
 
 ## 🌟 Roadmap
 
