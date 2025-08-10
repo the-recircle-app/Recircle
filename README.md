@@ -111,10 +111,13 @@ B3TR_CONTRACT_ADDRESS=0xbf64cf86894Ee0877C4e7d03936e35Ee8D8b864F
 X2EARNREWARDSPOOL_ADDRESS=0x4846E4c60Db17e4A4E1D38f1fD5D8b2BE5bF8449
 
 # VeChain Wallet Configuration
-REWARD_DISTRIBUTOR_PRIVATE_KEY=your_distributor_private_key
-REWARD_DISTRIBUTOR_WALLET=0x... # Derived from private key above
+# NOTE: NEVER commit private keys to git! Use environment variables only.
+REWARD_DISTRIBUTOR_WALLET=0x... # Your authorized distributor wallet address
 APP_FUND_WALLET=0x119761865b79bea9e7924edaa630942322ca09d1 # Where 30% goes
 CREATOR_FUND_WALLET=0x87c844e3314396ca43e5a6065e418d26a09db02b # Alternative fund wallet
+
+# PRIVATE KEYS (Add these to your deployment environment ONLY - NEVER to git)
+# REWARD_DISTRIBUTOR_PRIVATE_KEY=... # Set this in your deployment environment
 
 # Network Configuration
 VECHAIN_NETWORK=testnet
@@ -128,10 +131,16 @@ GOOGLE_SHEETS_WEBHOOK_URL=https://...
 **CRITICAL**: Your distributor wallet must be authorized in VeBetterDAO governance:
 
 1. Visit [VeBetterDAO Governance](https://gov.vebetterdao.org)
-2. Connect your distributor wallet (from private key above)
+2. Connect your distributor wallet 
 3. Verify wallet appears in "Distributors" section
 4. Test authorization with a small distribution
 5. Confirm B3TR tokens are distributed from treasury, not personal wallet
+
+### Security Note
+**NEVER commit private keys to your repository!** Always:
+- Set private keys as environment variables in your deployment platform
+- Use your .env file locally (which is gitignore'd)
+- Only share wallet addresses (0x...) publicly, never private keys
 
 ## 📱 User Experience
 
