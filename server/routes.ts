@@ -4065,7 +4065,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // VeBetterDAO Treasury Test Endpoint
-  app.post("/api/treasury/test-distribution", async (req: Request, res: Response) => {
+    // Distribution configuration endpoint
+  app.get("/api/distribution/config", async (_req: Request, res: Response) => {
+    try {
+      const { getDistributionInfo } = await import('./utils/distribution-router');
+      const config = getDistributionInfo();
+      
+      res.json({
+        success: true,
+        ...config,
+        environmentVariable: 'USE_VEBETTERDAO_TREASURY',
+        currentValue: process.env.USE_VEBETTERDAO_TREASURY || 'false',
+        switchInstructions: 'Set USE_VEBETTERDAO_TREASURY=true to use treasury system'
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: 'Failed to get distribution configuration',
+        details: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
+app.post("/api/treasury/test-distribution", async (req: Request, res: Response) => {
     try {
       const { userAddress, amount, testMode } = req.body;
       
