@@ -1,0 +1,267 @@
+> rest-express@1.0.0 dev
+> NODE_ENV=development tsx server/index.ts
+
+[STORAGE] Using in-memory storage for local development
+[STORAGE] Fixed user 1 streak to 1 based on receipt activity
+[BLOCKCHAIN] ✅ Using private key for wallet: 0xF1f72b305b7bf7b25e85D356927aF36b88dC84Ee
+[BLOCKCHAIN] Real blockchain transactions enabled
+1:40:20 AM [openai] OpenAI client initialized successfully
+Server initialized with wallet addresses: 
+  - REWARD_DISTRIBUTOR_WALLET: 0xF1f72b305b7bf7b25e85D356927aF36b88dC84Ee
+  - CREATOR_FUND_WALLET: 0x87c844e3314396ca43e5a6065e418d26a09db02b
+  - APP_FUND_WALLET: 0x119761865b79bea9e7924edaa630942322ca09d1
+
+✅ All blockchain configuration variables are set
+Initializing memory optimization for development
+[MEMORY] Environment configured for runtime:
+[MEMORY] NODE_OPTIONS: --expose-gc --max-old-space-size=4096 --max-semi-space-size=128
+[MEMORY] UV_THREADPOOL_SIZE: 64
+[MEMORY] ⚠️  Garbage collection not available - memory monitoring disabled
+[MEMORY] To enable: restart with NODE_OPTIONS="--expose-gc"
+ℹ️  Pierre VeBetterDAO contract system disabled (using direct B3TR distribution instead)
+[SOLO-NODE] 🔍 Checking solo mode setup: {
+  VITE_SOLO_MODE_ENABLED: "'true'",
+  SOLO_MODE_ENABLED: "'true'",
+  NODE_ENV: "'development'",
+  viteEnabled: true,
+  soloEnabled: true,
+  isDev: true,
+  finalSoloEnabled: true
+}
+[SOLO-NODE] 🚀 Setting up integrated VeChain Solo Node routes
+[SOLO-NODE] 🔧 Initializing Solo Node Genesis State...
+[SOLO-NODE] ✅ Genesis block created
+[SOLO-NODE]    Block #0: 0x00000000851caf3cfdb6e899cf5958bfb1ac3413d346d43539627e6be7ec1b4a
+[SOLO-NODE] 💰 Pre-funded accounts available:
+[SOLO-NODE]    Account 1: 0x7567d83b7b8d80addcb281a71d54fc7b3364ffed
+[SOLO-NODE]    Account 2: 0xd3ae78222beadb038203be21ed5ce7c9b1bff602
+[SOLO-NODE]    Account 3: 0x733b7269443c70de16bbf9b0615307884bcc5636
+[SOLO-NODE] 🪙 B3TR Token deployed at: 0x5ef79995fe8a89e0812330e4378eb2660cede699
+[SOLO-NODE]    Each account has 100,000 B3TR tokens for testing
+[SOLO-NODE] ✅ Solo Node integrated into Express server
+[SOLO-NODE] 🌐 Available at /solo/* endpoints
+[SOLO-NODE] Solo Node enabled for development environment
+ReCircle server running on port 5000
+Memory optimization enabled: true
+Server bound to 0.0.0.0:5000 for external access
+Receipt approval webhook received from Google Sheet: Receipt ID: TEST_003
+Receipt approval webhook received from Google Sheet: Receipt ID: TEST_003
+[User API] GET /api/users/103 - currentStreak: 0, tokenBalance: 0
+[User API] GET /api/users/103 - currentStreak: 0, tokenBalance: 0
+1:42:09 AM [receipts] Receipt validation request received. Debug mode: enabled (TESTING: forced enabled)
+1:42:09 AM [receipts] Starting receipt validation with AI...
+1:42:09 AM [openai] Starting OpenAI receipt analysis with model: gpt-4-turbo...
+1:42:09 AM [openai] OpenAI request timeout set to 40s with 3 retries
+1:42:18 AM [openai] OpenAI response received in 8.709s (836 chars)
+1:42:18 AM [receipts] Receipt date validation failed in analysis: 2025-07-10 (2025-07-10) is 31 days old (max: 30 days - TESTING MODE)
+[User API] GET /api/users/103 - currentStreak: 0, tokenBalance: 0
+[User API] GET /api/users/103 - currentStreak: 0, tokenBalance: 0
+Receipt approval webhook received from Google Sheet: Receipt ID: TEST_003
+Receipt approval webhook received from Google Sheet: Receipt ID: TEST_003
+1:46:40 AM [vite] hmr update /src/utils/VeChainKitProvider.tsx, /src/index.css?v=A8ta5C4QIW0LNwasFPKUR
+1:46:43 AM [vite] hmr update /src/utils/VeChainKitProvider.tsx, /src/index.css?v=A8ta5C4QIW0LNwasFPKUR (x2)
+1:46:51 AM [vite] hmr update /src/utils/VeChainKitProvider.tsx, /src/index.css?v=A8ta5C4QIW0LNwasFPKUR (x3)
+[User API] GET /api/users/103 - currentStreak: 0, tokenBalance: 0
+[User API] GET /api/users/103 - currentStreak: 0, tokenBalance: 0
+1:47:59 AM [receipts] Receipt validation request received. Debug mode: enabled (TESTING: forced enabled)
+1:47:59 AM [receipts] Starting receipt validation with AI...
+1:47:59 AM [openai] Starting OpenAI receipt analysis with model: gpt-4-turbo...
+1:47:59 AM [openai] OpenAI request timeout set to 40s with 3 retries
+1:48:07 AM [openai] OpenAI response received in 7.63s (848 chars)
+1:48:07 AM [receipts] Receipt date validation passed: 2025-08-08 (2025-08-08) is 2 days old (TESTING MODE: 30 day limit)
+1:48:07 AM [receipts] Receipt from sustainable store (waymo, category: ride_share) is acceptable
+Applied digital payment bonus: +0.3 B3TR for using Apple Pay
+1:48:07 AM [receipts] Estimated reward calculation:
+            - Base reward: 8 B3TR
+            - Digital payment bonus: 0.3 B3TR
+            - VeChain Visa bonus: 0 B3TR
+            - Total payment bonuses: 0.3 B3TR
+            - Final estimated reward: 8.3 B3TR
+          
+Receipt submission received: {
+  userId: 103,
+  walletAddress: '103',
+  storeId: 1,
+  storeName: 'Waymo',
+  amount: 8.3,
+  purchaseDate: '2025-08-10',
+  category: 'ride_share',
+  imageUrl: null,
+  isTestMode: true
+}
+Is test mode: true
+1:48:07 AM [receipts] Receipt date validation passed: 2025-08-10 (2025-08-10) is 0 days old
+🧪 TESTING MODE: Skipping duplicate receipt checking in submission phase for B3TR wallet testing
+[BLOCKCHAIN] Transportation service detected: Waymo - setting confidence to 0.95
+1:48:07 AM [receipts] 🎯 THRIFT STORE DETECTION:
+          - Store name check: NO (Waymo)
+          - Thrift flag check: NO
+          - Store ID check: YES (ID: 1)
+          - Confidence: 0.95
+          - Final decision: IS_THRIFT_STORE
+1:48:07 AM [receipts] ⚠️ CRITICAL OVERRIDE: Forcing bypass of ALL manual reviews for verified thrift store Waymo with confidence 0.95
+1:48:07 AM [receipts] Thrift store Waymo detected - Original flags: sentForManualReview=false, isTimeoutFallback=false, aiTestMode=false
+1:48:07 AM [receipts] 🧪 TEST MODE CHECK: req.body.isTestMode=true, analysisResult.testMode=undefined, isFromTestMode=true
+1:48:07 AM [receipts] 🧪 TEST MODE OVERRIDE: Bypassing manual review for test receipt - immediate token rewards enabled
+1:48:07 AM [receipts] Manual review decision: NOT NEEDED
+Receipt data ready for creation: {
+  storeId: 1,
+  userId: 103,
+  amount: 8.3,
+  purchaseDate: 2025-08-10T00:00:00.000Z,
+  imageUrl: null,
+  tokenReward: 8,
+  category: 're-use item',
+  needsManualReview: false
+}
+New receipt created: {
+  id: 3,
+  storeId: 1,
+  userId: 103,
+  amount: 8.3,
+  purchaseDate: 2025-08-10T00:00:00.000Z,
+  imageUrl: null,
+  category: 're-use item',
+  verified: false,
+  tokenReward: 8,
+  needsManualReview: false,
+  hasImage: false,
+  createdAt: 2025-08-10T01:48:07.243Z
+}
+1:48:07 AM [receipts] 🔄 FINAL THRIFT STORE OVERRIDE: Bypassing manual review for Waymo
+1:48:07 AM [receipts] ✅ Thrift store receipt #3 automatically verified!
+Receipt token calculation - raw data: {"receiptAmount":8.3,"tokenRewardProvided":8}
+Using provided token reward as base: 8 tokens
+Test mode - first receipt, not applying streak multiplier to 8 tokens
+Reward after streak logic: 8 tokens (no multiplier)
+Payment method bonuses:
+          - Payment method: Not specified
+          - Card last four: Not applicable
+          - Digital payment bonus: 0 B3TR
+          - VeChain Visa bonus: 0 B3TR
+          - Total payment bonuses: 0 B3TR
+          - Final reward with payment bonuses: 8 B3TR
+        
+[User API] GET /api/users/103 - currentStreak: 1, tokenBalance: 0
+[ACHIEVEMENT DEBUG] Starting achievement check for user 103
+[ACHIEVEMENT DEBUG] User has 1 receipts
+[ACHIEVEMENT DEBUG] Is first receipt: true
+Checking 0 transactions for achievement first_receipt
+No existing achievement transactions found for first_receipt
+[ACHIEVEMENT DEBUG] Already has achievement: false
+[ACHIEVEMENT DEBUG] Achievement conditions:
+          - User ID: 103
+          - Is first receipt? true (receipts count: 1)
+          - Already has first_receipt achievement? false
+        
+[ACHIEVEMENT DEBUG] Force award: true
+[ACHIEVEMENT DEBUG] Should award first receipt: true
+[ACHIEVEMENT DEBUG] Force awarding first_receipt achievement in test mode
+[ACHIEVEMENT DEBUG] Achievement bonus calculated: 10 B3TR
+Token reward breakdown:
+          - Starting balance: 0 B3TR
+          - Base receipt reward: 8 B3TR
+          - Final receipt reward: 8 B3TR
+          - Achievement bonus (if first receipt): 10 B3TR
+          - Total new rewards: 18 B3TR
+        
+Receipt #3 automatically verified and tokens awarded
+First receipt (and not previously awarded)! Adding 10 B3TR achievement bonus as a separate transaction
+Achievement first_receipt tracked for user 103 with reward 10 B3TR
+Achievement bonus awarded: 10 B3TR for first receipt
+TEST MODE - Updating user balance: 0 + 18 = 18
+[User API] GET /api/users/103 - currentStreak: 1, tokenBalance: 0
+[BLOCKCHAIN] Triggering 70/30 distribution for receipt 3
+[BLOCKCHAIN] Receipt needsManualReview: false, shouldAwardTokens: true
+[BLOCKCHAIN] FORCED EXECUTION - About to execute blockchain distribution
+[BLOCKCHAIN] Starting distribution: 18 B3TR to user 0xAbEf6032B9176C186F6BF984f548bdA53349f70a
+[BLOCKCHAIN] HIGH CONFIDENCE (0.95) - Using real blockchain distribution
+[BLOCKCHAIN] 🚀 Triggering 70/30 distribution for receipt #3
+[BLOCKCHAIN] Attempting REAL B3TR distribution to VeChain testnet
+[BLOCKCHAIN] FORCE TEST - Distribution will execute regardless of confidence
+[BLOCKCHAIN] About to import working-distribution module...
+[BLOCKCHAIN] Module imported successfully
+[BLOCKCHAIN] 🔍 RAW AMOUNT DEBUG:
+[BLOCKCHAIN] - totalRewards (raw): 18
+[BLOCKCHAIN] - totalRewards type: number
+[BLOCKCHAIN] - Expected wei units: 18 × 10^18
+[REAL-B3TR] 🔥 DISTRIBUTION FUNCTION CALLED - Starting error-resistant distribution
+[REAL-B3TR] 🚀 Starting real B3TR distribution
+[REAL-B3TR] Recipient: 0xAbEf6032B9176C186F6BF984f548bdA53349f70a
+[REAL-B3TR] Total: 18 B3TR → User: 12.6, App: 5.3999999999999995
+[REAL-B3TR] Environment check:
+[REAL-B3TR] - DISTRIBUTOR_PRIVATE_KEY: SET
+[REAL-B3TR] - B3TR_CONTRACT_ADDRESS: 0xbf64cf86894Ee0877C4e7d03936e35Ee8D8b864F
+[REAL-B3TR] - X2EARNREWARDSPOOL_ADDRESS: 0x5F8f86B8D0Fa93cdaE20936d150175dF0205fB38
+[REAL-B3TR] Connected to VeChain testnet at https://testnet.veblocks.net
+[REAL-B3TR] Private key validation:
+[REAL-B3TR] - Raw length: 66
+[REAL-B3TR] - Has 0x prefix: true
+[REAL-B3TR] - Clean key length: 64
+[REAL-B3TR] - Buffer created successfully, length: 32
+[REAL-B3TR] Deriving address from private key...
+[REAL-B3TR] Distributor wallet: 0xf1f72b305b7bf7b25e85d356927af36b88dc84ee
+[REAL-B3TR] User: 12.6 B3TR (12600000000000000000 wei) → 0xAbEf6032B9176C186F6BF984f548bdA53349f70a
+[REAL-B3TR] App: 5.3999999999999995 B3TR (5399999999999998976 wei) → 0x119761865b79bea9e7924edaa630942322ca09d1
+[REAL-B3TR] Fetching best block from https://testnet.veblocks.net/blocks/best
+[REAL-B3TR] Using block 22475282 (0x0156f2129ff032a1a506d15c33a208451c626e6e7127879d5d53e2bc5e363790)
+[REAL-B3TR] Signing user transaction...
+[REAL-B3TR] Signing app transaction...
+[REAL-B3TR] Submitting user transaction to https://testnet.veblocks.net/transactions
+[REAL-B3TR] Submitting app transaction to https://testnet.veblocks.net/transactions
+[REAL-B3TR] ✅ User transaction submitted: 0x1ed18e5cc3e7146b92902c746df76082655097139403482bda8eb105d240cc99
+[REAL-B3TR] ✅ App transaction submitted: 0xe944ab48b61599ab853edaa40e502a5f23cdf287390647fd6b4b9b21213aec97
+[REAL-B3TR] Explorer URLs:
+[REAL-B3TR] - User: https://explore-testnet.vechain.org/transactions/0x1ed18e5cc3e7146b92902c746df76082655097139403482bda8eb105d240cc99
+[REAL-B3TR] - App: https://explore-testnet.vechain.org/transactions/0xe944ab48b61599ab853edaa40e502a5f23cdf287390647fd6b4b9b21213aec97
+[BLOCKCHAIN] ✅ Real B3TR distribution successful!
+[BLOCKCHAIN] User TX: 0x1ed18e5cc3e7146b92902c746df76082655097139403482bda8eb105d240cc99
+[BLOCKCHAIN] App TX: 0xe944ab48b61599ab853edaa40e502a5f23cdf287390647fd6b4b9b21213aec97
+[BLOCKCHAIN] Explorer URLs:
+[BLOCKCHAIN] - User: https://explore-testnet.vechain.org/transactions/0x1ed18e5cc3e7146b92902c746df76082655097139403482bda8eb105d240cc99
+[BLOCKCHAIN] - App: https://explore-testnet.vechain.org/transactions/0xe944ab48b61599ab853edaa40e502a5f23cdf287390647fd6b4b9b21213aec97
+First receipt ever - setting streak to 1
+About to update user 103 streak from 1 to 1
+[User API] GET /api/users/103 - currentStreak: 1, tokenBalance: 18
+[User API] GET /api/users/103 - currentStreak: 1, tokenBalance: 18
+[STORAGE DEBUG] updateUserStreak called for user 103, setting streak to 1
+[STORAGE DEBUG] User 103 streak updated to 1
+User streak update details:
+            - User ID: 103
+            - Old streak: 1
+            - New streak: 1
+            - Updated user object streak: 1
+          
+[User API] GET /api/users/103 - currentStreak: 1, tokenBalance: 18
+Verification - User 103 streak is now: 1
+Test mode - Updated user streak to: 1
+[WEBHOOK] 📊 Logging receipt submission to Google Sheets for Uber - Receipt ID: 3
+[WEBHOOK] Google Sheets logging triggered - Event Type: submission
+[WEBHOOK] Purchase date transformed: Sun Aug 10 2025 00:00:00 GMT+0000 (Coordinated Universal Time) → 2025-08-10
+[WEBHOOK] Using sustainability category: re-use item
+[WEBHOOK] Validation passed for required fields: storeName, purchaseDate, amount, tokenReward, containsPreOwnedItems, paymentMethod, preOwnedKeywordsFound, sustainabilityCategory
+1:48:08 AM [webhooks] Sending webhook to Google Sheets for submission event - Receipt ID: 3
+[WEBHOOK PAYLOAD] Store: Uber, Date: 2025-08-10, Amount: 8.3, PreOwned: false, Reward: 8, Category: re-use item
+[WEBHOOK PAYLOAD FULL] {"receiptId":3,"receipt_id":3,"storeName":"Uber","store_name":"Uber","storeId":1,"store_id":1,"userId":103,"user_id":103,"username":"user_dozf3fmq","walletAddress":"0xAbEf6032B9176C186F6BF984f548bdA53349f70a","wallet_address":"0xAbEf6032B9176C186F6BF984f548bdA53349f70a","purchaseAmount":8.3,"purchase_amount":8.3,"purchaseDate":"2025-08-10","purchase_date":"2025-08-10","receiptCategory":"re-use item","receipt_category":"re-use item","containsPreOwned":false,"contains_pre_owned":false,"preOwnedKeywordsFound":"","pre_owned_keywords_found":"","sustainabilityTags":"re-use item","sustainability_tags":"re-use item","paymentMethod":{},"payment_method":{},"paymentIsDigital":false,"payment_is_digital":false,"paymentCardLastFour":null,"payment_card_last_four":null,"isVechainVisa":false,"is_vechain_visa":false,"baseReward":8,"base_reward":8,"streakMultiplier":1,"streak_multiplier":1,"digitalPaymentBonus":0,"digital_payment_bonus":0,"vechainVisaBonus":0,"vechain_visa_bonus":0,"finalReward":8,"final_reward":8,"tokenReward":8,"confidenceScore":0,"confidence_score":0,"validationReasons":"","validation_reasons":"","isAcceptable":true,"is_acceptable":true,"userStreak":1,"user_streak":1,"tokenBalance":0,"token_balance":0,"timestamp":"2025-08-10T01:48:08.190Z","eventType":"submission","event_type":"submission","isTestMode":true,"is_test_mode":true,"appVersion":"1.0.4","app_version":"1.0.4","debugHasReceipt":true,"_debug_has_receipt":true,"debugHasUser":true,"_debug_has_user":true,"debugHasRewards":true,"_debug_has_rewards":true,"debugWebhookAttemptTime":"2025-08-10T01:48:08.190Z","_debug_webhook_attempt_time":"2025-08-10T01:48:08.190Z"}
+[WEBHOOK] Sending request to: https://script.google.com/macros/s/AKfycbzDqopOu-WNEt9vxOn9Qrm0aD4K9gOnzj7AgRw-zXLJ8BtYk5_0V8d0dDyv816J-Eb3/exec
+[WEBHOOK] Response not OK: Status 404, Text: <!DOCTYPE html><html lang="en"><head><meta name="description" content="Web word processing, presentations and spreadsheets"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0"><link rel="shortcut icon" href="//docs.google.com/favicon.ico"><title>Page Not Found</title><meta name="referrer" content="origin"><link href="//fonts.googleapis.com/css?family=Product+Sans" rel="stylesheet" type="text/css" nonce="SIWhbeov1YGFlYHABl-cXA"><style nonce="SIWhbeov1YGFlYHABl-cXA">.goog-inline-block{position:relative;display:-moz-inline-box;display:inline-block}* html .goog-inline-block{display:inline}*:first-child+html .goog-inline-block{display:inline}#drive-logo{margin:18px 0;position:absolute;white-space:nowrap}.docs-drivelogo-img{background-image:url(//ssl.gstatic.com/images/branding/googlelogo/1x/googlelogo_color_116x41dp.png);-webkit-background-size:116px 41px;background-size:116px 41px;display:inline-block;height:41px;vertical-align:bottom;width:116px}.docs-drivelogo-text{color:#000;display:inline-block;opacity:.54;text-decoration:none;font-family:"Product Sans",Arial,Helvetica,sans-serif;font-size:32px;text-rendering:optimizeLegibility;position:relative;top:-6px;left:-7px;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}@media (-webkit-min-device-pixel-ratio:1.5),(min-resolution:144dpi){.docs-drivelogo-img{background-image:url(//ssl.gstatic.com/images/branding/googlelogo/2x/googlelogo_color_116x41dp.png)}}sentinel{}</style><style type="text/css" nonce="SIWhbeov1YGFlYHABl-cXA">body {background-color: #fff; font-family: Arial,sans-serif; font-size: 13px; margin: 0; padding: 0;}a, a:link, a:visited {color: #112ABB;}</style><style type="text/css" nonce="SIWhbeov1YGFlYHABl-cXA">.errorMessage {font-size: 12pt; font-weight: bold; line-height: 150%;}</style></head><body><div id="outerContainer"><div id="innerContainer"><div style="position: absolute; top: -80px;"><div id="drive-logo"><a href="/"><span class="docs-drivelogo-img" title="Google logo"></span><span class="docs-drivelogo-text">&nbsp;Drive</span></a></div></div><div align="center"><p class="errorMessage" style="padding-top: 50px">Sorry, the file you have requested does not exist.</p><p>Make sure that you have the correct URL and the file exists.</p><div style="background: #F0F6FF; border: 1px solid black; margin-top: 35px; padding: 10px 125px; width: 300px;"><p><strong>Get stuff done with Google Drive</strong></p><p>Apps in Google Drive make it easy to create, store and share online documents, spreadsheets, presentations and more.</p><p>Learn more at <a href="https://drive.google.com/start/apps">drive.google.com/start/apps</a>.</p></div></div></div></div></body><style nonce="SIWhbeov1YGFlYHABl-cXA">html {height: 100%; overflow: auto;}body {height: 100%; overflow: auto;}#outerContainer {margin: auto; max-width: 750px;}#innerContainer {margin-bottom: 20px; margin-left: 40px; margin-right: 40px; margin-top: 80px; position: relative;}</style></html>
+1:48:08 AM [webhooks] ⚠️ Error sending receipt data to Google Sheets: Google Sheets webhook failed with status 404: <!DOCTYPE html><html lang="en"><head><meta name="description" content="Web word processing, presentations and spreadsheets"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0"><link rel="shortcut icon" href="//docs.google.com/favicon.ico"><title>Page Not Found</title><meta name="referrer" content="origin"><link href="//fonts.googleapis.com/css?family=Product+Sans" rel="stylesheet" type="text/css" nonce="SIWhbeov1YGFlYHABl-cXA"><style nonce="SIWhbeov1YGFlYHABl-cXA">.goog-inline-block{position:relative;display:-moz-inline-box;display:inline-block}* html .goog-inline-block{display:inline}*:first-child+html .goog-inline-block{display:inline}#drive-logo{margin:18px 0;position:absolute;white-space:nowrap}.docs-drivelogo-img{background-image:url(//ssl.gstatic.com/images/branding/googlelogo/1x/googlelogo_color_116x41dp.png);-webkit-background-size:116px 41px;background-size:116px 41px;display:inline-block;height:41px;vertical-align:bottom;width:116px}.docs-drivelogo-text{color:#000;display:inline-block;opacity:.54;text-decoration:none;font-family:"Product Sans",Arial,Helvetica,sans-serif;font-size:32px;text-rendering:optimizeLegibility;position:relative;top:-6px;left:-7px;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}@media (-webkit-min-device-pixel-ratio:1.5),(min-resolution:144dpi){.docs-drivelogo-img{background-image:url(//ssl.gstatic.com/images/branding/googlelogo/2x/googlelogo_color_116x41dp.png)}}sentinel{}</style><style type="text/css" nonce="SIWhbeov1YGFlYHABl-cXA">body {background-color: #fff; font-family: Arial,sans-serif; font-size: 13px; margin: 0; padding: 0;}a, a:link, a:visited {color: #112ABB;}</style><style type="text/css" nonce="SIWhbeov1YGFlYHABl-cXA">.errorMessage {font-size: 12pt; font-weight: bold; line-height: 150%;}</style></head><body><div id="outerContainer"><div id="innerContainer"><div style="position: absolute; top: -80px;"><div id="drive-logo"><a href="/"><span class="docs-drivelogo-img" title="Google logo"></span><span class="docs-drivelogo-text">&nbsp;Drive</span></a></div></div><div align="center"><p class="errorMessage" style="padding-top: 50px">Sorry, the file you have requested does not exist.</p><p>Make sure that you have the correct URL and the file exists.</p><div style="background: #F0F6FF; border: 1px solid black; margin-top: 35px; padding: 10px 125px; width: 300px;"><p><strong>Get stuff done with Google Drive</strong></p><p>Apps in Google Drive make it easy to create, store and share online documents, spreadsheets, presentations and more.</p><p>Learn more at <a href="https://drive.google.com/start/apps">drive.google.com/start/apps</a>.</p></div></div></div></div></body><style nonce="SIWhbeov1YGFlYHABl-cXA">html {height: 100%; overflow: auto;}body {height: 100%; overflow: auto;}#outerContainer {margin: auto; max-width: 750px;}#innerContainer {margin-bottom: 20px; margin-left: 40px; margin-right: 40px; margin-top: 80px; position: relative;}</style></html>
+[WEBHOOK ERROR] Google Sheets webhook failed with status 404: <!DOCTYPE html><html lang="en"><head><meta name="description" content="Web word processing, presentations and spreadsheets"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0"><link rel="shortcut icon" href="//docs.google.com/favicon.ico"><title>Page Not Found</title><meta name="referrer" content="origin"><link href="//fonts.googleapis.com/css?family=Product+Sans" rel="stylesheet" type="text/css" nonce="SIWhbeov1YGFlYHABl-cXA"><style nonce="SIWhbeov1YGFlYHABl-cXA">.goog-inline-block{position:relative;display:-moz-inline-box;display:inline-block}* html .goog-inline-block{display:inline}*:first-child+html .goog-inline-block{display:inline}#drive-logo{margin:18px 0;position:absolute;white-space:nowrap}.docs-drivelogo-img{background-image:url(//ssl.gstatic.com/images/branding/googlelogo/1x/googlelogo_color_116x41dp.png);-webkit-background-size:116px 41px;background-size:116px 41px;display:inline-block;height:41px;vertical-align:bottom;width:116px}.docs-drivelogo-text{color:#000;display:inline-block;opacity:.54;text-decoration:none;font-family:"Product Sans",Arial,Helvetica,sans-serif;font-size:32px;text-rendering:optimizeLegibility;position:relative;top:-6px;left:-7px;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}@media (-webkit-min-device-pixel-ratio:1.5),(min-resolution:144dpi){.docs-drivelogo-img{background-image:url(//ssl.gstatic.com/images/branding/googlelogo/2x/googlelogo_color_116x41dp.png)}}sentinel{}</style><style type="text/css" nonce="SIWhbeov1YGFlYHABl-cXA">body {background-color: #fff; font-family: Arial,sans-serif; font-size: 13px; margin: 0; padding: 0;}a, a:link, a:visited {color: #112ABB;}</style><style type="text/css" nonce="SIWhbeov1YGFlYHABl-cXA">.errorMessage {font-size: 12pt; font-weight: bold; line-height: 150%;}</style></head><body><div id="outerContainer"><div id="innerContainer"><div style="position: absolute; top: -80px;"><div id="drive-logo"><a href="/"><span class="docs-drivelogo-img" title="Google logo"></span><span class="docs-drivelogo-text">&nbsp;Drive</span></a></div></div><div align="center"><p class="errorMessage" style="padding-top: 50px">Sorry, the file you have requested does not exist.</p><p>Make sure that you have the correct URL and the file exists.</p><div style="background: #F0F6FF; border: 1px solid black; margin-top: 35px; padding: 10px 125px; width: 300px;"><p><strong>Get stuff done with Google Drive</strong></p><p>Apps in Google Drive make it easy to create, store and share online documents, spreadsheets, presentations and more.</p><p>Learn more at <a href="https://drive.google.com/start/apps">drive.google.com/start/apps</a>.</p></div></div></div></div></body><style nonce="SIWhbeov1YGFlYHABl-cXA">html {height: 100%; overflow: auto;}body {height: 100%; overflow: auto;}#outerContainer {margin: auto; max-width: 750px;}#innerContainer {margin-bottom: 20px; margin-left: 40px; margin-right: 40px; margin-top: 80px; position: relative;}</style></html>
+[WEBHOOK ERROR DETAILS] {
+  eventType: 'submission',
+  receiptId: 3,
+  storeName: 'Uber',
+  errorType: 'Error',
+  timestamp: '2025-08-10T01:48:08.710Z'
+}
+[WEBHOOK] ✅ Receipt submission webhook completed in 523ms
+[User API] GET /api/users/103 - currentStreak: 1, tokenBalance: 18
+[User API] GET /api/users/103 - currentStreak: 1, tokenBalance: 18
+1:48:42 AM [receipts] Receipt validation request received. Debug mode: enabled (TESTING: forced enabled)
+1:48:42 AM [receipts] Starting receipt validation with AI...
+1:48:42 AM [openai] Starting OpenAI receipt analysis with model: gpt-4-turbo...
+1:48:42 AM [openai] OpenAI request timeout set to 40s with 3 retries
+1:48:49 AM [openai] OpenAI response received in 7.232s (749 chars)
+1:48:49 AM [receipts] Receipt date validation failed in analysis: 2025-07-10 (2025-07-10) is 31 days old (max: 30 days - TESTING MODE)
+[User API] GET /api/users/103 - currentStreak: 1, tokenBalance: 18
+[User API] GET /api/users/103 - currentStreak: 1, tokenBalance: 18
