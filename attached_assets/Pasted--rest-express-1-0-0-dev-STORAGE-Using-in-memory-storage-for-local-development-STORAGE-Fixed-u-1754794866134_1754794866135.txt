@@ -1,0 +1,49 @@
+> rest-express@1.0.0 dev
+[STORAGE] Using in-memory storage for local development
+[STORAGE] Fixed user 1 streak to 1 based on receipt activity
+[BLOCKCHAIN] ✅ Using private key for wallet: 0xF1f72b305b7bf7b25e85D356927aF36b88dC84Ee
+[BLOCKCHAIN] Real blockchain transactions enabled
+2:58:34 AM [openai] OpenAI client initialized successfully
+Server initialized with wallet addresses: 
+  - REWARD_DISTRIBUTOR_WALLET: 0xF1f72b305b7bf7b25e85D356927aF36b88dC84Ee
+  - CREATOR_FUND_WALLET: 0x87c844e3314396ca43e5a6065e418d26a09db02b
+  - APP_FUND_WALLET: 0x119761865b79bea9e7924edaa630942322ca09d1
+
+✅ All blockchain configuration variables are set
+Initializing memory optimization for development
+[MEMORY] Environment configured for runtime:
+[MEMORY] NODE_OPTIONS: --expose-gc --max-old-space-size=4096 --max-semi-space-size=128
+[MEMORY] UV_THREADPOOL_SIZE: 64
+[MEMORY] ⚠️  Garbage collection not available - memory monitoring disabled
+[MEMORY] To enable: restart with NODE_OPTIONS="--expose-gc"
+ℹ️  Pierre VeBetterDAO contract system disabled (using direct B3TR distribution instead)
+[SOLO-NODE] 🔍 Checking solo mode setup: {
+  VITE_SOLO_MODE_ENABLED: "'true'",
+  SOLO_MODE_ENABLED: "'true'",
+  NODE_ENV: "'development'",
+  viteEnabled: true,
+  soloEnabled: true,
+  isDev: true,
+  finalSoloEnabled: true
+}
+[SOLO-NODE] 🚀 Setting up integrated VeChain Solo Node routes
+[SOLO-NODE] 🔧 Initializing Solo Node Genesis State...
+[SOLO-NODE] ✅ Genesis block created
+[SOLO-NODE]    Block #0: 0x00000000851caf3cfdb6e899cf5958bfb1ac3413d346d43539627e6be7ec1b4a
+[SOLO-NODE] 💰 Pre-funded accounts available:
+[SOLO-NODE]    Account 1: 0x7567d83b7b8d80addcb281a71d54fc7b3364ffed
+[SOLO-NODE]    Account 2: 0xd3ae78222beadb038203be21ed5ce7c9b1bff602
+[SOLO-NODE]    Account 3: 0x733b7269443c70de16bbf9b0615307884bcc5636
+[SOLO-NODE] 🪙 B3TR Token deployed at: 0x5ef79995fe8a89e0812330e4378eb2660cede699
+[SOLO-NODE]    Each account has 100,000 B3TR tokens for testing
+[SOLO-NODE] ✅ Solo Node integrated into Express server
+[SOLO-NODE] 🌐 Available at /solo/* endpoints
+[SOLO-NODE] Solo Node enabled for development environment
+ReCircle server running on port 5000
+Memory optimization enabled: true
+Server bound to 0.0.0.0:5000 for external access
+🔍 Checking VeBetterDAO Treasury Status...
+💰 Simulated Treasury Funds: 10000 B3TR
+   ⚠️  Note: Using simulation until VeChain SDK integration is complete
+📊 Treasury Status: AUTHORIZED
+💰 Available Funds: 10000 B3TR
