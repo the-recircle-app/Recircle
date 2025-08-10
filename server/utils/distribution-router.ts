@@ -111,3 +111,6 @@ export function getDistributionInfo() {
         ]
   };
 }
+
+// Legacy alias for backward compatibility
+export const distributeTokens = distributeRewards;

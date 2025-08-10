@@ -3346,11 +3346,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
               console.log(`[BLOCKCHAIN] - Expected wei units: ${totalRewards} × 10^18`);
               
               // Execute B3TR distribution with 70/30 split using distribution router
-              const distributionResult = await distributeTokens(
-                userWalletAddress,
-                totalRewards,
-                submittedUserId
-              );
+              const distributionResult = await distributeTokens({
+                recipientAddress: userWalletAddress,
+                totalAmount: totalRewards,
+                isTestMode: false
+              });
               
               if (distributionResult.success) {
                 console.log(`[BLOCKCHAIN] ✅ Real B3TR distribution successful!`);
