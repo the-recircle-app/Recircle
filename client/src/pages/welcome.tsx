@@ -30,7 +30,7 @@ export default function Welcome() {
       {/* Why Choose ReCircle - Dark Section */}
       <div className="bg-slate-800 py-16 px-6">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-16 text-white">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-16 text-gray-50">
             Why Choose ReCircle?
           </h2>
           <div className="grid md:grid-cols-3 gap-8 md:gap-12">
@@ -39,7 +39,7 @@ export default function Welcome() {
               <div className="w-20 h-20 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-blue-500">
                 <DollarSign className="w-10 h-10 text-blue-400" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-4">Earn Real Tokens</h3>
+              <h3 className="text-xl font-bold text-gray-50 mb-4">Earn Real Tokens</h3>
               <p className="text-gray-300 leading-relaxed">
                 Get rewarded with B3TR tokens for sustainable transportation — ridesharing, electric rentals, and public transit
               </p>
@@ -50,7 +50,7 @@ export default function Welcome() {
               <div className="w-20 h-20 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-indigo-500">
                 <Zap className="w-10 h-10 text-indigo-400" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-4">Boost Rewards</h3>
+              <h3 className="text-xl font-bold text-gray-50 mb-4">Boost Rewards</h3>
               <p className="text-gray-300 leading-relaxed">
                 Build daily streaks and unlock multipliers for consistent sustainable transportation choices
               </p>
@@ -61,7 +61,7 @@ export default function Welcome() {
               <div className="w-20 h-20 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-purple-600">
                 <CheckCircle className="w-10 h-10 text-purple-400" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-4">Real Impact</h3>
+              <h3 className="text-xl font-bold text-gray-50 mb-4">Real Impact</h3>
               <p className="text-gray-300 leading-relaxed">
                 B3TR tokens represent real value, verified on VeChain blockchain for genuine environmental impact
               </p>
@@ -117,7 +117,7 @@ export default function Welcome() {
       {/* Ready to Start Earning - Purple Gradient Section */}
       <div className="bg-gradient-to-br from-purple-600 via-purple-700 to-purple-900 py-16 px-6">
         <div className="max-w-2xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-8">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-50 mb-8">
             Ready to Start Earning?
           </h2>
           
