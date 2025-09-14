@@ -9,6 +9,7 @@ export function VeChainKitProviderWrapper({ children }: Props) {
   const privyAppId = import.meta.env.VITE_PRIVY_APP_ID;
   const privyClientId = import.meta.env.VITE_PRIVY_CLIENT_ID;
 
+
   return (
     <VeChainKitProvider
       feeDelegation={{
@@ -16,10 +17,19 @@ export function VeChainKitProviderWrapper({ children }: Props) {
         // Enable fee delegation for better user experience
         delegateAllTransactions: true,
       }}
-      loginMethods={[
-        { method: "vechain", gridColumn: 4 }, // VeChain wallet integration (includes VeWorld)
-        { method: "dappkit", gridColumn: 4 }, // Mobile wallet integration
-      ]}
+      loginMethods={
+        privyAppId && privyClientId 
+          ? [
+              { method: "vechain", gridColumn: 4 }, // VeChain wallet integration (includes VeWorld)
+              { method: "dappkit", gridColumn: 4 }, // Mobile wallet integration
+              { method: "email", gridColumn: 2 }, // Email login via Privy
+              { method: "google", gridColumn: 2 }, // Google login via Privy
+            ]
+          : [
+              { method: "vechain", gridColumn: 4 }, // VeChain wallet integration (includes VeWorld)
+              { method: "dappkit", gridColumn: 4 }, // Mobile wallet integration
+            ]
+      }
       dappKit={{
         allowedWallets: ["veworld", "sync2"],
         // VeWorld mobile app and Sync2 wallet support

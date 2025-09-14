@@ -87,7 +87,7 @@ export default function Welcome() {
               </div>
               <h3 className="text-2xl font-bold text-gray-800 mb-4">Easy Start: Social Login</h3>
               <p className="text-gray-600 max-w-md mx-auto leading-relaxed">
-                Connect with Google, Apple, or email. We'll create a secure blockchain wallet automatically - no app downloads needed.
+                Connect with Google or email. We'll create a secure blockchain wallet automatically - no app downloads needed.
               </p>
             </div>
             
