@@ -164,36 +164,25 @@ export default function SmartWalletConnect({ onConnect }: SmartWalletConnectProp
     );
   }
 
-  // Default: show desktop connection for development/desktop, only show mobile for actual VeWorld mobile app
+  // Default: show VeChain Kit (includes both wallet and social login options)
   return (
-    <div className="space-y-2">
-      {isMobileVeWorld ? (
-        <Button 
-          onClick={handleMobileConnect}
-          disabled={isConnecting}
-          className="w-full"
-        >
-          {isConnecting ? 'Connecting...' : 'Connect Mobile Wallet'}
-        </Button>
-      ) : (
-        <Button 
-          onClick={handleDesktopConnect}
-          disabled={isConnecting}
-          className="w-full"
-        >
-          {isConnecting ? 'Connecting...' : 'Connect Wallet'}
-        </Button>
-      )}
-      
-      {/* Fallback option */}
-      <Button 
-        variant="ghost" 
-        size="sm" 
-        onClick={isMobileVeWorld ? handleDesktopConnect : handleMobileConnect}
-        className="text-xs w-full"
-      >
-        Try {isMobileVeWorld ? 'desktop' : 'mobile'} mode
-      </Button>
-    </div>
+    <VeChainKitProviderWrapper>
+      <div className="space-y-4">
+        <VeChainKitWalletButton />
+        
+        {/* Fallback for users who prefer desktop-only connection */}
+        <div className="text-center">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={handleDesktopConnect}
+            disabled={isConnecting}
+            className="text-xs"
+          >
+            {isConnecting ? 'Connecting...' : 'Use VeWorld Extension Only'}
+          </Button>
+        </div>
+      </div>
+    </VeChainKitProviderWrapper>
   );
 }
