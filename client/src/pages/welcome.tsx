@@ -47,8 +47,8 @@ export default function Welcome() {
             
             {/* Boost Rewards */}
             <div className="text-center">
-              <div className="w-20 h-20 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-purple-500">
-                <Zap className="w-10 h-10 text-purple-400" />
+              <div className="w-20 h-20 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-indigo-500">
+                <Zap className="w-10 h-10 text-indigo-400" />
               </div>
               <h3 className="text-xl font-bold text-white mb-4">Boost Rewards</h3>
               <p className="text-gray-300 leading-relaxed">
