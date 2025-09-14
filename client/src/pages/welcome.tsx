@@ -18,7 +18,7 @@ export default function Welcome() {
             />
           </div>
           
-          <h1 className="text-4xl md:text-5xl font-bold text-blue-600 mb-6">
+          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-6">
             Drive Change, Earn B3TR
           </h1>
           <p className="text-lg md:text-xl text-gray-600 max-w-xl mx-auto leading-relaxed">
