@@ -36,7 +36,7 @@ export default function Welcome() {
           <div className="grid md:grid-cols-3 gap-8 md:gap-12">
             {/* Earn Real Tokens */}
             <div className="text-center">
-              <div className="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
+              <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-800 rounded-full flex items-center justify-center mx-auto mb-6 border border-blue-400">
                 <DollarSign className="w-10 h-10 text-white" />
               </div>
               <h3 className="text-xl font-bold text-white mb-4">Earn Real Tokens</h3>
@@ -47,7 +47,7 @@ export default function Welcome() {
             
             {/* Boost Rewards */}
             <div className="text-center">
-              <div className="w-20 h-20 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+              <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-purple-800 rounded-full flex items-center justify-center mx-auto mb-6 border border-purple-400">
                 <Zap className="w-10 h-10 text-white" />
               </div>
               <h3 className="text-xl font-bold text-white mb-4">Boost Rewards</h3>
@@ -58,7 +58,7 @@ export default function Welcome() {
             
             {/* Real Impact */}
             <div className="text-center">
-              <div className="w-20 h-20 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+              <div className="w-20 h-20 bg-gradient-to-br from-purple-600 to-purple-900 rounded-full flex items-center justify-center mx-auto mb-6 border border-purple-500">
                 <CheckCircle className="w-10 h-10 text-white" />
               </div>
               <h3 className="text-xl font-bold text-white mb-4">Real Impact</h3>
