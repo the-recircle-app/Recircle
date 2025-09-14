@@ -7,8 +7,16 @@ export class PierreOpenAIService {
 
   constructor() {
     const apiKey = process.env.OPENAI_API_KEY;
+    
+    // In development mode, allow running without API key for basic functionality
     if (!apiKey || apiKey.startsWith('sk-proj-abcdefg')) {
-      throw new Error('Valid OpenAI API key required for receipt validation');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🔧 [OPENAI] Running in development mode without API key - mock responses will be used');
+        this.openai = null as any; // Will be handled in validateImage method
+        return;
+      } else {
+        throw new Error('Valid OpenAI API key required for receipt validation in production');
+      }
     }
     
     this.openai = new OpenAI({
@@ -17,6 +25,16 @@ export class PierreOpenAIService {
   }
 
   async validateImage(base64Image: string): Promise<ValidationResult | undefined> {
+    // Return mock response in development mode without API key
+    if (!this.openai && process.env.NODE_ENV === 'development') {
+      console.log('🔧 [OPENAI] Using mock validation response in development mode');
+      return {
+        validityFactor: 0.8,
+        reasoning: "Development mode mock response - receipt appears to be for sustainable transportation",
+        confidence: 0.9
+      } as ValidationResult;
+    }
+    
     try {
       console.log('🔍 [OPENAI] Starting OpenAI Vision API analysis...');
       console.log('🔍 [OPENAI] Image size:', base64Image.length, 'characters');
