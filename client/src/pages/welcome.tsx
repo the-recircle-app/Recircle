@@ -2,6 +2,8 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Scan, Coins, Leaf, ArrowRight, Car, Bus, Zap, Smartphone, Download, Wallet, DollarSign, CheckCircle } from "lucide-react";
+import SmartWalletConnect from "@/components/SmartWalletConnect";
+import { VeChainKitProviderWrapper } from "@/utils/VeChainKitProvider";
 
 export default function Welcome() {
   return (
@@ -121,20 +123,25 @@ export default function Welcome() {
             Ready to Start Earning?
           </h2>
           
-          <div className="space-y-4">
-            <Link href="/home">
-              <Button 
-                size="lg" 
-                className="w-full max-w-md mx-auto flex items-center justify-center bg-gray-50 text-purple-700 hover:bg-gray-200 font-semibold py-4 rounded-xl shadow-lg mb-4"
-              >
-                Get Started
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </Button>
-            </Link>
-            
-            <p className="text-purple-100 text-lg leading-relaxed max-w-md mx-auto">
-              Join thousands earning real blockchain tokens for sustainable transportation choices.
-            </p>
+          <div className="space-y-6 max-w-md mx-auto">
+            {/* Wallet Connection Options */}
+            <VeChainKitProviderWrapper>
+              <div className="space-y-4">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
+                  <h3 className="text-xl font-semibold text-gray-50 mb-4">Choose Your Connection Method</h3>
+                  <SmartWalletConnect 
+                    onConnect={(address) => {
+                      // Navigate to home after connection
+                      window.location.href = '/home';
+                    }}
+                  />
+                </div>
+                
+                <p className="text-purple-100 text-lg leading-relaxed">
+                  Join thousands earning real blockchain tokens for sustainable transportation choices.
+                </p>
+              </div>
+            </VeChainKitProviderWrapper>
           </div>
         </div>
       </div>

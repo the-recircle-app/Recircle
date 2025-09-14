@@ -19,8 +19,6 @@ export function VeChainKitProviderWrapper({ children }: Props) {
       loginMethods={[
         { method: "vechain", gridColumn: 4 }, // VeChain wallet integration (includes VeWorld)
         { method: "dappkit", gridColumn: 4 }, // Mobile wallet integration
-        { method: "email", gridColumn: 2 }, // Email login via Privy
-        { method: "google", gridColumn: 2 }, // Google login via Privy
       ]}
       dappKit={{
         allowedWallets: ["veworld", "sync2"],

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useWallet } from "../context/WalletContext";
+import { Button } from "../components/ui/button";
 import ReCircleLogo from "../components/ReCircleLogo";
 import ReCircleSymbol from "../components/ReCircleSymbol";
 import ReCircleLogoEarth from "../components/ReCircleLogoEarth";
@@ -10,11 +11,10 @@ import BottomNavigation from "../components/BottomNavigation";
 import ActivityCard from "../components/ActivityCard";
 import SupportFooter from "../components/SupportFooter";
 import TokenBalanceRefresher from "../components/TokenBalanceRefresher";
-import SmartWalletConnect from "../components/SmartWalletConnect";
 import { Link, useLocation } from "wouter";
 
 const Home = () => {
-  const { userId, isConnected, tokenBalance, address, refreshTokenBalance } = useWallet();
+  const { userId, isConnected, tokenBalance, address, refreshTokenBalance, disconnect } = useWallet();
   const [, setLocation] = useLocation();
   const [stats, setStats] = useState({
     totalRewards: 0,
@@ -120,10 +120,52 @@ const Home = () => {
         />
       )} */}
       
-      {/* Unified Wallet Button - Always shown */}
-      <div className="p-4 border-b border-gray-700">
-        <SmartWalletConnect />
-      </div>
+      {/* Wallet Status Display */}
+      {isConnected && address ? (
+        <div className="p-4 border-b border-gray-700">
+          <div className="flex items-center justify-between bg-gray-800 rounded-lg p-3">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center">
+                <span className="text-white text-sm font-semibold">
+                  {address.slice(2, 4).toUpperCase()}
+                </span>
+              </div>
+              <div>
+                <p className="text-gray-100 font-medium">Connected Wallet</p>
+                <p className="text-gray-400 text-sm">{address.slice(0, 6)}...{address.slice(-4)}</p>
+              </div>
+            </div>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="text-gray-400 hover:text-gray-200"
+              onClick={async () => {
+                try {
+                  const success = await disconnect();
+                  if (success) {
+                    setLocation("/welcome");
+                  }
+                } catch (error) {
+                  console.error("Error disconnecting:", error);
+                }
+              }}
+            >
+              Disconnect
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="p-4 border-b border-gray-700">
+          <div className="bg-gray-800 rounded-lg p-4 text-center">
+            <p className="text-gray-300 mb-3">Connect your wallet to start earning B3TR tokens</p>
+            <Link href="/welcome">
+              <Button className="w-full">
+                Connect Wallet
+              </Button>
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* Progress banner */}
       <div className="bg-green-600 text-white p-4">
