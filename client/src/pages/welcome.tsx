@@ -5,7 +5,7 @@ import { Scan, Coins, Leaf, ArrowRight, Car, Bus, Zap, Smartphone, Download, Wal
 
 export default function Welcome() {
   return (
-    <div className="min-h-screen bg-gray-50 pb-8">
+    <div className="min-h-screen bg-gray-100 pb-8">
       {/* Hero Section */}
       <div className="px-6 pt-16 pb-16 text-center">
         <div className="max-w-2xl mx-auto">
@@ -71,7 +71,7 @@ export default function Welcome() {
       </div>
 
       {/* Getting Started - Choose Your Way */}
-      <div className="py-16 px-6">
+      <div className="py-16 px-6 bg-gray-100">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-16 text-gray-800">
             Getting Started - Choose Your Way
@@ -125,7 +125,7 @@ export default function Welcome() {
             <Link href="/home">
               <Button 
                 size="lg" 
-                className="w-full max-w-md mx-auto flex items-center justify-center bg-white text-purple-700 hover:bg-gray-100 font-semibold py-4 rounded-xl shadow-lg mb-4"
+                className="w-full max-w-md mx-auto flex items-center justify-center bg-gray-50 text-purple-700 hover:bg-gray-200 font-semibold py-4 rounded-xl shadow-lg mb-4"
               >
                 Get Started
                 <ArrowRight className="w-5 h-5 ml-2" />
