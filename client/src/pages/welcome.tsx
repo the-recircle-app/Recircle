@@ -10,11 +10,11 @@ export default function Welcome() {
       <div className="px-6 pt-16 pb-16 text-center">
         <div className="max-w-2xl mx-auto">
           {/* ReCircle Mascot */}
-          <div className="w-32 h-32 mx-auto mb-8">
+          <div className="w-48 h-48 mx-auto mb-8">
             <img 
               src="/mascot.png" 
               alt="ReCircle Mascot" 
-              className="w-32 h-32 object-contain"
+              className="w-48 h-48 object-contain"
             />
           </div>
           
