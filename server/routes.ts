@@ -3311,26 +3311,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.error(`[BLOCKCHAIN] ❌ No wallet address found for user ${initialUserData.id}!`);
             console.error(`[BLOCKCHAIN] ❌ Cannot distribute blockchain tokens without wallet address`);
           } else {
-            // ===== EXECUTE WORKING BLOCKCHAIN DISTRIBUTION =====
+            // ===== EXECUTE VEBETTERDAO TREASURY DISTRIBUTION =====
             try {
-              console.log(`[BLOCKCHAIN] 🚀 EXECUTING WORKING DISTRIBUTION SYSTEM`);
-              console.log(`[BLOCKCHAIN] Distributing ${totalRewards} B3TR to ${targetWallet}`);
+              // Check if VeBetterDAO treasury system is available
+              const hasVeBetterDAOSecrets = process.env.DISTRIBUTOR_PRIVATE_KEY && 
+                                           process.env.B3TR_CONTRACT_ADDRESS && 
+                                           process.env.X2EARNREWARDSPOOL_ADDRESS;
               
-              const { distributeRealB3TR } = await import('./utils/working-distribution.js');
+              let distributionResult;
               
-              const distributionResult = await distributeRealB3TR(
-                targetWallet,
-                totalRewards,
-                initialUserData.id
-              );
+              if (hasVeBetterDAOSecrets) {
+                console.log(`[BLOCKCHAIN] 🏛️ EXECUTING VEBETTERDAO TREASURY DISTRIBUTION`);
+                console.log(`[BLOCKCHAIN] Distributing ${totalRewards} B3TR to ${targetWallet} via VeBetterDAO treasury`);
+                
+                distributionResult = await distributeTreasuryReward(
+                  targetWallet,
+                  totalRewards,
+                  `Receipt ID: ${newReceipt.id}, User: ${initialUserData.id}`
+                );
+              } else {
+                console.log(`[BLOCKCHAIN] 🚀 EXECUTING DIRECT B3TR DISTRIBUTION (fallback)`);
+                console.log(`[BLOCKCHAIN] Distributing ${totalRewards} B3TR to ${targetWallet}`);
+                
+                const { distributeRealB3TR } = await import('./utils/working-distribution.js');
+                
+                distributionResult = await distributeRealB3TR(
+                  targetWallet,
+                  totalRewards,
+                  initialUserData.id
+                );
+              }
               
               if (distributionResult.success) {
                 console.log(`[BLOCKCHAIN] ✅ SUCCESS! Real B3TR tokens sent to VeWorld wallet!`);
-                console.log(`[BLOCKCHAIN] User TX: ${distributionResult.transactions.user}`);
-                console.log(`[BLOCKCHAIN] App TX: ${distributionResult.transactions.app}`);
-                console.log(`[BLOCKCHAIN] Network: ${distributionResult.network}`);
-                console.log(`[BLOCKCHAIN] User reward: ${distributionResult.userReward} B3TR`);
-                console.log(`[BLOCKCHAIN] App reward: ${distributionResult.appReward} B3TR`);
+                if (hasVeBetterDAOSecrets) {
+                  console.log(`[BLOCKCHAIN] VeBetterDAO Treasury Distribution:`);
+                  console.log(`[BLOCKCHAIN] User TX: ${distributionResult.txHash}`);
+                  console.log(`[BLOCKCHAIN] App TX: ${distributionResult.appTxHash || 'N/A'}`);
+                  console.log(`[BLOCKCHAIN] Method: ${distributionResult.method}`);
+                  console.log(`[BLOCKCHAIN] User reward: ${distributionResult.userAmount} B3TR`);
+                  console.log(`[BLOCKCHAIN] App reward: ${distributionResult.appAmount} B3TR`);
+                } else {
+                  console.log(`[BLOCKCHAIN] Direct Distribution:`);
+                  console.log(`[BLOCKCHAIN] User TX: ${distributionResult.transactions?.user || distributionResult.txHash}`);
+                  console.log(`[BLOCKCHAIN] App TX: ${distributionResult.transactions?.app || 'N/A'}`);
+                  console.log(`[BLOCKCHAIN] Network: ${distributionResult.network || 'VeChain'}`);
+                  console.log(`[BLOCKCHAIN] User reward: ${distributionResult.userReward || distributionResult.userAmount} B3TR`);
+                  console.log(`[BLOCKCHAIN] App reward: ${distributionResult.appReward || distributionResult.appAmount} B3TR`);
+                }
               } else {
                 console.log(`[BLOCKCHAIN] ❌ Distribution failed: ${distributionResult.error}`);
               }
