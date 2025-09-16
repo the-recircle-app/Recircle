@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Scan, Coins, Leaf, ArrowRight, Car, Bus, Zap, Smartphone, Download, Wallet, DollarSign, CheckCircle } from "lucide-react";
 import SmartWalletConnect from "@/components/SmartWalletConnect";
-import { VeChainKitProviderWrapper } from "@/utils/VeChainKitProvider";
+// VeChainKitProviderWrapper removed - using the one from App.tsx instead
 
 export default function Welcome() {
   return (
@@ -125,23 +125,21 @@ export default function Welcome() {
           
           <div className="space-y-6 max-w-md mx-auto">
             {/* Wallet Connection Options */}
-            <VeChainKitProviderWrapper>
-              <div className="space-y-4">
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
-                  <h3 className="text-xl font-semibold text-gray-50 mb-4">Choose Your Connection Method</h3>
-                  <SmartWalletConnect 
-                    onConnect={(address) => {
-                      // Navigate to home after connection
-                      window.location.href = '/home';
-                    }}
-                  />
-                </div>
-                
-                <p className="text-purple-100 text-lg leading-relaxed">
-                  Join thousands earning real blockchain tokens for sustainable transportation choices.
-                </p>
+            <div className="space-y-4">
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
+                <h3 className="text-xl font-semibold text-gray-50 mb-4">Choose Your Connection Method</h3>
+                <SmartWalletConnect 
+                  onConnect={(address) => {
+                    // Navigate to home after connection
+                    window.location.href = '/home';
+                  }}
+                />
               </div>
-            </VeChainKitProviderWrapper>
+              
+              <p className="text-purple-100 text-lg leading-relaxed">
+                Join thousands earning real blockchain tokens for sustainable transportation choices.
+              </p>
+            </div>
           </div>
         </div>
       </div>
