@@ -8,6 +8,13 @@ export function VeChainKitProviderWrapper({ children }: Props) {
   // Get Privy credentials from environment variables
   const privyAppId = import.meta.env.VITE_PRIVY_APP_ID;
   const privyClientId = import.meta.env.VITE_PRIVY_CLIENT_ID;
+  
+  // Debug the actual values to understand the conditional logic issue
+  console.log('[PRIVY-DEBUG] Raw environment values:', {
+    privyAppId: privyAppId ? `present (${privyAppId.length} chars)` : 'missing',
+    privyClientId: privyClientId ? `present (${privyClientId.length} chars)` : 'missing',
+    bothPresent: !!(privyAppId && privyClientId)
+  });
 
 
   return (
@@ -17,31 +24,37 @@ export function VeChainKitProviderWrapper({ children }: Props) {
         // Enable fee delegation for better user experience
         delegateAllTransactions: true,
       }}
-      loginMethods={[
-        { method: "vechain", gridColumn: 4 }, // VeChain ecosystem login
-        { method: "dappkit", gridColumn: 4 }, // Native wallets (VeWorld, Sync2)
-        // NOTE: Social login temporarily disabled - need correct Privy OAuth App Client ID
-        // { method: "email", gridColumn: 2 }, // Social login via Privy
-        // { method: "google", gridColumn: 4 }, // Social login via Privy
-      ]}
+      loginMethods={
+        privyAppId && privyClientId 
+          ? [
+              { method: "vechain", gridColumn: 4 }, // VeChain ecosystem login
+              { method: "dappkit", gridColumn: 4 }, // Native wallets (VeWorld, Sync2)
+              { method: "email", gridColumn: 2 }, // Social login via Privy
+              { method: "google", gridColumn: 4 }, // Social login via Privy
+            ]
+          : [
+              { method: "vechain", gridColumn: 4 }, // VeChain ecosystem login only
+              { method: "dappkit", gridColumn: 4 }, // Native wallets (VeWorld, Sync2) only
+            ]
+      }
       dappKit={{
         allowedWallets: ["veworld", "sync2"],
         // VeWorld mobile app and Sync2 wallet support
       }}
-      // Privy configuration temporarily disabled to prevent React crash from invalid client ID
-      // privy={privyAppId && privyClientId ? {
-      //   appId: privyAppId,
-      //   clientId: privyClientId,
-      //   loginMethods: ['email', 'google'],
-      //   appearance: {
-      //     accentColor: '#8B5CF6', // Purple to match ReCircle branding
-      //     loginMessage: 'Connect with social media or email to start earning B3TR tokens',
-      //     logo: '/mascot.png', // Use ReCircle mascot
-      //   },
-      //   embeddedWallets: {
-      //     createOnLogin: 'users-without-wallets', // Create embedded wallets for social users
-      //   },
-      // } : undefined}
+      // Privy configuration for social login
+      privy={privyAppId && privyClientId ? {
+        appId: privyAppId,
+        clientId: privyClientId,
+        loginMethods: ['email', 'google'],
+        appearance: {
+          accentColor: '#8B5CF6', // Purple to match ReCircle branding
+          loginMessage: 'Connect with social media or email to start earning B3TR tokens',
+          logo: '/mascot.png', // Use ReCircle mascot
+        },
+        embeddedWallets: {
+          createOnLogin: 'users-without-wallets', // Create embedded wallets for social users
+        },
+      } : undefined}
       darkMode={false} // Light mode to match ReCircle branding
       language="en"
       network={{

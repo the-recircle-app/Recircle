@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useWallet } from '../context/WalletContext';
 import VeChainKitWalletButton from './VeChainKitWalletButton';
-import { VeChainKitProviderWrapper } from '../utils/VeChainKitProvider';
 import { useLocation } from 'wouter';
 
 interface SmartWalletConnectProps {
@@ -131,60 +130,56 @@ export default function SmartWalletConnect({ onConnect }: SmartWalletConnectProp
   // If user specifically wants to show mobile kit
   if (showMobileKit) {
     return (
-      <VeChainKitProviderWrapper>
-        <div className="space-y-4">
-          <VeChainKitWalletButton />
-          <div className="flex space-x-2">
+      <div className="space-y-4">
+        <VeChainKitWalletButton />
+        <div className="flex space-x-2">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => setShowMobileKit(false)}
+            className="text-xs flex-1"
+          >
+            Back to desktop mode
+          </Button>
+          {address && (
             <Button 
               variant="ghost" 
               size="sm" 
-              onClick={() => setShowMobileKit(false)}
+              onClick={async () => {
+                // Use proper disconnect function
+                const success = await disconnect();
+                if (success) {
+                  setShowMobileKit(false);
+                  setLocation('/welcome');
+                }
+              }}
               className="text-xs flex-1"
             >
-              Back to desktop mode
+              Disconnect & Reset
             </Button>
-            {address && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={async () => {
-                  // Use proper disconnect function
-                  const success = await disconnect();
-                  if (success) {
-                    setShowMobileKit(false);
-                    setLocation('/welcome');
-                  }
-                }}
-                className="text-xs flex-1"
-              >
-                Disconnect & Reset
-              </Button>
-            )}
-          </div>
+          )}
         </div>
-      </VeChainKitProviderWrapper>
+      </div>
     );
   }
 
   // Default: show VeChain Kit (includes both wallet and social login options)
   return (
-    <VeChainKitProviderWrapper>
-      <div className="space-y-4">
-        <VeChainKitWalletButton />
-        
-        {/* Fallback for users who prefer desktop-only connection */}
-        <div className="text-center">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={handleDesktopConnect}
-            disabled={isConnecting}
-            className="text-xs"
-          >
-            {isConnecting ? 'Connecting...' : 'Use VeWorld Extension Only'}
-          </Button>
-        </div>
+    <div className="space-y-4">
+      <VeChainKitWalletButton />
+      
+      {/* Fallback for users who prefer desktop-only connection */}
+      <div className="text-center">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={handleDesktopConnect}
+          disabled={isConnecting}
+          className="text-xs"
+        >
+          {isConnecting ? 'Connecting...' : 'Use VeWorld Extension Only'}
+        </Button>
       </div>
-    </VeChainKitProviderWrapper>
+    </div>
   );
 }
