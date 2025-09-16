@@ -3,15 +3,17 @@ import { Button } from '@/components/ui/button';
 import { useWallet } from '../context/WalletContext';
 import VeChainKitWalletButton from './VeChainKitWalletButton';
 import { VeChainKitProviderWrapper } from '../utils/VeChainKitProvider';
+import { useLocation } from 'wouter';
 
 interface SmartWalletConnectProps {
   onConnect?: (address: string) => void;
 }
 
 export default function SmartWalletConnect({ onConnect }: SmartWalletConnectProps) {
-  const { address, connect, isConnecting } = useWallet();
+  const { address, connect, disconnect, isConnecting } = useWallet();
   const [isMobileVeWorld, setIsMobileVeWorld] = useState(false);
   const [showMobileKit, setShowMobileKit] = useState(false);
+  const [, setLocation] = useLocation();
 
   useEffect(() => {
     // More precise VeWorld mobile app detection - only true mobile VeWorld app
@@ -112,15 +114,15 @@ export default function SmartWalletConnect({ onConnect }: SmartWalletConnectProp
           variant="ghost" 
           size="sm" 
           onClick={async () => {
-            // Clear wallet state and allow reconnection
-            localStorage.removeItem("walletAddress");
-            localStorage.removeItem("userId");
-            localStorage.removeItem("connectedWallet");
-            window.location.reload();
+            // Use proper disconnect function instead of reloading
+            const success = await disconnect();
+            if (success) {
+              setLocation('/welcome');
+            }
           }}
           className="text-xs w-full"
         >
-          Disconnect & Reconnect
+          Disconnect
         </Button>
       </div>
     );
@@ -145,13 +147,13 @@ export default function SmartWalletConnect({ onConnect }: SmartWalletConnectProp
               <Button 
                 variant="ghost" 
                 size="sm" 
-                onClick={() => {
-                  // Clear wallet state and reload
-                  localStorage.removeItem("walletAddress");
-                  localStorage.removeItem("userId");
-                  localStorage.removeItem("connectedWallet");
-                  setShowMobileKit(false);
-                  window.location.reload();
+                onClick={async () => {
+                  // Use proper disconnect function
+                  const success = await disconnect();
+                  if (success) {
+                    setShowMobileKit(false);
+                    setLocation('/welcome');
+                  }
                 }}
                 className="text-xs flex-1"
               >

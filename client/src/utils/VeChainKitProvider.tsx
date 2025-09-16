@@ -9,10 +9,6 @@ export function VeChainKitProviderWrapper({ children }: Props) {
   const privyAppId = import.meta.env.VITE_PRIVY_APP_ID;
   const privyClientId = import.meta.env.VITE_PRIVY_CLIENT_ID;
 
-  console.log('[VECHAIN-KIT] Privy credentials check:', {
-    hasAppId: !!privyAppId,
-    hasClientId: !!privyClientId
-  });
 
   return (
     <VeChainKitProvider
@@ -32,20 +28,20 @@ export function VeChainKitProviderWrapper({ children }: Props) {
         allowedWallets: ["veworld", "sync2"],
         // VeWorld mobile app and Sync2 wallet support
       }}
-      // Privy configuration temporarily disabled - need correct OAuth App Client ID
-      // privy={{
-      //   appId: privyAppId,
-      //   clientId: privyClientId,
-      //   loginMethods: ['email', 'google'],
-      //   appearance: {
-      //     accentColor: '#8B5CF6', // Purple to match ReCircle branding
-      //     loginMessage: 'Connect with social media or email to start earning B3TR tokens',
-      //     logo: '/mascot.png', // Use ReCircle mascot
-      //   },
-      //   embeddedWallets: {
-      //     createOnLogin: 'users-without-wallets', // Create embedded wallets for social users
-      //   },
-      // }}
+      // Privy configuration for social login
+      privy={privyAppId && privyClientId ? {
+        appId: privyAppId,
+        clientId: privyClientId,
+        loginMethods: ['email', 'google'],
+        appearance: {
+          accentColor: '#8B5CF6', // Purple to match ReCircle branding
+          loginMessage: 'Connect with social media or email to start earning B3TR tokens',
+          logo: '/mascot.png', // Use ReCircle mascot
+        },
+        embeddedWallets: {
+          createOnLogin: 'users-without-wallets', // Create embedded wallets for social users
+        },
+      } : undefined}
       darkMode={false} // Light mode to match ReCircle branding
       language="en"
       network={{
