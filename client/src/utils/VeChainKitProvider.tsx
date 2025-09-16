@@ -28,20 +28,20 @@ export function VeChainKitProviderWrapper({ children }: Props) {
         allowedWallets: ["veworld", "sync2"],
         // VeWorld mobile app and Sync2 wallet support
       }}
-      // Privy configuration for social login
-      privy={privyAppId && privyClientId ? {
-        appId: privyAppId,
-        clientId: privyClientId,
-        loginMethods: ['email', 'google'],
-        appearance: {
-          accentColor: '#8B5CF6', // Purple to match ReCircle branding
-          loginMessage: 'Connect with social media or email to start earning B3TR tokens',
-          logo: '/mascot.png', // Use ReCircle mascot
-        },
-        embeddedWallets: {
-          createOnLogin: 'users-without-wallets', // Create embedded wallets for social users
-        },
-      } : undefined}
+      // Privy configuration temporarily disabled to prevent React crash from invalid client ID
+      // privy={privyAppId && privyClientId ? {
+      //   appId: privyAppId,
+      //   clientId: privyClientId,
+      //   loginMethods: ['email', 'google'],
+      //   appearance: {
+      //     accentColor: '#8B5CF6', // Purple to match ReCircle branding
+      //     loginMessage: 'Connect with social media or email to start earning B3TR tokens',
+      //     logo: '/mascot.png', // Use ReCircle mascot
+      //   },
+      //   embeddedWallets: {
+      //     createOnLogin: 'users-without-wallets', // Create embedded wallets for social users
+      //   },
+      // } : undefined}
       darkMode={false} // Light mode to match ReCircle branding
       language="en"
       network={{
