@@ -233,12 +233,18 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
 
   const disconnect = async (): Promise<boolean> => {
     try {
-      // Clear all wallet connection data from localStorage
+      // Clear all wallet connection data from localStorage first
       localStorage.removeItem("walletAddress");
       localStorage.removeItem("connectedWallet");
       localStorage.removeItem("userId");
       localStorage.removeItem("veworld-connected");
       localStorage.removeItem("veworld-address");
+      
+      // Clear VeChainKit and Privy related storage
+      localStorage.removeItem("privy:token");
+      localStorage.removeItem("privy:refresh_token");
+      localStorage.removeItem("privy:did_token");
+      localStorage.removeItem("vechain-kit-account");
       
       // Try to disconnect from the VeChain SDK and DAppKit
       try {

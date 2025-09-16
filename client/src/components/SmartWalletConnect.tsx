@@ -116,7 +116,7 @@ export default function SmartWalletConnect({ onConnect }: SmartWalletConnectProp
             // Use proper disconnect function instead of reloading
             const success = await disconnect();
             if (success) {
-              setLocation('/welcome');
+              setLocation('/');
             }
           }}
           className="text-xs w-full"
@@ -150,7 +150,7 @@ export default function SmartWalletConnect({ onConnect }: SmartWalletConnectProp
                 const success = await disconnect();
                 if (success) {
                   setShowMobileKit(false);
-                  setLocation('/welcome');
+                  setLocation('/');
                 }
               }}
               className="text-xs flex-1"

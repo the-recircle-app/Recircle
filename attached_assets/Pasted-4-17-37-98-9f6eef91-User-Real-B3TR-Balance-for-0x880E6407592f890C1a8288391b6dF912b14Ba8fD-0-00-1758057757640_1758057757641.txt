@@ -1,0 +1,108 @@
+4:17:37.98
+9f6eef91
+User
+✅ Real B3TR Balance for 0x880E6407592f890C1a8288391b6dF912b14Ba8fD: 0.00 B3TR (VeChain testnet)
+2025-09-16 14:17:38.19
+9f6eef91
+User
+🧪 Fetching real B3TR balance for 0x880E6407592f890C1a8288391b6dF912b14Ba8fD from VeChain testnet...
+2025-09-16 14:17:38.39
+9f6eef91
+User
+📋 Contract info for 0xbf64cf86894Ee0877C4e7d03936e35Ee8D8b864F: { balance: '0x0', energy: '0x0', hasCode: true }
+2025-09-16 14:17:38.59
+9f6eef91
+User
+📞 Contract call result: [
+2025-09-16 14:17:38.59
+9f6eef91
+User
+{
+2025-09-16 14:17:38.59
+9f6eef91
+User
+data: '0x0000000000000000000000000000000000000000000000000000000000000000',
+2025-09-16 14:17:38.59
+9f6eef91
+User
+events: [],
+2025-09-16 14:17:38.59
+9f6eef91
+User
+transfers: [],
+2025-09-16 14:17:38.59
+9f6eef91
+User
+gasUsed: 904,
+2025-09-16 14:17:38.59
+9f6eef91
+User
+reverted: false,
+2025-09-16 14:17:38.59
+9f6eef91
+User
+vmError: ''
+2025-09-16 14:17:38.59
+9f6eef91
+User
+}
+2025-09-16 14:17:38.59
+9f6eef91
+User
+]
+2025-09-16 14:17:38.59
+9f6eef91
+User
+✅ Real B3TR Balance for 0x880E6407592f890C1a8288391b6dF912b14Ba8fD: 0.00 B3TR (VeChain testnet)
+2025-09-16 14:17:42.17
+9f6eef91
+User
+🧪 Fetching real B3TR balance for 0x880E6407592f890C1a8288391b6dF912b14Ba8fD from VeChain testnet...
+2025-09-16 14:17:42.37
+9f6eef91
+User
+📋 Contract info for 0xbf64cf86894Ee0877C4e7d03936e35Ee8D8b864F: { balance: '0x0', energy: '0x0', hasCode: true }
+2025-09-16 14:17:42.57
+9f6eef91
+User
+📞 Contract call result: [
+2025-09-16 14:17:42.57
+9f6eef91
+User
+{
+2025-09-16 14:17:42.57
+9f6eef91
+User
+data: '0x0000000000000000000000000000000000000000000000000000000000000000',
+2025-09-16 14:17:42.57
+9f6eef91
+User
+events: [],
+2025-09-16 14:17:42.57
+9f6eef91
+User
+transfers: [],
+2025-09-16 14:17:42.57
+9f6eef91
+User
+gasUsed: 904,
+2025-09-16 14:17:42.57
+9f6eef91
+User
+reverted: false,
+2025-09-16 14:17:42.57
+9f6eef91
+User
+vmError: ''
+2025-09-16 14:17:42.57
+9f6eef91
+User
+}
+2025-09-16 14:17:42.57
+9f6eef91
+User
+]
+2025-09-16 14:17:42.57
+9f6eef91
+User
+✅ Real B3TR Balance for 0x880E6407592f890C1a8288391b6dF912b14Ba8fD: 0.00 B3TR (VeChain testnet)
