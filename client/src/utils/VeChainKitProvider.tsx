@@ -9,7 +9,12 @@ export function VeChainKitProviderWrapper({ children }: Props) {
   const privyAppId = import.meta.env.VITE_PRIVY_APP_ID;
   const privyClientId = import.meta.env.VITE_PRIVY_CLIENT_ID;
   
-  // Current credentials are not from Privy (cmeh... / ht53rpd... vs app_... / client_...)
+  console.log('[PRIVY-DEBUG] Configuration check:', {
+    appId: privyAppId ? 'present' : 'missing',
+    clientId: privyClientId ? 'present' : 'missing',
+    appIdPrefix: privyAppId?.substring(0, 4),
+    readyForSocialLogin: !!(privyAppId && privyClientId)
+  });
 
 
   return (
@@ -19,17 +24,37 @@ export function VeChainKitProviderWrapper({ children }: Props) {
         // Enable fee delegation for better user experience
         delegateAllTransactions: true,
       }}
-      loginMethods={[
-        { method: "vechain", gridColumn: 4 }, // VeChain ecosystem login
-        { method: "dappkit", gridColumn: 4 }, // Native wallets (VeWorld, Sync2)
-        // Social login disabled - need actual Privy credentials (app_... and client_...)
-      ]}
+      loginMethods={
+        (privyAppId && privyClientId)
+          ? [
+              { method: "vechain", gridColumn: 4 }, // VeChain ecosystem login
+              { method: "dappkit", gridColumn: 4 }, // Native wallets (VeWorld, Sync2)
+              { method: "email", gridColumn: 2 }, // Social login via Privy
+              { method: "google", gridColumn: 4 }, // Social login via Privy
+            ]
+          : [
+              { method: "vechain", gridColumn: 4 }, // VeChain ecosystem login only
+              { method: "dappkit", gridColumn: 4 }, // Native wallets (VeWorld, Sync2) only
+            ]
+      }
       dappKit={{
         allowedWallets: ["veworld", "sync2"],
         // VeWorld mobile app and Sync2 wallet support
       }}
-      // Privy configuration disabled - current credentials are not from Privy
-      // Need: App ID starting with "app_..." and Client ID starting with "client_..."
+      // Privy configuration for social login (requires both App ID and Client ID)
+      privy={(privyAppId && privyClientId) ? {
+        appId: privyAppId,
+        clientId: privyClientId, // Required for mobile support
+        loginMethods: ['email', 'google'],
+        appearance: {
+          accentColor: '#8B5CF6', // Purple to match ReCircle branding
+          loginMessage: 'Connect with social media or email to start earning B3TR tokens',
+          logo: '/mascot.png', // Use ReCircle mascot
+        },
+        embeddedWallets: {
+          createOnLogin: 'users-without-wallets', // Create embedded wallets for social users
+        },
+      } : undefined}
       darkMode={false} // Light mode to match ReCircle branding
       language="en"
       network={{
