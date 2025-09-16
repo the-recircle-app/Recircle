@@ -52,6 +52,7 @@ import { useEffect } from "react";
 import { vechain } from "./lib/vechain";
 import { mobileConnexInit } from "./lib/mobile-connex-init";
 import { VeChainKitProviderWrapper } from "./utils/VeChainKitProvider";
+import SmartAccountManager from "./components/SmartAccountManager";
 
 function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -227,6 +228,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <VeChainKitProviderWrapper>
         <WalletProvider>
+          <SmartAccountManager />
           <VeChainStateBridge />
           <AchievementProvider>
             <TooltipProvider>
