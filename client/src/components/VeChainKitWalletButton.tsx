@@ -10,7 +10,6 @@ import {
 import { useWallet } from "../context/WalletContext";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 
 type OAuthProvider = 'google' | 'twitter' | 'apple' | 'discord';
 
@@ -20,7 +19,7 @@ export default function VeChainKitWalletButton() {
   const [, setLocation] = useLocation();
   const [showIndividualOptions, setShowIndividualOptions] = useState(false);
 
-  // VeChain Kit login hooks
+  // VeChain Kit official login hooks from documentation
   const { initOAuth } = useLoginWithOAuth();
   const { loginWithPasskey } = useLoginWithPasskey();
   const { login: loginWithVeChainWallet } = useLoginWithVeChain();
@@ -68,74 +67,74 @@ export default function VeChainKitWalletButton() {
     }
   };
 
+  // Show individual social login options when clicked
   if (showIndividualOptions) {
     return (
-      <div className="space-y-4 w-full max-w-md">
+      <div className="space-y-3 w-full max-w-md">
         <div className="text-center mb-4">
-          <h3 className="text-lg font-semibold">Choose Your Login Method</h3>
-          <p className="text-sm text-gray-600">Select how you'd like to sign in</p>
+          <h3 className="text-lg font-semibold text-gray-200">Choose Your Login Method</h3>
+          <p className="text-sm text-gray-400">Select how you'd like to sign in</p>
         </div>
 
         {/* Social Login Options */}
-        <div className="space-y-3">
-          <Button 
-            onClick={() => handleOAuthLogin('google')} 
-            variant="outline" 
-            className="w-full"
-          >
-            🔍 Continue with Google
-          </Button>
-          
-          <Button 
-            onClick={() => handleOAuthLogin('apple')} 
-            variant="outline" 
-            className="w-full"
-          >
-            🍎 Continue with Apple
-          </Button>
-          
-          <Button 
-            onClick={() => handleOAuthLogin('twitter')} 
-            variant="outline" 
-            className="w-full"
-          >
-            🐦 Continue with X (Twitter)
-          </Button>
-          
-          <Button 
-            onClick={() => handleOAuthLogin('discord')} 
-            variant="outline" 
-            className="w-full"
-          >
-            🎮 Continue with Discord
-          </Button>
-        </div>
+        <Button 
+          onClick={() => handleOAuthLogin('google')} 
+          variant="outline" 
+          className="w-full justify-start space-x-3"
+        >
+          <span className="text-lg">🔍</span>
+          <span>Continue with Google</span>
+        </Button>
+        
+        <Button 
+          onClick={() => handleOAuthLogin('apple')} 
+          variant="outline" 
+          className="w-full justify-start space-x-3"
+        >
+          <span className="text-lg">🍎</span>
+          <span>Continue with Apple</span>
+        </Button>
+        
+        <Button 
+          onClick={() => handleOAuthLogin('twitter')} 
+          variant="outline" 
+          className="w-full justify-start space-x-3"
+        >
+          <span className="text-lg">🐦</span>
+          <span>Continue with X (Twitter)</span>
+        </Button>
+        
+        <Button 
+          onClick={() => handleOAuthLogin('discord')} 
+          variant="outline" 
+          className="w-full justify-start space-x-3"
+        >
+          <span className="text-lg">🎮</span>
+          <span>Continue with Discord</span>
+        </Button>
 
-        <Separator className="my-4" />
-
-        {/* Alternative Login Methods */}
-        <div className="space-y-3">
-          <Button 
-            onClick={handlePasskeyLogin} 
-            variant="outline" 
-            className="w-full"
-          >
-            🔐 Continue with Passkey
-          </Button>
-          
-          <Button 
-            onClick={handleVeChainWalletLogin} 
-            variant="outline" 
-            className="w-full"
-          >
-            ⛓️ Continue with VeChain Wallet
-          </Button>
-        </div>
+        <Button 
+          onClick={handlePasskeyLogin} 
+          variant="outline" 
+          className="w-full justify-start space-x-3"
+        >
+          <span className="text-lg">🔐</span>
+          <span>Continue with Passkey</span>
+        </Button>
+        
+        <Button 
+          onClick={handleVeChainWalletLogin} 
+          variant="outline" 
+          className="w-full justify-start space-x-3"
+        >
+          <span className="text-lg">⛓️</span>
+          <span>Continue with VeChain Wallet</span>
+        </Button>
 
         <Button 
           onClick={() => setShowIndividualOptions(false)} 
           variant="ghost" 
-          className="w-full mt-4"
+          className="w-full mt-4 text-gray-400"
         >
           ← Back to simple login
         </Button>
@@ -143,19 +142,11 @@ export default function VeChainKitWalletButton() {
     );
   }
 
+  // Default VeChain Kit button, but intercept click to show individual options
   return (
-    <div className="space-y-4 w-full max-w-md">
-      {/* Default VeChain Kit WalletButton */}
-      <WalletButton />
-      
-      <div className="text-center">
-        <Button 
-          onClick={() => setShowIndividualOptions(true)} 
-          variant="link" 
-          className="text-sm"
-        >
-          Or choose specific login method →
-        </Button>
+    <div className="w-full max-w-md">
+      <div onClick={() => setShowIndividualOptions(true)} style={{ cursor: 'pointer' }}>
+        <WalletButton />
       </div>
     </div>
   );
