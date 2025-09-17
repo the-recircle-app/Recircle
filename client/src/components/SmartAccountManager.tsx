@@ -109,7 +109,7 @@ export default function SmartAccountManager() {
         
         toast({
           title: "Smart Account Connected",
-          description: `Smart account V${smartAccountVersion} ready for transactions.`,
+          description: `Smart account V${typeof smartAccountVersion === 'object' ? smartAccountVersion?.version || 'latest' : smartAccountVersion || 'latest'} ready for transactions.`,
           duration: 3000
         });
       }
@@ -148,6 +148,37 @@ export default function SmartAccountManager() {
     }
   };
 
-  // This component doesn't render anything visible - it's a pure logic component
+  // Temporary debug panel to make smart account state visible (remove after testing)
+  const showDebugPanel = kitAccount?.address || derivedSmartAccountAddress;
+  
+  if (showDebugPanel) {
+    return (
+      <div style={{
+        position: 'fixed',
+        top: '10px',
+        right: '10px',
+        background: 'rgba(0, 0, 0, 0.8)',
+        color: 'white',
+        padding: '12px',
+        borderRadius: '8px',
+        fontSize: '12px',
+        zIndex: 9999,
+        maxWidth: '300px',
+        fontFamily: 'monospace'
+      }}>
+        <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>🔍 Smart Account Debug</div>
+        <div>Owner: {kitAccount?.address ? `${kitAccount.address.slice(0, 8)}...` : 'None'}</div>
+        <div>Smart Account: {derivedSmartAccountAddress ? `${derivedSmartAccountAddress.slice(0, 8)}...` : 'None'}</div>
+        <div>Deployed: {isSmartAccountDeployed ? '✅' : '❌'}</div>
+        <div>Version: {typeof smartAccountVersion === 'object' ? smartAccountVersion?.version || 'Unknown' : smartAccountVersion || 'Unknown'}</div>
+        <div>App Context: {appAddress ? `${appAddress.slice(0, 8)}...` : 'None'}</div>
+        <div style={{ marginTop: '4px', fontSize: '10px', opacity: 0.7 }}>
+          {isProcessingSmartAccount ? '⏳ Processing...' : '✅ Ready'}
+        </div>
+      </div>
+    );
+  }
+  
+  // Return nothing when no wallet connected
   return null;
 }
