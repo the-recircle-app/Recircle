@@ -46,13 +46,14 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
   const [showCelebration, setShowCelebration] = useState<boolean>(false);
   const { toast } = useToast();
 
-  // Check for stored wallet address on load with safety checks
+  // Check for stored wallet address on load with safety checks and VeChainKit coordination
   useEffect(() => {
     const storedAddress = localStorage.getItem("walletAddress");
     const storedUserId = localStorage.getItem("userId");
     
     // Enhanced recovery logic with fallback user ID
     if (storedAddress) {
+      console.log("[WALLET] Found stored address, attempting recovery:", storedAddress);
       recoverWalletConnection(storedAddress);
     } else if (storedUserId) {
       // If we have a user ID but no wallet address, don't set as connected
@@ -65,14 +66,35 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
         localStorage.removeItem("userId");
       }
     } else {
-      // Always require real wallet connection - no development fallbacks
-      console.log("[WALLET] No stored wallet found - requiring real wallet connection");
-      setUserId(null);
-      setIsConnected(false);
-      // Clear any existing localStorage data for clean state
-      localStorage.removeItem("walletAddress");
-      localStorage.removeItem("userId");
-      localStorage.removeItem("connectedWallet");
+      // Check if VeChainKit might have storage that could be restored
+      const vechainKitStorageKeys = [
+        'vechain-kit-account',
+        '@vechain/dapp-kit',
+        'privy:token',
+        'privy:refresh_token',
+        'dappkit-connected',
+        'veworld-connected'
+      ];
+      
+      const hasVeChainKitStorage = vechainKitStorageKeys.some(key => 
+        localStorage.getItem(key) || sessionStorage.getItem(key)
+      );
+      
+      if (hasVeChainKitStorage) {
+        console.log("[WALLET] No stored wallet address but VeChainKit storage found - waiting for kit restoration...");
+        // Don't clear anything yet - give VeChainKitSessionRestorer a chance to restore
+        setUserId(null);
+        setIsConnected(false);
+      } else {
+        // No storage anywhere - safe to start fresh
+        console.log("[WALLET] No stored wallet found - requiring real wallet connection");
+        setUserId(null);
+        setIsConnected(false);
+        // Clear any existing localStorage data for clean state
+        localStorage.removeItem("walletAddress");
+        localStorage.removeItem("userId");
+        localStorage.removeItem("connectedWallet");
+      }
     }
     
     // Legacy fallback block - now disabled
@@ -93,6 +115,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
 
   const recoverWalletConnection = async (address: string) => {
     try {
+      console.log('[WALLET] Attempting to recover wallet connection for address:', address);
       setIsConnecting(true);
       
       // Fetch user data from the API

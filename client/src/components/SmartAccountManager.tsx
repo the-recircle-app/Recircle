@@ -47,22 +47,25 @@ export default function SmartAccountManager() {
     kitAccount?.address || '' // owner address
   );
 
-  // Debug logging
+  // Enhanced debug logging
   useEffect(() => {
-    if (kitAccount?.address) {
-      console.log('[SMART-ACCOUNT] VeChainKit account detected:', {
-        ownerAddress: kitAccount.address,
-        derivedSmartAccountAddress,
-        isDeployed: isSmartAccountDeployed,
-        upgradeRequired,
-        version: smartAccountVersion
-      });
-    }
-  }, [kitAccount, derivedSmartAccountAddress, isSmartAccountDeployed, upgradeRequired, smartAccountVersion]);
+    console.log('[SMART-ACCOUNT] State update:', {
+      hasKitAccount: !!kitAccount?.address,
+      ownerAddress: kitAccount?.address,
+      derivedSmartAccountAddress,
+      appContextAddress: appAddress,
+      isDeployed: isSmartAccountDeployed,
+      setupCompleted,
+      isProcessing: isProcessingSmartAccount,
+      upgradeRequired,
+      version: smartAccountVersion
+    });
+  }, [kitAccount, derivedSmartAccountAddress, appAddress, isSmartAccountDeployed, upgradeRequired, smartAccountVersion, setupCompleted, isProcessingSmartAccount]);
 
   // Reset setup state when wallet disconnects
   useEffect(() => {
     if (!kitAccount?.address) {
+      console.log('[SMART-ACCOUNT] VeChainKit disconnected - clearing smart account state');
       setSetupCompleted('');
       setSmartAccountAddress('');
       setIsProcessingSmartAccount(false);
@@ -74,9 +77,24 @@ export default function SmartAccountManager() {
     if (kitAccount?.address && derivedSmartAccountAddress && 
         !isProcessingSmartAccount && 
         setupCompleted !== derivedSmartAccountAddress) {
+      console.log('[SMART-ACCOUNT] Triggering smart account setup for:', derivedSmartAccountAddress);
       handleSmartAccountSetup();
+    } else if (!kitAccount?.address && !isProcessingSmartAccount) {
+      console.log('[SMART-ACCOUNT] No VeChainKit account - checking if we should restore connection...');
+      
+      // Check if we have a stored wallet address that should trigger VeChainKit restore
+      const storedAddress = localStorage.getItem("walletAddress");
+      const storedWalletType = localStorage.getItem("connectedWallet");
+      
+      if (storedAddress && (storedWalletType === 'smart-account' || storedWalletType === 'dappkit')) {
+        console.log('[SMART-ACCOUNT] Found stored smart account, but VeChainKit not connected. Storage may need cleanup:', {
+          storedAddress,
+          storedWalletType,
+          currentAppAddress: appAddress
+        });
+      }
     }
-  }, [kitAccount?.address, derivedSmartAccountAddress, isProcessingSmartAccount, setupCompleted]);
+  }, [kitAccount?.address, derivedSmartAccountAddress, isProcessingSmartAccount, setupCompleted, appAddress]);
 
   const handleSmartAccountSetup = async () => {
     if (!kitAccount?.address || !derivedSmartAccountAddress || isProcessingSmartAccount) {

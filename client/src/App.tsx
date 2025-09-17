@@ -51,8 +51,8 @@ import OfficialVeChainKitTest from "./pages/official-vechain-kit-test";
 import { useEffect } from "react";
 import { vechain } from "./lib/vechain";
 import { mobileConnexInit } from "./lib/mobile-connex-init";
-import { VeChainKitProviderWrapper } from "./utils/VeChainKitProvider";
 import SmartAccountManager from "./components/SmartAccountManager";
+import VeChainKitSessionRestorer from "./components/VeChainKitSessionRestorer";
 
 function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -226,20 +226,19 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <VeChainKitProviderWrapper>
-        <WalletProvider>
-          <SmartAccountManager />
-          <VeChainStateBridge />
-          <AchievementProvider>
-            <TooltipProvider>
-              <Layout>
-                <Router />
-              </Layout>
-              <Toaster />
-            </TooltipProvider>
-          </AchievementProvider>
-        </WalletProvider>
-      </VeChainKitProviderWrapper>
+      <WalletProvider>
+        <VeChainKitSessionRestorer />
+        <SmartAccountManager />
+        <VeChainStateBridge />
+        <AchievementProvider>
+          <TooltipProvider>
+            <Layout>
+              <Router />
+            </Layout>
+            <Toaster />
+          </TooltipProvider>
+        </AchievementProvider>
+      </WalletProvider>
     </QueryClientProvider>
   );
 }
