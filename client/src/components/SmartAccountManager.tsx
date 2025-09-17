@@ -27,6 +27,7 @@ export default function SmartAccountManager() {
   // State for smart account management
   const [smartAccountAddress, setSmartAccountAddress] = useState<string>('');
   const [isProcessingSmartAccount, setIsProcessingSmartAccount] = useState(false);
+  const [setupCompleted, setSetupCompleted] = useState<string>(''); // Track which account has been set up
   
   // Get smart account address for the connected wallet owner
   const { data: derivedSmartAccountAddress } = useGetAccountAddress(
@@ -61,12 +62,23 @@ export default function SmartAccountManager() {
     }
   }, [kitAccount, derivedSmartAccountAddress, isSmartAccountDeployed, upgradeRequired, smartAccountVersion]);
 
+  // Reset setup state when wallet disconnects
+  useEffect(() => {
+    if (!kitAccount?.address) {
+      setSetupCompleted('');
+      setSmartAccountAddress('');
+      setIsProcessingSmartAccount(false);
+    }
+  }, [kitAccount?.address]);
+
   // Handle smart account setup when VeChainKit connects
   useEffect(() => {
-    if (kitAccount?.address && derivedSmartAccountAddress && !isProcessingSmartAccount) {
+    if (kitAccount?.address && derivedSmartAccountAddress && 
+        !isProcessingSmartAccount && 
+        setupCompleted !== derivedSmartAccountAddress) {
       handleSmartAccountSetup();
     }
-  }, [kitAccount, derivedSmartAccountAddress, isSmartAccountDeployed, isProcessingSmartAccount]);
+  }, [kitAccount?.address, derivedSmartAccountAddress, isProcessingSmartAccount, setupCompleted]);
 
   const handleSmartAccountSetup = async () => {
     if (!kitAccount?.address || !derivedSmartAccountAddress || isProcessingSmartAccount) {
@@ -135,6 +147,9 @@ export default function SmartAccountManager() {
         }
       }
       
+      // Mark setup as completed for this smart account address
+      setSetupCompleted(derivedSmartAccountAddress);
+      
     } catch (error) {
       console.error('[SMART-ACCOUNT] Setup error:', error);
       
@@ -148,37 +163,6 @@ export default function SmartAccountManager() {
     }
   };
 
-  // Temporary debug panel to make smart account state visible (remove after testing)
-  const showDebugPanel = kitAccount?.address || derivedSmartAccountAddress;
-  
-  if (showDebugPanel) {
-    return (
-      <div style={{
-        position: 'fixed',
-        top: '10px',
-        right: '10px',
-        background: 'rgba(0, 0, 0, 0.8)',
-        color: 'white',
-        padding: '12px',
-        borderRadius: '8px',
-        fontSize: '12px',
-        zIndex: 9999,
-        maxWidth: '300px',
-        fontFamily: 'monospace'
-      }}>
-        <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>🔍 Smart Account Debug</div>
-        <div>Owner: {kitAccount?.address ? `${kitAccount.address.slice(0, 8)}...` : 'None'}</div>
-        <div>Smart Account: {derivedSmartAccountAddress ? `${derivedSmartAccountAddress.slice(0, 8)}...` : 'None'}</div>
-        <div>Deployed: {isSmartAccountDeployed ? '✅' : '❌'}</div>
-        <div>Version: {typeof smartAccountVersion === 'object' ? smartAccountVersion?.version || 'Unknown' : smartAccountVersion || 'Unknown'}</div>
-        <div>App Context: {appAddress ? `${appAddress.slice(0, 8)}...` : 'None'}</div>
-        <div style={{ marginTop: '4px', fontSize: '10px', opacity: 0.7 }}>
-          {isProcessingSmartAccount ? '⏳ Processing...' : '✅ Ready'}
-        </div>
-      </div>
-    );
-  }
-  
-  // Return nothing when no wallet connected
+  // This component runs as a background service - no UI needed
   return null;
 }

@@ -242,9 +242,30 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       
       // Clear VeChainKit and Privy related storage
       localStorage.removeItem("privy:token");
-      localStorage.removeItem("privy:refresh_token");
+      localStorage.removeItem("privy:refresh_token");  
       localStorage.removeItem("privy:did_token");
       localStorage.removeItem("vechain-kit-account");
+      
+      // Clear VeChainKit session storage and indexedDB
+      if (typeof window !== 'undefined') {
+        // Clear session storage
+        sessionStorage.removeItem("vechain-kit-account");
+        sessionStorage.removeItem("@vechain/dapp-kit");
+        
+        // Clear all VeChain-related localStorage keys
+        Object.keys(localStorage).forEach(key => {
+          if (key.includes('vechain') || key.includes('privy') || key.includes('dappkit') || key.includes('@vechain')) {
+            localStorage.removeItem(key);
+          }
+        });
+        
+        // Clear all VeChain-related sessionStorage keys
+        Object.keys(sessionStorage).forEach(key => {
+          if (key.includes('vechain') || key.includes('privy') || key.includes('dappkit') || key.includes('@vechain')) {
+            sessionStorage.removeItem(key);
+          }
+        });
+      }
       
       // Try to disconnect from the VeChain SDK and DAppKit
       try {
