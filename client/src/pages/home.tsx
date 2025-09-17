@@ -143,7 +143,7 @@ const Home = () => {
                 try {
                   const success = await disconnect();
                   if (success) {
-                    setLocation("/welcome");
+                    setLocation("/");
                   }
                 } catch (error) {
                   console.error("Error disconnecting:", error);
@@ -158,7 +158,7 @@ const Home = () => {
         <div className="p-4 border-b border-gray-700">
           <div className="bg-gray-800 rounded-lg p-4 text-center">
             <p className="text-gray-300 mb-3">Connect your wallet to start earning B3TR tokens</p>
-            <Link href="/welcome">
+            <Link href="/">
               <Button className="w-full">
                 Connect Wallet
               </Button>
