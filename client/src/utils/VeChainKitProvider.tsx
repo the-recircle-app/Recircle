@@ -31,7 +31,13 @@ export function VeChainKitProviderWrapper({ children }: Props) {
               { method: "dappkit", gridColumn: 4 }, // Native wallets first (avoids CORS)
               { method: "vechain", gridColumn: 4 }, // VeChain ecosystem login
               { method: "email", gridColumn: 2 }, // Social login via Privy
-              { method: "google", gridColumn: 4 }, // Social login via Privy
+              { method: "google", gridColumn: 2 }, // Social login via Privy
+              { method: "apple", gridColumn: 2 }, // Social login via Privy
+              { method: "github", gridColumn: 2 }, // Social login via Privy
+              { method: "twitter", gridColumn: 2 }, // Social login via Privy (X)
+              { method: "discord", gridColumn: 2 }, // Social login via Privy
+              { method: "instagram", gridColumn: 2 }, // Social login via Privy
+              { method: "linkedin", gridColumn: 2 }, // Social login via Privy
             ]
           : [
               { method: "dappkit", gridColumn: 4 }, // Native wallets (VeWorld, Sync2) prioritized
