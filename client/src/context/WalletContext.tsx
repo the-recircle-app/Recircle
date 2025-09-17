@@ -5,6 +5,7 @@ import { useToast } from "../hooks/use-toast";
 import type { User } from "../types";
 import ConnectionCelebration from "../components/ConnectionCelebration";
 import { featureFlags, environment } from "../lib/environment";
+import { useWallet as useVeChainKitWallet } from '@vechain/vechain-kit';
 
 interface WalletContextType {
   address: string;
@@ -45,6 +46,9 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
   const [connecting, setConnecting] = useState<boolean>(false);
   const [showCelebration, setShowCelebration] = useState<boolean>(false);
   const { toast } = useToast();
+  
+  // VeChain Kit hooks for proper disconnect
+  const { disconnect: kitDisconnect } = useVeChainKitWallet();
 
   // Check for stored wallet address on load with safety checks and VeChainKit coordination
   useEffect(() => {
@@ -256,7 +260,21 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
 
   const disconnect = async (): Promise<boolean> => {
     try {
-      // Clear all wallet connection data from localStorage first
+      console.log("[WALLET] Starting complete disconnect process...");
+      
+      // 🔥 CRITICAL FIX: Call VeChain Kit disconnect FIRST
+      try {
+        if (kitDisconnect) {
+          console.log("[WALLET] Calling VeChain Kit disconnect...");
+          await kitDisconnect();
+          console.log("[WALLET] VeChain Kit disconnect successful");
+        }
+      } catch (error) {
+        console.error("[WALLET] VeChain Kit disconnect failed:", error);
+        // Continue with manual cleanup even if VeChain Kit disconnect fails
+      }
+      
+      // Clear all wallet connection data from localStorage
       localStorage.removeItem("walletAddress");
       localStorage.removeItem("connectedWallet");
       localStorage.removeItem("userId");
