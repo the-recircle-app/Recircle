@@ -46,7 +46,16 @@ export function VeChainKitProviderWrapper({ children }: Props) {
       privy={(privyAppId && privyClientId) ? {
         appId: privyAppId,
         clientId: privyClientId, // Required for mobile support
-        loginMethods: ['email', 'google'],
+        loginMethods: [
+          'email', 
+          'google', 
+          'apple', 
+          'github', 
+          'twitter',  // X (formerly Twitter)
+          'discord',
+          'instagram',
+          'linkedin'
+        ], // 🔥 EXPANDED: All available social login options
         appearance: {
           accentColor: '#8B5CF6', // Purple to match ReCircle branding
           loginMessage: 'Sign up or log in to start earning B3TR tokens for sustainable transportation',
