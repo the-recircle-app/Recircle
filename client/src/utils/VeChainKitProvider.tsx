@@ -19,6 +19,7 @@ export function VeChainKitProviderWrapper({ children }: Props) {
 
   return (
     <VeChainKitProvider
+      usePersistence={true} // 🔥 CRITICAL FIX: Enable session persistence for smart account state
       feeDelegation={{
         delegatorUrl: "https://sponsor-testnet.vechain.energy/by/441",
         // Enable fee delegation for better user experience

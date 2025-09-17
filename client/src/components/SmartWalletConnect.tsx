@@ -163,21 +163,44 @@ export default function SmartWalletConnect({ onConnect }: SmartWalletConnectProp
     );
   }
 
-  // Default: show VeChain Kit (includes both wallet and social login options)
+  // Default: show VeChain Kit with improved social login options
   return (
     <div className="space-y-4">
-      <VeChainKitWalletButton />
+      {/* Primary option: Full VeChain Kit (social login + wallets) */}
+      <div className="space-y-2">
+        <VeChainKitWalletButton />
+        <p className="text-xs text-gray-500 text-center">
+          Includes Google, email login + VeWorld, WalletConnect
+        </p>
+      </div>
       
-      {/* Fallback for users who prefer desktop-only connection */}
-      <div className="text-center">
+      {/* Alternative: Direct wallet connection (no popups) */}
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t border-gray-200" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-white px-2 text-gray-500">Or connect directly</span>
+        </div>
+      </div>
+      
+      <div className="space-y-2">
+        <VeChainKitWalletButton useDirectModal={true} />
+        <p className="text-xs text-gray-500 text-center">
+          Direct wallet connection (VeWorld, Sync2) - no popups
+        </p>
+      </div>
+      
+      {/* Desktop-only fallback */}
+      <div className="text-center pt-2">
         <Button 
           variant="ghost" 
           size="sm" 
           onClick={handleDesktopConnect}
           disabled={isConnecting}
-          className="text-xs"
+          className="text-xs text-gray-400"
         >
-          {isConnecting ? 'Connecting...' : 'Use VeWorld Extension Only'}
+          {isConnecting ? 'Connecting...' : 'Desktop Extension Only'}
         </Button>
       </div>
     </div>
