@@ -128,6 +128,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Apply memory optimization middleware first
   app.use(memoryOptimizationMiddleware);
   
+  // CORS middleware to fix Privy iframe loading issues
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    
+    // Handle preflight requests
+    if (req.method === 'OPTIONS') {
+      return res.sendStatus(200);
+    }
+    
+    next();
+  });
+  
   // Body parsing middleware MUST come early
   app.use(express.json({ limit: '50mb' }));
   

@@ -27,14 +27,14 @@ export function VeChainKitProviderWrapper({ children }: Props) {
       loginMethods={
         (privyAppId && privyClientId)
           ? [
+              { method: "dappkit", gridColumn: 4 }, // Native wallets first (avoids CORS)
               { method: "vechain", gridColumn: 4 }, // VeChain ecosystem login
-              { method: "dappkit", gridColumn: 4 }, // Native wallets (VeWorld, Sync2)
               { method: "email", gridColumn: 2 }, // Social login via Privy
               { method: "google", gridColumn: 4 }, // Social login via Privy
             ]
           : [
-              { method: "vechain", gridColumn: 4 }, // VeChain ecosystem login only
-              { method: "dappkit", gridColumn: 4 }, // Native wallets (VeWorld, Sync2) only
+              { method: "dappkit", gridColumn: 4 }, // Native wallets (VeWorld, Sync2) prioritized
+              { method: "vechain", gridColumn: 4 }, // VeChain ecosystem login
             ]
       }
       dappKit={{
