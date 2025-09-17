@@ -48,7 +48,7 @@ export function VeChainKitProviderWrapper({ children }: Props) {
         loginMethods: ['email', 'google'],
         appearance: {
           accentColor: '#8B5CF6', // Purple to match ReCircle branding
-          loginMessage: 'Connect with social media or email to start earning B3TR tokens',
+          loginMessage: 'Sign up or log in to start earning B3TR tokens for sustainable transportation',
           logo: '/mascot.png', // Use ReCircle mascot
         },
         embeddedWallets: {

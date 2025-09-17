@@ -29,10 +29,8 @@ export default function SmartAccountManager() {
   const [isProcessingSmartAccount, setIsProcessingSmartAccount] = useState(false);
   const [setupCompleted, setSetupCompleted] = useState<string>(''); // Track which account has been set up
   
-  // Get smart account address for the connected wallet owner
-  const { data: derivedSmartAccountAddress } = useGetAccountAddress(
-    kitAccount?.address || '' // The EOA or embedded wallet address
-  );
+  // Get smart account address from VeChainKit (already available from useVeChainKitWallet)
+  const derivedSmartAccountAddress = smartAccount?.address;
   
   // Check if smart account is deployed on-chain
   const { data: isSmartAccountDeployed } = useIsSmartAccountDeployed(
@@ -107,13 +105,13 @@ export default function SmartAccountManager() {
         return;
       }
       
-      // If smart account is not deployed, it will be deployed on first transaction
+      // Smart account is ready - deployment happens automatically when needed
       if (!isSmartAccountDeployed) {
-        console.log('[SMART-ACCOUNT] Smart account not deployed yet, will deploy on first transaction');
+        console.log('[SMART-ACCOUNT] Smart account ready - has deterministic address, will deploy when needed');
         
         toast({
           title: "Smart Account Ready",
-          description: "Your smart account will be created on your first transaction.",
+          description: "Your smart account is ready to receive B3TR tokens and make transactions.",
           duration: 5000
         });
       } else {
