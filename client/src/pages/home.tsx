@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useWallet } from "../context/WalletContext";
-import { useWallet as useVeChainKitWallet } from '@vechain/vechain-kit';
+import { WalletButton } from '@vechain/vechain-kit';
 import { Button } from "../components/ui/button";
 import ReCircleLogo from "../components/ReCircleLogo";
 import ReCircleSymbol from "../components/ReCircleSymbol";
@@ -16,27 +16,7 @@ import { Link, useLocation } from "wouter";
 
 const Home = () => {
   const { userId, isConnected, tokenBalance, address, refreshTokenBalance, disconnect } = useWallet();
-  const { smartAccount } = useVeChainKitWallet(); // Get smart account from VeChain Kit
   const [, setLocation] = useLocation();
-  
-  // Use smart account address if available, fallback to regular address
-  const displayAddress = smartAccount?.address || address;
-  
-  // Debug logging for smart account detection
-  useEffect(() => {
-    if (smartAccount?.address) {
-      console.log('[HOME] 🎯 Smart Account detected:', {
-        smartAccountAddress: smartAccount.address,
-        regularAddress: address,
-        displayingAddress: displayAddress
-      });
-    } else if (address) {
-      console.log('[HOME] ⚠️ Regular wallet detected (no smart account yet):', {
-        regularAddress: address,
-        smartAccount: smartAccount
-      });
-    }
-  }, [smartAccount?.address, address, displayAddress]);
   const [stats, setStats] = useState({
     totalRewards: 0,
     receiptsCount: 0,
@@ -141,25 +121,24 @@ const Home = () => {
         />
       )} */}
       
-      {/* Smart Account Status Display */}
-      {isConnected && displayAddress ? (
+      {/* VeChain Kit Smart Account Display */}
+      {isConnected ? (
         <div className="p-4 border-b border-gray-700">
           <div className="flex items-center justify-between bg-gray-800 rounded-lg p-3">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-semibold">
-                  {displayAddress.slice(2, 4).toUpperCase()}
-                </span>
-              </div>
-              <div>
-                <p className="text-gray-100 font-medium">
-                  {smartAccount?.address ? 'Smart Account' : 'Connected Wallet'}
-                </p>
-                <p className="text-gray-400 text-sm">{displayAddress.slice(0, 6)}...{displayAddress.slice(-4)}</p>
-                {smartAccount?.address && (
-                  <p className="text-blue-400 text-xs">Ready for B3TR rewards</p>
-                )}
-              </div>
+              {/* Use VeChain Kit's WalletButton - automatically shows smart account */}
+              <WalletButton 
+                mobileVariant="iconDomainAndAddress"
+                desktopVariant="iconDomainAndAddress"
+                buttonStyle={{
+                  background: 'transparent',
+                  border: 'none',
+                  padding: '0',
+                  minHeight: 'auto',
+                  fontSize: '14px',
+                  color: '#f3f4f6'
+                }}
+              />
             </div>
             <Button 
               variant="ghost" 
