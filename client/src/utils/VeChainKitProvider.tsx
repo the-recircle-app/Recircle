@@ -19,7 +19,6 @@ export function VeChainKitProviderWrapper({ children }: Props) {
 
   return (
     <VeChainKitProvider
-      usePersistence={true} // 🔥 CRITICAL FIX: Enable session persistence for smart account state
       feeDelegation={{
         delegatorUrl: "https://sponsor-testnet.vechain.energy/by/441",
         // Enable fee delegation for better user experience
@@ -29,15 +28,7 @@ export function VeChainKitProviderWrapper({ children }: Props) {
         (privyAppId && privyClientId)
           ? [
               { method: "dappkit", gridColumn: 4 }, // Native wallets first (avoids CORS)
-              { method: "vechain", gridColumn: 4 }, // VeChain ecosystem login
-              { method: "email", gridColumn: 2 }, // Social login via Privy
-              { method: "google", gridColumn: 2 }, // Social login via Privy
-              { method: "apple", gridColumn: 2 }, // Social login via Privy
-              { method: "github", gridColumn: 2 }, // Social login via Privy
-              { method: "twitter", gridColumn: 2 }, // Social login via Privy (X)
-              { method: "discord", gridColumn: 2 }, // Social login via Privy
-              { method: "instagram", gridColumn: 2 }, // Social login via Privy
-              { method: "linkedin", gridColumn: 2 }, // Social login via Privy
+              { method: "vechain", gridColumn: 4 }, // VeChain ecosystem login - this shows all Privy social options
             ]
           : [
               { method: "dappkit", gridColumn: 4 }, // Native wallets (VeWorld, Sync2) prioritized
@@ -69,6 +60,13 @@ export function VeChainKitProviderWrapper({ children }: Props) {
         },
         embeddedWallets: {
           createOnLogin: 'users-without-wallets', // Create embedded wallets for social users
+        },
+        // Show all social login methods in Privy popup
+        uiConfig: {
+          loginMethodsAndOrder: {
+            primary: ['google', 'apple', 'twitter', 'discord', 'github', 'linkedin', 'instagram'],
+            overflow: ['email']
+          }
         },
       } : undefined}
       darkMode={false} // Light mode to match ReCircle branding
