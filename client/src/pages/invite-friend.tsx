@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
+import { useSmartNavigation } from '../utils/navigation';
 import { useWallet } from '../context/WalletContext';
 import { useToast } from '../hooks/use-toast';
 import { useQuery } from '@tanstack/react-query';
@@ -14,6 +15,7 @@ import BottomNavigation from '../components/BottomNavigation';
 
 const InviteFriend = () => {
   const [, setLocation] = useLocation();
+  const { goHome } = useSmartNavigation();
   const { isConnected, userId, tokenBalance } = useWallet();
   const { toast } = useToast();
   const [inviteMethod, setInviteMethod] = useState('sms');
@@ -185,7 +187,7 @@ const InviteFriend = () => {
   };
 
   const handleBackToHome = () => {
-    setLocation('/');
+    goHome();
   };
 
   const renderShareButtons = () => {

@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useLocation } from "wouter";
+import { useSmartNavigation } from "../utils/navigation";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useForm } from "react-hook-form";
@@ -68,6 +69,7 @@ type ReceiptFormValues = z.infer<typeof receiptFormSchema>;
 
 const ScanReceipt = () => {
   const [, setLocation] = useLocation();
+  const { goHome } = useSmartNavigation();
   const { userId, isConnected, refreshTokenBalance, tokenBalance } = useWallet();
   const { toast } = useToast();
 
@@ -96,7 +98,7 @@ const ScanReceipt = () => {
 
   // Handle return to dashboard
   const handleReturnToDashboard = () => {
-    setLocation('/');
+    goHome();
   };
 
   return (
@@ -111,7 +113,7 @@ const ScanReceipt = () => {
             <div className="flex items-center justify-center mb-4">
               <Button
                 variant="default"
-                onClick={() => setLocation('/')}
+                onClick={goHome}
                 className="mr-4 bg-blue-600 hover:bg-blue-700 text-white"
               >
                 ← Back to Dashboard
@@ -179,7 +181,7 @@ const ScanReceipt = () => {
                         Connect your wallet to start earning B3TR rewards
                       </div>
                       <Button
-                        onClick={() => setLocation('/')}
+                        onClick={goHome}
                         className="bg-blue-600 hover:bg-blue-700 text-white"
                       >
                         Go to Dashboard

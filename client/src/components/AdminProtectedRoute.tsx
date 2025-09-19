@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import { useSmartNavigation } from '@/utils/navigation';
 
 interface AdminProtectedRouteProps {
   children: ReactNode;
@@ -18,6 +19,7 @@ export default function AdminProtectedRoute({ children }: AdminProtectedRoutePro
   const { isConnected, isConnecting, address } = useWallet();
   const [, navigate] = useLocation();
   const { toast } = useToast();
+  const { goHome } = useSmartNavigation();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -119,7 +121,7 @@ export default function AdminProtectedRoute({ children }: AdminProtectedRoutePro
             </p>
             <Button 
               className="mt-2 w-full"
-              onClick={() => navigate('/')}
+              onClick={goHome}
             >
               Return to Home
             </Button>
