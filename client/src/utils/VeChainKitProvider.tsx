@@ -27,11 +27,9 @@ export function VeChainKitProviderWrapper({ children }: Props) {
       loginMethods={
         (privyAppId && privyClientId)
           ? [
-              { method: "dappkit", gridColumn: 4 }, // Native wallets (VeWorld extension) - required for "Use VeWorld Extension Only"
-              { method: "vechain", gridColumn: 4 }, // VeChain ecosystem login - shows all Privy social options
+              { method: "vechain", gridColumn: 4 }, // VeChain ecosystem login - shows all Privy social options + VeWorld mobile
             ]
           : [
-              { method: "dappkit", gridColumn: 4 }, // Native wallets (VeWorld extension) 
               { method: "vechain", gridColumn: 4 }, // VeChain ecosystem login
             ]
       }
