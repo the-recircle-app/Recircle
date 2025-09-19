@@ -260,6 +260,7 @@ const ScanReceipt = () => {
           {showStreakCelebration && (
             <StreakCelebration
               streakCount={streakCount}
+              isVisible={showStreakCelebration}
               onComplete={() => {
                 setShowStreakCelebration(false);
                 setCurrentStep(ScanStep.SUCCESS);
