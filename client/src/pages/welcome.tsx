@@ -109,7 +109,7 @@ export default function Welcome() {
               </div>
               <h3 className="text-2xl font-bold text-gray-800 mb-4">Start Earning B3TR Tokens</h3>
               <p className="text-gray-600 max-w-md mx-auto leading-relaxed">
-                Choose your preferred connection method below and start earning real blockchain tokens for sustainable transportation.
+                Connect your wallet and start earning real blockchain tokens for sustainable transportation.
               </p>
             </div>
           </div>

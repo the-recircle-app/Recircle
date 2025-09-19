@@ -169,7 +169,7 @@ export default function SmartWalletConnect({ onConnect }: SmartWalletConnectProp
       <VeChainKitWalletButton />
       
       {/* Fallback for users who prefer desktop-only connection */}
-      <div className="text-center">
+      <div className="text-center" style={{display: 'none'}}>
         <Button 
           variant="ghost" 
           size="sm" 
