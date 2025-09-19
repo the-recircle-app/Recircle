@@ -12,11 +12,10 @@ import BottomNavigation from "../components/BottomNavigation";
 import ActivityCard from "../components/ActivityCard";
 import SupportFooter from "../components/SupportFooter";
 import TokenBalanceRefresher from "../components/TokenBalanceRefresher";
-import { Link, useLocation } from "wouter";
+import { Link } from "wouter";
 
 const Home = () => {
-  const { userId, isConnected, tokenBalance, address, refreshTokenBalance, disconnect } = useWallet();
-  const [, setLocation] = useLocation();
+  const { userId, isConnected, tokenBalance, address, refreshTokenBalance } = useWallet();
   const [stats, setStats] = useState({
     totalRewards: 0,
     receiptsCount: 0,
@@ -124,7 +123,7 @@ const Home = () => {
       {/* VeChain Kit Smart Account Display */}
       {isConnected ? (
         <div className="p-4 border-b border-gray-700">
-          <div className="flex items-center justify-between bg-gray-800 rounded-lg p-3">
+          <div className="bg-gray-800 rounded-lg p-3">
             <div className="flex items-center space-x-3">
               {/* Use VeChain Kit's WalletButton - automatically shows smart account */}
               <WalletButton 
@@ -140,23 +139,6 @@ const Home = () => {
                 }}
               />
             </div>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="text-gray-400 hover:text-gray-200"
-              onClick={async () => {
-                try {
-                  const success = await disconnect();
-                  if (success) {
-                    setLocation("/");
-                  }
-                } catch (error) {
-                  console.error("Error disconnecting:", error);
-                }
-              }}
-            >
-              Disconnect
-            </Button>
           </div>
         </div>
       ) : (
