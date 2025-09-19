@@ -10,6 +10,13 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Progress
 
+**September 19, 2025**:
+- 🎉 **LOGOUT NAVIGATION FIXED**: VeChain Kit logout now properly redirects to welcome page across all platforms
+- ✅ **Cross-Platform Testing Confirmed**: Desktop, mobile browser, and VeWorld mobile browser all working
+- ✅ **Architectural Solution**: VeChainKitAuthBridge centralizes all logout detection at app root level
+- ✅ **Toast Flashing Fixed**: Idempotence guard prevents duplicate connection celebrations
+- ✅ **Clean Component Architecture**: Separated navigation logic from UI components for maintainability
+
 **August 10, 2025**: 
 - 🎉 **PRODUCTION CHECKPOINT REACHED**: Complete VeBetterDAO treasury integration with verified mobile/desktop wallet connectivity
 - ✅ **PURE VEBETTERDAO TREASURY CONFIRMED**: Both user rewards (70%) AND app fund (30%) successfully distributed from official treasury
