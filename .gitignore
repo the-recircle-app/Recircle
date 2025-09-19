@@ -204,3 +204,7 @@ docker-compose.override.yml
 .env.local.example.env*.solo
 .env
 .env.*
+
+# Security - Exclude files with test keys and attached assets
+attached_assets/
+LOCAL_DEPLOYMENT_FIX.js
