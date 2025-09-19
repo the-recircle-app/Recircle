@@ -27,11 +27,9 @@ export function VeChainKitProviderWrapper({ children }: Props) {
       loginMethods={
         (privyAppId && privyClientId)
           ? [
-              { method: "dappkit", gridColumn: 4 }, // Native wallets first (avoids CORS)
-              { method: "vechain", gridColumn: 4 }, // VeChain ecosystem login - this shows all Privy social options
+              { method: "vechain", gridColumn: 4 }, // VeChain ecosystem login - shows all Privy social options
             ]
           : [
-              { method: "dappkit", gridColumn: 4 }, // Native wallets (VeWorld, Sync2) prioritized
               { method: "vechain", gridColumn: 4 }, // VeChain ecosystem login
             ]
       }
@@ -61,13 +59,7 @@ export function VeChainKitProviderWrapper({ children }: Props) {
         embeddedWallets: {
           createOnLogin: 'users-without-wallets', // Create embedded wallets for social users
         },
-        // Show all social login methods in Privy popup
-        uiConfig: {
-          loginMethodsAndOrder: {
-            primary: ['google', 'apple', 'twitter', 'discord', 'github', 'linkedin', 'instagram'],
-            overflow: ['email']
-          }
-        },
+        // All social login methods configured in loginMethods above
       } : undefined}
       darkMode={false} // Light mode to match ReCircle branding
       language="en"
