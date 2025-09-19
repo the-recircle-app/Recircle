@@ -53,6 +53,7 @@ import { vechain } from "./lib/vechain";
 import { mobileConnexInit } from "./lib/mobile-connex-init";
 import SmartAccountManager from "./components/SmartAccountManager";
 import VeChainKitSessionRestorer from "./components/VeChainKitSessionRestorer";
+import VeChainKitAuthBridge from "./components/VeChainKitAuthBridge";
 
 function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -230,6 +231,7 @@ function App() {
         <VeChainKitSessionRestorer />
         <SmartAccountManager />
         <VeChainStateBridge />
+        <VeChainKitAuthBridge />
         <AchievementProvider>
           <TooltipProvider>
             <Layout>

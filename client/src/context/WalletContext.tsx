@@ -175,6 +175,13 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
   const connect = async (walletType: string, walletAddress?: string, options: { skipCelebration?: boolean } = {}): Promise<boolean> => {
     try {
       console.log(`[WALLET] Connect called with walletType: ${walletType}, explicit address: ${walletAddress}`);
+      
+      // IDEMPOTENCE GUARD: Short-circuit if already connected to the same address
+      if (walletAddress && isConnected && address === walletAddress) {
+        console.log(`[WALLET] Already connected to ${walletAddress} - skipping duplicate connection`);
+        return true;
+      }
+      
       setConnecting(true);
       
       // If an explicit wallet address is provided (from DAppKit or StandardWalletConnect), use it
