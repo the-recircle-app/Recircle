@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useWallet } from "../context/WalletContext";
-import { WalletButton } from '@vechain/vechain-kit';
+import { useWallet as useVeChainKitWallet, WalletButton } from '@vechain/vechain-kit';
 import { Button } from "../components/ui/button";
 import ReCircleLogo from "../components/ReCircleLogo";
 import ReCircleSymbol from "../components/ReCircleSymbol";
@@ -16,7 +16,17 @@ import { Link, useLocation } from "wouter";
 
 const Home = () => {
   const { userId, isConnected, tokenBalance, address, refreshTokenBalance, disconnect } = useWallet();
+  const { connection: kitConnection } = useVeChainKitWallet(); // Monitor VeChain Kit connection
   const [, setLocation] = useLocation();
+
+  // 🎯 SOLUTION: Navigate to welcome page when VeChain Kit logout occurs
+  useEffect(() => {
+    // Only trigger navigation if we were connected and now we're not
+    if (isConnected && !kitConnection.isConnected) {
+      console.log('[HOME] VeChain Kit logout detected - navigating to welcome page');
+      setLocation("/");
+    }
+  }, [kitConnection.isConnected, isConnected, setLocation]);
   const [stats, setStats] = useState({
     totalRewards: 0,
     receiptsCount: 0,
