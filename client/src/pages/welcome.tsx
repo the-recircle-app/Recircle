@@ -127,7 +127,7 @@ export default function Welcome() {
             {/* Wallet Connection Options */}
             <div className="space-y-4">
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
-                <h3 className="text-xl font-semibold text-gray-50 mb-4">Choose Your Connection Method</h3>
+                <h3 className="text-xl font-semibold text-gray-50 mb-4">Connect Your Wallet</h3>
                 <SmartWalletConnect 
                   onConnect={(address) => {
                     // Navigate to home after connection
