@@ -214,10 +214,30 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       } else if (response.status === 404) {
         // Create new user
         const username = `user_${Math.random().toString(36).substring(2, 10)}`;
+        
+        // Check for referral code from localStorage (stored by /join?ref=code)
+        const referralCode = localStorage.getItem('referralCode');
+        let referredBy = null;
+        
+        if (referralCode) {
+          // Validate and get referrer info
+          try {
+            const referralResponse = await fetch(`/api/referrals/code/${referralCode}`);
+            if (referralResponse.ok) {
+              const referralData = await referralResponse.json();
+              referredBy = referralData.referrerId;
+              console.log(`[REFERRAL] New user referred by user ${referredBy} with code ${referralCode}`);
+            }
+          } catch (error) {
+            console.error('[REFERRAL] Failed to validate referral code:', error);
+          }
+        }
+        
         const newUserResponse = await apiRequest("POST", "/api/users", {
           username,
           password: Math.random().toString(36).substring(2, 15),
-          walletAddress: walletInfo.address
+          walletAddress: walletInfo.address,
+          referredBy
         });
         
         if (!newUserResponse.ok) {
@@ -225,6 +245,12 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
         }
         
         userData = await newUserResponse.json();
+        
+        // Clear referral code from localStorage after successful user creation
+        if (referralCode) {
+          localStorage.removeItem('referralCode');
+          console.log('[REFERRAL] Referral code processed and cleared from localStorage');
+        }
       } else {
         throw new Error("Failed to fetch or create user");
       }

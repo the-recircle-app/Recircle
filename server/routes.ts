@@ -594,6 +594,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userData = insertUserSchema.parse(req.body);
       const newUser = await storage.createUser(userData);
+      
+      // Auto-create referral record if user was referred by someone
+      if (newUser.referredBy) {
+        try {
+          // Get the referrer's referral code
+          const referrerCode = await storage.getUserReferralCode(newUser.referredBy);
+          
+          if (referrerCode) {
+            await storage.createReferral({
+              referrerId: newUser.referredBy,
+              referredId: newUser.id,
+              code: referrerCode,
+              status: "pending"
+            });
+            console.log(`[REFERRAL] Auto-created referral record: User ${newUser.id} referred by User ${newUser.referredBy} with code ${referrerCode}`);
+          }
+        } catch (referralError) {
+          console.error('[REFERRAL] Failed to create referral record:', referralError);
+          // Don't fail user creation if referral creation fails
+        }
+      }
+      
       res.status(201).json(newUser);
     } catch (error) {
       if (error instanceof z.ZodError) {
