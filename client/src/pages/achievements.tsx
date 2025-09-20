@@ -186,7 +186,7 @@ const AchievementsPage: React.FC = () => {
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [selectedAchievement, setSelectedAchievement] = useState<string | null>(null);
   
-  const { userId, isConnected } = useWallet();
+  const { userId, isConnected, tokenBalance } = useWallet();
   
   // Fetch user receipts
   const { data: receipts = [] } = useQuery({
@@ -252,7 +252,7 @@ const AchievementsPage: React.FC = () => {
       <Header 
         className="border-b border-gray-800 bg-gradient-to-b from-gray-900 to-gray-950"
         streak={userData?.currentStreak}
-        gems={userData?.tokenBalance}
+        gems={tokenBalance}
       />
       
       <main className="container max-w-md mx-auto px-4 py-6 text-white">
