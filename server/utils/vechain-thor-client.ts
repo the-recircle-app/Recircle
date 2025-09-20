@@ -53,9 +53,8 @@ export function createThorSigner(mnemonic: string): VeChainPrivateKeySigner {
 export async function testThorConnectivity(): Promise<void> {
     try {
         const thorClient = await createThorClient();
-        const bestBlock = await thorClient.blocks.getBestBlock();
-        const blockRef = bestBlock.id.slice(0, 18);
-        console.log(`[THOR] ✅ Thor client working, best block: ${bestBlock}`);
+        const bestBlockRef = await thorClient.blocks.getBestBlockRef();
+        console.log(`[THOR] ✅ Thor client working, best block ref: ${bestBlockRef}`);
         
         // Test account query
         const testAddress = Address.of('0x7567d83b7b8d80addcb281a71d54fc7b3364ffed');
