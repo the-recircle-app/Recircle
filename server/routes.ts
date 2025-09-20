@@ -2734,10 +2734,83 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           // Create a similarity score - higher means more likely to be a duplicate
           let similarityScore = 0;
-          if (sameImage) similarityScore += 100; // Same image is definitely a duplicate
-          if (sameStore) similarityScore += 40;  // Reduced from 50 to make room for image matching
-          if (sameAmount) similarityScore += 30;
-          if (sameDate) similarityScore += 20;
+          
+          // ✅ TRANSPORTATION FOCUS: Robust detection including major transit agencies
+          const isTransportationService = (name: string, amount?: number) => {
+            const nameLower = (name || '').toLowerCase();
+            
+            // Core transportation keywords
+            const hasTransportKeywords = nameLower.includes('uber') || nameLower.includes('lyft') || nameLower.includes('taxi') || nameLower.includes('cab') ||
+                   nameLower.includes('bus') || nameLower.includes('metro') || nameLower.includes('transit') || nameLower.includes('subway') ||
+                   nameLower.includes('rail') || nameLower.includes('train') || nameLower.includes('lightrail') || nameLower.includes('light rail') ||
+                   nameLower.includes('bike') || nameLower.includes('scooter') || nameLower.includes('lime') || nameLower.includes('bird') ||
+                   nameLower.includes('citi bike') || nameLower.includes('divvy') || nameLower.includes('bluebikes') ||
+                   nameLower.includes('e-bike') || nameLower.includes('ebike') || nameLower.includes('e-scooter') || nameLower.includes('escooter');
+            
+            // Major transit agency codes and names + fare cards
+            const hasTransitAgency = nameLower.includes('mta') || nameLower.includes('bart') || nameLower.includes('wmata') || 
+                   nameLower.includes('cta') || nameLower.includes('ttc') || nameLower.includes('muni') || nameLower.includes('mbta') ||
+                   nameLower.includes('lirr') || nameLower.includes('njt') || nameLower.includes('rtd') || nameLower.includes('septa') ||
+                   nameLower.includes('metro') || nameLower.includes('metrolink') || nameLower.includes('caltrain') || nameLower.includes('amtrak') ||
+                   nameLower.includes('marc') || nameLower.includes('vre') || nameLower.includes('ace') || nameLower.includes('samtrans') ||
+                   nameLower.includes('vta') || nameLower.includes('ac transit') || nameLower.includes('golden gate') ||
+                   // Transit fare cards and systems
+                   nameLower.includes('orca') || nameLower.includes('clipper') || nameLower.includes('oyster') || nameLower.includes('tfl') ||
+                   nameLower.includes('presto') || nameLower.includes('opal') || nameLower.includes('myki') || nameLower.includes('suica') ||
+                   nameLower.includes('pasmo') || nameLower.includes('icoca') || nameLower.includes('compass') || nameLower.includes('gocard') ||
+                   nameLower.includes('smartrip') || nameLower.includes('ventra') || nameLower.includes('breeze') || nameLower.includes('hart') ||
+                   nameLower.includes('dart') || nameLower.includes('trimet') || nameLower.includes('sound transit');
+            
+            return hasTransportKeywords || hasTransitAgency;
+          };
+          
+          const currentIsTransportation = isTransportationService(storeName || '', numericAmount);
+          const existingIsTransportation = isTransportationService(receipt.storeName || '', receipt.amount);
+          
+          // Safety net: Only apply to small fares that are likely transit with additional validation
+          let wouldBeStrictReject = false;
+          if (!currentIsTransportation && !existingIsTransportation && 
+              sameStore && sameAmount && sameDate && 
+              numericAmount && numericAmount <= 5) { // Reduced to typical transit fares only
+            
+            // Additional validation: Check if this merchant appears multiple times for this user (recurring pattern)
+            const sameStoreReceipts = userReceipts.filter(r => 
+              r.storeName?.toLowerCase() === (storeName || '').toLowerCase() ||
+              r.storeId === (typeof storeId === 'string' ? parseInt(storeId) : storeId)
+            );
+            
+            wouldBeStrictReject = sameStoreReceipts.length >= 2; // Only if user has 2+ receipts from same merchant
+            if (wouldBeStrictReject) {
+              console.log(`Safety net triggered: Small recurring fare (${numericAmount}) from merchant with ${sameStoreReceipts.length} prior receipts`);
+            }
+          }
+          
+          const applyTransportLeniency = currentIsTransportation || existingIsTransportation || wouldBeStrictReject;
+          
+          if (sameImage) {
+            similarityScore += 100; // Same image is definitely a duplicate (regardless of service type)
+          } else if (applyTransportLeniency) {
+            // ✅ TRANSPORTATION RECEIPTS: Apply lenient logic if EITHER receipt is transportation
+            console.log(`Transportation service detected for duplicate check: "${storeName}" vs "${receipt.storeName}"`);
+            
+            // For transportation, heavily penalize if ALL factors match (actual duplicate receipt)
+            if (sameStore && sameAmount && sameDate) {
+              similarityScore += 95; // Above threshold - this is clearly a duplicate submission
+              console.log(`[DUPLICATE] Transportation receipt with ALL matching factors: Store+Amount+Date = 95 points`);
+            } else {
+              // Individual factors get much lower weights to allow multiple legitimate rides
+              if (sameStore) similarityScore += 15;  // Multiple rides from same service are normal
+              if (sameAmount) similarityScore += 10; // Same fares are common (standard bus fare, etc.)
+              if (sameDate) similarityScore += 5;   // Multiple rides per day are completely normal for commuters
+              console.log(`[TRANSPORTATION] Individual factors - Store:${sameStore ? 15 : 0}, Amount:${sameAmount ? 10 : 0}, Date:${sameDate ? 5 : 0}`);
+            }
+          } else {
+            // ✅ NON-TRANSPORTATION RECEIPTS: Original stricter logic
+            if (sameStore) similarityScore += 40;  // Standard penalty for same store
+            if (sameAmount) similarityScore += 30; // Standard penalty for same amount
+            if (sameDate) similarityScore += 20;   // Standard penalty for same date
+            console.log(`[NON-TRANSPORT] Standard scoring - Store:${sameStore ? 40 : 0}, Amount:${sameAmount ? 30 : 0}, Date:${sameDate ? 20 : 0}`);
+          }
           
           // Log each potential duplicate for debugging
           if (similarityScore > 0) {
