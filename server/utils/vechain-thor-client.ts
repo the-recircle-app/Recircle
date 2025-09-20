@@ -3,8 +3,8 @@
  * Replaces ethers.js JsonRpcProvider with proper VeChain Thor SDK
  */
 
-import { ThorClient, VeChainProvider } from '@vechain/sdk-network';
-import { Address, VeChainPrivateKeySigner } from '@vechain/sdk-core';
+import { ThorClient, VeChainProvider, VeChainPrivateKeySigner } from '@vechain/sdk-network';
+import { Address } from '@vechain/sdk-core';
 import { HDNodeWallet } from 'ethers';
 import { getVeChainConfig } from '../../shared/vechain-config';
 
