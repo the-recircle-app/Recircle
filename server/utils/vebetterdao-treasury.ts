@@ -163,7 +163,7 @@ export async function distributeTreasuryReward(
       throw new Error(`Transaction submission failed: ${JSON.stringify(submitResult)}`);
     }
     
-    const userTxHash = submitResult.id || ('0x' + tx.id?.toString('hex'));
+    const userTxHash = submitResult.id || ('0x' + tx.getID().toString('hex'));
     console.log(`✅ User transaction submitted successfully with hash: ${userTxHash}`);
     
     // Create second VeBetterDAO treasury transaction for app fund (30% portion)
@@ -218,7 +218,7 @@ export async function distributeTreasuryReward(
       });
       
       const appSubmitResult = await appSubmitResponse.json();
-      appTxHash = appSubmitResult.id || ('0x' + appTx.id?.toString('hex'));
+      appTxHash = appSubmitResult.id || ('0x' + appTx.getID().toString('hex'));
       console.log(`✅ App fund VeBetterDAO treasury transaction submitted with hash: ${appTxHash}`);
     }
     

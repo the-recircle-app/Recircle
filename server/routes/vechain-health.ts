@@ -48,8 +48,25 @@ interface HealthCheckResult {
  * Comprehensive VeChain network health check
  */
 router.get('/health', async (req, res) => {
+  let config: any = null;
+  
   try {
-    const config = getVeChainConfig();
+    // Try to get config, but don't let it fail the health check for mainnet
+    config = getVeChainConfig();
+  } catch (configError: any) {
+    // Config failed (likely mainnet with missing vars) - continue with degraded health
+    console.warn('⚠️ Config failed in health check:', configError.message);
+    
+    return res.status(503).json({
+      network: 'UNKNOWN',
+      status: 'degraded',
+      error: 'Configuration failed: ' + configError.message,
+      mainnetReadiness: validateMainnetReadiness(),
+      timestamp: new Date().toISOString()
+    });
+  }
+  
+  try {
     const result: HealthCheckResult = {
       network: config.network.toUpperCase(),
       status: 'healthy',
@@ -76,12 +93,12 @@ router.get('/health', async (req, res) => {
     // Test Thor client connectivity
     try {
       const thorClient = await createThorClient();
-      const bestBlock = await thorClient.blocks.getBestBlockRef();
+      const bestBlock = await thorClient.blocks.getBestBlock();
       
       result.connectivity.thorClient = true;
       if (bestBlock) {
-        result.connectivity.bestBlock = bestBlock.toString();
-        result.connectivity.blockHeight = parseInt(bestBlock.toString().slice(2, 10), 16); // Extract block number from blockRef
+        result.connectivity.bestBlock = bestBlock.id;
+        result.connectivity.blockHeight = bestBlock.number;
       }
       
       console.log(`[HEALTH] ✅ ${config.network} Thor client connected, block: ${result.connectivity.blockHeight}`);

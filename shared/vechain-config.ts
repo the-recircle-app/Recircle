@@ -83,16 +83,26 @@ export function getVeChainConfig(): VeChainNetworkConfig {
   const currentNetwork = getVeChainNetwork();
   const config = NETWORK_CONFIGS[currentNetwork];
   
-  // Validate mainnet configuration
+  // Validate mainnet configuration - FAIL FAST instead of fallback
   if (currentNetwork === 'mainnet') {
-    if (!config.contracts.b3trToken || !config.contracts.x2earnRewardsPool) {
-      console.warn('⚠️  Mainnet contract addresses not configured, falling back to testnet');
-      return NETWORK_CONFIGS.testnet;
+    const missingVars: string[] = [];
+    
+    if (!config.contracts.b3trToken) {
+      missingVars.push('B3TR_CONTRACT_ADDRESS_MAINNET');
+    }
+    
+    if (!config.contracts.x2earnRewardsPool) {
+      missingVars.push('X2EARNREWARDSPOOL_ADDRESS_MAINNET');
     }
     
     if (!config.sponsorUrl) {
-      console.warn('⚠️  Mainnet sponsor URL not configured, falling back to testnet');
-      return NETWORK_CONFIGS.testnet;
+      missingVars.push('VECHAIN_MAINNET_SPONSOR_URL');
+    }
+    
+    if (missingVars.length > 0) {
+      const errorMsg = `🚨 MAINNET DEPLOYMENT BLOCKED: Missing required environment variables: ${missingVars.join(', ')}. Set these variables or use VECHAIN_NETWORK=testnet for development.`;
+      console.error(errorMsg);
+      throw new Error(errorMsg);
     }
   }
   

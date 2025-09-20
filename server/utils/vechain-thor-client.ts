@@ -3,8 +3,8 @@
  * Replaces ethers.js JsonRpcProvider with proper VeChain Thor SDK
  */
 
-import { ThorClient, VeChainProvider, VeChainPrivateKeySigner } from '@vechain/sdk-network';
-import { Address } from '@vechain/sdk-core';
+import { ThorClient, VeChainProvider } from '@vechain/sdk-network';
+import { Address, VeChainPrivateKeySigner } from '@vechain/sdk-core';
 import { HDNodeWallet } from 'ethers';
 import { getVeChainConfig } from '../../shared/vechain-config';
 
@@ -53,7 +53,8 @@ export function createThorSigner(mnemonic: string): VeChainPrivateKeySigner {
 export async function testThorConnectivity(): Promise<void> {
     try {
         const thorClient = await createThorClient();
-        const bestBlock = await thorClient.blocks.getBestBlockRef();
+        const bestBlock = await thorClient.blocks.getBestBlock();
+        const blockRef = bestBlock.id.slice(0, 18);
         console.log(`[THOR] ✅ Thor client working, best block: ${bestBlock}`);
         
         // Test account query
