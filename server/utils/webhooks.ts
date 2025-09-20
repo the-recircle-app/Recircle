@@ -162,15 +162,17 @@ function validateRequiredWebhookFields(data: any): {
                  data.rewardInfo?.finalReward;
   }
   
-  // Final fallback: Default to 8 tokens for thrift store receipts or 0 otherwise
+  // Final fallback: Default to appropriate tokens for transportation receipts or 0 otherwise
   if (tokenReward === undefined || tokenReward === null) {
-    // Check if this is a thrift store receipt (based on store name in previous validations)
-    if (result.updatedData.storeName && 
-        (result.updatedData.storeName.toLowerCase().includes('thrift') || 
-         result.updatedData.storeName.toLowerCase().includes('goodwill') ||
-         result.updatedData.storeName.toLowerCase().includes('salvation army'))) {
-      console.log(`[WEBHOOK] Missing tokenReward, but detected thrift store name "${result.updatedData.storeName}", using 8 as default`);
-      tokenReward = 8;
+    // Check if this is a transportation receipt (based on store name in previous validations)
+    const storeNameForCheck = (result.updatedData.storeName || '').toLowerCase();
+    if (storeNameForCheck.includes('uber') || storeNameForCheck.includes('lyft') || storeNameForCheck.includes('ride')) {
+      console.log(`[WEBHOOK] Missing tokenReward, but detected rideshare service "${result.updatedData.storeName}", using 6 as default`);
+      tokenReward = 6;
+    } else if (storeNameForCheck.includes('bus') || storeNameForCheck.includes('metro') || storeNameForCheck.includes('transit') || 
+               storeNameForCheck.includes('rail') || storeNameForCheck.includes('subway')) {
+      console.log(`[WEBHOOK] Missing tokenReward, but detected public transit "${result.updatedData.storeName}", using 4 as default`);
+      tokenReward = 4;
     } else {
       console.log(`[WEBHOOK] Missing tokenReward in all fallbacks, using default value of 0`);
       tokenReward = 0;
@@ -237,8 +239,8 @@ function validateRequiredWebhookFields(data: any): {
   } else if (data.category) {
     result.updatedData.sustainabilityCategory = data.category;
   } else {
-    // Default to standard category
-    result.updatedData.sustainabilityCategory = "re-use item";
+    // Default to transportation category
+    result.updatedData.sustainabilityCategory = "sustainable_transportation";
   }
   
   // Force sustainability category to be a string (since the webhook expects a string)
@@ -277,27 +279,35 @@ export async function sendReceiptForManualReview(
   confidence: number = 0
 ): Promise<boolean> {
   try {
-    // ⚠️ CRITICAL FIX: Skip manual review for thrift stores entirely
-    // This is a direct override that bypasses all other conditions
+    console.log(`[MANUAL REVIEW] Processing transportation receipt for manual review - User: ${userId}`);
+    
+    // ✅ TRANSPORTATION FOCUS: Determine review type based on transportation service
     const storeNameLower = (storeName || '').toLowerCase();
-    if (
-      storeNameLower.includes('goodwill') || 
-      storeNameLower.includes('salvation army') ||
-      storeNameLower.includes('thrift') ||
-      (storeNameLower.includes('store') && notes.toLowerCase().includes('thrift'))
-    ) {
-      console.log(`[MANUAL REVIEW] ⚠️ CRITICAL OVERRIDE: Skipping manual review for thrift store: ${storeName}`);
-      return true; // Return success without actually sending
+    const notesLower = (notes || '').toLowerCase(); // Fix crash risk
+    
+    let reviewType = 'TRANSPORTATION VALIDATION';
+    let reviewReason = "Transportation receipt requires manual validation";
+    
+    // Check for specific transportation types that commonly need manual review
+    if (storeNameLower.includes('bus') || storeNameLower.includes('metro') || storeNameLower.includes('transit') ||
+        notesLower.includes('bus') || notesLower.includes('metro') || notesLower.includes('transit')) {
+      reviewType = 'PUBLIC TRANSIT VALIDATION';
+      reviewReason = "Public transit receipts vary by city/state and require manual verification";
+    } else if (storeNameLower.includes('rail') || storeNameLower.includes('subway') || storeNameLower.includes('lightrail') || storeNameLower.includes('light rail') || 
+               storeNameLower.includes('tram') || storeNameLower.includes('streetcar') ||
+               notesLower.includes('rail') || notesLower.includes('subway') || notesLower.includes('lightrail') || notesLower.includes('light rail') ||
+               notesLower.includes('tram') || notesLower.includes('streetcar')) {
+      reviewType = 'RAIL TRANSIT VALIDATION';
+      reviewReason = "Rail/subway receipts have varied formats requiring manual verification";
+    } else if (storeNameLower.includes('bike') || storeNameLower.includes('scooter') || storeNameLower.includes('e-bike') || storeNameLower.includes('ebike') ||
+               storeNameLower.includes('e-scooter') || storeNameLower.includes('escooter') || storeNameLower.includes('bike share') || storeNameLower.includes('scooter share') ||
+               notesLower.includes('bike') || notesLower.includes('scooter') || notesLower.includes('e-bike') || notesLower.includes('ebike') ||
+               notesLower.includes('e-scooter') || notesLower.includes('escooter') || notesLower.includes('bike share') || notesLower.includes('scooter share')) {
+      reviewType = 'SUSTAINABLE TRANSPORT VALIDATION';
+      reviewReason = "Bike/scooter sharing receipt needs manual verification";
     }
     
-    console.log(`[MANUAL REVIEW] Sending receipt for manual review - User: ${userId}`);
-    
-    // Check for GameStop receipts specifically
-    const isGameStop = (storeName || '').toLowerCase().includes('gamestop');
-    const reviewType = isGameStop ? 'PRE-OWNED CHECK' : 'GENERAL VALIDATION';
-    const reviewReason = isGameStop 
-      ? "GameStop receipt may contain pre-owned items; needs manual review" 
-      : "Receipt requires manual validation";
+    console.log(`[MANUAL REVIEW] Review Type: ${reviewType} - ${reviewReason}`);
     
     // Validate required fields
     if (!userId) {
@@ -331,13 +341,16 @@ export async function sendReceiptForManualReview(
       amount: normalizedAmount,
       
       // Category and sustainability information
-      receiptCategory: "pending-review",
-      receipt_category: "pending-review",
-      sustainabilityCategory: "pending-review",
-      sustainability_category: "pending-review",
-      containsPreOwned: false,
-      contains_pre_owned: false,
-      containsPreOwnedItems: false,
+      receiptCategory: "transportation-pending-review",
+      receipt_category: "transportation-pending-review",
+      sustainabilityCategory: "sustainable_transportation",
+      sustainability_category: "sustainable_transportation",
+      transportationType: reviewType.includes('PUBLIC TRANSIT') ? 'public_transit' : 
+                         reviewType.includes('RAIL') ? 'rail_transit' : 
+                         reviewType.includes('SUSTAINABLE') ? 'sustainable_transport' : 'general_transportation',
+      transportation_type: reviewType.includes('PUBLIC TRANSIT') ? 'public_transit' : 
+                          reviewType.includes('RAIL') ? 'rail_transit' : 
+                          reviewType.includes('SUSTAINABLE') ? 'sustainable_transport' : 'general_transportation',
       
       // Payment information
       paymentMethod: {},
@@ -381,10 +394,16 @@ export async function sendReceiptForManualReview(
       retryCount: 0, // For retry logic
       notes: notes || reviewReason,
       validation_reasons: notes || reviewReason,
-      pre_owned_keywords_found: isGameStop ? ['PRE-OWNED', 'USED', 'PRE OWNED'] : [],
-      preOwnedKeywordsFound: isGameStop ? ['PRE-OWNED', 'USED', 'PRE OWNED'] : [],
-      pre_owned_evidence: isGameStop ? "Receipt may contain pre-owned items requiring verification" : "",
-      preOwnedEvidence: isGameStop ? "Receipt may contain pre-owned items requiring verification" : "",
+      transportation_keywords_found: [reviewType, 'TRANSPORTATION', 'SUSTAINABLE'],
+      transportationKeywordsFound: [reviewType, 'TRANSPORTATION', 'SUSTAINABLE'],
+      transportation_evidence: `Receipt identified as ${reviewType.toLowerCase()} requiring manual verification for transportation service validation`,
+      transportationEvidence: `Receipt identified as ${reviewType.toLowerCase()} requiring manual verification for transportation service validation`,
+      
+      // Critical: Include receipt image for manual reviewers
+      imageUrl: imageUrl || null,
+      image_url: imageUrl || null,
+      receiptImageUrl: imageUrl || null,
+      receipt_image_url: imageUrl || null,
       
       // Debug information
       debugHasReceipt: false,
