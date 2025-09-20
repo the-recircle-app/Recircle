@@ -8,6 +8,7 @@
 import * as thor from 'thor-devkit';
 import { getVeChainConfig } from '../../shared/vechain-config';
 import { createThorClient } from './vechain-thor-client';
+import { makeSponsoringDecision, formatSponsoringMessage, type SponsoringDecision } from './smart-sponsoring';
 
 // VeBetterDAO Contract Addresses (Testnet) - REAL CONFIGURED VALUES
 const X2EARN_REWARDS_POOL_ADDRESS = process.env.X2EARNREWARDSPOOL_ADDRESS || '0x5F8f86B8D0Fa93cdaE20936d150175dF0205fB38';
@@ -52,6 +53,50 @@ interface TreasuryDistributionResult {
   error?: string;
   method: 'treasury-distributeReward';
   timestamp: string;
+  sponsoring?: SponsoringDecision;
+  sponsoringMessage?: string;
+}
+
+/**
+ * Distributes B3TR tokens using REAL VeBetterDAO treasury system with smart sponsoring
+ * Tokens come from X2EarnRewardsPool contract, not personal wallet
+ * Includes intelligent sponsoring decisions based on user VTHO balance
+ */
+export async function distributeTreasuryRewardWithSponsoring(
+  userAddress: string,
+  totalAmount: number,
+  receiptProof: string = ''
+): Promise<TreasuryDistributionResult> {
+  console.log(`🏛️ SMART VeBetterDAO Treasury Distribution: ${totalAmount} B3TR to ${userAddress}`);
+  
+  // Make sponsoring decision first
+  const sponsoringDecision = await makeSponsoringDecision(userAddress, 'reward_distribution');
+  const sponsoringMessage = formatSponsoringMessage(sponsoringDecision);
+  
+  console.log(`🧠 Sponsoring Decision: ${sponsoringDecision.shouldSponsor ? '✅ SPONSOR' : '❌ NO SPONSOR'}`);
+  console.log(`📝 Reason: ${sponsoringDecision.reason}`);
+  console.log(`💬 User Message: ${sponsoringMessage}`);
+  
+  try {
+    const result = await distributeTreasuryReward(userAddress, totalAmount, receiptProof);
+    
+    // Add sponsoring information to result
+    result.sponsoring = sponsoringDecision;
+    result.sponsoringMessage = sponsoringMessage;
+    
+    return result;
+    
+  } catch (error) {
+    console.error('❌ Treasury distribution with sponsoring failed:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      method: 'treasury-distributeReward',
+      timestamp: new Date().toISOString(),
+      sponsoring: sponsoringDecision,
+      sponsoringMessage
+    };
+  }
 }
 
 /**
@@ -163,7 +208,7 @@ export async function distributeTreasuryReward(
       throw new Error(`Transaction submission failed: ${JSON.stringify(submitResult)}`);
     }
     
-    const userTxHash = submitResult.id || ('0x' + tx.getID().toString('hex'));
+    const userTxHash = submitResult.id || ('0x' + tx.id.toString('hex'));
     console.log(`✅ User transaction submitted successfully with hash: ${userTxHash}`);
     
     // Create second VeBetterDAO treasury transaction for app fund (30% portion)
@@ -218,7 +263,7 @@ export async function distributeTreasuryReward(
       });
       
       const appSubmitResult = await appSubmitResponse.json();
-      appTxHash = appSubmitResult.id || ('0x' + appTx.getID().toString('hex'));
+      appTxHash = appSubmitResult.id || ('0x' + appTx.id.toString('hex'));
       console.log(`✅ App fund VeBetterDAO treasury transaction submitted with hash: ${appTxHash}`);
     }
     

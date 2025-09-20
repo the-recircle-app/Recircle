@@ -23,8 +23,8 @@ export function VeChainKitProviderWrapper({ children }: Props) {
     <VeChainKitProvider
       feeDelegation={{
         delegatorUrl: config.sponsorUrl,
-        // Enable fee delegation for better user experience
-        delegateAllTransactions: true,
+        // Strategic fee delegation - only for users who need it
+        delegateAllTransactions: false, // We'll handle sponsoring decisions server-side
       }}
       loginMethods={
         (privyAppId && privyClientId)

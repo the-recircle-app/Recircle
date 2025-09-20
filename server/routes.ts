@@ -70,7 +70,7 @@ import {
 import { differenceInCalendarDays, format, parseISO } from 'date-fns';
 import { isVeChainVisaCard } from "./utils/receiptUtils";
 import { distributeSoloB3TR, isSoloNodeAvailable, testSoloB3TR } from "./utils/solo-node-b3tr";
-import { distributeTreasuryReward, checkTreasuryFunds, verifyDistributorAuthorization } from "./utils/vebetterdao-treasury";
+import { distributeTreasuryReward, distributeTreasuryRewardWithSponsoring, checkTreasuryFunds, verifyDistributorAuthorization } from "./utils/vebetterdao-treasury";
 
 
 // VeChain addresses for creator wallet and app sustainability fund
@@ -3307,6 +3307,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const isTestModeReceipt = req.body.isTestMode === true;
         const shouldAwardTokens = !needsManualReview || isTestModeReceipt;
         
+        // Declare distributionResult in broader scope for access in response
+        let distributionResult: any = null;
+        
         if (shouldAwardTokens) {
           const newBalance = (initialUserData.tokenBalance || 0) + totalRewards;
           console.log(`${isTestModeReceipt ? 'TEST MODE - ' : ''}Updating user balance: ${initialUserData.tokenBalance || 0} + ${totalRewards} = ${newBalance}`);
@@ -3337,13 +3340,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
                                            process.env.B3TR_CONTRACT_ADDRESS && 
                                            process.env.X2EARNREWARDSPOOL_ADDRESS;
               
-              let distributionResult;
-              
               if (hasVeBetterDAOSecrets) {
                 console.log(`[BLOCKCHAIN] 🏛️ EXECUTING VEBETTERDAO TREASURY DISTRIBUTION`);
                 console.log(`[BLOCKCHAIN] Distributing ${totalRewards} B3TR to ${targetWallet} via VeBetterDAO treasury`);
                 
-                distributionResult = await distributeTreasuryReward(
+                distributionResult = await distributeTreasuryRewardWithSponsoring(
                   targetWallet,
                   totalRewards,
                   `Receipt ID: ${newReceipt.id}, User: ${initialUserData.id}`
@@ -3370,6 +3371,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   console.log(`[BLOCKCHAIN] Method: ${distributionResult.method}`);
                   console.log(`[BLOCKCHAIN] User reward: ${distributionResult.userAmount} B3TR`);
                   console.log(`[BLOCKCHAIN] App reward: ${distributionResult.appAmount} B3TR`);
+                  console.log(`[BLOCKCHAIN] 🎯 Fee sponsoring: ${distributionResult.sponsoring?.shouldSponsor ? 'SPONSORED' : 'USER PAID'} (user VTHO: ${distributionResult.sponsoring?.userVTHOBalance || 'unknown'})`);
                 } else {
                   console.log(`[BLOCKCHAIN] Direct Distribution:`);
                   console.log(`[BLOCKCHAIN] User TX: ${distributionResult.transactions?.user || distributionResult.txHash}`);
@@ -3519,7 +3521,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             totalRewards: totalRewards,
             preOwnedItemsDetected: containsPreOwnedItems || false,
             needsManualReview: needsManualReview || false,
-            rewardsDelayed: needsManualReview || false
+            rewardsDelayed: needsManualReview || false,
+            sponsored: distributionResult?.sponsoring?.shouldSponsor || false,
+            userVthoBalance: distributionResult?.sponsoring?.userVTHOBalance || null,
+            sponsoringMessage: distributionResult?.sponsoring?.userMessage || null
           },
           updatedUser
         };
