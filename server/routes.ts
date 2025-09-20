@@ -54,6 +54,12 @@ import {
   authRateLimit,
   adminRateLimit 
 } from "./middlewares/rateLimiting";
+import { 
+  requireAuth, 
+  requireAdmin, 
+  requireOwnership, 
+  requireReceiptAccess 
+} from "./middlewares/authentication";
 import productionTestRoutes from './routes/production-test.js';
 import { 
   calculateReceiptReward, 
@@ -209,7 +215,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Receipt Image Viewing Endpoint for Manual Review
-  app.get("/api/receipt-image/:receiptId", async (req: Request, res: Response) => {
+  app.get("/api/receipt-image/:receiptId", authRateLimit, requireAuth, requireReceiptAccess, async (req: Request, res: Response) => {
     try {
       const receiptId = parseInt(req.params.receiptId);
       
@@ -255,7 +261,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // User update endpoint for wallet address and other fields
-  app.patch("/api/users/:id", async (req: Request, res: Response) => {
+  app.patch("/api/users/:id", authRateLimit, requireAuth, requireOwnership(), async (req: Request, res: Response) => {
     try {
       const userId = parseInt(req.params.id);
       
@@ -296,7 +302,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Comprehensive data reset endpoint for any user ID
-  app.post("/api/users/:id/reset", async (req: Request, res: Response) => {
+  app.post("/api/users/:id/reset", authRateLimit, requireAuth, requireOwnership(), async (req: Request, res: Response) => {
     try {
       const userId = parseInt(req.params.id);
       
@@ -353,7 +359,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   // Receipt image viewing endpoint for manual review
-  app.get("/api/receipts/:id/image", async (req: Request, res: Response) => {
+  app.get("/api/receipts/:id/image", authRateLimit, requireAuth, requireReceiptAccess, async (req: Request, res: Response) => {
     try {
       const receiptId = parseInt(req.params.id);
       const image = await getReceiptImage(receiptId);
@@ -383,7 +389,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin endpoint to get all receipts needing manual review
-  app.get("/api/admin/receipts/pending-review", async (req: Request, res: Response) => {
+  app.get("/api/admin/receipts/pending-review", adminRateLimit, requireAuth, requireAdmin, async (req: Request, res: Response) => {
     try {
       // Get receipts that need manual review (status = "pending_manual_review")
       const allReceipts = await storage.getUserReceipts(0); // Get all receipts
@@ -4603,7 +4609,7 @@ app.post("/api/treasury/test-distribution", async (req: Request, res: Response) 
   
   // Admin endpoint to approve submissions (will require authentication in production)
   // Check if a user has admin access
-  app.get("/api/user/admin-status", async (req: Request, res: Response) => {
+  app.get("/api/user/admin-status", authRateLimit, requireAuth, async (req: Request, res: Response) => {
     try {
       // Check if wallet address is associated with an account
       const walletAddress = req.query.walletAddress as string || null;
@@ -4652,51 +4658,10 @@ app.post("/api/treasury/test-distribution", async (req: Request, res: Response) 
     }
   });
   
-  // Admin middleware to check permission for all admin routes
-  const requireAdmin = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      // If not in development mode, require admin authentication
-      if (process.env.NODE_ENV !== 'development' || !req.query.bypassAuth) {
-        const walletAddress = req.query.walletAddress as string || null;
-        let user = null;
-        
-        if (walletAddress) {
-          user = await storage.getUserByWalletAddress(walletAddress);
-        } else if (req.query.userId) {
-          const userId = parseInt(req.query.userId as string);
-          if (!isNaN(userId)) {
-            user = await storage.getUser(userId);
-          }
-        }
-        
-        if (!user) {
-          return res.status(401).json({ error: "Authentication required" });
-        }
-        
-        // For production, a list of approved admin wallet addresses
-        const ADMIN_WALLET_ADDRESSES = [
-          process.env.CREATOR_FUND_WALLET,
-          "0x7dE3085b3190B3a787822Ee16F23be010f5F8686" // Your development wallet for testing
-        ].filter(Boolean);
-        
-        // Check if user has admin privileges
-        const isAdmin = user.isAdmin || (user.walletAddress && ADMIN_WALLET_ADDRESSES.includes(user.walletAddress));
-        
-        if (!isAdmin) {
-          return res.status(403).json({ error: "Admin privileges required" });
-        }
-      }
-      
-      // If we reach here, admin is authorized
-      next();
-    } catch (error) {
-      console.error("Admin auth error:", error);
-      res.status(500).json({ error: "Admin authentication error" });
-    }
-  };
+  // Legacy duplicate admin middleware removed - now using centralized authentication middleware
   
   // Admin API to approve a form submission
-  app.post("/api/admin/approve-submission/:id", requireAdmin, async (req: Request, res: Response) => {
+  app.post("/api/admin/approve-submission/:id", adminRateLimit, requireAuth, requireAdmin, async (req: Request, res: Response) => {
     try {
       const submissionId = parseInt(req.params.id);
       
@@ -5630,7 +5595,7 @@ app.post("/api/treasury/test-distribution", async (req: Request, res: Response) 
     }
   });
 
-  app.post('/api/users/reset-stats', async (req: Request, res: Response) => {
+  app.post('/api/users/reset-stats', authRateLimit, requireAuth, requireAdmin, async (req: Request, res: Response) => {
     const { userId, resetDaily, resetStreak } = req.body;
     
     if (!userId) {
@@ -5820,7 +5785,7 @@ app.post("/api/treasury/test-distribution", async (req: Request, res: Response) 
   });
 
   // Simple test endpoint to verify VeBetterDAO is configured correctly
-  app.get('/api/test/vebetterdao', adminRateLimit, async (req: Request, res: Response) => {
+  app.get('/api/test/vebetterdao', adminRateLimit, requireAuth, requireAdmin, async (req: Request, res: Response) => {
     try {
       const { VeBetterDAOConfig } = await import('./utils/vebetterdao-rewards');
       
@@ -5847,7 +5812,7 @@ app.post("/api/treasury/test-distribution", async (req: Request, res: Response) 
   });
 
   // Test actual blockchain transaction endpoint  
-  app.post('/api/test/blockchain-transaction', adminRateLimit, async (req: Request, res: Response) => {
+  app.post('/api/test/blockchain-transaction', adminRateLimit, requireAuth, requireAdmin, async (req: Request, res: Response) => {
     try {
       const { distributeVeBetterDAOReward } = await import('./utils/vebetterdao-rewards');
       
