@@ -3,21 +3,18 @@
  * Replaces ethers.js JsonRpcProvider with proper VeChain Thor SDK
  */
 
-import { ThorClient, VeChainProvider } from '@vechain/sdk-network';
-import { Address, TransactionHandler, VeChainPrivateKeySigner } from '@vechain/sdk-core';
+import { ThorClient, VeChainProvider, VeChainPrivateKeySigner } from '@vechain/sdk-network';
+import { Address } from '@vechain/sdk-core';
 import { HDNodeWallet } from 'ethers';
-
-// VeChain testnet Thor REST API endpoints (working!)
-const THOR_TESTNET_ENDPOINTS = [
-    'https://testnet.veblocks.net',
-    'https://sync-testnet.veblocks.net'
-];
+import { getVeChainConfig } from '../../shared/vechain-config';
 
 /**
- * Creates a VeChain Thor client for testnet
+ * Creates a VeChain Thor client for current network (testnet/mainnet)
  */
-export async function createThorTestnetClient(): Promise<ThorClient> {
-    for (const endpoint of THOR_TESTNET_ENDPOINTS) {
+export async function createThorClient(): Promise<ThorClient> {
+    const config = getVeChainConfig();
+    
+    for (const endpoint of config.thorEndpoints) {
         try {
             console.log(`[THOR] Attempting to connect to: ${endpoint}`);
             
@@ -27,22 +24,18 @@ export async function createThorTestnetClient(): Promise<ThorClient> {
                 const block = await response.json();
                 console.log(`[THOR] ✅ Connected to ${endpoint}, best block: ${block.number}`);
                 
-                // Create VeChain provider and Thor client
-                const provider = new VeChainProvider(
-                    ThorClient.at(endpoint),
-                    new VeChainPrivateKeySigner(Buffer.alloc(32, 0)), // Dummy signer for read operations
-                    false // Disable fee delegation
-                );
+                // Create VeChain provider and Thor client  
+                // For read-only operations, we just need the ThorClient
                 
                 return ThorClient.at(endpoint);
             }
-        } catch (error) {
-            console.log(`[THOR] ❌ Failed ${endpoint}:`, error.message);
+        } catch (error: any) {
+            console.log(`[THOR] ❌ Failed ${endpoint}:`, error?.message || 'Unknown error');
             continue;
         }
     }
     
-    throw new Error('No working VeChain Thor testnet endpoints found');
+    throw new Error(`No working VeChain Thor ${config.network} endpoints found`);
 }
 
 /**
@@ -59,14 +52,14 @@ export function createThorSigner(mnemonic: string): VeChainPrivateKeySigner {
  */
 export async function testThorConnectivity(): Promise<void> {
     try {
-        const thorClient = await createThorTestnetClient();
-        const bestBlock = await thorClient.blocks.getBestBlock();
-        console.log(`[THOR] ✅ Thor client working, best block: ${bestBlock.number}`);
+        const thorClient = await createThorClient();
+        const bestBlock = await thorClient.blocks.getBestBlockRef();
+        console.log(`[THOR] ✅ Thor client working, best block: ${bestBlock}`);
         
         // Test account query
         const testAddress = Address.of('0x7567d83b7b8d80addcb281a71d54fc7b3364ffed');
         const account = await thorClient.accounts.getAccount(testAddress);
-        console.log(`[THOR] ✅ Account query working, balance: ${account.balance}`);
+        console.log(`[THOR] ✅ Account query working, balance: ${account?.balance}`);
         
     } catch (error) {
         console.error('[THOR] ❌ Thor connectivity test failed:', error);

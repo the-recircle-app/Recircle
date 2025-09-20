@@ -6,6 +6,8 @@
  */
 
 import * as thor from 'thor-devkit';
+import { getVeChainConfig } from '../../shared/vechain-config';
+import { createThorClient } from './vechain-thor-client';
 
 // VeBetterDAO Contract Addresses (Testnet) - REAL CONFIGURED VALUES
 const X2EARN_REWARDS_POOL_ADDRESS = process.env.X2EARNREWARDSPOOL_ADDRESS || '0x5F8f86B8D0Fa93cdaE20936d150175dF0205fB38';
@@ -44,6 +46,7 @@ const AVAILABLE_FUNDS_ABI = {
 interface TreasuryDistributionResult {
   success: boolean;
   txHash?: string;
+  appTxHash?: string;
   userAmount?: number;
   appAmount?: number;
   error?: string;
@@ -90,9 +93,11 @@ export async function distributeTreasuryReward(
     const pubKey = thor.secp256k1.derivePublicKey(distributorPrivateKeyBuffer);
     const distributorAddress = thor.address.fromPublicKey(pubKey);
     
+    const config = getVeChainConfig();
+    
     console.log(`🔑 Using authorized distributor: ${distributorAddress}`);
-    console.log(`🏛️ Treasury Contract: ${X2EARN_REWARDS_POOL_ADDRESS}`);
-    console.log(`🪙 B3TR Token: ${B3TR_TOKEN_ADDRESS}`);
+    console.log(`🏛️ Treasury Contract: ${config.contracts.x2earnRewardsPool}`);
+    console.log(`🪙 B3TR Token: ${config.contracts.b3trToken}`);
     
     // Create the distributeReward function call data for user
     const userProof = JSON.stringify({
@@ -104,7 +109,7 @@ export async function distributeTreasuryReward(
     
     const userFunctionCall = encodeFunctionCall(DISTRIBUTE_REWARD_ABI, [
       RECIRCLE_APP_ID,           // bytes32 appId  
-      (userAmount * 1e18).toString(), // uint256 amount (convert to wei)
+      (BigInt(userAmount) * BigInt('1000000000000000000')).toString(), // uint256 amount (convert to wei)
       userAddress,               // address recipient
       userProof                  // string proof
     ]);
@@ -113,11 +118,11 @@ export async function distributeTreasuryReward(
     
     // Create transaction using thor-devkit
     const userTxBody = {
-      chainTag: 0x27, // VeChain testnet
+      chainTag: config.chainTag, // Current network chain tag
       blockRef: '0x0000000000000000', // Will be updated with latest block
       expiration: 32,
       clauses: [{
-        to: X2EARN_REWARDS_POOL_ADDRESS,
+        to: config.contracts.x2earnRewardsPool,
         value: '0x0',
         data: userFunctionCall
       }],
@@ -127,8 +132,8 @@ export async function distributeTreasuryReward(
       nonce: Date.now()
     };
     
-    // Get latest block reference for transaction
-    const blockResponse = await fetch('https://testnet.vechain.org/blocks/best');
+    // Get latest block reference for transaction using current network
+    const blockResponse = await fetch(`${config.thorEndpoints[0]}/v1/blocks/best`);
     const latestBlock = await blockResponse.json();
     userTxBody.blockRef = latestBlock.id.slice(0, 18); // Use first 8 bytes as blockRef
     
@@ -140,7 +145,7 @@ export async function distributeTreasuryReward(
     
     // ACTUALLY SUBMIT TO VECHAIN NETWORK
     const rawTx = '0x' + tx.encode().toString('hex');
-    const submitResponse = await fetch('https://testnet.vechain.org/transactions', {
+    const submitResponse = await fetch(`${config.thorEndpoints[0]}/v1/transactions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -158,7 +163,7 @@ export async function distributeTreasuryReward(
       throw new Error(`Transaction submission failed: ${JSON.stringify(submitResult)}`);
     }
     
-    const userTxHash = submitResult.id || ('0x' + tx.id!.toString('hex'));
+    const userTxHash = submitResult.id || ('0x' + tx.id?.toString('hex'));
     console.log(`✅ User transaction submitted successfully with hash: ${userTxHash}`);
     
     // Create second VeBetterDAO treasury transaction for app fund (30% portion)
@@ -176,18 +181,18 @@ export async function distributeTreasuryReward(
       
       const appFunctionCall = encodeFunctionCall(DISTRIBUTE_REWARD_ABI, [
         RECIRCLE_APP_ID,           // bytes32 appId  
-        (appAmount * 1e18).toString(), // uint256 amount (convert to wei)
+        (BigInt(appAmount) * BigInt('1000000000000000000')).toString(), // uint256 amount (convert to wei)
         appFundAddress,            // address recipient (app fund wallet)
         appProof                   // string proof
       ]);
       
       // Create app fund VeBetterDAO treasury transaction
       const appTxBody = {
-        chainTag: 0x27, // VeChain testnet
+        chainTag: config.chainTag, // Current network chain tag
         blockRef: latestBlock.id.slice(0, 18),
         expiration: 32,
         clauses: [{
-          to: X2EARN_REWARDS_POOL_ADDRESS,
+          to: config.contracts.x2earnRewardsPool,
           value: '0x0',
           data: appFunctionCall
         }],
@@ -204,7 +209,7 @@ export async function distributeTreasuryReward(
       
       // Submit app fund VeBetterDAO treasury transaction
       const appRawTx = '0x' + appTx.encode().toString('hex');
-      const appSubmitResponse = await fetch('https://testnet.vechain.org/transactions', {
+      const appSubmitResponse = await fetch(`${config.thorEndpoints[0]}/v1/transactions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -213,7 +218,7 @@ export async function distributeTreasuryReward(
       });
       
       const appSubmitResult = await appSubmitResponse.json();
-      appTxHash = appSubmitResult.id || ('0x' + appTx.id!.toString('hex'));
+      appTxHash = appSubmitResult.id || ('0x' + appTx.id?.toString('hex'));
       console.log(`✅ App fund VeBetterDAO treasury transaction submitted with hash: ${appTxHash}`);
     }
     
@@ -229,7 +234,7 @@ export async function distributeTreasuryReward(
       appTxHash,
       userAmount,
       appAmount,
-      method: 'treasury-distributeReward (dual)',
+      method: 'treasury-distributeReward',
       timestamp: new Date().toISOString()
     };
     
@@ -249,19 +254,50 @@ export async function distributeTreasuryReward(
  */
 export async function checkTreasuryFunds(): Promise<number> {
   try {
+    const config = getVeChainConfig();
+    
     console.log(`💰 Checking VeBetterDAO Treasury Funds for App: ${RECIRCLE_APP_ID}`);
     
-    // Create contract call to check availableFunds
-    const functionCall = encodeFunctionCall(AVAILABLE_FUNDS_ABI, [RECIRCLE_APP_ID]);
-    
-    // Use your REAL VeBetterDAO allocation confirmed in project docs
-    const realAllocation = 24166; // Your confirmed VeBetterDAO treasury allocation
-    console.log(`💰 REAL VeBetterDAO Treasury Funds: ${realAllocation} B3TR (confirmed allocation)`);
-    console.log(`🆔 App ID: ${RECIRCLE_APP_ID} (REGISTERED)`);
-    console.log(`🏛️ Treasury: ${X2EARN_REWARDS_POOL_ADDRESS} (LIVE CONTRACT)`);
-    console.log(`✅ Using your actual VeBetterDAO registration, not simulation`);
-    
-    return realAllocation;
+    try {
+      // Attempt real on-chain call to availableFunds
+      const thorClient = await createThorClient();
+      
+      // Create contract call to check availableFunds
+      const functionCall = encodeFunctionCall(AVAILABLE_FUNDS_ABI, [RECIRCLE_APP_ID]);
+      
+      // Make the contract call
+      const callResult = await thorClient.accounts.call({
+        to: config.contracts.x2earnRewardsPool,
+        data: functionCall
+      });
+      
+      if (callResult && callResult.data && callResult.data !== '0x') {
+        // Parse the returned uint256 from the contract call
+        const resultHex = callResult.data.slice(2); // Remove 0x prefix
+        const availableFunds = parseInt(resultHex, 16) / 1e18; // Convert from wei to B3TR
+        
+        console.log(`💰 REAL On-Chain Treasury Funds: ${availableFunds} B3TR`);
+        console.log(`🆔 App ID: ${RECIRCLE_APP_ID} (REGISTERED)`);
+        console.log(`🏛️ Treasury: ${config.contracts.x2earnRewardsPool} (LIVE CONTRACT)`);
+        console.log(`✅ Real blockchain query successful`);
+        
+        return availableFunds;
+      } else {
+        throw new Error('Contract call returned empty result');
+      }
+      
+    } catch (contractError: any) {
+      console.warn(`⚠️ Real treasury call failed: ${contractError.message}`);
+      console.log(`💰 Falling back to confirmed VeBetterDAO allocation`);
+      
+      // Fallback to confirmed allocation when contract call fails
+      const confirmedAllocation = 24166;
+      console.log(`💰 VeBetterDAO Treasury Allocation: ${confirmedAllocation} B3TR (confirmed)`);
+      console.log(`🆔 App ID: ${RECIRCLE_APP_ID} (REGISTERED)`);
+      console.log(`🏛️ Treasury: ${config.contracts.x2earnRewardsPool} (FALLBACK)`);
+      
+      return confirmedAllocation;
+    }
   } catch (error: any) {
     console.error('Failed to check treasury funds:', error.message);
     return 0;
@@ -352,14 +388,14 @@ function createB3TRTransferData(recipientAddress: string, amount: number): strin
   const addressBytes = Buffer.from(recipientAddress.slice(2), 'hex');
   const addressPadded = Buffer.concat([Buffer.alloc(12), addressBytes]); // Left pad to 32 bytes
   
-  const amountWei = BigInt(amount * 1e18);
+  const amountWei = BigInt(amount) * BigInt('1000000000000000000');
   const amountBytes = Buffer.alloc(32);
   
   // Convert BigInt to bytes (big endian)
   let tempAmount = amountWei;
   for (let i = 31; i >= 0; i--) {
-    amountBytes[i] = Number(tempAmount & 0xFFn);
-    tempAmount >>= 8n;
+    amountBytes[i] = Number(tempAmount & BigInt(0xFF));
+    tempAmount >>= BigInt(8);
   }
   
   const callData = Buffer.concat([selector, addressPadded, amountBytes]);

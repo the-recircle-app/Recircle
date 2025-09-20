@@ -583,6 +583,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Mount VeChain health check routes  
+  const vechainHealthRoutes = await import('./routes/vechain-health');
+  app.use('/api/vechain', vechainHealthRoutes.default);
+
   // Body parsing middleware MUST come before route handlers
   app.use(express.json({ limit: '50mb' })); // Increased limit for image uploads
   // User Routes

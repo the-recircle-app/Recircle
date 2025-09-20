@@ -1,11 +1,13 @@
 'use client';
 import { VeChainKitProvider } from "@vechain/vechain-kit";
 import { ReactNode } from "react";
+import { getVeChainConfig } from "../../../shared/vechain-config";
 
 type Props = { children: ReactNode };
 
 export function VeChainKitProviderWrapper({ children }: Props) {
-  // Get Privy credentials from environment variables
+  // Get network configuration and Privy credentials
+  const config = getVeChainConfig();
   const privyAppId = import.meta.env.VITE_PRIVY_APP_ID;
   const privyClientId = import.meta.env.VITE_PRIVY_CLIENT_ID;
   
@@ -20,7 +22,7 @@ export function VeChainKitProviderWrapper({ children }: Props) {
   return (
     <VeChainKitProvider
       feeDelegation={{
-        delegatorUrl: "https://sponsor-testnet.vechain.energy/by/441",
+        delegatorUrl: config.sponsorUrl,
         // Enable fee delegation for better user experience
         delegateAllTransactions: true,
       }}
@@ -64,7 +66,7 @@ export function VeChainKitProviderWrapper({ children }: Props) {
       darkMode={false} // Light mode to match ReCircle branding
       language="en"
       network={{
-        type: "test", // Using testnet for development
+        type: config.network === 'mainnet' ? "main" : "test",
       }}
     >
       {children}
