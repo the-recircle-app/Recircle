@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { storage } from '../storage';
+import { Certificate } from 'thor-devkit';
 
 // Extend Express Request type to include user information
 declare global {
@@ -15,41 +16,163 @@ declare global {
 }
 
 /**
- * Simple session-based authentication middleware
- * Checks if user ID exists in session and validates against database
+ * VeChain certificate-based authentication middleware
+ * Verifies wallet signatures instead of trusting client headers
  */
 export const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    // Check for user ID in headers, query, or body (flexible auth for wallet-based system)
-    const userId = req.headers['x-user-id'] || 
-                   req.query.userId ||
-                   req.body.userId;
+    // Check for VeChain certificate in Authorization header
+    const authHeader = req.headers.authorization;
     
-    if (!userId) {
+    // Fallback to legacy header system for backwards compatibility during transition
+    const legacyUserId = req.headers['x-user-id'] || req.query.userId || req.body.userId;
+    
+    let walletAddress: string | null = null;
+    
+    // Try VeChain certificate validation first
+    if (authHeader) {
+      try {
+        // Support both raw base64 and "Bearer <base64>" formats
+        const certificateToken = authHeader.startsWith('Bearer ') 
+          ? authHeader.substring(7)
+          : authHeader;
+          
+        // Decode base64 certificate
+        const decodedAuthHeader = Buffer.from(certificateToken, 'base64').toString('utf-8');
+        const decodedCertificate = JSON.parse(decodedAuthHeader);
+        
+        // Verify certificate signature using thor-devkit
+        Certificate.verify(decodedCertificate);
+        
+        // STRICT SECURITY VALIDATIONS (all required)
+        const now = Math.floor(Date.now() / 1000);
+        const maxAge = 300; // 5 minutes
+        const maxFutureSkew = 60; // 1 minute future tolerance
+        
+        // 1. TIMESTAMP REQUIRED (prevents indefinite replay)
+        if (!decodedCertificate.timestamp || typeof decodedCertificate.timestamp !== 'number') {
+          return res.status(401).json({ 
+            error: 'Invalid certificate format',
+            message: 'Certificate must include valid timestamp'
+          });
+        }
+        
+        // 2. TIMESTAMP VALIDATION (prevents replay attacks)
+        const certAge = now - decodedCertificate.timestamp;
+        if (certAge > maxAge) {
+          return res.status(401).json({ 
+            error: 'Certificate expired',
+            message: 'Please reconnect your wallet - session expired'
+          });
+        }
+        
+        if (certAge < -maxFutureSkew) {
+          return res.status(401).json({ 
+            error: 'Certificate timestamp invalid',
+            message: 'Certificate timestamp is too far in the future'
+          });
+        }
+        
+        // 3. PURPOSE VALIDATION (prevents cross-service replay)
+        if (decodedCertificate.purpose !== 'identification') {
+          return res.status(401).json({ 
+            error: 'Invalid certificate purpose',
+            message: 'Certificate must be for identification purpose'
+          });
+        }
+        
+        // 4. DOMAIN VALIDATION REQUIRED (prevents cross-domain replay)
+        if (!decodedCertificate.domain) {
+          return res.status(401).json({ 
+            error: 'Certificate domain required',
+            message: 'Certificate must include domain for security validation'
+          });
+        }
+        
+        // SECURE DOMAIN VALIDATION: Use hardcoded allowlist (never trust client headers!)
+        const productionDomains = [
+          process.env.APP_DOMAIN,
+          ...(process.env.REPLIT_DOMAINS || '').split(',').filter(Boolean)
+        ].filter(Boolean).map(domain => domain.toLowerCase());
+        
+        // PRODUCTION SECURITY GUARD: Require explicit domain configuration in production
+        const isProduction = process.env.NODE_ENV === 'production';
+        if (isProduction && productionDomains.length === 0) {
+          console.error('[VECHAIN-AUTH] SECURITY ERROR: Production requires APP_DOMAIN or REPLIT_DOMAINS configuration');
+          return res.status(500).json({ 
+            error: 'Server configuration error',
+            message: 'Authentication system requires domain configuration'
+          });
+        }
+        
+        // Build allowed domains list (exclude localhost in production)
+        const allowedDomains = isProduction 
+          ? productionDomains
+          : ['localhost', '127.0.0.1', ...productionDomains];
+        
+        // Normalize certificate domain (remove port, lowercase)
+        const certDomain = decodedCertificate.domain.split(':')[0].toLowerCase();
+        
+        if (!allowedDomains.includes(certDomain)) {
+          console.error('[VECHAIN-AUTH] Domain not in allowlist:', certDomain, 'Allowed:', allowedDomains);
+          return res.status(401).json({ 
+            error: 'Certificate domain not allowed',
+            message: 'Certificate domain is not authorized for this application'
+          });
+        }
+        
+        // Extract verified wallet address
+        walletAddress = decodedCertificate.signer?.toLowerCase();
+        if (!walletAddress) {
+          return res.status(401).json({ 
+            error: 'Invalid certificate format',
+            message: 'Certificate must include valid signer address'
+          });
+        }
+        
+        console.log('[VECHAIN-AUTH] ✅ Certificate verified for wallet:', walletAddress);
+        
+      } catch (certError) {
+        // FULLY SANITIZED LOGGING - no certificate fragments exposed
+        const errorType = certError instanceof SyntaxError ? 'PARSE_ERROR' : 
+                         certError.name === 'ThorDevKitError' ? 'SIGNATURE_ERROR' :
+                         'UNKNOWN_ERROR';
+        console.error(`[VECHAIN-AUTH] Certificate validation failed: ${errorType}`);
+        
+        return res.status(401).json({ 
+          error: 'Invalid wallet signature',
+          message: 'Please reconnect your wallet to authenticate'
+        });
+      }
+    }
+    
+    // LEGACY AUTHENTICATION DISABLED FOR SECURITY
+    // Legacy headers are completely insecure and allow account takeover
+    if (!walletAddress && legacyUserId) {
+      console.log('[VECHAIN-AUTH] ❌ Legacy authentication DISABLED for security - certificate required');
+      return res.status(401).json({ 
+        error: 'Certificate required',
+        message: 'Legacy authentication disabled for security. Please connect your wallet with proper VeChain certificate.'
+      });
+    }
+    
+    if (!walletAddress) {
       return res.status(401).json({ 
         error: 'Authentication required',
         message: 'Please connect your wallet to access this endpoint'
       });
     }
 
-    const userIdNum = typeof userId === 'string' ? parseInt(userId) : userId;
-    if (isNaN(userIdNum)) {
-      return res.status(401).json({ 
-        error: 'Invalid user ID',
-        message: 'Valid user authentication required'
-      });
-    }
-
-    // Validate user exists in database
-    const user = await storage.getUser(userIdNum);
+    // Get user by cryptographically verified wallet address ONLY
+    const user = await storage.getUserByWalletAddress(walletAddress);
     if (!user) {
       return res.status(401).json({ 
         error: 'User not found',
-        message: 'Authentication failed - user does not exist'
+        message: 'Wallet not registered - please connect your wallet first'
       });
     }
 
-    // Attach user info to request
+    // Attach verified user info to request
     req.user = {
       id: user.id,
       isAdmin: user.isAdmin || false,
@@ -58,7 +181,7 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
 
     next();
   } catch (error) {
-    console.error('[AUTH] Authentication error:', error);
+    console.error('[VECHAIN-AUTH] Authentication error:', error);
     return res.status(500).json({ 
       error: 'Authentication system error',
       message: 'Please try again later'
