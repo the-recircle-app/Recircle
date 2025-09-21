@@ -174,19 +174,6 @@ async function processReferralOnFirstReceipt(inviteeUserId: number, receiptId: n
     
     console.log(`[REFERRAL] Processing referral reward: ${sustainabilityDistribution.userReward} B3TR to inviter ${referral.referrerId}, ${sustainabilityDistribution.appReward} B3TR to app fund`);
     
-    // IMPROVED IDEMPOTENCY: Mark referral as rewarded FIRST (atomic check)
-    const markedReferral = await storage.markReferralRewardedAtomic(
-      referral.id,
-      new Date(),
-      receiptId,
-      0 // Will update with real transaction ID after blockchain distribution
-    );
-    
-    if (!markedReferral) {
-      console.log(`[REFERRAL] Referral ${referral.id} already processed by another request`);
-      return;
-    }
-    
     try {
       // ON-CHAIN DISTRIBUTION: Use sendReward/distributeTreasuryReward for real blockchain transactions
       const distributionResult = await distributeTreasuryRewardWithSponsoring(
@@ -202,7 +189,7 @@ async function processReferralOnFirstReceipt(inviteeUserId: number, receiptId: n
         console.log(`[REFERRAL] ✅ On-chain distribution successful - User: ${distributionResult.hash}, App: ${distributionResult.appHash}`);
         
         // Create referral reward transaction for inviter with real blockchain hash
-        await storage.createTransaction({
+        const referralTx = await storage.createTransaction({
           userId: referral.referrerId,
           type: "referral_reward", 
           amount: sustainabilityDistribution.userReward,
@@ -213,7 +200,7 @@ async function processReferralOnFirstReceipt(inviteeUserId: number, receiptId: n
         
         // Create app fund transaction with real blockchain hash
         await storage.createTransaction({
-          userId: null,
+          userId: referral.referrerId, // Use referrerId instead of null for schema compatibility
           type: "sustainability_app",
           amount: sustainabilityDistribution.appReward,
           description: `App Sustainability (Referral): ${APP_FUND_WALLET.slice(0, 8)}...`,
@@ -227,42 +214,31 @@ async function processReferralOnFirstReceipt(inviteeUserId: number, receiptId: n
           (inviter.tokenBalance || 0) + sustainabilityDistribution.userReward
         );
         
+        // FIXED STATE MACHINE: Only mark as rewarded AFTER successful blockchain distribution
+        await storage.markReferralRewardedAtomic(
+          referral.id,
+          new Date(),
+          receiptId,
+          referralTx.id // Link actual transaction ID
+        );
+        
         console.log(`[REFERRAL] ✅ Referral reward completed: ${sustainabilityDistribution.userReward} B3TR to inviter ${referral.referrerId} (${inviter.walletAddress})`);
         
       } else {
         console.error(`[REFERRAL] ❌ On-chain distribution failed:`, distributionResult.message);
+        console.log(`[REFERRAL] ⚠️ Referral ${referral.id} remains 'pending' for retry`);
         
-        // Create pending transactions for manual processing
-        await storage.createTransaction({
-          userId: referral.referrerId,
-          type: "referral_reward", 
-          amount: sustainabilityDistribution.userReward,
-          description: `Referral reward: Invitee's first receipt (receipt #${receiptId}) - PENDING`,
-          referenceId: referral.id,
-          txHash: `pending-ref-${Date.now().toString(16)}`
-        });
-        
-        // Still update token balance for UI purposes
-        await storage.updateUserTokenBalance(
-          referral.referrerId,
-          (inviter.tokenBalance || 0) + sustainabilityDistribution.userReward
-        );
-        
-        console.log(`[REFERRAL] ⚠️ Referral reward marked as pending due to blockchain error`);
+        // Don't mark as rewarded - leave as 'pending' for retry
+        // Don't update token balance until blockchain succeeds
+        return;
       }
       
     } catch (blockchainError) {
       console.error(`[REFERRAL] ❌ Blockchain distribution error:`, blockchainError);
+      console.log(`[REFERRAL] ⚠️ Referral ${referral.id} remains 'pending' for retry`);
       
-      // Create pending transaction as fallback
-      await storage.createTransaction({
-        userId: referral.referrerId,
-        type: "referral_reward", 
-        amount: sustainabilityDistribution.userReward,
-        description: `Referral reward: Invitee's first receipt (receipt #${receiptId}) - ERROR FALLBACK`,
-        referenceId: referral.id,
-        txHash: `error-ref-${Date.now().toString(16)}`
-      });
+      // Don't mark as rewarded - leave as 'pending' for retry  
+      return;
     }
     
   } catch (error) {
@@ -3314,6 +3290,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             if (verifiedReceipt) {
               console.log("Receipt verified automatically");
               Object.assign(newReceipt, verifiedReceipt);
+              
+              // REFERRAL PROCESSING: Award inviter when invitee submits first valid receipt
+              await processReferralOnFirstReceipt(receiptData.userId, newReceipt.id);
             }
           }
         }
