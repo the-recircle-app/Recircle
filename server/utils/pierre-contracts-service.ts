@@ -9,10 +9,18 @@ export class PierreContractsService {
   private contract: any;
 
   constructor() {
-    // Initialize Thor client (following Pierre's pattern)
-    this.thor = new ThorClient(NetworkConfig.NETWORK_URL, {
-      isPollingEnabled: false,
-    });
+    // Initialize Thor client with explicit HTTP client for reliability
+    try {
+      this.thor = new ThorClient(NetworkConfig.NETWORK_URL, {
+        isPollingEnabled: false,
+        timeout: 30000
+      });
+      console.log(`🌐 ThorClient initialized with endpoint: ${NetworkConfig.NETWORK_URL}`);
+    } catch (error) {
+      console.error('❌ ThorClient initialization failed:', error);
+      // Fallback to basic initialization
+      this.thor = new ThorClient(NetworkConfig.NETWORK_URL);
+    }
 
     // Only initialize contract if we have addresses configured
     if (VeBetterDAOConfig.CONTRACT_ADDRESS && NetworkConfig.ADMIN_MNEMONIC) {
@@ -65,8 +73,9 @@ export class PierreContractsService {
       console.log(`📋 App ID: ${VeBetterDAOConfig.APP_ID}`);
       console.log(`🏛️ Contract: ${VeBetterDAOConfig.CONTRACT_ADDRESS}`);
       
-      // Convert reward amount to wei (multiply by 10^18)
-      const amountInWei = BigInt(VeBetterDAOConfig.REWARD_AMOUNT) * BigInt('1000000000000000000');
+      // Convert reward amount to wei using proper decimal parsing
+      const rewardAmount = parseFloat(VeBetterDAOConfig.REWARD_AMOUNT);
+      const amountInWei = BigInt(Math.floor(rewardAmount * 1e18));
       
       const result = await (
         await this.contract.transact.distributeReward(
