@@ -48,6 +48,7 @@ const NETWORK_CONFIGS: Record<VeChainNetwork, VeChainNetworkConfig> = {
     chainTag: 0x27, // 39 in decimal
     networkId: '0x27',
     thorEndpoints: [
+      'https://vethor-node-test.vechaindev.com',  // Working VeChainDev testnet endpoint
       'https://testnet.veblocks.net',
       'https://sync-testnet.veblocks.net'
     ],
