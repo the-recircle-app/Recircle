@@ -143,12 +143,18 @@ export default function SmartAccountManager() {
       }
       
       // Sync the smart account address to our WalletContext
-      // Use the smart account address for all B3TR balance queries
-      if (derivedSmartAccountAddress !== appAddress) {
-        console.log('[SMART-ACCOUNT] Syncing smart account to app context:', derivedSmartAccountAddress);
+      // DISABLED: Smart account auto-creation causing wallet mismatch issues
+      // Users expect tokens to go to their actual VeWorld wallet, not derived smart accounts
+      console.log('[SMART-ACCOUNT] Smart account available but NOT auto-connecting to preserve user wallet choice');
+      console.log('[SMART-ACCOUNT] Smart account address:', derivedSmartAccountAddress);
+      console.log('[SMART-ACCOUNT] User EOA address (VeWorld wallet):', kitAccount?.address);
+      
+      // Use the EOA address (user's actual VeWorld wallet) instead of smart account
+      if (kitAccount?.address && kitAccount.address !== appAddress) {
+        console.log('[SMART-ACCOUNT] Using user EOA wallet instead of smart account:', kitAccount.address);
         
-        // Connect using the smart account address (not the EOA owner address)
-        const success = await appConnect('smart-account', derivedSmartAccountAddress, {
+        // Connect using the user's actual VeWorld wallet (EOA)
+        const success = await appConnect('veworld', kitAccount.address, {
           skipCelebration: true
         });
         
