@@ -24,55 +24,74 @@ export class PierreContractsService {
 
   private initializeContract() {
     try {
-      // Simplified mnemonic handling for testing
-      const adminPrivateKey = Buffer.from('dummy_private_key_for_testing', 'hex');
+      // Handle real private key from environment
+      let adminPrivateKey: Buffer;
+      
+      if (NetworkConfig.ADMIN_MNEMONIC.startsWith('0x')) {
+        // Remove 0x prefix if present
+        adminPrivateKey = Buffer.from(NetworkConfig.ADMIN_MNEMONIC.slice(2), 'hex');
+      } else if (NetworkConfig.ADMIN_MNEMONIC.length === 64) {
+        // Raw hex private key
+        adminPrivateKey = Buffer.from(NetworkConfig.ADMIN_MNEMONIC, 'hex');
+      } else {
+        console.error('❌ Invalid private key format');
+        return;
+      }
       
       this.contract = this.thor.contracts.load(
         VeBetterDAOConfig.CONTRACT_ADDRESS,
         RECIRCLE_EARN_ABI,
         new VeChainPrivateKeySigner(
-          Buffer.from(adminPrivateKey), 
+          adminPrivateKey, 
           new VeChainProvider(this.thor)
         )
       );
       
-      console.log('✅ ReCircle VeBetterDAO contract initialized');
+      console.log('✅ ReCircle VeBetterDAO contract initialized with real key');
+      console.log(`🏛️ Contract address: ${VeBetterDAOConfig.CONTRACT_ADDRESS}`);
     } catch (error) {
       console.error('❌ Contract initialization error:', error);
     }
   }
 
-  async registerSubmission(submission: Submission): Promise<boolean> {
+  async registerSubmission(submission: Submission): Promise<{ success: boolean, txHash?: string, error?: string }> {
     if (!this.contract) {
       console.error('❌ Contract not initialized');
-      return false;
+      return { success: false, error: 'Contract not initialized' };
     }
 
-    let isSuccess = false;
     try {
-      console.log(`🎯 Distributing ${VeBetterDAOConfig.REWARD_AMOUNT} B3TR tokens to ${submission.address}`);
+      console.log(`🎯 VeBetterDAO Distribution: ${VeBetterDAOConfig.REWARD_AMOUNT} B3TR tokens to ${submission.address}`);
+      console.log(`📋 App ID: ${VeBetterDAOConfig.APP_ID}`);
+      console.log(`🏛️ Contract: ${VeBetterDAOConfig.CONTRACT_ADDRESS}`);
+      
+      // Convert reward amount to wei (multiply by 10^18)
+      const amountInWei = BigInt(VeBetterDAOConfig.REWARD_AMOUNT) * BigInt('1000000000000000000');
       
       const result = await (
-        await this.contract.transact.registerValidSubmission(
-          submission.address, 
-          BigInt(VeBetterDAOConfig.REWARD_AMOUNT + '000000000000000000') // 1 token = 1e18 wei
+        await this.contract.transact.distributeReward(
+          VeBetterDAOConfig.APP_ID, // bytes32 appId
+          amountInWei, // uint256 amount in wei
+          submission.address, // address recipient
+          `Receipt validation: ${submission.timestamp}` // string proof
         )
       ).wait();
       
-      isSuccess = !result.reverted;
+      const isSuccess = !result.reverted;
       
       if (isSuccess) {
-        console.log('✅ B3TR tokens distributed successfully');
+        console.log('✅ VeBetterDAO B3TR tokens distributed successfully');
         console.log('🔗 Transaction hash:', result.meta.txID);
+        return { success: true, txHash: result.meta.txID };
       } else {
-        console.error('❌ Transaction reverted');
+        console.error('❌ VeBetterDAO transaction reverted');
+        return { success: false, error: 'Transaction reverted' };
       }
       
     } catch (error) {
-      console.error('❌ Token distribution error:', error);
+      console.error('❌ VeBetterDAO token distribution error:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
-
-    return isSuccess;
   }
 
   async validateSubmission(submission: Submission): Promise<void> {
