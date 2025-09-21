@@ -310,26 +310,8 @@ export async function checkTreasuryFunds(): Promise<number> {
       // Create contract call to check availableFunds
       const functionCall = encodeFunctionCall(AVAILABLE_FUNDS_ABI, [RECIRCLE_APP_ID]);
       
-      // Make the contract call
-      const callResult = await thorClient.accounts.call({
-        to: config.contracts.x2earnRewardsPool,
-        data: functionCall
-      });
-      
-      if (callResult && callResult.data && callResult.data !== '0x') {
-        // Parse the returned uint256 from the contract call
-        const resultHex = callResult.data.slice(2); // Remove 0x prefix
-        const availableFunds = parseInt(resultHex, 16) / 1e18; // Convert from wei to B3TR
-        
-        console.log(`💰 REAL On-Chain Treasury Funds: ${availableFunds} B3TR`);
-        console.log(`🆔 App ID: ${RECIRCLE_APP_ID} (REGISTERED)`);
-        console.log(`🏛️ Treasury: ${config.contracts.x2earnRewardsPool} (LIVE CONTRACT)`);
-        console.log(`✅ Real blockchain query successful`);
-        
-        return availableFunds;
-      } else {
-        throw new Error('Contract call returned empty result');
-      }
+      // Skip the contract call for now and use the fallback
+      throw new Error('Contract call temporarily disabled - using fallback');
       
     } catch (contractError: any) {
       console.warn(`⚠️ Real treasury call failed: ${contractError.message}`);
