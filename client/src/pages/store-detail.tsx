@@ -119,12 +119,12 @@ export default function StoreDetail() {
   const handleShareStore = () => {
     if (!store) return;
     
-    const storeName = store.name || 'This thrift store';
+    const storeName = store.name || 'This transportation service';
     
     // Create share data
     const shareData = {
-      title: `${storeName} on ReWardrobe`,
-      text: `Check out ${storeName}, a thrift store on ReWardrobe! Recycle your clothing and earn rewards.`,
+      title: `${storeName} on ReCircle`,
+      text: `Check out ${storeName}, a sustainable transportation service on ReCircle! Use eco-friendly travel and earn B3TR rewards.`,
       url: window.location.href
     };
     

@@ -362,9 +362,9 @@ export default function EcoImpactDashboard() {
                 <TreePine className="h-4 w-4 text-primary" />
               </div>
               <div>
-                <span className="font-medium">Add more thrift stores to the map</span>
+                <span className="font-medium">Add more transportation services to the map</span>
                 <p className="text-sm text-muted-foreground">
-                  Help others discover great sustainable shopping locations
+                  Help others discover great sustainable transportation options
                 </p>
               </div>
             </li>
@@ -375,7 +375,7 @@ export default function EcoImpactDashboard() {
               <div>
                 <span className="font-medium">Invite friends to join</span>
                 <p className="text-sm text-muted-foreground">
-                  Amplify your impact by getting your friends to shop sustainably too
+                  Amplify your impact by getting your friends to use sustainable transportation too
                 </p>
               </div>
             </li>
@@ -386,7 +386,7 @@ export default function EcoImpactDashboard() {
               <div>
                 <span className="font-medium">Maintain your streak</span>
                 <p className="text-sm text-muted-foreground">
-                  Shop sustainably regularly to earn streak bonuses
+                  Use sustainable transportation regularly to earn streak bonuses
                 </p>
               </div>
             </li>
