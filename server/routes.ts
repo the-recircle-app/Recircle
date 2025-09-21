@@ -156,50 +156,114 @@ async function processReferralOnFirstReceipt(inviteeUserId: number, receiptId: n
       return;
     }
     
+    // Get inviter details for on-chain distribution
+    const inviter = await storage.getUser(referral.referrerId);
+    if (!inviter) {
+      console.error(`[REFERRAL] ❌ Inviter user ${referral.referrerId} not found`);
+      return;
+    }
+    
+    if (!inviter.walletAddress) {
+      console.error(`[REFERRAL] ❌ Inviter ${referral.referrerId} has no wallet address`);
+      return;
+    }
+    
     // Award inviter 15 B3TR with 70/30 split
     const referralRewardAmount = 15;
     const sustainabilityDistribution = calculateSustainabilityRewards(referralRewardAmount);
     
-    console.log(`[REFERRAL] Awarding referral reward: ${sustainabilityDistribution.userReward} B3TR to inviter ${referral.referrerId}, ${sustainabilityDistribution.appReward} B3TR to app fund`);
+    console.log(`[REFERRAL] Processing referral reward: ${sustainabilityDistribution.userReward} B3TR to inviter ${referral.referrerId}, ${sustainabilityDistribution.appReward} B3TR to app fund`);
     
-    // Create referral reward transaction for inviter (user gets 70%)
-    const referralTx = await storage.createTransaction({
-      userId: referral.referrerId,
-      type: "referral_reward", 
-      amount: sustainabilityDistribution.userReward,
-      description: `Referral reward: Invitee's first receipt (receipt #${receiptId})`,
-      referenceId: referral.id,
-      txHash: `txhash-ref-${Date.now().toString(16)}`
-    });
-    
-    // Create app fund transaction (app gets 30%)
-    await storage.createTransaction({
-      userId: null,
-      type: "sustainability_app",
-      amount: sustainabilityDistribution.appReward,
-      description: `App Sustainability (Referral): ${APP_FUND_WALLET.slice(0, 8)}...`,
-      referenceId: referral.id,
-      txHash: `txhash-saref-${Date.now().toString(16)}`
-    });
-    
-    // Update inviter's token balance
-    const inviter = await storage.getUser(referral.referrerId);
-    if (inviter) {
-      await storage.updateUserTokenBalance(
-        referral.referrerId,
-        (inviter.tokenBalance || 0) + sustainabilityDistribution.userReward
-      );
-    }
-    
-    // Mark referral as rewarded atomically
-    await storage.markReferralRewardedAtomic(
+    // IMPROVED IDEMPOTENCY: Mark referral as rewarded FIRST (atomic check)
+    const markedReferral = await storage.markReferralRewardedAtomic(
       referral.id,
       new Date(),
       receiptId,
-      referralTx.id
+      0 // Will update with real transaction ID after blockchain distribution
     );
     
-    console.log(`[REFERRAL] ✅ Referral reward processed successfully: ${sustainabilityDistribution.userReward} B3TR to inviter ${referral.referrerId}`);
+    if (!markedReferral) {
+      console.log(`[REFERRAL] Referral ${referral.id} already processed by another request`);
+      return;
+    }
+    
+    try {
+      // ON-CHAIN DISTRIBUTION: Use sendReward/distributeTreasuryReward for real blockchain transactions
+      const distributionResult = await distributeTreasuryRewardWithSponsoring(
+        inviter.walletAddress,
+        sustainabilityDistribution.userReward,
+        APP_FUND_WALLET,
+        sustainabilityDistribution.appReward,
+        `Referral reward: Invitee's first receipt`,
+        `Referral app fund: ${APP_FUND_WALLET.slice(0, 8)}...`
+      );
+      
+      if (distributionResult.success) {
+        console.log(`[REFERRAL] ✅ On-chain distribution successful - User: ${distributionResult.hash}, App: ${distributionResult.appHash}`);
+        
+        // Create referral reward transaction for inviter with real blockchain hash
+        await storage.createTransaction({
+          userId: referral.referrerId,
+          type: "referral_reward", 
+          amount: sustainabilityDistribution.userReward,
+          description: `Referral reward: Invitee's first receipt (receipt #${receiptId})`,
+          referenceId: referral.id,
+          txHash: distributionResult.hash
+        });
+        
+        // Create app fund transaction with real blockchain hash
+        await storage.createTransaction({
+          userId: null,
+          type: "sustainability_app",
+          amount: sustainabilityDistribution.appReward,
+          description: `App Sustainability (Referral): ${APP_FUND_WALLET.slice(0, 8)}...`,
+          referenceId: referral.id,
+          txHash: distributionResult.appHash
+        });
+        
+        // Update inviter's token balance
+        await storage.updateUserTokenBalance(
+          referral.referrerId,
+          (inviter.tokenBalance || 0) + sustainabilityDistribution.userReward
+        );
+        
+        console.log(`[REFERRAL] ✅ Referral reward completed: ${sustainabilityDistribution.userReward} B3TR to inviter ${referral.referrerId} (${inviter.walletAddress})`);
+        
+      } else {
+        console.error(`[REFERRAL] ❌ On-chain distribution failed:`, distributionResult.message);
+        
+        // Create pending transactions for manual processing
+        await storage.createTransaction({
+          userId: referral.referrerId,
+          type: "referral_reward", 
+          amount: sustainabilityDistribution.userReward,
+          description: `Referral reward: Invitee's first receipt (receipt #${receiptId}) - PENDING`,
+          referenceId: referral.id,
+          txHash: `pending-ref-${Date.now().toString(16)}`
+        });
+        
+        // Still update token balance for UI purposes
+        await storage.updateUserTokenBalance(
+          referral.referrerId,
+          (inviter.tokenBalance || 0) + sustainabilityDistribution.userReward
+        );
+        
+        console.log(`[REFERRAL] ⚠️ Referral reward marked as pending due to blockchain error`);
+      }
+      
+    } catch (blockchainError) {
+      console.error(`[REFERRAL] ❌ Blockchain distribution error:`, blockchainError);
+      
+      // Create pending transaction as fallback
+      await storage.createTransaction({
+        userId: referral.referrerId,
+        type: "referral_reward", 
+        amount: sustainabilityDistribution.userReward,
+        description: `Referral reward: Invitee's first receipt (receipt #${receiptId}) - ERROR FALLBACK`,
+        referenceId: referral.id,
+        txHash: `error-ref-${Date.now().toString(16)}`
+      });
+    }
     
   } catch (error) {
     console.error(`[REFERRAL] ❌ Error processing referral reward:`, error);
@@ -3181,6 +3245,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
               if (verifiedReceipt) {
                 log(`✅ Thrift store receipt #${newReceipt.id} automatically verified!`, "receipts");
                 Object.assign(newReceipt, verifiedReceipt);
+                
+                // REFERRAL PROCESSING: Award inviter when invitee submits first valid receipt
+                await processReferralOnFirstReceipt(receiptData.userId, newReceipt.id);
               }
             } catch (verifyError) {
               log(`❌ Error verifying thrift store receipt: ${verifyError instanceof Error ? verifyError.message : String(verifyError)}`, "receipts");
@@ -3203,6 +3270,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
               
               // Set needsManualReview to false since we're auto-approving
               newReceipt.needsManualReview = false;
+              
+              // REFERRAL PROCESSING: Award inviter when invitee submits first valid receipt
+              await processReferralOnFirstReceipt(receiptData.userId, newReceipt.id);
             }
           } catch (verifyError) {
             log(`❌ Error auto-verifying high confidence receipt: ${verifyError instanceof Error ? verifyError.message : String(verifyError)}`, "receipts");
