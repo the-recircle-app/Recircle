@@ -253,9 +253,9 @@ export async function distributeTreasuryReward(
       const appSignature = thor.secp256k1.sign(appSigningHash, distributorPrivateKeyBuffer);
       appTx.signature = appSignature;
       
-      // Submit app fund VeBetterDAO treasury transaction
+      // Submit app fund VeBetterDAO treasury transaction (using working pattern)
       const appRawTx = '0x' + appTx.encode().toString('hex');
-      const appSubmitResponse = await fetch(`${config.thorEndpoints[0]}/v1/transactions`, {
+      const appSubmitResponse = await fetch(`${config.thorEndpoints[0]}/transactions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -263,9 +263,15 @@ export async function distributeTreasuryReward(
         body: JSON.stringify({ raw: appRawTx })
       });
       
-      const appSubmitResult = await appSubmitResponse.json();
-      appTxHash = appSubmitResult.id || ('0x' + appTx.id.toString('hex'));
-      console.log(`✅ App fund VeBetterDAO treasury transaction submitted with hash: ${appTxHash}`);
+      if (!appSubmitResponse.ok) {
+        const errorText = await appSubmitResponse.text();
+        console.warn(`⚠️ App fund transaction failed: ${appSubmitResponse.status} - ${errorText}`);
+        appTxHash = 'failed';
+      } else {
+        const appSubmitResult = await appSubmitResponse.json();
+        appTxHash = appSubmitResult.id || ('0x' + appTx.id.toString('hex'));
+        console.log(`✅ App fund VeBetterDAO treasury transaction submitted with hash: ${appTxHash}`);
+      }
     }
     
     console.log(`✅ COMPLETE VeBetterDAO Treasury Distribution to VeChain Network!`);
