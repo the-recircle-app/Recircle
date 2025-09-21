@@ -32,6 +32,19 @@ interface BlockchainTransaction {
 const TransactionExplorer = () => {
   const { userId, address, isConnected, tokenBalance, refreshTokenBalance } = useWallet();
   const { toast } = useToast();
+
+  // Helper function for safe address display
+  const getConnectedAddress = () => {
+    return address || localStorage.getItem('walletAddress') || '';
+  };
+
+  // Helper function for safe short address display
+  const formatShortAddress = (addr?: string) => {
+    const safeAddr = addr || getConnectedAddress();
+    return (safeAddr && safeAddr.length >= 14) 
+      ? `${safeAddr.substring(0, 8)}...${safeAddr.substring(safeAddr.length - 6)}` 
+      : safeAddr || '';
+  };
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
   const [blockchainDetails, setBlockchainDetails] = useState<BlockchainTransaction | null>(null);
@@ -51,7 +64,18 @@ const TransactionExplorer = () => {
     staleTime: 0
   });
   
-  // Refresh token balance and transaction data when component mounts
+  // 🔧 FIX #1: Refresh token balance immediately when wallet connects (independent of userId)
+  useEffect(() => {
+    if (isConnected && refreshTokenBalance) {
+      refreshTokenBalance().then(updatedBalance => {
+        console.log("Token balance refreshed on connection:", updatedBalance);
+      }).catch(err => {
+        console.log("Token balance refresh failed:", err);
+      });
+    }
+  }, [isConnected, refreshTokenBalance]);
+
+  // Refresh transaction data when component mounts
   // or when a transaction is approved or user data changes
   useEffect(() => {
     // Initial load of data
@@ -151,13 +175,13 @@ const TransactionExplorer = () => {
       
       // Determine from/to addresses based on transaction type
       let fromAddress = platformWalletAddress;
-      let toAddress = address || "0x0123456789012345678901234567890123456789"; // Use connected user wallet for all user transactions
+      let toAddress = getConnectedAddress(); // Use actual connected wallet address
       
       // For user rewards (receipt_verification, achievement_reward, store_addition), 
       // the user is receiving tokens FROM the platform
       if (tx.type === "receipt_verification" || tx.type === "achievement_reward" || tx.type === "store_addition") {
         fromAddress = platformWalletAddress;
-        toAddress = address || "0x0123456789012345678901234567890123456789"; // Use consistent address
+        toAddress = getConnectedAddress(); // Use actual connected wallet address
       } 
       // Set proper addresses for sustainability transactions
       else if (tx.type === "sustainability_creator") {
@@ -288,7 +312,7 @@ const TransactionExplorer = () => {
                     </div>
                     <h3 className="font-medium text-lg">Connected Wallet</h3>
                     <p className="text-sm text-gray-500 break-all text-center mt-1 mb-2">
-                      {address?.substring(0, 8)}...{address?.substring(address.length - 6)}
+                      {formatShortAddress()}
                     </p>
                     <div className="flex items-center text-primary mt-2 text-lg font-bold">
                       {tokenBalance} <B3trLogo className="w-5 h-5 ml-1" color="#38BDF8" />
