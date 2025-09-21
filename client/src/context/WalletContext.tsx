@@ -47,18 +47,26 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
   const [showCelebration, setShowCelebration] = useState<boolean>(false);
   const { toast } = useToast();
   
-  // VeChain Kit hooks for proper disconnect
-  const { disconnect: kitDisconnect } = useVeChainKitWallet();
+  // VeChain Kit hooks for live wallet state and proper disconnect
+  const { disconnect: kitDisconnect, account } = useVeChainKitWallet();
+  const kitConnected = !!account; // Kit is connected if account exists
 
   // Check for stored wallet address on load with safety checks and VeChainKit coordination
   useEffect(() => {
     const storedAddress = localStorage.getItem("walletAddress");
     const storedUserId = localStorage.getItem("userId");
     
-    // Enhanced recovery logic with fallback user ID
+    // Enhanced recovery logic with VeChain Kit coordination
     if (storedAddress) {
-      console.log("[WALLET] Found stored address, attempting recovery:", storedAddress);
-      recoverWalletConnection(storedAddress);
+      console.log("[WALLET] Found stored address:", storedAddress);
+      // If Kit is already connected to a different address, skip initial recovery
+      // The mismatch-heal effect will handle the correction
+      if (kitConnected && account?.address && account.address.toLowerCase() !== storedAddress.toLowerCase()) {
+        console.log("[WALLET] Kit connected to different address - skipping stale recovery");
+      } else {
+        console.log("[WALLET] Attempting recovery for stored address");
+        recoverWalletConnection(storedAddress);
+      }
     } else if (storedUserId) {
       // If we have a user ID but no wallet address, don't set as connected
       const userIdNum = parseInt(storedUserId);
@@ -117,6 +125,127 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
+  // PROVIDER AUTHORITY: Auto-heal wallet address mismatches
+  // Make VeChain Kit provider the source of truth over localStorage
+  useEffect(() => {
+    const healWalletMismatch = async () => {
+      // Only proceed if VeChain Kit is connected and has an account
+      if (!kitConnected || !account?.address) {
+        return;
+      }
+
+      const liveAddress = account.address.toLowerCase();
+      const storedAddress = localStorage.getItem("walletAddress")?.toLowerCase();
+      
+      console.log('[WALLET-HEAL] Checking address mismatch:', {
+        liveAddress,
+        storedAddress,
+        connected: kitConnected,
+        mismatch: liveAddress !== storedAddress
+      });
+
+      // If addresses don't match, auto-heal by clearing stale data and using live address
+      if (storedAddress && liveAddress !== storedAddress) {
+        console.log('[WALLET-HEAL] ⚠️ Address mismatch detected - auto-healing with live provider address');
+        
+        // Clear stale localStorage data
+        localStorage.removeItem("walletAddress");
+        localStorage.removeItem("userId");
+        localStorage.removeItem("connectedWallet");
+        
+        // Use live provider address as source of truth
+        console.log('[WALLET-HEAL] ✅ Using live VeWorld address:', account.address);
+        await recoverWalletConnection(account.address);
+        
+        toast({
+          title: "Wallet Fixed! 🎯",
+          description: "Updated to use your current VeWorld wallet address",
+          variant: "default"
+        });
+      } else if (kitConnected && !isConnected && liveAddress) {
+        // Kit is connected but our context isn't - sync up
+        console.log('[WALLET-HEAL] Syncing with connected VeChain Kit wallet');
+        await recoverWalletConnection(account.address);
+      }
+    };
+
+    healWalletMismatch();
+  }, [kitConnected, account?.address, isConnected]);
+
+  // URL-triggered reset for mobile browsers
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('reset') === '1') {
+      console.log('[WALLET-RESET] URL reset triggered - performing hard reset');
+      hardResetDappStorage();
+    }
+  }, []);
+
+  // Mobile-safe hard reset function for cache/storage issues
+  const hardResetDappStorage = async () => {
+    try {
+      console.log('[WALLET-RESET] 🧹 Starting mobile-safe hard reset');
+      
+      // Step 1: Disconnect VeChain Kit gracefully
+      if (kitDisconnect) {
+        try {
+          await kitDisconnect();
+          console.log('[WALLET-RESET] ✅ VeChain Kit disconnected');
+        } catch (error) {
+          console.log('[WALLET-RESET] ⚠️ Kit disconnect error (continuing):', error);
+        }
+      }
+      
+      // Step 2: Clear localStorage and sessionStorage
+      const preserveKeys = ['referralCode']; // Keep referral codes
+      const lsKeys = Object.keys(localStorage);
+      lsKeys.forEach(key => {
+        if (!preserveKeys.includes(key)) {
+          localStorage.removeItem(key);
+        }
+      });
+      sessionStorage.clear();
+      console.log('[WALLET-RESET] ✅ Browser storage cleared');
+      
+      // Step 3: Clear IndexedDB databases (mobile-safe)
+      if ('indexedDB' in window && indexedDB.databases) {
+        try {
+          const databases = await indexedDB.databases();
+          const deletePromises = databases.map(db => {
+            if (db.name && ['vechain-kit', '@vechain/dapp-kit', 'privy', 'privy-auth'].some(prefix => db.name?.includes(prefix))) {
+              return indexedDB.deleteDatabase(db.name);
+            }
+          }).filter(Boolean);
+          
+          await Promise.all(deletePromises);
+          console.log('[WALLET-RESET] ✅ IndexedDB cleared');
+        } catch (error) {
+          console.log('[WALLET-RESET] ⚠️ IndexedDB clear error (continuing):', error);
+        }
+      }
+      
+      // Step 4: Clear component state
+      setAddress("");
+      setTokenBalance(0);
+      setUserId(null);
+      setIsConnected(false);
+      setIsConnecting(false);
+      setConnecting(false);
+      
+      // Step 5: Force reload to fresh state
+      console.log('[WALLET-RESET] 🔄 Redirecting to fresh session');
+      window.location.replace(window.location.origin + '/?fresh=1');
+      
+    } catch (error) {
+      console.error('[WALLET-RESET] ❌ Hard reset failed:', error);
+      toast({
+        title: "Reset Failed",
+        description: "Manual browser refresh may be needed",
+        variant: "destructive"
+      });
+    }
+  };
+
   const recoverWalletConnection = async (address: string) => {
     try {
       console.log('[WALLET] Attempting to recover wallet connection for address:', address);
@@ -133,6 +262,8 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
         setTokenBalance(userData.tokenBalance);
         setUserId(userData.id);
         setIsConnected(true);
+        // Keep localStorage in sync after recovery/heal
+        localStorage.setItem("walletAddress", address);
         localStorage.setItem("userId", userData.id.toString());
       } else {
         // If user doesn't exist, create a new one
@@ -150,6 +281,8 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
             setTokenBalance(userData.tokenBalance);
             setUserId(userData.id);
             setIsConnected(true);
+            // Keep localStorage in sync after recovery/heal
+            localStorage.setItem("walletAddress", address);
             localStorage.setItem("userId", userData.id.toString());
           } else {
             throw new Error("Failed to create user account");
