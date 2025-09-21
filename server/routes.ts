@@ -2389,6 +2389,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         } : {};
         
+        // CRITICAL FIX: Detect OpenAI fallback analysis and trigger manual review
+        const isOpenAIFallback = analysisResult.confidence === 0.0 && 
+          !analysisResult.isValid && 
+          analysisResult.reasons?.includes("We couldn't automatically determine if this receipt qualifies. Please enter the details manually.");
+          
+        if (isOpenAIFallback) {
+          log(`🔍 OpenAI fallback analysis detected - triggering manual review webhook`, "receipts");
+          
+          // Send the receipt for manual review when OpenAI fallback is detected
+          const userId = req.body.userId || null;
+          if (userId) {
+            try {
+              // Get wallet address from request body or fetch from DB if needed
+              let walletAddress = req.body.walletAddress || null;
+              
+              // If no wallet address in body but we have userId, try to get from storage
+              if (!walletAddress && userId) {
+                try {
+                  const user = await storage.getUser(Number(userId));
+                  if (user && user.walletAddress) {
+                    walletAddress = user.walletAddress;
+                    log(`Retrieved wallet address for user ${userId}: ${walletAddress}`, "receipts");
+                  }
+                } catch (err) {
+                  log(`Error fetching wallet address for user ${userId}: ${err instanceof Error ? err.message : String(err)}`, "receipts");
+                }
+              }
+              
+              const storeHint = req.body.storeHint || "Unknown Store";
+              const purchaseDate = req.body.purchaseDate || null;
+              const totalAmount = req.body.amount || null;
+              const imageUrl = null; // We don't have image URL storage yet
+              const notes = `OpenAI analysis failed - using fallback mode. Store hint: ${storeHint}`;
+              
+              await sendReceiptForManualReview(
+                userId,
+                walletAddress,
+                storeHint,
+                purchaseDate,
+                totalAmount,
+                imageUrl,
+                notes,
+                0.0 // Zero confidence since OpenAI failed
+              );
+              log(`✅ OpenAI fallback receipt sent for manual review - User: ${userId}, Store: ${storeHint}`, "receipts");
+            } catch (webhookError) {
+              log(`❌ Failed to send OpenAI fallback receipt for manual review: ${webhookError instanceof Error ? webhookError.message : String(webhookError)}`, "receipts");
+            }
+          }
+        }
+
         // Check receipt category and determine manual review requirements
         const storeName = analysisResult.storeName?.toLowerCase() || '';
         const isKnownThriftStore = 
