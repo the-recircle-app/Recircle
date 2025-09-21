@@ -5099,12 +5099,12 @@ app.post("/api/treasury/test-distribution", async (req: Request, res: Response) 
       // Use the user's 70% portion as the final reward (instead of 100% as in the old model)
       const finalReward = distributionRewards.userReward;
       
-      console.log(`Rewards for approved receipt (70/30 distribution):
-        - Total reward amount: ${totalRawReward} B3TR
-        - User reward: ${finalReward} B3TR (70% of total)
-        - App fund: ${txResult?.appAmount || (totalRawReward * 0.3)} B3TR (30% of total)
-        - Distribution model: 70/30 (user/app fund)
-      `);
+      console.log(`Reward distribution (70/30 split):
+    - Total reward: ${totalRawReward} B3TR
+    - User portion: ${finalReward} B3TR (70% of total)
+    - App fund: ${(totalRawReward * 0.3).toFixed(1)} B3TR (30% of total)
+    - Total operational: ${(totalRawReward * 0.3).toFixed(1)} B3TR (30% of total)
+`);
       
       // Create a descriptive transaction for the user
       let txHash = `txhash-mr-${Date.now().toString(16)}`;
