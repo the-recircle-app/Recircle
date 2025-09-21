@@ -11,8 +11,8 @@ const CONTRACTS = {
     X2EARN_REWARDS_POOL: process.env.X2EARNREWARDSPOOL_ADDRESS || ''
 };
 
-// Working VeChain testnet RPC endpoint
-const TESTNET_RPC = 'https://testnet.veblocks.net';
+// Working VeChain testnet RPC endpoint (fixed for current connectivity issues)
+const TESTNET_RPC = 'https://vethor-node-test.vechaindev.com';
 
 // ERC20 transfer function signature
 const ERC20_TRANSFER_SIG = 'transfer(address,uint256)';
