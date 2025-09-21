@@ -3632,16 +3632,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
                                            process.env.X2EARNREWARDSPOOL_ADDRESS;
               
               if (hasVeBetterDAOSecrets) {
-                console.log(`[BLOCKCHAIN] 🏛️ EXECUTING WORKING DISTRIBUTION SYSTEM`);
-                console.log(`[BLOCKCHAIN] Distributing ${totalRewards} B3TR to ${targetWallet} via working distribution`);
+                console.log(`[BLOCKCHAIN] 🏛️ EXECUTING VEBETTERDAO TREASURY DISTRIBUTION`);
+                console.log(`[BLOCKCHAIN] Distributing ${totalRewards} B3TR to ${targetWallet} via VeBetterDAO treasury`);
                 
-                // Use your WORKING distribution system instead of broken Pierre SDK
-                const { distributeRealB3TR } = await import('./utils/working-distribution');
-                
-                distributionResult = await distributeRealB3TR(
+                // Use VeBetterDAO treasury system - tokens come from X2EarnRewardsPool, not wallet transfers
+                distributionResult = await distributeTreasuryRewardWithSponsoring(
                   targetWallet,
                   totalRewards,
-                  initialUserData.id
+                  `Receipt ID: ${newReceipt.id}, User: ${initialUserData.id}`
                 );
               } else {
                 console.log(`[BLOCKCHAIN] 🚀 EXECUTING DIRECT B3TR DISTRIBUTION (fallback)`);
