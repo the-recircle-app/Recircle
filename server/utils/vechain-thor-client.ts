@@ -19,7 +19,7 @@ export async function createThorClient(): Promise<ThorClient> {
             console.log(`[THOR] Attempting to connect to: ${endpoint}`);
             
             // Test the endpoint first
-            const response = await fetch(`${endpoint}/v1/blocks/best`);
+            const response = await fetch(`${endpoint}/blocks/best`);
             if (response.ok) {
                 const block = await response.json();
                 console.log(`[THOR] ✅ Connected to ${endpoint}, best block: ${block.number}`);
