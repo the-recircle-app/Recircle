@@ -142,8 +142,14 @@ async function processReferralOnFirstReceipt(inviteeUserId: number, receiptId: n
       return;
     }
     
+    // CONCURRENCY PROTECTION: Use atomic state transition to prevent double processing
     if (referral.status === 'rewarded') {
       console.log(`[REFERRAL] Referral ${referral.id} already rewarded`);
+      return;
+    }
+    
+    if (referral.status === 'processing') {
+      console.log(`[REFERRAL] Referral ${referral.id} already being processed`);
       return;
     }
     
@@ -153,6 +159,13 @@ async function processReferralOnFirstReceipt(inviteeUserId: number, receiptId: n
     
     if (verifiedReceipts.length !== 1) {
       console.log(`[REFERRAL] User ${inviteeUserId} has ${verifiedReceipts.length} verified receipts, not their first`);
+      return;
+    }
+    
+    // ATOMIC LOCK: Transition to 'processing' state to prevent concurrent execution
+    const lockSuccess = await storage.transitionReferralToProcessing(referral.id);
+    if (!lockSuccess) {
+      console.log(`[REFERRAL] Referral ${referral.id} already transitioned to processing by another request`);
       return;
     }
     
@@ -188,56 +201,53 @@ async function processReferralOnFirstReceipt(inviteeUserId: number, receiptId: n
       if (distributionResult.success) {
         console.log(`[REFERRAL] ✅ On-chain distribution successful - User: ${distributionResult.hash}, App: ${distributionResult.appHash}`);
         
-        // Create referral reward transaction for inviter with real blockchain hash
-        const referralTx = await storage.createTransaction({
-          userId: referral.referrerId,
-          type: "referral_reward", 
-          amount: sustainabilityDistribution.userReward,
-          description: `Referral reward: Invitee's first receipt (receipt #${receiptId})`,
-          referenceId: referral.id,
-          txHash: distributionResult.hash
-        });
-        
-        // Create app fund transaction with real blockchain hash
-        await storage.createTransaction({
-          userId: referral.referrerId, // Use referrerId instead of null for schema compatibility
-          type: "sustainability_app",
-          amount: sustainabilityDistribution.appReward,
-          description: `App Sustainability (Referral): ${APP_FUND_WALLET.slice(0, 8)}...`,
-          referenceId: referral.id,
-          txHash: distributionResult.appHash
-        });
-        
-        // Update inviter's token balance
-        await storage.updateUserTokenBalance(
-          referral.referrerId,
-          (inviter.tokenBalance || 0) + sustainabilityDistribution.userReward
-        );
-        
-        // FIXED STATE MACHINE: Only mark as rewarded AFTER successful blockchain distribution
-        await storage.markReferralRewardedAtomic(
+        // ATOMIC DATABASE OPERATIONS: Use single transaction for all post-blockchain operations
+        const atomicResult = await storage.completeReferralRewardAtomic(
           referral.id,
-          new Date(),
+          referral.referrerId,
           receiptId,
-          referralTx.id // Link actual transaction ID
+          {
+            userId: referral.referrerId,
+            type: "referral_reward", 
+            amount: sustainabilityDistribution.userReward,
+            description: `Referral reward: Invitee's first receipt (receipt #${receiptId})`,
+            referenceId: referral.id,
+            txHash: distributionResult.hash
+          },
+          {
+            userId: null, // Use null for system transactions to avoid FK dependencies
+            type: "sustainability_app",
+            amount: sustainabilityDistribution.appReward,
+            description: `App Sustainability (Referral): ${APP_FUND_WALLET.slice(0, 8)}...`,
+            referenceId: referral.id,
+            txHash: distributionResult.appHash
+          },
+          sustainabilityDistribution.userReward
         );
+        
+        if (!atomicResult.success) {
+          console.error(`[REFERRAL] ❌ Atomic database operations failed: ${atomicResult.error}`);
+          // Blockchain succeeded but DB operations failed - leave in processing for manual resolution
+          return;
+        }
         
         console.log(`[REFERRAL] ✅ Referral reward completed: ${sustainabilityDistribution.userReward} B3TR to inviter ${referral.referrerId} (${inviter.walletAddress})`);
         
       } else {
         console.error(`[REFERRAL] ❌ On-chain distribution failed:`, distributionResult.message);
-        console.log(`[REFERRAL] ⚠️ Referral ${referral.id} remains 'pending' for retry`);
         
-        // Don't mark as rewarded - leave as 'pending' for retry
-        // Don't update token balance until blockchain succeeds
+        // PROPER STATE TRANSITION: Move back to 'pending' for retry
+        await storage.transitionReferralToPending(referral.id);
+        console.log(`[REFERRAL] ⚠️ Referral ${referral.id} transitioned back to 'pending' for retry`);
         return;
       }
       
     } catch (blockchainError) {
       console.error(`[REFERRAL] ❌ Blockchain distribution error:`, blockchainError);
-      console.log(`[REFERRAL] ⚠️ Referral ${referral.id} remains 'pending' for retry`);
       
-      // Don't mark as rewarded - leave as 'pending' for retry  
+      // PROPER STATE TRANSITION: Move back to 'pending' for retry
+      await storage.transitionReferralToPending(referral.id);
+      console.log(`[REFERRAL] ⚠️ Referral ${referral.id} transitioned back to 'pending' for retry`);
       return;
     }
     

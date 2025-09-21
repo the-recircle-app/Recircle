@@ -55,7 +55,17 @@ export interface IStorage {
   getReferralByReferredUser(referredId: number): Promise<Referral | undefined>;
   createReferral(referral: InsertReferral): Promise<Referral>;
   updateReferralStatus(id: number, status: string): Promise<Referral | undefined>;
+  transitionReferralToProcessing(referralId: number): Promise<boolean>;
   markReferralRewardedAtomic(id: number, rewardedAt: Date, firstReceiptId: number, rewardTxId: number): Promise<Referral | undefined>;
+  transitionReferralToPending(referralId: number): Promise<boolean>;
+  completeReferralRewardAtomic(
+    referralId: number,
+    referrerId: number,
+    receiptId: number,
+    userTxData: InsertTransaction,
+    appTxData: InsertTransaction,
+    rewardAmount: number
+  ): Promise<{success: boolean; referral?: Referral; userTx?: Transaction; error?: string}>;
   getUserReferralCount(userId: number): Promise<number>;
 }
 
@@ -678,13 +688,22 @@ export class MemStorage implements IStorage {
     );
   }
 
+  async transitionReferralToProcessing(referralId: number): Promise<boolean> {
+    const referral = await this.getReferral(referralId);
+    if (!referral || referral.status !== 'pending') return false;
+    
+    const updatedReferral = { ...referral, status: 'processing' };
+    this.referrals.set(referralId, updatedReferral);
+    return true;
+  }
+
   async markReferralRewardedAtomic(id: number, rewardedAt: Date, firstReceiptId: number, rewardTxId: number): Promise<Referral | undefined> {
     const referral = await this.getReferral(id);
-    if (!referral || referral.status !== 'pending') return undefined; // Only update if still pending
+    if (!referral || referral.status !== 'processing') return undefined; // Only update if currently processing
     
     const updatedReferral = { 
       ...referral, 
-      status: 'rewarded' as any,
+      status: 'rewarded',
       rewardedAt,
       firstReceiptId,
       rewardTxId
@@ -694,9 +713,48 @@ export class MemStorage implements IStorage {
     return updatedReferral;
   }
 
+  async transitionReferralToPending(referralId: number): Promise<boolean> {
+    const referral = await this.getReferral(referralId);
+    if (!referral || referral.status !== 'processing') return false;
+    
+    const updatedReferral = { ...referral, status: 'pending' };
+    this.referrals.set(referralId, updatedReferral);
+    return true;
+  }
+
+  async completeReferralRewardAtomic(
+    referralId: number,
+    referrerId: number,
+    receiptId: number,
+    userTxData: InsertTransaction,
+    appTxData: InsertTransaction,
+    rewardAmount: number
+  ): Promise<{success: boolean; referral?: Referral; userTx?: Transaction; error?: string}> {
+    try {
+      // Create user transaction
+      const userTx = await this.createTransaction(userTxData);
+      
+      // Create app fund transaction  
+      await this.createTransaction(appTxData);
+      
+      // Update user balance
+      const user = await this.getUser(referrerId);
+      if (user) {
+        await this.updateUserTokenBalance(referrerId, (user.tokenBalance || 0) + rewardAmount);
+      }
+      
+      // Mark referral as rewarded
+      const referral = await this.markReferralRewardedAtomic(referralId, new Date(), receiptId, userTx.id);
+      
+      return { success: true, referral, userTx };
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  }
+
   async getUserReferralCount(userId: number): Promise<number> {
     return Array.from(this.referrals.values()).filter(
-      (referral) => referral.referrerId === userId && referral.status === "completed"
+      (referral) => referral.referrerId === userId && referral.status === "rewarded"
     ).length;
   }
 
@@ -901,6 +959,14 @@ export class PgStorage implements IStorage {
     return result[0];
   }
 
+  async transitionReferralToProcessing(referralId: number): Promise<boolean> {
+    const result = await db.update(referrals)
+      .set({ status: 'processing' })
+      .where(and(eq(referrals.id, referralId), eq(referrals.status, 'pending')))
+      .returning();
+    return result.length > 0;
+  }
+
   async markReferralRewardedAtomic(id: number, rewardedAt: Date, firstReceiptId: number, rewardTxId: number): Promise<Referral | undefined> {
     const result = await db.update(referrals)
       .set({ 
@@ -909,14 +975,68 @@ export class PgStorage implements IStorage {
         firstReceiptId,
         rewardTxId
       })
-      .where(and(eq(referrals.id, id), eq(referrals.status, 'pending'))) // Only update if still pending
+      .where(and(eq(referrals.id, id), eq(referrals.status, 'processing'))) // Only update if currently processing
       .returning();
     return result[0];
   }
 
+  async transitionReferralToPending(referralId: number): Promise<boolean> {
+    const result = await db.update(referrals)
+      .set({ status: 'pending' })
+      .where(and(eq(referrals.id, referralId), eq(referrals.status, 'processing')))
+      .returning();
+    return result.length > 0;
+  }
+
+  async completeReferralRewardAtomic(
+    referralId: number,
+    referrerId: number,
+    receiptId: number,
+    userTxData: InsertTransaction,
+    appTxData: InsertTransaction,
+    rewardAmount: number
+  ): Promise<{success: boolean; referral?: Referral; userTx?: Transaction; error?: string}> {
+    try {
+      // Wrap all operations in a single database transaction for atomicity
+      const result = await db.transaction(async (trx) => {
+        // Create user transaction
+        const userTx = await trx.insert(transactions).values(userTxData).returning();
+        
+        // Create app fund transaction  
+        await trx.insert(transactions).values(appTxData).returning();
+        
+        // Update user balance atomically
+        await trx.update(users)
+          .set({ tokenBalance: sql`${users.tokenBalance} + ${rewardAmount}` })
+          .where(eq(users.id, referrerId));
+        
+        // Mark referral as rewarded atomically 
+        const referral = await trx.update(referrals)
+          .set({ 
+            status: 'rewarded',
+            rewardedAt: new Date(),
+            firstReceiptId: receiptId,
+            rewardTxId: userTx[0].id
+          })
+          .where(and(eq(referrals.id, referralId), eq(referrals.status, 'processing')))
+          .returning();
+          
+        if (!referral[0]) {
+          throw new Error('Failed to mark referral as rewarded - invalid state');
+        }
+        
+        return { userTx: userTx[0], referral: referral[0] };
+      });
+      
+      return { success: true, referral: result.referral, userTx: result.userTx };
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  }
+
   async getUserReferralCount(userId: number): Promise<number> {
     const result = await db.select({ count: sql<number>`count(*)` }).from(referrals).where(
-      and(eq(referrals.referrerId, userId), eq(referrals.status, "completed"))
+      and(eq(referrals.referrerId, userId), eq(referrals.status, "rewarded"))
     );
     return result[0]?.count || 0;
   }
