@@ -163,7 +163,7 @@ export async function distributeTreasuryReward(
     
     // Create transaction using thor-devkit
     const userTxBody = {
-      chainTag: config.chainTag, // Current network chain tag
+      chainTag: 0x27, // VeChain testnet chain tag (fixed)
       blockRef: '0x0000000000000000', // Will be updated with latest block
       expiration: 32,
       clauses: [{
@@ -178,7 +178,7 @@ export async function distributeTreasuryReward(
     };
     
     // Get latest block reference for transaction using current network
-    const blockResponse = await fetch(`${config.thorEndpoints[0]}/v1/blocks/best`);
+    const blockResponse = await fetch(`${config.thorEndpoints[0]}/blocks/best`);
     const latestBlock = await blockResponse.json();
     userTxBody.blockRef = latestBlock.id.slice(0, 18); // Use first 8 bytes as blockRef
     
@@ -188,9 +188,9 @@ export async function distributeTreasuryReward(
     const signature = thor.secp256k1.sign(signingHash, distributorPrivateKeyBuffer);
     tx.signature = signature;
     
-    // ACTUALLY SUBMIT TO VECHAIN NETWORK
+    // ACTUALLY SUBMIT TO VECHAIN NETWORK (using working pattern)
     const rawTx = '0x' + tx.encode().toString('hex');
-    const submitResponse = await fetch(`${config.thorEndpoints[0]}/v1/transactions`, {
+    const submitResponse = await fetch(`${config.thorEndpoints[0]}/transactions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -198,15 +198,16 @@ export async function distributeTreasuryReward(
       body: JSON.stringify({ raw: rawTx })
     });
     
+    if (!submitResponse.ok) {
+      const errorText = await submitResponse.text();
+      console.error(`❌ Transaction submission failed with status ${submitResponse.status}`);
+      console.error(`❌ Error details:`, errorText);
+      throw new Error(`Transaction submission failed: ${submitResponse.status} - ${errorText}`);
+    }
+    
     const submitResult = await submitResponse.json();
     console.log(`🔍 VeChain submission response:`, JSON.stringify(submitResult));
     console.log(`🔍 HTTP status:`, submitResponse.status);
-    
-    if (!submitResponse.ok) {
-      console.error(`❌ Transaction submission failed with status ${submitResponse.status}`);
-      console.error(`❌ Error details:`, JSON.stringify(submitResult));
-      throw new Error(`Transaction submission failed: ${JSON.stringify(submitResult)}`);
-    }
     
     const userTxHash = submitResult.id || ('0x' + tx.id.toString('hex'));
     console.log(`✅ User transaction submitted successfully with hash: ${userTxHash}`);
@@ -233,7 +234,7 @@ export async function distributeTreasuryReward(
       
       // Create app fund VeBetterDAO treasury transaction
       const appTxBody = {
-        chainTag: config.chainTag, // Current network chain tag
+        chainTag: 0x27, // VeChain testnet chain tag (fixed)
         blockRef: latestBlock.id.slice(0, 18),
         expiration: 32,
         clauses: [{
