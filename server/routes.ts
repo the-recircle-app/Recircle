@@ -854,30 +854,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // TEMPORARY: Admin endpoint to fix wallet address after workspace migration
-  app.post("/api/admin/fix-wallet/:userId", async (req: Request, res: Response) => {
-    try {
-      const userId = parseInt(req.params.userId);
-      const { walletAddress } = req.body;
-      
-      if (isNaN(userId) || !walletAddress) {
-        return res.status(400).json({ error: "Missing userId or walletAddress" });
-      }
-      
-      // Update wallet address directly in storage
-      const updatedUser = await storage.updateUser(userId, { walletAddress });
-      
-      if (!updatedUser) {
-        return res.status(404).json({ error: "User not found" });
-      }
-      
-      console.log(`[ADMIN] Fixed wallet address for user ${userId}: ${walletAddress}`);
-      res.json({ success: true, user: updatedUser });
-    } catch (error) {
-      console.error('[ADMIN] Error fixing wallet address:', error);
-      res.status(500).json({ error: "Failed to update wallet address" });
-    }
-  });
 
   // Handle VeWorld wallet connection callbacks
   app.post("/api/wallet-connection", async (req: Request, res: Response) => {
