@@ -337,8 +337,11 @@ export class MemStorage implements IStorage {
   }
 
   async getUserByWalletAddress(walletAddress: string): Promise<User | undefined> {
+    // NORMALIZE WALLET ADDRESSES: Convert both sides to lowercase for comparison  
+    // This fixes the critical bug where auth middleware lowercases addresses but storage uses mixed-case
+    const normalizedSearchAddress = walletAddress.toLowerCase();
     return Array.from(this.users.values()).find(
-      (user) => user.walletAddress === walletAddress
+      (user) => user.walletAddress?.toLowerCase() === normalizedSearchAddress
     );
   }
 
@@ -693,7 +696,12 @@ export class PgStorage implements IStorage {
   }
 
   async getUserByWalletAddress(walletAddress: string): Promise<User | undefined> {
-    const result = await db.select().from(users).where(eq(users.walletAddress, walletAddress)).limit(1);
+    // NORMALIZE WALLET ADDRESSES: Use case-insensitive comparison for database storage too
+    // Convert search address to lowercase to match authentication middleware behavior
+    const normalizedSearchAddress = walletAddress.toLowerCase();
+    const result = await db.select().from(users).where(
+      sql`lower(${users.walletAddress}) = ${normalizedSearchAddress}`
+    ).limit(1);
     return result[0];
   }
 
