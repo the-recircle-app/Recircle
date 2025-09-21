@@ -130,6 +130,82 @@ import { log } from "./vite";
 
 // No longer needed - we use the rewardTracker module instead
 
+// Helper function to process referral rewards on invitee's first valid receipt
+async function processReferralOnFirstReceipt(inviteeUserId: number, receiptId: number): Promise<void> {
+  try {
+    console.log(`[REFERRAL] Checking for referral reward processing for user ${inviteeUserId}, receipt ${receiptId}`);
+    
+    // Look up active referral by invitee user ID
+    const referral = await storage.getReferralByReferredUser(inviteeUserId);
+    if (!referral) {
+      console.log(`[REFERRAL] No referral found for user ${inviteeUserId}`);
+      return;
+    }
+    
+    if (referral.status === 'rewarded') {
+      console.log(`[REFERRAL] Referral ${referral.id} already rewarded`);
+      return;
+    }
+    
+    // Verify this is the invitee's first verified receipt
+    const userReceipts = await storage.getUserReceipts(inviteeUserId);
+    const verifiedReceipts = userReceipts.filter(r => r.verified === true);
+    
+    if (verifiedReceipts.length !== 1) {
+      console.log(`[REFERRAL] User ${inviteeUserId} has ${verifiedReceipts.length} verified receipts, not their first`);
+      return;
+    }
+    
+    // Award inviter 15 B3TR with 70/30 split
+    const referralRewardAmount = 15;
+    const sustainabilityDistribution = calculateSustainabilityRewards(referralRewardAmount);
+    
+    console.log(`[REFERRAL] Awarding referral reward: ${sustainabilityDistribution.userReward} B3TR to inviter ${referral.referrerId}, ${sustainabilityDistribution.appReward} B3TR to app fund`);
+    
+    // Create referral reward transaction for inviter (user gets 70%)
+    const referralTx = await storage.createTransaction({
+      userId: referral.referrerId,
+      type: "referral_reward", 
+      amount: sustainabilityDistribution.userReward,
+      description: `Referral reward: Invitee's first receipt (receipt #${receiptId})`,
+      referenceId: referral.id,
+      txHash: `txhash-ref-${Date.now().toString(16)}`
+    });
+    
+    // Create app fund transaction (app gets 30%)
+    await storage.createTransaction({
+      userId: null,
+      type: "sustainability_app",
+      amount: sustainabilityDistribution.appReward,
+      description: `App Sustainability (Referral): ${APP_FUND_WALLET.slice(0, 8)}...`,
+      referenceId: referral.id,
+      txHash: `txhash-saref-${Date.now().toString(16)}`
+    });
+    
+    // Update inviter's token balance
+    const inviter = await storage.getUser(referral.referrerId);
+    if (inviter) {
+      await storage.updateUserTokenBalance(
+        referral.referrerId,
+        (inviter.tokenBalance || 0) + sustainabilityDistribution.userReward
+      );
+    }
+    
+    // Mark referral as rewarded atomically
+    await storage.markReferralRewardedAtomic(
+      referral.id,
+      new Date(),
+      receiptId,
+      referralTx.id
+    );
+    
+    console.log(`[REFERRAL] ✅ Referral reward processed successfully: ${sustainabilityDistribution.userReward} B3TR to inviter ${referral.referrerId}`);
+    
+  } catch (error) {
+    console.error(`[REFERRAL] ❌ Error processing referral reward:`, error);
+  }
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Apply memory optimization middleware first
   app.use(memoryOptimizationMiddleware);
@@ -3401,6 +3477,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           trackAwardedAchievement(submittedUserId, 'first_receipt', achievementBonus);
           
           console.log(`Achievement bonus awarded: ${achievementBonus} B3TR for first receipt`);
+          
+          // REFERRAL PROCESSING: Award inviter when invitee submits first valid receipt
+          await processReferralOnFirstReceipt(submittedUserId, newReceipt?.id || 0);
         }
         
         // Update user's token balance with all rewards at once
@@ -4329,7 +4408,7 @@ app.post("/api/treasury/test-distribution", async (req: Request, res: Response) 
     }
   });
 
-  app.patch("/api/referrals/:id/status", async (req: Request, res: Response) => {
+  app.patch("/api/referrals/:id/status", adminRateLimit, requireAuth, requireAdmin, async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       const idNum = parseInt(id);
@@ -4352,7 +4431,7 @@ app.post("/api/treasury/test-distribution", async (req: Request, res: Response) 
       
       // If status is 'rewarded', create a transaction for the referral reward
       if (status === 'rewarded' && updatedReferral.referrerId) {
-        const referralReward = 5; // 5 B3TR tokens for each successful referral
+        const referralReward = 15; // 15 B3TR tokens for each successful referral
         
         // Create a transaction for the referral reward
         await storage.createTransaction({

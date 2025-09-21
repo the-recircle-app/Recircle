@@ -52,8 +52,10 @@ export interface IStorage {
   getReferral(id: number): Promise<Referral | undefined>;
   getUserReferrals(userId: number): Promise<Referral[]>;
   getReferralByCode(code: string): Promise<Referral | undefined>;
+  getReferralByReferredUser(referredId: number): Promise<Referral | undefined>;
   createReferral(referral: InsertReferral): Promise<Referral>;
   updateReferralStatus(id: number, status: string): Promise<Referral | undefined>;
+  markReferralRewardedAtomic(id: number, rewardedAt: Date, firstReceiptId: number, rewardTxId: number): Promise<Referral | undefined>;
   getUserReferralCount(userId: number): Promise<number>;
 }
 
@@ -670,6 +672,28 @@ export class MemStorage implements IStorage {
     return updatedReferral;
   }
 
+  async getReferralByReferredUser(referredId: number): Promise<Referral | undefined> {
+    return Array.from(this.referrals.values()).find(
+      (referral) => referral.referredId === referredId
+    );
+  }
+
+  async markReferralRewardedAtomic(id: number, rewardedAt: Date, firstReceiptId: number, rewardTxId: number): Promise<Referral | undefined> {
+    const referral = await this.getReferral(id);
+    if (!referral || referral.status !== 'pending') return undefined; // Only update if still pending
+    
+    const updatedReferral = { 
+      ...referral, 
+      status: 'rewarded' as any,
+      rewardedAt,
+      firstReceiptId,
+      rewardTxId
+    };
+    
+    this.referrals.set(id, updatedReferral);
+    return updatedReferral;
+  }
+
   async getUserReferralCount(userId: number): Promise<number> {
     return Array.from(this.referrals.values()).filter(
       (referral) => referral.referrerId === userId && referral.status === "completed"
@@ -869,6 +893,24 @@ export class PgStorage implements IStorage {
       updates.rewardedAt = new Date();
     }
     const result = await db.update(referrals).set(updates).where(eq(referrals.id, id)).returning();
+    return result[0];
+  }
+
+  async getReferralByReferredUser(referredId: number): Promise<Referral | undefined> {
+    const result = await db.select().from(referrals).where(eq(referrals.referredId, referredId)).limit(1);
+    return result[0];
+  }
+
+  async markReferralRewardedAtomic(id: number, rewardedAt: Date, firstReceiptId: number, rewardTxId: number): Promise<Referral | undefined> {
+    const result = await db.update(referrals)
+      .set({ 
+        status: 'rewarded',
+        rewardedAt,
+        firstReceiptId,
+        rewardTxId
+      })
+      .where(and(eq(referrals.id, id), eq(referrals.status, 'pending'))) // Only update if still pending
+      .returning();
     return result[0];
   }
 
