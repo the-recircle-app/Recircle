@@ -3632,27 +3632,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
                                            process.env.X2EARNREWARDSPOOL_ADDRESS;
               
               if (hasVeBetterDAOSecrets) {
-                console.log(`[BLOCKCHAIN] 🏛️ EXECUTING PIERRE VEBETTERDAO DISTRIBUTION`);
-                console.log(`[BLOCKCHAIN] Distributing ${totalRewards} B3TR to ${targetWallet} via Pierre VeBetterDAO system`);
+                console.log(`[BLOCKCHAIN] 🏛️ EXECUTING WORKING DISTRIBUTION SYSTEM`);
+                console.log(`[BLOCKCHAIN] Distributing ${totalRewards} B3TR to ${targetWallet} via working distribution`);
                 
-                // Use working Pierre VeBetterDAO system instead of broken treasury
-                const pierreService = new PierreContractsService();
-                const pierreResult = await pierreService.registerSubmission({
-                  address: targetWallet,
-                  deviceID: req.body.deviceId || 'web-browser',
-                  image: req.body.image || '',
-                  timestamp: Date.now()
-                });
+                // Use your WORKING distribution system instead of broken Pierre SDK
+                const { distributeRealB3TR } = await import('./utils/working-distribution');
                 
-                distributionResult = {
-                  success: pierreResult.success,
-                  txHash: pierreResult.txHash,
-                  userAmount: totalRewards,
-                  appAmount: 0, // Pierre system handles distribution internally
-                  error: pierreResult.error,
-                  method: 'pierre-vebetterdao',
-                  timestamp: new Date().toISOString()
-                };
+                distributionResult = await distributeRealB3TR(
+                  targetWallet,
+                  totalRewards,
+                  initialUserData.id
+                );
               } else {
                 console.log(`[BLOCKCHAIN] 🚀 EXECUTING DIRECT B3TR DISTRIBUTION (fallback)`);
                 console.log(`[BLOCKCHAIN] Distributing ${totalRewards} B3TR to ${targetWallet}`);
