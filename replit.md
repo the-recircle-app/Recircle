@@ -2,104 +2,11 @@
 
 ## Overview
 
-ReCircle is a blockchain-powered rewards platform designed to incentivize sustainable transportation choices. It distributes B3TR tokens to users who submit receipts from approved ride-share services, electric vehicle rentals, and public transportation. The platform integrates with VeBetterDAO's smart contract ecosystem and uses OpenAI Vision API for automated receipt validation and fraud prevention, creating a comprehensive and rewarding ecosystem for sustainable mobility. ReCircle aims to promote eco-friendly travel habits and offers a scalable solution for rewarding users while generating revenue for platform operations.
+ReCircle is a blockchain-powered rewards platform incentivizing sustainable transportation through B3TR token distribution for approved ride-share, EV rental, and public transport receipts. It integrates with VeBetterDAO's smart contracts and uses OpenAI Vision API for receipt validation, promoting eco-friendly travel and offering a scalable, revenue-generating solution for rewarding users.
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
-
-## Recent Progress
-
-**September 21, 2025**:
-- 🎉 **MISSION ACCOMPLISHED - PRODUCTION DEPLOYMENT READY**: Complete security overhaul and production preparation finished
-- ✅ **PRODUCTION-GRADE SECURITY COMPLETED**: VeChain cryptographic authentication fully operational with all vulnerabilities eliminated
-- ✅ **Critical Authentication Bug Fixed**: Wallet address normalization issue resolved - authentication working perfectly
-- ✅ **Comprehensive Security Implementation**: Certificate validation, domain allowlisting, timestamp enforcement, sanitized logging
-- ✅ **Duplicate Detection Verified**: Sophisticated transportation-specific logic confirmed working correctly  
-- ✅ **Production Domain Configuration**: REPLIT_DOMAINS configured and security guards operational for production deployment
-- ✅ **All Tasks Completed**: 9/9 development tasks finished with architect approval and comprehensive testing verified
-- ✅ **Health Monitoring**: Production health endpoints operational and system monitoring ready
-- 🚀 **READY FOR LAUNCH**: ReCircle transformed from development to enterprise-grade production platform
-
-**September 20, 2025**:
-- 🎯 **STRATEGIC FEE DELEGATION COMPLETED**: Smart sponsoring system integrated with VeChain Energy for optimal transaction fee management
-- ✅ **VeChain Energy Projects Configured**: Mainnet (ID: 1248) and Testnet (ID: 932) with proper contract whitelisting
-- ✅ **Smart Sponsoring Logic**: Conditional fee delegation based on user VTHO balance thresholds (newcomers < 5 VTHO, low balance < 10 VTHO)
-- ✅ **Economic Efficiency**: Real transaction costs ~4 VTHO (vs estimated 400 VTHO) enable 99%+ profit margins on sponsoring
-- ✅ **Strategic User Targeting**: Only sponsor users who need it most (~30% of users), promoting self-sufficiency progression
-- ✅ **Enhanced User Experience**: Clear sponsoring messages and transparency about fee coverage decisions
-- ✅ **Response Integration**: Sponsoring decisions included in receipt submission responses for frontend feedback
-- 💰 **Cost Analysis**: Monthly sponsoring budget ~$1.08 for 500 receipts, highly sustainable for platform operations
-- 🎯 **PRODUCTION READY**: Strategic sponsoring system operational with VeChain Energy backing both networks
-
-**September 19, 2025**:
-- 🎉 **UI/UX CLEANUP COMPLETED**: Streamlined wallet connection interface for production readiness
-- ✅ **Removed Problematic Desktop Buttons**: Hidden "Use VeWorld Extension Only" button that was causing connection issues
-- ✅ **VeChain Kit Configuration Optimized**: Removed `dappkit` method, kept only `vechain` method for social login + VeWorld mobile
-- ✅ **Clean User Experience**: Updated messaging from "Choose Your Connection Method" to "Connect Your Wallet"  
-- ✅ **Mobile-First Architecture**: Focus on social login (8 Privy options) + VeWorld mobile for optimal user experience
-- ✅ **Security Verified**: All sensitive data properly protected, safe GitHub push completed
-- 🎯 **PRODUCTION READY**: Clean, simplified connection flow eliminates user confusion and connection failures
-
-**August 10, 2025**: 
-- 🎉 **PRODUCTION CHECKPOINT REACHED**: Complete VeBetterDAO treasury integration with verified mobile/desktop wallet connectivity
-- ✅ **PURE VEBETTERDAO TREASURY CONFIRMED**: Both user rewards (70%) AND app fund (30%) successfully distributed from official treasury
-- ✅ **Transaction 0x3c623fef33356af9002e4f0bf5c193d7308565b07ded5482f992b900f255f86a CONFIRMED**: 6 B3TR app fund distribution successful
-- ✅ **VeWorld + VeChain Explorer Confirmation**: User verified transaction success on both platforms
-- ✅ **Mobile Wallet Detection Working**: SmartWalletConnect properly detects VeWorld mobile app vs desktop environment
-- ✅ **Desktop VeWorld Extension Working**: Connex authentication and VeWorld extension fallback both operational
-- ✅ **Wallet State Management**: Disconnect/reconnect functionality maintains proper state clearing
-- ✅ **VeChain Kit Integration**: Mobile VeChain Kit switching works for VeWorld app browser testing
-- ✅ **Original Implementation Validated**: User's insight correct - initial VeBetterDAO approach was working from start
-- ✅ **Real B3TR Distribution**: 14 B3TR confirmed received in user wallet 0x865306084235Bf804c8Bba8a8d56890940ca8F0b
-- ✅ **Blockchain Transaction Processing**: VeChain testnet transactions require patience, but system reliable
-- 🎯 **READY FOR DEPLOYMENT**: All blockchain distribution, wallet connectivity, and token validation systems operational
-
-**August 7, 2025**: 
-- ✅ MOBILE WALLET INTEGRATION: VeChain Kit implementation complete
-- ✅ Smart wallet detection logic for mobile vs desktop environments
-- ✅ Fixed desktop wallet connection issues (resolved "unsupported wallet type" error)
-- ✅ Created unified SmartWalletConnect component with mobile/desktop detection
-- ✅ VeChain Kit shows authentication prompts and wallet selection on mobile
-- ✅ Desktop uses direct Connex authentication with VeWorld extension
-- ✅ Disconnect/reconnect functionality for testing different wallet states
-- 🔄 Ready for mobile deployment testing via VeWorld app browser
-
-**August 5, 2025**: 
-- ✅ COMPLETE SUCCESS: Real B3TR blockchain distribution working in production!
-- ✅ Fixed HDNode creation error using thor.secp256k1 + thor.address approach
-- ✅ Fixed ethers.parseEther import error that was terminating the server
-- ✅ Frontend properly calls both validation AND submission endpoints
-- ✅ Production deployment successful with real VeChain testnet integration
-- ✅ VERIFIED: Real transactions submitted to VeChain testnet
-  - User TX: 0x501a9ab1d69e9d1e3e72588f2508559338f5be9316dcd0cef6cb0f1c8ac3b66d
-  - App TX: 0xccb4e45d18db254eb57e9176f2d92863cceaf85f91a06f8820e420e9bc970225
-- ✅ B3TR tokens successfully distributed to user wallet: 0xAbEf6032B9176C186F6BF984f548bdA53349f70a
-- 🎉 MISSION ACCOMPLISHED: ReCircle blockchain distribution fully operational!
-
-**August 4, 2025**: 
-- ✅ CRITICAL FIX: Eliminated JsonRpcProvider errors causing production token distribution failures
-- ✅ Created simple-real-distribution.ts using VeChain Thor REST API instead of ethers.js JSON-RPC
-- ✅ Fixed the root cause: VeChain requires Thor client, not Ethereum JsonRpcProvider
-- ✅ Implemented direct B3TR token transfers with proper 70/30 split to user and app fund wallets
-- ✅ Production secrets configured: B3TR_CONTRACT_ADDRESS and X2EARNREWARDSPOOL_ADDRESS available
-- ✅ Server logs show successful local testing: token balance increases from 18.5 → 24 tokens
-- ✅ Eliminated syntax errors in routes.ts preventing server startup
-- ✅ Real blockchain distribution now bypasses broken VeBetterDAO rewards system
-- 🚀 Ready for production deployment with working VeChain testnet distribution
-- 📊 VeBetterDAO allocation: 24,166 B3TR tokens confirmed available for distribution
-
-**August 2, 2025**: 
-- ✅ PRODUCTION READY: Pierre VeBetterDAO patterns fully integrated into main ReCircle app
-- ✅ Real OpenAI Vision API validation system working (GPT-4o model)
-- ✅ Automatic B3TR token distribution for valid receipts (threshold: score > 0.5)
-- ✅ Smart Upload component with drag-and-drop receipt processing
-- ✅ Complete backend integration: /api/receipts/validate uses Pierre's validation system
-- ✅ Production scan page updated with Smart Upload mode
-- ✅ Enhanced upload debugging for troubleshooting receipt validation issues
-- ✅ VeChain transaction validation following Cooper's guidance (receipt polling + reverted flag check)
-- B3TR token deployed at: 0x5ef79995fe8a89e0812330e4378eb2660cede699
-- Server running on port 5000 with full blockchain functionality
 
 ## System Architecture
 
@@ -124,43 +31,28 @@ Preferred communication style: Simple, everyday language.
 - **Token**: B3TR tokens distributed via VeBetterDAO
 - **Distribution Model**: 70% to users, 30% to app fund (both via VeBetterDAO treasury system)
 - **Wallet Support**: VeWorld wallet integration via Connex SDK
-- **Smart Fee Delegation**: Strategic transaction sponsoring via VeChain Energy with conditional VTHO balance checks
-
-### Smart Fee Delegation System
-
-ReCircle implements a strategic transaction fee sponsoring system using VeChain Energy to selectively cover transaction fees for users who need it most:
-
-**Economic Model:**
-- Real-world costs: ~4 VTHO per transaction (not 400 VTHO as initially estimated)
-- Monthly budget: $1.08 for 500 receipts, enabling 99%+ profit margins
-- Target users: ~30% of users receive sponsoring (newcomers and low-balance users)
-
-**Decision Logic:**
-1. Insufficient Balance: Users who can't afford a specific transaction (< 4 VTHO) get sponsoring
-2. Newcomers: Users with < 5 VTHO get sponsoring to help them get started
-3. Low-Balance Reward Recipients: Users with < 10 VTHO get sponsored for reward distributions
-4. Self-Sufficient: Users with ≥ 10 VTHO pay their own fees
-
-**Technical Implementation:**
-- VTHO Balance Checking: Real-time balance queries via VeChain Thor Client
-- Smart Decision Making: Conditional sponsoring based on balance thresholds
-- User Communication: Clear messages explaining sponsoring decisions
-- Response Integration: Sponsoring status included in API responses
-- Network Support: Both mainnet (ID: 1248) and testnet (ID: 932) VeChain Energy projects
+- **Smart Fee Delegation**: Strategic transaction sponsoring via VeChain Energy with conditional VTHO balance checks based on user VTHO balance thresholds (e.g., newcomers < 5 VTHO, low balance < 10 VTHO).
 
 ### Key Features
-- **Receipt Validation**: Multi-tier system with auto-approval (e.g., ride-share) and manual review for others. Leverages OpenAI Vision API (GPT-4o) for content analysis and fraud detection (SHA-256 hashing, duplicate prevention).
-- **Transportation Services Database**: Comprehensive database covering various sustainable transport options.
+- **Receipt Validation**: Multi-tier system using OpenAI Vision API (GPT-4o) for content analysis, fraud detection (SHA-256 hashing, duplicate prevention), and auto-approval.
+- **Transportation Services Database**: Comprehensive database of sustainable transport options.
 - **Achievement System**: Gamified progression with blockchain-verified milestones and CO₂ savings tracking.
-- **Admin Dashboard**: Google Sheets integration for manual review workflow, including flagging suspicious receipts, image verification, and streamlined approval processes.
-- **Deployment Ready**: Configured for Replit Autoscale with health checks, proper port binding, and blockchain initialization.
-- **Verified Token Distribution**: Real B3TR tokens confirmed flowing to user VeWorld wallets (tested with 14 B3TR successful transfer).
+- **Referral System**: Rewards inviters with 15 B3TR upon invitee's first valid receipt, featuring automatic processing, concurrency protection, and on-chain distribution. Invitee receives ~18 B3TR total (8 B3TR base + 10 B3TR achievement).
+- **Admin Dashboard**: Google Sheets integration for manual review, flagging suspicious receipts, and approval workflows.
+- **Deployment Ready**: Configured for Replit Autoscale with health checks and proper port binding.
+- **Verified Token Distribution**: Confirmed real B3TR token flow to user VeWorld wallets.
 
 ### Deployment Configuration
-- **Health Check**: /health endpoint monitors system status and blockchain configuration
-- **Port Configuration**: External port 80 → Internal port 5000 for Autoscale compatibility
-- **Environment Variables**: Fallback values for blockchain addresses ensure deployment stability
-- **Production Script**: Custom start.sh handles environment setup and graceful startup
+- **Health Check**: `/health` endpoint.
+- **Port Configuration**: External port 80 → Internal port 5000.
+- **Environment Variables**: Fallback values for blockchain addresses.
+
+### Critical Deployment Requirements
+- **Database Schema Updates**:
+    1. `referrals.status` column migration to support 'pending' | 'processing' | 'rewarded'.
+    2. `transactions.userId` column to allow NULLs for system/app-fund transactions.
+    3. Unique constraint on `referrals` table and unique index on `(type, referenceId)` for `transactions` to prevent duplicates.
+- **Reconciliation & Monitoring**: Implement monitoring for stuck referrals and periodic reconciliation.
 
 ## External Dependencies
 
