@@ -898,7 +898,7 @@ const ScanReceipt = () => {
               )}
             </CardTitle>
             <CardDescription className="text-sm text-gray-600 flex items-center gap-1">
-              Earn <B3trLogo className="w-4 h-4 inline-block" color="#38BDF8" /> tokens for rideshare, electric rentals & sustainable purchases
+              Earn <B3trLogo className="w-4 h-4 inline-block" color="#38BDF8" /> tokens for rideshare, EV rentals & sustainable purchases
             </CardDescription>
           </CardHeader>
           

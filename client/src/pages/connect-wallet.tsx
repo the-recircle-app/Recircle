@@ -47,7 +47,7 @@ export default function ConnectWalletPage() {
             
             <div className="space-y-6 text-gray-300">
               <p className="text-xl">
-                Transform your commute into rewards. Earn B3TR tokens for sustainable transportation choices like rideshare, electric rentals, and public transit.
+                Transform your commute into rewards. Earn B3TR tokens for sustainable transportation choices like rideshare, EV rentals, and public transit.
               </p>
               
               <div className="space-y-4">

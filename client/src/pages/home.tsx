@@ -193,7 +193,7 @@ const Home = () => {
           {/* Primary Focus - Transportation Receipts */}
           <ActivityCard
             title="Upload Rideshare Receipt"
-            description="Earn B3TR tokens for Uber, Lyft, Waymo rides & electric rentals"
+            description="Earn B3TR tokens for Uber, Lyft, Waymo rides & EV rentals"
             icon={
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M7 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />

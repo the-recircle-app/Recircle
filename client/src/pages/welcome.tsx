@@ -24,7 +24,7 @@ export default function Welcome() {
             Drive Change, Earn B3TR
           </h1>
           <p className="text-lg md:text-xl text-gray-600 max-w-xl mx-auto leading-relaxed">
-            Transform your commute into rewards. Earn B3TR tokens for sustainable transportation choices like rideshare, electric rentals, and public transit.
+            Transform your commute into rewards. Earn B3TR tokens for sustainable transportation choices like rideshare, EV rentals, and public transit.
           </p>
         </div>
       </div>
@@ -43,7 +43,7 @@ export default function Welcome() {
               </div>
               <h3 className="text-xl font-bold text-gray-50 mb-4">Earn Real Tokens</h3>
               <p className="text-gray-300 leading-relaxed">
-                Get rewarded with B3TR tokens for sustainable transportation — ridesharing, electric rentals, and public transit
+                Get rewarded with B3TR tokens for sustainable transportation — ridesharing, EV rentals, and public transit
               </p>
             </div>
             

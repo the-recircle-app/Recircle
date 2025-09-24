@@ -121,7 +121,7 @@ const ScanReceipt = () => {
               <h1 className="text-2xl font-bold text-gray-900">Scan Transportation Receipt</h1>
             </div>
             <p className="text-gray-600">
-              Upload rideshare, electric rentals & sustainable purchases to earn B3TR tokens
+              Upload rideshare, EV rentals & sustainable purchases to earn B3TR tokens
             </p>
           </div>
 
