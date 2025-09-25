@@ -77,6 +77,7 @@ import { differenceInCalendarDays, format, parseISO } from 'date-fns';
 import { isVeChainVisaCard } from "./utils/receiptUtils";
 import { distributeSoloB3TR, isSoloNodeAvailable, testSoloB3TR } from "./utils/solo-node-b3tr";
 import { distributeTreasuryReward, distributeTreasuryRewardWithSponsoring, checkTreasuryFunds, verifyDistributorAuthorization } from "./utils/vebetterdao-treasury";
+import { getSoloB3TRBalance } from "./utils/solo-b3tr-real";
 import { PierreContractsService } from "./utils/pierre-contracts-service";
 
 
@@ -820,6 +821,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(response);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+  
+  // Refresh user token balance from blockchain
+  app.post("/api/users/:id/refresh-balance", async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const idNum = parseInt(id);
+      
+      if (isNaN(idNum)) {
+        return res.status(400).json({ message: "Invalid ID" });
+      }
+      
+      // Get user to get wallet address
+      const user = await storage.getUser(idNum);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Fetch live balance from blockchain
+      console.log(`[REFRESH-BALANCE] Fetching live B3TR balance for user ${idNum} (${user.walletAddress})`);
+      
+      let liveBalance = 0;
+      try {
+        // Try to get balance from Solo node (or mainnet)
+        const balanceStr = await getSoloB3TRBalance(user.walletAddress);
+        liveBalance = parseFloat(balanceStr) || 0;
+        console.log(`[REFRESH-BALANCE] Live blockchain balance: ${liveBalance} B3TR`);
+      } catch (error) {
+        console.error(`[REFRESH-BALANCE] Error fetching blockchain balance:`, error);
+        return res.status(500).json({ message: "Failed to fetch blockchain balance" });
+      }
+      
+      // Update database with live balance
+      const updatedUser = await storage.updateUserTokenBalance(idNum, liveBalance);
+      if (!updatedUser) {
+        return res.status(500).json({ message: "Failed to update balance" });
+      }
+      
+      console.log(`[REFRESH-BALANCE] ✅ Balance synced! Database updated from ${user.tokenBalance} to ${liveBalance} B3TR`);
+      
+      res.json({
+        success: true,
+        oldBalance: user.tokenBalance,
+        newBalance: liveBalance,
+        message: "Balance refreshed from blockchain"
+      });
+    } catch (error) {
+      console.error("[REFRESH-BALANCE] Error:", error);
+      res.status(500).json({ message: "Failed to refresh balance" });
     }
   });
   

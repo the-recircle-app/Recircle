@@ -529,32 +529,57 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Refresh token balance from the server
+  // Refresh token balance from the server (with blockchain sync)
   const refreshTokenBalance = async (): Promise<number> => {
     if (!userId || !isConnected) {
       return tokenBalance;
     }
     
     try {
-      // Fetch latest user data with no-cache headers to ensure fresh data
-      const response = await fetch(`/api/users/${userId}`, {
+      console.log("🔄 Refreshing token balance from blockchain...");
+      
+      // First, refresh balance from blockchain to sync database
+      const refreshResponse = await fetch(`/api/users/${userId}/refresh-balance`, {
+        method: 'POST',
         credentials: "include",
         headers: {
+          'Content-Type': 'application/json',
           'Cache-Control': 'no-cache, no-store, must-revalidate',
           'Pragma': 'no-cache',
           'Expires': '0'
         }
       });
       
-      if (response.ok) {
-        const userData: User = await response.json();
-        console.log("Refreshed user token balance:", userData.tokenBalance);
+      if (refreshResponse.ok) {
+        const refreshData = await refreshResponse.json();
+        console.log(`✅ Balance synced from blockchain: ${refreshData.oldBalance} → ${refreshData.newBalance} B3TR`);
         
-        // Update token balance state
-        setTokenBalance(userData.tokenBalance);
-        return userData.tokenBalance;
+        // Update token balance state with the new balance
+        setTokenBalance(refreshData.newBalance);
+        return refreshData.newBalance;
       } else {
-        throw new Error("Failed to fetch updated user data");
+        console.log("❌ Blockchain refresh failed, falling back to database value");
+        
+        // Fallback: fetch from database if blockchain refresh fails
+        const response = await fetch(`/api/users/${userId}`, {
+          credentials: "include",
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          }
+        });
+        
+        if (response.ok) {
+          const userData: User = await response.json();
+          console.log("Fallback: database token balance:", userData.tokenBalance);
+          
+          // Update token balance state
+          setTokenBalance(userData.tokenBalance);
+          return userData.tokenBalance;
+        } else {
+          throw new Error("Failed to fetch user data");
+        }
       }
     } catch (error) {
       console.error("Error refreshing token balance:", error);
