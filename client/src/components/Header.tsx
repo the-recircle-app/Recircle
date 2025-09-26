@@ -6,6 +6,7 @@ import ReCircleLogoIntegrated from './ReCircleLogoIntegrated';
 import ReCircleBrandLogo from './ReCircleBrandLogo';
 import ReCircleLogoEarth from './ReCircleLogoEarth';
 import B3trLogo from './B3trLogo';
+import LiveB3TRBalance from './LiveB3TRBalance';
 import { Link } from 'wouter';
 import { featureFlags } from '../lib/environment';
 
@@ -86,7 +87,9 @@ const Header: React.FC<HeaderProps> = ({
               <B3trLogo className="w-4 h-4" color={highlightBlue} />
             </div>
             <div className="flex flex-col items-start">
-              <span className="font-bold text-blue-300 leading-none text-base">{gems.toFixed(1)}</span>
+              <span className="font-bold text-blue-300 leading-none text-base">
+                <LiveB3TRBalance fallbackBalance={gems} />
+              </span>
               <span className="text-blue-300/70 text-[10px] leading-none mt-[1px]">B3TR</span>
             </div>
           </div>
