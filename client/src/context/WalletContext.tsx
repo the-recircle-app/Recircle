@@ -265,6 +265,17 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
         // Keep localStorage in sync after recovery/heal
         localStorage.setItem("walletAddress", address);
         localStorage.setItem("userId", userData.id.toString());
+        
+        // CRITICAL: Refresh balance from blockchain after connection
+        console.log("🔄 Connection successful - refreshing balance from blockchain...");
+        setTimeout(async () => {
+          try {
+            const liveBalance = await refreshTokenBalance();
+            console.log(`✅ Live balance refreshed: ${liveBalance} B3TR`);
+          } catch (error) {
+            console.error("❌ Failed to refresh balance from blockchain:", error);
+          }
+        }, 500); // Small delay to ensure connection is fully established
       } else {
         // If user doesn't exist, create a new one
         if (response.status === 404) {
@@ -284,6 +295,17 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
             // Keep localStorage in sync after recovery/heal
             localStorage.setItem("walletAddress", address);
             localStorage.setItem("userId", userData.id.toString());
+            
+            // CRITICAL: Refresh balance from blockchain after new user creation
+            console.log("🔄 New user created - refreshing balance from blockchain...");
+            setTimeout(async () => {
+              try {
+                const liveBalance = await refreshTokenBalance();
+                console.log(`✅ Live balance refreshed for new user: ${liveBalance} B3TR`);
+              } catch (error) {
+                console.error("❌ Failed to refresh balance from blockchain:", error);
+              }
+            }, 500); // Small delay to ensure connection is fully established
           } else {
             throw new Error("Failed to create user account");
           }
