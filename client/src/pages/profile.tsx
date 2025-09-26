@@ -5,6 +5,7 @@ import { vechain } from "../lib/vechain";
 import TransactionHistory from "../components/TransactionHistory";
 import StreakCelebration from "../components/StreakCelebration";
 import { UserManagement } from "../components/UserManagement";
+import LiveWalletAddress from "../components/LiveWalletAddress";
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useSmartNavigation } from "../utils/navigation";
@@ -83,7 +84,9 @@ const Profile = () => {
           </div>
           <h2 className="text-xl font-bold mb-1">Web3User</h2>
           <p className="mb-2 text-gray-500">
-            <span className="wallet-address">{vechain.formatAddress(address)}</span>
+            <span className="wallet-address">
+              <LiveWalletAddress fallbackAddress={address} formatted={true} />
+            </span>
           </p>
           <div className="inline-flex items-center bg-green-100 text-green-800 rounded-full px-3 py-1 text-sm font-medium">
             <i className="fa-solid fa-circle text-xs mr-1 text-green-500"></i> 
