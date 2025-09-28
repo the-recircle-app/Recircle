@@ -6,6 +6,7 @@
 import express from 'express';
 import { pierreOpenAIService } from '../utils/pierre-openai-service.js';
 import { distributeB3TRTokensSimple } from '../utils/simple-solo-rewards.js';
+import { sendReceiptForManualReview } from '../utils/webhooks.js';
 
 const router = express.Router();
 
@@ -73,11 +74,45 @@ router.post('/validate', async (req, res) => {
     const baseReward = 10; // B3TR tokens
     const estimatedReward = isValid ? baseReward * validityScore : 0;
     
+    // Check if receipt needs manual review
+    const needsManualReview = 
+      !isValid || // Invalid receipts go to manual review
+      validityScore < 0.7 || // Low confidence scores
+      aiValidation.needsManualReview || // AI flagged for review
+      aiValidation.timeoutFallback; // Timeout fallbacks need review
+    
+    let sentForManualReview = false;
     let tokenDistributed = false;
     let txHash = null;
     
-    // Distribute B3TR tokens if receipt is valid (Pierre's pattern)
-    if (isValid && estimatedReward > 0) {
+    // Send for manual review if needed
+    if (needsManualReview) {
+      console.log(`[RECEIPT] 📋 Sending receipt for manual review - Confidence: ${validityScore}`);
+      try {
+        const reviewSent = await sendReceiptForManualReview(
+          userId,
+          walletAddress,
+          aiValidation.storeName || storeHint || "Unknown Store", 
+          purchaseDate || new Date().toISOString().split('T')[0],
+          amount || 0,
+          null, // Image URL will be handled by storage service
+          `Low confidence score: ${validityScore}. Needs manual validation.`,
+          aiValidation.confidence || validityScore
+        );
+        
+        if (reviewSent) {
+          sentForManualReview = true;
+          console.log(`[RECEIPT] ✅ Receipt sent for manual review successfully`);
+        } else {
+          console.log(`[RECEIPT] ⚠️ Failed to send receipt for manual review`);
+        }
+      } catch (error) {
+        console.error(`[RECEIPT] ❌ Error sending receipt for manual review:`, error);
+      }
+    }
+    
+    // Only distribute B3TR tokens if receipt is valid AND not sent for manual review
+    if (isValid && estimatedReward > 0 && !sentForManualReview) {
       try {
         const distributionResult = await distributeB3TRTokensSimple(
           userId,
@@ -107,7 +142,7 @@ router.post('/validate', async (req, res) => {
       actualReward: tokenDistributed ? estimatedReward : 0,
       reasons: [aiValidation.reasoning || "AI analysis completed"],
       category: "transportation",
-      sentForManualReview: false,
+      sentForManualReview,
       tokenDistributed,
       txHash,
       aiValidation: {
