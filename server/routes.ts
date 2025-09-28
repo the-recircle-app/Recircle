@@ -3249,13 +3249,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         log(`Thrift store ${storeNameProvided} detected - Original flags: sentForManualReview=${sentForManualReview}, isTimeoutFallback=${isTimeoutFallback}, aiTestMode=${aiTestMode}`, "receipts");
       }
       
-      // ADDITIONAL OVERRIDE: For test mode receipts, always bypass manual review to enable immediate token rewards
+      // ADDITIONAL OVERRIDE: For test mode receipts, conditionally bypass manual review
       // NOW INCLUDING public transit receipts for testing blockchain distribution
       const isFromTestMode = req.body.isTestMode === true || analysisResult.testMode === true;
-      log(`🧪 TEST MODE CHECK: req.body.isTestMode=${req.body.isTestMode}, analysisResult.testMode=${analysisResult.testMode}, isFromTestMode=${isFromTestMode}`, "receipts");
-      if (isFromTestMode) {
+      const forceManualReview = req.body.forceManualReview === true; // New flag for testing manual review
+      
+      log(`🧪 TEST MODE CHECK: req.body.isTestMode=${req.body.isTestMode}, analysisResult.testMode=${analysisResult.testMode}, isFromTestMode=${isFromTestMode}, forceManualReview=${forceManualReview}`, "receipts");
+      
+      if (isFromTestMode && !forceManualReview) {
         needsManualReview = false;
         log(`🧪 TEST MODE OVERRIDE: Bypassing manual review for test receipt (including public transit) - immediate token rewards enabled`, "receipts");
+      } else if (forceManualReview) {
+        needsManualReview = true;
+        log(`🧪 FORCE MANUAL REVIEW: Receipt forced to manual review for testing purposes`, "receipts");
       }
       
       // REMOVED: Public transit override - allowing auto-processing for testing blockchain distribution
@@ -3872,9 +3878,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         };
 
         // Send DAO webhook for receipt logging to Google Sheets (non-blocking)
-        // Get the transportation service name from the store ID if available
-        const storeInfo = newReceipt.storeId ? await storage.getStore(newReceipt.storeId) : null;
-        const storeName = storeInfo?.name || "Unknown Transportation Service";
+        // Get the transportation service name from the store ID if available, or lookup by name
+        let storeInfo = newReceipt.storeId ? await storage.getStore(newReceipt.storeId) : null;
+        
+        // If no store ID but we have a store name, try to find it in the database
+        if (!storeInfo && req.body.storeName) {
+          const allStores = await storage.getStores();
+          storeInfo = allStores.find(store => 
+            store.name.toLowerCase() === req.body.storeName.toLowerCase()
+          );
+        }
+        
+        const storeName = storeInfo?.name || req.body.storeName || "Unknown Transportation Service";
         
         // Add essential receipt data fields for the webhook (we use 'any' since our type doesn't include these fields)
         const receiptWithMetadata = {
