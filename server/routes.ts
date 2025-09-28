@@ -3748,7 +3748,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             newStreak = 1;
             streakIncreased = true;
             console.log("First receipt ever - setting streak to 1");
-          } else if (isDevEnv && req.body.isTestMode) {
+          } else if (process.env.NODE_ENV === 'development' && req.body.isTestMode) {
             // In test mode for subsequent receipts, don't increment artificially
             newStreak = initialUserData.currentStreak || 0;
             streakIncreased = false;
@@ -3836,7 +3836,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         
         // Force-update the user data for testing clarity
-        if (isDevEnv && req.body.isTestMode) {
+        if (process.env.NODE_ENV === 'development' && req.body.isTestMode) {
           console.log(`Test mode - Updated user streak to: ${newStreak}`);
         }
         
