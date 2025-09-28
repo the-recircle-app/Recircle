@@ -154,7 +154,7 @@ export async function distributeTreasuryReward(
     
     const userFunctionCall = encodeFunctionCall(DISTRIBUTE_REWARD_ABI, [
       RECIRCLE_APP_ID,           // bytes32 appId  
-      (BigInt(userAmount) * BigInt('1000000000000000000')).toString(), // uint256 amount (convert to wei)
+      (BigInt(Math.round(userAmount)) * BigInt('1000000000000000000')).toString(), // uint256 amount (convert to wei)
       userAddress,               // address recipient
       userProof                  // string proof
     ]);
@@ -227,7 +227,7 @@ export async function distributeTreasuryReward(
       
       const appFunctionCall = encodeFunctionCall(DISTRIBUTE_REWARD_ABI, [
         RECIRCLE_APP_ID,           // bytes32 appId  
-        (BigInt(appAmount) * BigInt('1000000000000000000')).toString(), // uint256 amount (convert to wei)
+        (BigInt(Math.round(appAmount)) * BigInt('1000000000000000000')).toString(), // uint256 amount (convert to wei)
         appFundAddress,            // address recipient (app fund wallet)
         appProof                   // string proof
       ]);
