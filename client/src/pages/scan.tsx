@@ -80,7 +80,7 @@ const ScanReceipt = () => {
   const [useProductionUpload, setUseProductionUpload] = useState(true);
   const [aiAnalysis, setAiAnalysis] = useState<ReceiptAnalysisResult | null>(null);
   const [submittedReceipt, setSubmittedReceipt] = useState<any>(null);
-  const [rewardAmount, setRewardAmount] = useState<number>(8);
+  const [rewardAmount, setRewardAmount] = useState<number>(0); // Will be set from backend response
   const [baseReward, setBaseReward] = useState<number>(8);
   const [streakMultiplier, setStreakMultiplier] = useState<number>(1);
   const [showStreakCelebration, setShowStreakCelebration] = useState(false);
