@@ -3884,10 +3884,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const storeName = storeInfo?.name || req.body.storeName || "Unknown Transportation Service";
         
         // Add essential receipt data fields for the webhook (we use 'any' since our type doesn't include these fields)
+        // Use actual distributed amount instead of raw reward if VeBetterDAO distribution occurred
+        const actualUserReward = distributionResult?.userAmount || distributionResult?.userReward || finalReward;
         const receiptWithMetadata = {
           ...newReceipt,
           storeName: storeInfo?.name || storeName,
-          tokenReward: finalReward,
+          tokenReward: actualUserReward,
           containsPreOwnedItems: containsPreOwnedItems || false
         } as any;
         
