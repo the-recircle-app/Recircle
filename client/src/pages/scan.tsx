@@ -77,7 +77,6 @@ const ScanReceipt = () => {
   // State management
   const [currentStep, setCurrentStep] = useState<ScanStep>(ScanStep.CAMERA);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
-  const [useProductionUpload, setUseProductionUpload] = useState(true);
   const [aiAnalysis, setAiAnalysis] = useState<ReceiptAnalysisResult | null>(null);
   const [submittedReceipt, setSubmittedReceipt] = useState<any>(null);
   const [rewardAmount, setRewardAmount] = useState<number>(0); // Will be set from backend response
@@ -130,27 +129,7 @@ const ScanReceipt = () => {
           {/* Upload Step */}
           {currentStep === ScanStep.CAMERA && (
             <div>
-              {/* Toggle between Production and Legacy Upload */}
-              <div className="flex justify-center mb-4">
-                <div className="bg-white p-1 rounded-lg border">
-                  <Button
-                    variant={useProductionUpload ? "default" : "ghost"}
-                    size="sm"
-                    onClick={() => setUseProductionUpload(true)}
-                  >
-                    Smart Upload
-                  </Button>
-                  <Button
-                    variant={!useProductionUpload ? "default" : "ghost"}
-                    size="sm"
-                    onClick={() => setUseProductionUpload(false)}
-                  >
-                    Legacy Mode
-                  </Button>
-                </div>
-              </div>
-
-              {useProductionUpload && isConnected ? (
+              {isConnected ? (
                 <ProductionReceiptUpload
                   userId={userId?.toString() || "102"}
                   walletAddress={userId?.toString() || "0x7567d83b7b8d80addcb281a71d54fc7b3364ffed"}

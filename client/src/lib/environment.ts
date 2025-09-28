@@ -7,7 +7,7 @@ export const featureFlags = {
   // Development tools
   showUserSwitcher: isDevelopment,
   showDataResetButton: isDevelopment,
-  showAdminButton: isDevelopment,
+  showAdminButton: false, // Disabled for production
   showTestMode: isDevelopment,
   showSampleReceipts: isDevelopment,
   showDevLogs: isDevelopment,

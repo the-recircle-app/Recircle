@@ -247,7 +247,7 @@ const AchievementsPage: React.FC = () => {
               <div>
                 <h2 className="text-lg font-semibold text-white">Eco Impact</h2>
                 <p className="text-sm text-gray-400">
-                  Your sustainable shopping has made a difference!
+                  Your sustainable transportation has made a difference!
                 </p>
               </div>
             </div>

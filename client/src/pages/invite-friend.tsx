@@ -18,10 +18,7 @@ const InviteFriend = () => {
   const { goHome } = useSmartNavigation();
   const { isConnected, userId, tokenBalance } = useWallet();
   const { toast } = useToast();
-  const [inviteMethod, setInviteMethod] = useState('sms');
-  const [inviteInfo, setInviteInfo] = useState('');
   const [isCopied, setIsCopied] = useState(false);
-  const [isInviteSent, setIsInviteSent] = useState(false);
   const inviteLinkRef = useRef<HTMLInputElement>(null);
   const [referralCode, setReferralCode] = useState<string | null>(null);
   const [referralCount, setReferralCount] = useState(0);
@@ -88,31 +85,6 @@ const InviteFriend = () => {
     }
   };
 
-  const handleSendInvite = () => {
-    if (!inviteInfo) {
-      toast({
-        title: 'Information Required',
-        description: inviteMethod === 'sms' 
-          ? 'Please enter a phone number' 
-          : 'Please enter an email address',
-        variant: 'destructive',
-      });
-      return;
-    }
-    
-    // In a real app, this would send an actual SMS or email
-    setIsInviteSent(true);
-    
-    toast({
-      title: 'Invitation Sent',
-      description: `Invitation sent to ${inviteInfo}`,
-    });
-    
-    setTimeout(() => {
-      setIsInviteSent(false);
-      setInviteInfo('');
-    }, 2000);
-  };
 
   const handleShareSocial = (platform: string) => {
     const shareText = "Join ReCircle and earn B3TR tokens for sustainable transportation! Use my invite code to get started.";
@@ -292,81 +264,6 @@ const InviteFriend = () => {
           </CardContent>
         </Card>
 
-        <Card className="mb-6">
-          <CardHeader className="pb-3">
-            <CardTitle>Send Direct Invitation</CardTitle>
-            <CardDescription>
-              Send an invitation directly to your friend
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="sms" onValueChange={setInviteMethod}>
-              <TabsList className="w-full mb-4">
-                <TabsTrigger value="sms" className="flex-1">SMS</TabsTrigger>
-                <TabsTrigger value="email" className="flex-1">Email</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="sms">
-                <div className="space-y-3">
-                  <div className="relative">
-                    <Input
-                      type="tel"
-                      placeholder="Enter phone number"
-                      value={inviteInfo}
-                      onChange={(e) => setInviteInfo(e.target.value)}
-                      className="pr-24"
-                    />
-                    <Button
-                      className="absolute right-0 top-0 h-full rounded-l-none"
-                      onClick={handleSendInvite}
-                      disabled={isInviteSent}
-                    >
-                      {isInviteSent ? (
-                        <>
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1 animate-spin">
-                            <circle cx="12" cy="12" r="10" />
-                            <path d="M12 6v6l4 2" />
-                          </svg>
-                          Sending...
-                        </>
-                      ) : (
-                        <>
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
-                            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
-                          </svg>
-                          Send
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                  <p className="text-sm text-gray-500">
-                    We'll send a text message with your invite link
-                  </p>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="email">
-                <div className="space-y-3">
-                  <Input
-                    type="email"
-                    placeholder="Enter email address"
-                    value={inviteInfo}
-                    onChange={(e) => setInviteInfo(e.target.value)}
-                    className="mb-3"
-                  />
-                  <Textarea
-                    placeholder="Add a personal message (optional)"
-                    rows={3}
-                    className="mb-3"
-                  />
-                  <Button className="w-full" onClick={handleSendInvite} disabled={isInviteSent}>
-                    {isInviteSent ? 'Sending...' : 'Send Invitation'}
-                  </Button>
-                </div>
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
 
         <Card>
           <CardHeader className="pb-3">
