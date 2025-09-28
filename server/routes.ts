@@ -3840,9 +3840,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log(`Test mode - Updated user streak to: ${newStreak}`);
         }
         
+        // Calculate the actual amount the user received (important for VeBetterDAO 2:1 distribution)
+        const actualUserReward = distributionResult?.userAmount || distributionResult?.userReward || finalReward;
+        
         // Include streak info in the response
         const responseData = {
           ...newReceipt,
+          tokenReward: actualUserReward, // Override with actual distributed amount
           streakInfo: {
             currentStreak: newStreak,
             streakIncreased
@@ -3856,6 +3860,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               totalPaymentBonus: paymentBonuses.totalBonus
             },
             finalReward: finalReward,
+            actualReward: actualUserReward, // Add the actual distributed amount
             achievementBonus: achievementBonus || 0,
             achievementAwarded: shouldAwardFirstReceipt ? 'first_receipt' : null,
             totalRewards: totalRewards,
@@ -3885,7 +3890,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Add essential receipt data fields for the webhook (we use 'any' since our type doesn't include these fields)
         // Use actual distributed amount instead of raw reward if VeBetterDAO distribution occurred
-        const actualUserReward = distributionResult?.userAmount || distributionResult?.userReward || finalReward;
         const receiptWithMetadata = {
           ...newReceipt,
           storeName: storeInfo?.name || storeName,
