@@ -2513,7 +2513,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           analysisResult.purchaseCategory === 'public_transit';
           
         if (isPublicTransitReceipt) {
-          log(`🚌 Public transit receipt detected: ${analysisResult.storeName} - Forcing manual review for validation accuracy`, "receipts");
+          log(`🚌 Public transit receipt detected: ${analysisResult.storeName} - Auto-approving recognized transit service`, "receipts");
         }
           
         // Skip manual review for known thrift stores with reasonable confidence
@@ -2571,10 +2571,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           },
           preOwnedItemsDetected: analysisResult.containsPreOwnedItems,
           testMode: isTestModeActive, // Include test mode flag in response
-          // Force manual review for public transit receipts due to validation complexity
+          // Auto-approve recognized public transit services (Valley Metro, etc.) for testing
           // Skip manual review for thrift stores with reasonable confidence
-          sentForManualReview: isPublicTransitReceipt ? true : (manualReviewOverride ? false : (confidenceScore < 0.8)),
-          needsManualReview: isPublicTransitReceipt ? true : (manualReviewOverride ? false : (confidenceScore < 0.8)),
+          sentForManualReview: (manualReviewOverride ? false : (confidenceScore < 0.8)),
+          needsManualReview: (manualReviewOverride ? false : (confidenceScore < 0.8)),
           ...debugInfo // Include debug information if in developer debug mode
         });
       } catch (error) {
@@ -3250,12 +3250,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // ADDITIONAL OVERRIDE: For test mode receipts, always bypass manual review to enable immediate token rewards
-      // EXCEPT for public transit receipts which always need manual review for accuracy
+      // NOW INCLUDING public transit receipts for testing blockchain distribution
       const isFromTestMode = req.body.isTestMode === true || analysisResult.testMode === true;
       log(`🧪 TEST MODE CHECK: req.body.isTestMode=${req.body.isTestMode}, analysisResult.testMode=${analysisResult.testMode}, isFromTestMode=${isFromTestMode}`, "receipts");
-      if (isFromTestMode && !isPublicTransitReceipt) {
+      if (isFromTestMode) {
         needsManualReview = false;
-        log(`🧪 TEST MODE OVERRIDE: Bypassing manual review for test receipt - immediate token rewards enabled`, "receipts");
+        log(`🧪 TEST MODE OVERRIDE: Bypassing manual review for test receipt (including public transit) - immediate token rewards enabled`, "receipts");
       }
       
       // REMOVED: Public transit override - allowing auto-processing for testing blockchain distribution
