@@ -295,6 +295,17 @@ export class MemStorage implements IStorage {
         storeType: "public_transit",
         category: "transportation",
         addedBy: null
+      },
+      {
+        name: "Valley Metro",
+        address: "Public Transit",
+        city: "Phoenix",
+        state: "AZ",
+        latitude: 33.4484,
+        longitude: -112.0740,
+        storeType: "public_transit",
+        category: "transportation",
+        addedBy: null
       }
     ];
 
