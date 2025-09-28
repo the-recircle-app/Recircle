@@ -2078,18 +2078,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           // TEMPORARILY DISABLED DATE VALIDATION FOR BLOCKCHAIN TESTING
           // If the receipt is older than 3 days, reject it - same logic as in /api/receipts endpoint
-          if (ageInDays > 30) { // Changed from 3 to 30 days for blockchain testing
+          if (ageInDays > 40) { // Changed from 30 to 40 days for manual review testing
             // Log the date rejection for debugging
-            log(`Receipt date validation failed in analysis: ${analysisResult.purchaseDate} (${receiptDateFormatted}) is ${ageInDays} days old (max: 30 days - TESTING MODE)`, "receipts");
+            log(`Receipt date validation failed in analysis: ${analysisResult.purchaseDate} (${receiptDateFormatted}) is ${ageInDays} days old (max: 40 days - TESTING MODE)`, "receipts");
             
-            return res.json({
-              ...analysisResult,
-              isAcceptable: false,
-              estimatedReward: 0,
-              reasons: [
-                ...analysisResult.reasons, 
-                `Receipt is too old (${ageInDays} days). Receipts must be submitted within 30 days of purchase.`
-              ]
+            return res.status(400).json({
+              error: "Receipt date validation failed",
+              message: `Receipt is too old (${ageInDays} days). Receipts must be submitted within 40 days of purchase.`,
+              ageInDays,
+              maxDays: 40,
+              purchaseDate: analysisResult.purchaseDate,
+              code: "DATE_TOO_OLD"
             });
           } else {
             // Log successful date validation
