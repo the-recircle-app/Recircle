@@ -6,8 +6,8 @@
 import fetch from "node-fetch";
 import { log } from "../vite";
 
-// Google Sheets webhook URL - replace with your Apps Script deployment URL
-const GOOGLE_SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbzDqopOu-WNEt9vxOn9Qrm0aD4K9gOnzj7AgRw-zXLJ8BtYk5_0V8d0dDyv816J-Eb3/exec";
+// Google Sheets webhook URL - uses environment variable with fallback
+const GOOGLE_SHEET_WEBHOOK_URL = process.env.RECEIPT_APPROVAL_WEBHOOK_URL || "https://script.google.com/macros/s/AKfycbw3cDppOWbfrgrTMpt_fodCOWGlcmmAnEuAb2n8cST1sQtiyYrcetoljbPbgE05kMFV/exec";
 
 /**
  * Send receipt approval update to Google Sheets
