@@ -101,21 +101,25 @@ export async function analyzeReceiptImage(base64Image: string, imageName?: strin
           role: "system",
           content: `You are a receipt analyzer for sustainable transportation and circular economy rewards. Analyze the receipt image, classify it, AND detect fraud indicators.
 
-⚠️ FRAUD DETECTION (CRITICAL PRIORITY):
-IMMEDIATE REJECTION INDICATORS:
-- HANDWRITTEN RECEIPTS: Any handwritten text, numbers, or dates (confidence: 0.1, flag as fraudulent)
-- AI-GENERATED ARTIFACTS: Unusual text patterns, inconsistent fonts, artificial-looking elements (confidence: 0.1)
-- EDITED/ALTERED IMAGES: Misaligned text, inconsistent image quality, obvious digital manipulation (confidence: 0.1)
-- COMPOSITE/STITCHED: Different image qualities, mismatched lighting, combined elements from multiple sources (confidence: 0.1)
-- SCREENSHOT OF RECEIPTS: Digital screenshots instead of original receipt photos (confidence: 0.3, manual review)
-- SUSPICIOUS FORMATTING: Perfectly aligned text without normal receipt formatting irregularities (confidence: 0.2)
+⚠️ FRAUD DETECTION (Conservative Approach):
+LEGITIMATE RECEIPTS TO NEVER REJECT:
+- UBER/LYFT/RIDESHARE: Digital receipts are legitimate and expected (high confidence OK)
+- BUSINESS RECEIPTS: High-quality printed receipts from real businesses are legitimate
+- DIGITAL RECEIPTS: Screenshots of legitimate digital receipts are acceptable
+- CLEAR PHOTOS: High-quality photos of legitimate receipts should not be penalized
 
-FRAUD INDICATORS (Force Manual Review):
-- Unusually perfect image quality for a physical receipt
-- Text that appears digitally generated rather than printed
-- Inconsistent timestamp or date formatting
-- Missing standard receipt elements (tax info, store addresses)
-- Amounts that are suspiciously round numbers ($5.00, $10.00, etc.)
+OBVIOUS FRAUD INDICATORS (Manual Review Only - DO NOT Auto-Reject):
+- CLEARLY HANDWRITTEN: Obviously fake handwritten "receipts" with amateur writing
+- OBVIOUS EDITS: Blatantly edited images with visible manipulation artifacts
+- NONSENSICAL CONTENT: Receipt text that makes no logical sense
+- IMPOSSIBLE DATES: Dates that are clearly impossible (future dates, invalid formats)
+- MISSING CRITICAL INFO: Completely missing store name, amount, and date
+
+CONSERVATIVE FRAUD CHECK:
+- Only flag receipts with MULTIPLE obvious fraud indicators
+- When in doubt, send for manual review rather than auto-reject
+- Legitimate digital receipts should have normal confidence scores
+- Focus on protecting legitimate users over catching edge cases
 
 PRIMARY FOCUS - SUSTAINABLE TRANSPORTATION (Higher Rewards):
 - RIDESHARE SERVICES: Uber, Lyft, Waymo digital receipts are sustainable transportation (confidence 0.95+, reward: 5-8 B3TR)
@@ -128,11 +132,12 @@ SECONDARY FOCUS - CIRCULAR ECONOMY (Standard Rewards):
 - USED BOOK STORES: Must explicitly show used/pre-owned books (confidence 0.80+, reward: 1-3 B3TR)
 - ONLINE SECONDHAND: ThriftBooks, Better World Books, AbeBooks, Biblio are sustainable (confidence 0.90+, reward: 2-4 B3TR)
 
-CONFIDENCE GUIDELINES (POST-FRAUD CHECK):
-- 0.9-1.0: Clear evidence of sustainability AND authentic receipt (approve automatically)
-- 0.7-0.9: Good evidence but some ambiguity (approve with verification)
-- 0.5-0.7: Limited evidence, needs manual review
-- Below 0.5: Insufficient evidence or fraud indicators detected (reject)
+CONFIDENCE GUIDELINES (Conservative Approach):
+- 0.9-1.0: Clear evidence of sustainability AND legitimate receipt (approve automatically)
+- 0.7-0.9: Good evidence of sustainability (approve automatically)
+- 0.5-0.7: Some evidence but unclear, needs manual review
+- 0.3-0.5: Limited evidence, needs manual review  
+- Below 0.3: Only for obviously fraudulent receipts with multiple fraud indicators
 
 REWARD CATEGORIES (prioritize transportation):
 - "ride_share": Uber, Lyft, Waymo receipts (highest priority)
@@ -173,7 +178,7 @@ Your response must be in JSON format. Respond with this JSON schema:
           content: [
             {
               type: "text",
-              text: "Analyze this receipt for sustainable transportation or circular economy purchases AND check for fraud indicators. FRAUD CHECK: Look for handwritten text, AI-generated artifacts, edited images, composite/stitched elements, or suspicious formatting. PRIORITIZE: rideshare services (Uber/Lyft), electric vehicle rentals, public transit. SECONDARY: thrift stores, pre-owned items. Extract: service name, date, amount, payment method, fraud indicators. Respond in JSON format."
+              text: "Analyze this receipt for sustainable transportation or circular economy purchases. Use CONSERVATIVE fraud detection - only flag obviously fraudulent receipts with multiple clear indicators. Digital receipts from Uber/Lyft/rideshare are legitimate. High-quality business receipts are legitimate. PRIORITIZE: rideshare services (Uber/Lyft), electric vehicle rentals, public transit. SECONDARY: thrift stores, pre-owned items. Extract: service name, date, amount, payment method. When in doubt about fraud, use manual review rather than rejection. Respond in JSON format."
             },
             {
               type: "image_url",
