@@ -731,6 +731,10 @@ const TransactionExplorer = () => {
                                 className="flex items-center"
                                 variant="outline"
                                 onClick={() => {
+                                  // Debug: Log the transaction ID and environment variable
+                                  console.log('Debug Transaction ID:', blockchainDetails.txId);
+                                  console.log('Debug Environment Variable:', import.meta.env.VITE_NETWORK);
+                                  
                                   // Determine network (mainnet vs testnet)
                                   // For development, we'll check if it's a mock tx (starts with 'txhash-')
                                   // In production, this should be determined from the wallet connection
