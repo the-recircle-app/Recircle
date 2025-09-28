@@ -8,7 +8,7 @@
 // Global configuration
 const CONFIG = {
   // API Endpoints
-  API_BASE_URL: "https://workspace.reign360.replit.app",  // Updated for VeBetterDAO system
+  API_BASE_URL: "https://65a0c091-f8b5-4b02-ae8f-04ce476a7181-00-yhmbve5mpso9.worf.replit.dev",  // Public Replit development URL
   RECEIPT_APPROVAL_ENDPOINT: "/api/receipt-approved",
   
   // Sheet names

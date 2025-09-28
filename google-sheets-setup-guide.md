@@ -48,5 +48,11 @@ Add these secrets in Replit:
 5. **Check VeWorld wallet** for B3TR tokens
 
 ## Webhook URLs to Use:
-- Your app: `https://workspace.reign360.replit.app`
-- Webhook endpoint: `https://workspace.reign360.replit.app/api/receipt-approved`
+- Your app: `https://65a0c091-f8b5-4b02-ae8f-04ce476a7181-00-yhmbve5mpso9.worf.replit.dev`
+- Webhook endpoint: `https://65a0c091-f8b5-4b02-ae8f-04ce476a7181-00-yhmbve5mpso9.worf.replit.dev/api/receipt-approved`
+
+## Why This URL is Required:
+- Google Sheets needs to call your webhook from the internet
+- `localhost:5000` is NOT accessible to Google Sheets
+- Replit provides a public development URL for external access
+- This is the URL Google Sheets must use to reach your app
