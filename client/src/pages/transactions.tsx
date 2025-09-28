@@ -151,6 +151,8 @@ const TransactionExplorer = () => {
     console.log("Available environment variables in frontend:");
     console.log("VITE_CREATOR_FUND_WALLET:", import.meta.env.VITE_CREATOR_FUND_WALLET || "not set");
     console.log("VITE_APP_FUND_WALLET:", import.meta.env.VITE_APP_FUND_WALLET || "not set");
+    console.log("VITE_NETWORK:", import.meta.env.VITE_NETWORK || "not set");
+    console.log("ALL VITE VARS:", Object.keys(import.meta.env).filter(k => k.startsWith('VITE')));
   }, []);
 
   // Handle transaction selection for detailed view
