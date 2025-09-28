@@ -3254,18 +3254,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const isFromTestMode = req.body.isTestMode === true || analysisResult.testMode === true;
       const forceManualReview = req.body.forceManualReview === true; // New flag for testing manual review
       
-      // TEST MANUAL REVIEW: If store name contains "manual" or "review", force manual review
-      const testManualReviewKeyword = analysisResult.storeName?.toLowerCase().includes('manual') || 
-                                      analysisResult.storeName?.toLowerCase().includes('review');
+      log(`🧪 TEST MODE CHECK: req.body.isTestMode=${req.body.isTestMode}, analysisResult.testMode=${analysisResult.testMode}, isFromTestMode=${isFromTestMode}, forceManualReview=${forceManualReview}`, "receipts");
       
-      log(`🧪 TEST MODE CHECK: req.body.isTestMode=${req.body.isTestMode}, analysisResult.testMode=${analysisResult.testMode}, isFromTestMode=${isFromTestMode}, forceManualReview=${forceManualReview}, testKeyword=${testManualReviewKeyword}`, "receipts");
-      
-      if (isFromTestMode && !forceManualReview && !testManualReviewKeyword) {
+      if (isFromTestMode && !forceManualReview) {
         needsManualReview = false;
         log(`🧪 TEST MODE OVERRIDE: Bypassing manual review for test receipt (including public transit) - immediate token rewards enabled`, "receipts");
-      } else if (forceManualReview || testManualReviewKeyword) {
+      } else if (forceManualReview) {
         needsManualReview = true;
-        log(`🧪 FORCE MANUAL REVIEW: Receipt forced to manual review ${forceManualReview ? 'by flag' : 'by keyword'} for testing purposes`, "receipts");
+        log(`🧪 FORCE MANUAL REVIEW: Receipt forced to manual review for testing purposes`, "receipts");
       }
       
       // REMOVED: Public transit override - allowing auto-processing for testing blockchain distribution
