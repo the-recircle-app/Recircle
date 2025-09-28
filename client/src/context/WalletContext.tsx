@@ -377,14 +377,39 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
         if (referralCode) {
           // Validate and get referrer info
           try {
+            console.log(`[REFERRAL DEBUG] Validating referral code: ${referralCode}`);
             const referralResponse = await fetch(`/api/referrals/code/${referralCode}`);
+            
             if (referralResponse.ok) {
               const referralData = await referralResponse.json();
               referredBy = referralData.referrerId;
-              console.log(`[REFERRAL] New user referred by user ${referredBy} with code ${referralCode}`);
+              console.log(`[REFERRAL] ✅ New user referred by user ${referredBy} with code ${referralCode}`);
+              
+              // Show success toast
+              toast({
+                title: "Invitation Accepted!",
+                description: `You were invited by someone awesome! 🎉`,
+              });
+            } else {
+              const errorText = await referralResponse.text();
+              console.error(`[REFERRAL] ❌ Invalid referral code ${referralCode}: ${referralResponse.status} - ${errorText}`);
+              
+              // Show error toast for invalid referral code
+              toast({
+                title: "Invalid Invitation Code",
+                description: "The invitation link appears to be invalid or expired. You can still join without it!",
+                variant: "destructive"
+              });
             }
           } catch (error) {
-            console.error('[REFERRAL] Failed to validate referral code:', error);
+            console.error('[REFERRAL] ❌ Network error validating referral code:', error);
+            
+            // Show error toast for network issues
+            toast({
+              title: "Connection Issue",
+              description: "Could not verify invitation link. You can still join without it!",
+              variant: "destructive"
+            });
           }
         }
         
