@@ -56,6 +56,14 @@ export interface ReceiptAnalysisResult {
   // Payment method analysis
   paymentMethod: PaymentMethodDetails;
   receiptText?: string; // Full text extracted from receipt (for debugging)
+  
+  // Fraud detection analysis
+  fraudDetection?: {
+    isSuspicious: boolean;
+    fraudIndicators: string[];
+    riskLevel: string;
+    authenticity: string;
+  };
 }
 
 /**
@@ -91,7 +99,23 @@ export async function analyzeReceiptImage(base64Image: string, imageName?: strin
       messages: [
         {
           role: "system",
-          content: `You are a receipt analyzer for sustainable transportation and circular economy rewards. Analyze the receipt image and classify it.
+          content: `You are a receipt analyzer for sustainable transportation and circular economy rewards. Analyze the receipt image, classify it, AND detect fraud indicators.
+
+⚠️ FRAUD DETECTION (CRITICAL PRIORITY):
+IMMEDIATE REJECTION INDICATORS:
+- HANDWRITTEN RECEIPTS: Any handwritten text, numbers, or dates (confidence: 0.1, flag as fraudulent)
+- AI-GENERATED ARTIFACTS: Unusual text patterns, inconsistent fonts, artificial-looking elements (confidence: 0.1)
+- EDITED/ALTERED IMAGES: Misaligned text, inconsistent image quality, obvious digital manipulation (confidence: 0.1)
+- COMPOSITE/STITCHED: Different image qualities, mismatched lighting, combined elements from multiple sources (confidence: 0.1)
+- SCREENSHOT OF RECEIPTS: Digital screenshots instead of original receipt photos (confidence: 0.3, manual review)
+- SUSPICIOUS FORMATTING: Perfectly aligned text without normal receipt formatting irregularities (confidence: 0.2)
+
+FRAUD INDICATORS (Force Manual Review):
+- Unusually perfect image quality for a physical receipt
+- Text that appears digitally generated rather than printed
+- Inconsistent timestamp or date formatting
+- Missing standard receipt elements (tax info, store addresses)
+- Amounts that are suspiciously round numbers ($5.00, $10.00, etc.)
 
 PRIMARY FOCUS - SUSTAINABLE TRANSPORTATION (Higher Rewards):
 - RIDESHARE SERVICES: Uber, Lyft, Waymo digital receipts are sustainable transportation (confidence 0.95+, reward: 5-8 B3TR)
@@ -104,11 +128,11 @@ SECONDARY FOCUS - CIRCULAR ECONOMY (Standard Rewards):
 - USED BOOK STORES: Must explicitly show used/pre-owned books (confidence 0.80+, reward: 1-3 B3TR)
 - ONLINE SECONDHAND: ThriftBooks, Better World Books, AbeBooks, Biblio are sustainable (confidence 0.90+, reward: 2-4 B3TR)
 
-CONFIDENCE GUIDELINES:
-- 0.9-1.0: Clear evidence of sustainability (approve automatically)
+CONFIDENCE GUIDELINES (POST-FRAUD CHECK):
+- 0.9-1.0: Clear evidence of sustainability AND authentic receipt (approve automatically)
 - 0.7-0.9: Good evidence but some ambiguity (approve with verification)
 - 0.5-0.7: Limited evidence, needs manual review
-- Below 0.5: Insufficient evidence (reject)
+- Below 0.5: Insufficient evidence or fraud indicators detected (reject)
 
 REWARD CATEGORIES (prioritize transportation):
 - "ride_share": Uber, Lyft, Waymo receipts (highest priority)
@@ -130,6 +154,12 @@ Your response must be in JSON format. Respond with this JSON schema:
   "reasons": [strings],
   "containsPreOwnedItems": boolean,
   "preOwnedKeywordsFound": [strings],
+  "fraudDetection": {
+    "isSuspicious": boolean,
+    "fraudIndicators": [strings],
+    "riskLevel": string,
+    "authenticity": string
+  },
   "paymentMethod": {
     "method": string,
     "cardLastFour": string or null,
@@ -143,7 +173,7 @@ Your response must be in JSON format. Respond with this JSON schema:
           content: [
             {
               type: "text",
-              text: "Analyze this receipt for sustainable transportation or circular economy purchases. PRIORITIZE: rideshare services (Uber/Lyft), electric vehicle rentals, public transit. SECONDARY: thrift stores, pre-owned items. Extract: service name, date, amount, payment method. Respond in JSON format."
+              text: "Analyze this receipt for sustainable transportation or circular economy purchases AND check for fraud indicators. FRAUD CHECK: Look for handwritten text, AI-generated artifacts, edited images, composite/stitched elements, or suspicious formatting. PRIORITIZE: rideshare services (Uber/Lyft), electric vehicle rentals, public transit. SECONDARY: thrift stores, pre-owned items. Extract: service name, date, amount, payment method, fraud indicators. Respond in JSON format."
             },
             {
               type: "image_url",
@@ -199,6 +229,15 @@ Your response must be in JSON format. Respond with this JSON schema:
           cardLastFour: result.paymentMethod?.cardLastFour ?? null,
           isDigital: result.paymentMethod?.isDigital ?? false
         },
+        
+        // Add fraud detection data
+        fraudDetection: {
+          isSuspicious: result.fraudDetection?.isSuspicious ?? false,
+          fraudIndicators: result.fraudDetection?.fraudIndicators ?? [],
+          riskLevel: result.fraudDetection?.riskLevel ?? "low",
+          authenticity: result.fraudDetection?.authenticity ?? "unknown"
+        },
+        
         receiptText: result.receiptText ?? ""
       };
       
