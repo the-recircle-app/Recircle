@@ -731,8 +731,9 @@ const TransactionExplorer = () => {
                                 className="flex items-center"
                                 variant="outline"
                                 onClick={() => {
-                                  // Determine if this is a real blockchain transaction or a mock one
-                                  // Mock transactions start with 'txhash-', real ones start with '0x'
+                                  // Determine network (mainnet vs testnet)
+                                  // For development, we'll check if it's a mock tx (starts with 'txhash-')
+                                  // In production, this should be determined from the wallet connection
                                   const isTestTx = blockchainDetails.txId.startsWith('txhash-');
                                   
                                   // If it's a mock transaction for testing, show custom view or dialog instead
@@ -760,9 +761,21 @@ const TransactionExplorer = () => {
                                       console.log("Opening VeChain stats website for demo purposes");
                                     }
                                   } else {
-                                    // For real blockchain transactions, we're using VeChain testnet
-                                    // Your app is configured for testnet with VeBetterDAO integration
-                                    const baseUrl = 'https://explore-testnet.vechain.org/transactions/';
+                                    // For real transactions on testnet or mainnet
+                                    // Determine which network we're on based on environment variable
+                                    // In a production app, this would come from the wallet connection
+                                    const isTestnet = import.meta.env.VITE_NETWORK === 'testnet';
+                                    
+                                    // Use appropriate explorer for the network
+                                    // VeChainStats is generally better for mainnet
+                                    // explore-testnet.vechain.org is better for testnet
+                                    let baseUrl;
+                                    if (isTestnet) {
+                                      baseUrl = 'https://explore-testnet.vechain.org/transactions/';
+                                    } else {
+                                      // For mainnet, VeChainStats offers better UI
+                                      baseUrl = 'https://vechainstats.com/transaction/';
+                                    }
                                     
                                     // Ensure txId has 0x prefix required by explorers
                                     const txIdFormatted = blockchainDetails.txId.startsWith('0x') 
@@ -771,7 +784,7 @@ const TransactionExplorer = () => {
                                       
                                     const url = baseUrl + txIdFormatted;
                                     window.open(url, '_blank');
-                                    console.log(`Opening VeChain testnet explorer URL:`, url);
+                                    console.log(`Opening VeChain ${isTestnet ? 'testnet' : 'mainnet'} explorer URL:`, url);
                                   }
                                 }}
                               >
