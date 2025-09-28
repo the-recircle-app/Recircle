@@ -3316,9 +3316,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           finalStoreNameCheck.toLowerCase().includes('goodwill') || 
           finalStoreNameCheck.toLowerCase().includes('salvation army') || 
           finalStoreNameCheck.toLowerCase().includes('thrift') ||
-          // Also check store IDs for known thrift stores in our database
-          req.body.storeId === 1 || req.body.storeId === "1" || // Goodwill
-          req.body.storeId === 2 || req.body.storeId === "2";   // Salvation Army
+          // Also check store IDs for known thrift stores in our database (REMOVED: hardcoded IDs cause conflicts)
+          false; // Disabled hardcoded store ID checks - rely on store name matching instead
         
         // If this is a thrift store with good confidence, force bypass manual review
         if (isThriftStoreFinalCheck && (confidenceLevel >= 0.7 || isWellKnownThriftStore)) {

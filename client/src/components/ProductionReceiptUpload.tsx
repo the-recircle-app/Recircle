@@ -136,7 +136,7 @@ export function ProductionReceiptUpload({
           body: JSON.stringify({
             userId: parseInt(userId),
             walletAddress,
-            storeId: 1, // Default store ID for sustainable transportation
+            storeId: null, // Let backend determine correct store ID based on store name
             storeName: validationResult.storeName || 'Transportation Service',
             amount: validationResult.estimatedReward || 0,
             purchaseDate: new Date().toISOString().split('T')[0],
