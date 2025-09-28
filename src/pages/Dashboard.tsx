@@ -71,17 +71,17 @@ export function Dashboard({ userBalance, currentStreak, totalReceipts }: Dashboa
           {/* Internal transaction history logic redacted for privacy */}
           <div className="activity-item">
             <span className="activity-type">🛍️ Thrift Store</span>
-            <span className="activity-reward">+8 B3TR</span>
+            <span className="activity-reward">Earned B3TR</span>
             <span className="activity-date">2 days ago</span>
           </div>
           <div className="activity-item">
             <span className="activity-type">🚗 Uber Ride</span>
-            <span className="activity-reward">+5 B3TR</span>
+            <span className="activity-reward">Earned B3TR</span>
             <span className="activity-date">5 days ago</span>
           </div>
           <div className="activity-item">
             <span className="activity-type">🎮 GameStop Pre-owned</span>
-            <span className="activity-reward">+8 B3TR</span>
+            <span className="activity-reward">Earned B3TR</span>
             <span className="activity-date">1 week ago</span>
           </div>
         </div>

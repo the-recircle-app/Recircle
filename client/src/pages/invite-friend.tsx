@@ -242,11 +242,11 @@ const InviteFriend = () => {
             <h3 className="text-white font-semibold">Reward Per Referral</h3>
             <div className="flex items-center gap-1 bg-blue-600 px-3 py-1 rounded-full">
               <B3trLogo className="w-5 h-5" color="#38BDF8" />
-              <span className="text-white font-medium">15 tokens</span>
+              <span className="text-white font-medium">bonus B3TR</span>
             </div>
           </div>
           <p className="text-blue-100 text-sm">
-            Invite your friends to join ReCircle. You'll earn 15 B3TR tokens for each friend who joins and scans their first receipt!
+            Invite your friends to join ReCircle. You'll earn bonus B3TR tokens for each friend who joins and scans their first receipt!
           </p>
         </div>
       </div>
