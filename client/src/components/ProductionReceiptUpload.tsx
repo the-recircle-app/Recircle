@@ -32,13 +32,15 @@ interface ProductionReceiptUploadProps {
   walletAddress: string;
   onValidationComplete: (result: ValidationResult) => void;
   onUploadStart?: () => void;
+  onError?: (error: string) => void;
 }
 
 export function ProductionReceiptUpload({ 
   userId, 
   walletAddress, 
   onValidationComplete, 
-  onUploadStart 
+  onUploadStart,
+  onError 
 }: ProductionReceiptUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -101,9 +103,22 @@ export function ProductionReceiptUpload({
       console.log('[UPLOAD] 📨 Validation response status:', validationResponse.status);
 
       if (!validationResponse.ok) {
-        const errorText = await validationResponse.text();
-        console.error('[UPLOAD] ❌ Validation error response:', errorText);
-        throw new Error(`Validation Error ${validationResponse.status}: ${errorText}`);
+        try {
+          const errorData = await validationResponse.json();
+          console.error('[UPLOAD] ❌ Validation error response:', errorData);
+          
+          // Handle specific error codes with user-friendly messages
+          if (errorData.code === 'DATE_TOO_OLD') {
+            throw new Error(`Receipt is too old: ${errorData.message}`);
+          } else {
+            throw new Error(errorData.message || `Validation failed (${validationResponse.status})`);
+          }
+        } catch (parseError) {
+          // Fallback to text if JSON parsing fails
+          const errorText = await validationResponse.text();
+          console.error('[UPLOAD] ❌ Could not parse error response as JSON:', parseError);
+          throw new Error(`Validation Error ${validationResponse.status}: ${errorText}`);
+        }
       }
 
       const validationResult: ValidationResult = await validationResponse.json();
@@ -183,16 +198,24 @@ export function ProductionReceiptUpload({
         name: error instanceof Error ? error.name : 'Unknown error'
       });
       
-      toast({
-        title: "Upload Failed",
-        description: `Error: ${error instanceof Error ? error.message : 'Please try again with a clear receipt image'}`,
-        variant: "destructive",
-      });
+      const errorMessage = error instanceof Error ? error.message : 'Please try again with a clear receipt image';
+      
+      // Call the onError callback if provided
+      if (onError) {
+        onError(errorMessage);
+      } else {
+        // Fallback to toast if no onError callback
+        toast({
+          title: "Upload Failed",
+          description: `Error: ${errorMessage}`,
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsUploading(false);
       setUploadProgress(0);
     }
-  }, [userId, walletAddress, onValidationComplete, onUploadStart, toast]);
+  }, [userId, walletAddress, onValidationComplete, onUploadStart, onError, toast]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,

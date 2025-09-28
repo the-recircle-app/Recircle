@@ -55,7 +55,8 @@ enum ScanStep {
   CAMERA = "camera",
   ANALYZING = "analyzing",
   FORM = "form",
-  SUCCESS = "success"
+  SUCCESS = "success",
+  ERROR = "error"
 }
 
 const receiptFormSchema = z.object({
@@ -84,6 +85,7 @@ const ScanReceipt = () => {
   const [streakMultiplier, setStreakMultiplier] = useState<number>(1);
   const [showStreakCelebration, setShowStreakCelebration] = useState(false);
   const [streakCount, setStreakCount] = useState(0);
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
   // Form for editing receipt details
   const form = useForm<ReceiptFormValues>({
@@ -165,6 +167,12 @@ const ScanReceipt = () => {
                   }}
                   onUploadStart={() => {
                     setCurrentStep(ScanStep.ANALYZING);
+                    setErrorMessage(""); // Clear any previous errors
+                  }}
+                  onError={(error) => {
+                    console.log("[SCAN] Upload error:", error);
+                    setErrorMessage(error);
+                    setCurrentStep(ScanStep.ERROR);
                   }}
                 />
               ) : (
@@ -209,6 +217,48 @@ const ScanReceipt = () => {
                   <p className="text-sm text-gray-500 mt-2">
                     Checking validity score and calculating B3TR rewards
                   </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Error Step */}
+          {currentStep === ScanStep.ERROR && (
+            <Card className="overflow-hidden mb-6">
+              <CardHeader className="px-4 py-3 border-b">
+                <CardTitle className="text-lg font-semibold text-red-700">Receipt Processing Failed</CardTitle>
+                <CardDescription className="text-sm text-gray-600">
+                  Please check the error below and try again
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-4">
+                <div className="text-center py-8">
+                  <div className="text-red-600 text-6xl mb-4">✗</div>
+                  <h3 className="text-xl font-bold text-red-700 mb-2">
+                    Upload Failed
+                  </h3>
+                  <p className="text-gray-600 mb-6">
+                    {errorMessage}
+                  </p>
+                  
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => {
+                        setCurrentStep(ScanStep.CAMERA);
+                        setErrorMessage("");
+                      }}
+                      className="flex-1"
+                    >
+                      Try Again
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={handleReturnToDashboard}
+                      className="flex-1"
+                    >
+                      Back to Dashboard
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
