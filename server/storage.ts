@@ -636,6 +636,20 @@ export class MemStorage implements IStorage {
     return transaction;
   }
 
+  async updateTransactionHash(transactionId: number, txHash: string): Promise<boolean> {
+    const transaction = this.transactions.get(transactionId);
+    if (transaction) {
+      console.log(`[MEMORY] Updating transaction ${transactionId} with real hash: ${txHash}`);
+      transaction.txHash = txHash;
+      this.transactions.set(transactionId, transaction);
+      console.log(`[MEMORY] ✅ Transaction ${transactionId} hash updated successfully`);
+      return true;
+    } else {
+      console.log(`[MEMORY] ⚠️ Transaction ${transactionId} not found for hash update`);
+      return false;
+    }
+  }
+
   async deleteTransaction(id: number): Promise<boolean> {
     const success = this.transactions.delete(id);
     return success;
@@ -926,6 +940,27 @@ export class PgStorage implements IStorage {
     const result = await db.insert(transactions).values(insertTransaction).returning();
     console.log(`[DB] ✅ Transaction created with ID: ${result[0].id}`);
     return result[0];
+  }
+
+  async updateTransactionHash(transactionId: number, txHash: string): Promise<boolean> {
+    try {
+      console.log(`[DB] Updating transaction ${transactionId} with real hash: ${txHash}`);
+      const result = await db.update(transactions)
+        .set({ txHash: txHash })
+        .where(eq(transactions.id, transactionId))
+        .returning();
+      
+      if (result.length > 0) {
+        console.log(`[DB] ✅ Transaction ${transactionId} hash updated successfully`);
+        return true;
+      } else {
+        console.log(`[DB] ⚠️ Transaction ${transactionId} not found for hash update`);
+        return false;
+      }
+    } catch (error) {
+      console.error(`[DB] ❌ Failed to update transaction ${transactionId} hash:`, error);
+      return false;
+    }
   }
 
   async deleteTransaction(id: number): Promise<boolean> {
