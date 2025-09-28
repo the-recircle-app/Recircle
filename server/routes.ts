@@ -183,8 +183,8 @@ async function processReferralOnFirstReceipt(inviteeUserId: number, receiptId: n
       return;
     }
     
-    // Award inviter 15 B3TR with 70/30 split
-    const referralRewardAmount = 15;
+    // Award inviter 18 B3TR with 70/30 split
+    const referralRewardAmount = 18;
     const sustainabilityDistribution = calculateSustainabilityRewards(referralRewardAmount);
     
     console.log(`[REFERRAL] Processing referral reward: ${sustainabilityDistribution.userReward} B3TR to inviter ${referral.referrerId}, ${sustainabilityDistribution.appReward} B3TR to app fund`);
@@ -4600,7 +4600,7 @@ app.post("/api/treasury/test-distribution", async (req: Request, res: Response) 
       
       // If status is 'rewarded', create a transaction for the referral reward
       if (status === 'rewarded' && updatedReferral.referrerId) {
-        const referralReward = 15; // 15 B3TR tokens for each successful referral
+        const referralReward = 18; // 18 B3TR tokens for each successful referral
         
         // Create a transaction for the referral reward
         await storage.createTransaction({
