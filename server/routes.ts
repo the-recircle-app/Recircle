@@ -3254,14 +3254,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const isFromTestMode = req.body.isTestMode === true || analysisResult.testMode === true;
       const forceManualReview = req.body.forceManualReview === true; // New flag for testing manual review
       
-      log(`🧪 TEST MODE CHECK: req.body.isTestMode=${req.body.isTestMode}, analysisResult.testMode=${analysisResult.testMode}, isFromTestMode=${isFromTestMode}, forceManualReview=${forceManualReview}`, "receipts");
+      // TEST MANUAL REVIEW: If store name contains "manual" or "review", force manual review
+      const testManualReviewKeyword = analysisResult.storeName?.toLowerCase().includes('manual') || 
+                                      analysisResult.storeName?.toLowerCase().includes('review');
       
-      if (isFromTestMode && !forceManualReview) {
+      log(`🧪 TEST MODE CHECK: req.body.isTestMode=${req.body.isTestMode}, analysisResult.testMode=${analysisResult.testMode}, isFromTestMode=${isFromTestMode}, forceManualReview=${forceManualReview}, testKeyword=${testManualReviewKeyword}`, "receipts");
+      
+      if (isFromTestMode && !forceManualReview && !testManualReviewKeyword) {
         needsManualReview = false;
         log(`🧪 TEST MODE OVERRIDE: Bypassing manual review for test receipt (including public transit) - immediate token rewards enabled`, "receipts");
-      } else if (forceManualReview) {
+      } else if (forceManualReview || testManualReviewKeyword) {
         needsManualReview = true;
-        log(`🧪 FORCE MANUAL REVIEW: Receipt forced to manual review for testing purposes`, "receipts");
+        log(`🧪 FORCE MANUAL REVIEW: Receipt forced to manual review ${forceManualReview ? 'by flag' : 'by keyword'} for testing purposes`, "receipts");
       }
       
       // REMOVED: Public transit override - allowing auto-processing for testing blockchain distribution
@@ -3495,20 +3499,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           - Already has first_receipt achievement? ${hasFirstReceiptAchievement}
         `);
         
-        // Force award for first receipt in test mode - reuse isDevelopmentEnv that's defined later
-        const isDevEnv = process.env.NODE_ENV === 'development';
-        const forceAward = isDevEnv && isFirstReceipt && req.body.isTestMode;
-        
         // Only award achievement bonus if this is their first receipt AND they haven't already been awarded
-        // OR if we're in test mode with the first receipt
-        const shouldAwardFirstReceipt = (isFirstReceipt && !hasFirstReceiptAchievement) || forceAward;
+        // Test mode does NOT override achievement logic - achievements should only be awarded once per user
+        const shouldAwardFirstReceipt = isFirstReceipt && !hasFirstReceiptAchievement;
         
-        console.log(`[ACHIEVEMENT DEBUG] Force award: ${forceAward}`);
         console.log(`[ACHIEVEMENT DEBUG] Should award first receipt: ${shouldAwardFirstReceipt}`);
-        
-        if (forceAward) {
-          console.log(`[ACHIEVEMENT DEBUG] Force awarding first_receipt achievement in test mode`);
-        }
+        console.log(`[ACHIEVEMENT DEBUG] Achievement logic: isFirstReceipt=${isFirstReceipt}, hasAchievement=${hasFirstReceiptAchievement}`);
         
         // Calculate achievement bonus if applicable
         const achievementBonus = shouldAwardFirstReceipt ? calculateAchievementReward('first_receipt') : 0;
