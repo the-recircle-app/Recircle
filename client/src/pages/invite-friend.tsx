@@ -213,7 +213,6 @@ const InviteFriend = () => {
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-white font-semibold">Reward Per Referral</h3>
             <div className="flex items-center gap-1 bg-blue-600 px-3 py-1 rounded-full">
-              <B3trLogo className="w-5 h-5" color="#38BDF8" />
               <span className="text-white font-medium">bonus B3TR</span>
             </div>
           </div>
