@@ -22,20 +22,19 @@ import { isVeChainVisaCard } from './receiptUtils';
  * 3. Achievement bonus rewards
  * 4. Store addition rewards
  * 
- * NEW DISTRIBUTION MODEL (July 2025):
- * The user receives 70% of the total minted tokens, while 30% goes to 
+ * NEW DISTRIBUTION MODEL (September 2025):
+ * The user receives 66.67% of the total minted tokens (2:1 ratio), while 33.33% goes to 
  * the app fund for operational expenses, growth, and team compensation.
- * This optimized model provides more operational funding while maintaining
- * competitive user rewards.
+ * This matches VeBetterDAO treasury's enforced 2:1 distribution and eliminates decimal issues.
  */
 export const ECOSYSTEM_MULTIPLIERS = {
-  // User gets 70% of total rewards
-  USER_MULTIPLIER: 0.7,
+  // User gets 66.67% of total rewards (2:1 ratio matching VeBetterDAO)
+  USER_MULTIPLIER: 2/3,
   
-  // App fund gets 30% of total rewards (operational fund)
-  APP_MULTIPLIER: 0.3,
+  // App fund gets 33.33% of total rewards (2:1 ratio matching VeBetterDAO)
+  APP_MULTIPLIER: 1/3,
   
-  // Legacy creator fund removed in 70/30 model
+  // Legacy creator fund removed in 2:1 model
   CREATOR_MULTIPLIER: 0.0,
   
   // Internal reference: combined multiplier is 100% (USER + APP = 1.0)
@@ -106,20 +105,20 @@ export function calculateSustainabilityRewards(totalRewardAmount: number): {
   appReward: number;
   totalSustainabilityReward: number;
 } {
-  // Calculate user's 70% share of total reward
+  // Calculate user's 66.67% share of total reward (2:1 ratio)
   const userReward = Math.round(totalRewardAmount * ECOSYSTEM_MULTIPLIERS.USER_MULTIPLIER * 10) / 10;
   
-  // Calculate app reward (30% of total reward - combined operational fund)
+  // Calculate app reward (33.33% of total reward - combined operational fund)
   const appReward = Math.round(totalRewardAmount * ECOSYSTEM_MULTIPLIERS.APP_MULTIPLIER * 10) / 10;
   
-  // Total sustainability reward (30% of total goes to app fund)
+  // Total sustainability reward (33.33% of total goes to app fund)
   const totalSustainabilityReward = appReward;
   
-  console.log(`Reward distribution (70/30 split):
+  console.log(`Reward distribution (2:1 split):
     - Total reward: ${totalRewardAmount} B3TR
-    - User portion: ${userReward} B3TR (70% of total)
-    - App fund: ${appReward} B3TR (30% of total)
-    - Total operational: ${totalSustainabilityReward} B3TR (${ECOSYSTEM_MULTIPLIERS.APP_MULTIPLIER * 100}% of total)`);
+    - User portion: ${userReward} B3TR (66.67% of total)
+    - App fund: ${appReward} B3TR (33.33% of total)
+    - Total operational: ${totalSustainabilityReward} B3TR (${Math.round(ECOSYSTEM_MULTIPLIERS.APP_MULTIPLIER * 100 * 100) / 100}% of total)`);
   
   return {
     userReward,
@@ -183,7 +182,7 @@ export function applyStreakMultiplier(baseAmount: number, streakInfo: StreakInfo
   }
   
   console.log(`Applied streak multiplier: ${weeklyMultiplier}x to ${baseAmount} tokens = ${amount} tokens`);
-  console.log(`Note: This raw amount will be distributed according to the 70/30 model (user: ${amount * ECOSYSTEM_MULTIPLIERS.USER_MULTIPLIER}, app fund: ${amount * ECOSYSTEM_MULTIPLIERS.APP_MULTIPLIER})`);
+  console.log(`Note: This raw amount will be distributed according to the 2:1 model (user: ${amount * ECOSYSTEM_MULTIPLIERS.USER_MULTIPLIER}, app fund: ${amount * ECOSYSTEM_MULTIPLIERS.APP_MULTIPLIER})`);
   
   return Math.round(amount * 10) / 10; // Round to 1 decimal place
 }

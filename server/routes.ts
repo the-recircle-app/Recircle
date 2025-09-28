@@ -183,7 +183,7 @@ async function processReferralOnFirstReceipt(inviteeUserId: number, receiptId: n
       return;
     }
     
-    // Award inviter 18 B3TR with 70/30 split
+    // Award inviter 18 B3TR with 2:1 split
     const referralRewardAmount = 18;
     const sustainabilityDistribution = calculateSustainabilityRewards(referralRewardAmount);
     
