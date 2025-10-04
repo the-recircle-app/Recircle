@@ -31,7 +31,7 @@ const TESTNET_MNEMONIC = process.env.TESTNET_MNEMONIC;
 let DISTRIBUTOR_PRIVATE_KEY: string | null = null;
 
 // Check for direct private key first (preferred method)
-const VECHAIN_PRIVATE_KEY = process.env.VECHAIN_PRIVATE_KEY;
+const VECHAIN_PRIVATE_KEY = process.env.VECHAIN_PRIVATE_KEY || process.env.DISTRIBUTOR_PRIVATE_KEY;
 
 if (VECHAIN_PRIVATE_KEY) {
   try {
