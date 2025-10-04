@@ -10,6 +10,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+**October 4, 2025 - Send/Receive Features & Settings Implementation**
+- Built B3TR transfer component using VeChain Kit V2 useSendTransaction hook with proper amount conversion (parseUnits)
+- Updated SmartAccountManager to correctly use smart account addresses for Privy users and EOA addresses for VeWorld users
+- Created /send page with Mugshot-style UI (warnings, percentage buttons 25%/50%/75%/100%, form validation)
+- Added "Connected Wallet" card to Transactions page with Send/Receive buttons matching Mugshot design
+- Built Receive modal with address display and copy-to-clipboard functionality  
+- Added Settings gear icon to Profile page
+- Created Settings menu with Support/Developer/Privacy sections and Log out functionality
+- Fixed critical bug: replaced float math with ethers.js parseUnits for accurate B3TR amount conversion
+
 **October 4, 2025 - Project Import Setup**
 - Created PostgreSQL database and pushed schema using Drizzle ORM
 - Fixed npm script paths to use direct node_modules references for tsx and drizzle-kit
