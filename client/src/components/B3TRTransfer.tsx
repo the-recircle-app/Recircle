@@ -1,6 +1,7 @@
 import { useMemo, useEffect } from 'react';
 import { useWallet, useSendTransaction } from '@vechain/vechain-kit';
 import { Interface } from '@ethersproject/abi';
+import { parseUnits } from '@ethersproject/units';
 
 const B3TR_CONTRACT_ADDRESS = '0xbf64cf86894Ee0877C4e7d03936e35Ee8D8b864F';
 
@@ -44,7 +45,7 @@ export function B3TRTransfer({
     
     const b3trInterface = new Interface(VIP180_ABI);
     
-    const amountInWei = (parseFloat(amount) * Math.pow(10, 18)).toString();
+    const amountInWei = parseUnits(amount, 18).toString();
     
     return [{
       to: B3TR_CONTRACT_ADDRESS,

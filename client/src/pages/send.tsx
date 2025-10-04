@@ -102,14 +102,31 @@ export default function SendB3TR() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="space-y-3 mb-4">
+            <div className="bg-blue-900/30 border border-blue-700/50 rounded-lg p-3 flex gap-3">
+              <div className="text-blue-400 mt-0.5">ℹ️</div>
+              <p className="text-sm text-blue-200">
+                You need to send B3TR to a VeChain Wallet. If you don't have one, download VeWorld.
+              </p>
+            </div>
+            
+            <div className="bg-blue-900/30 border border-blue-700/50 rounded-lg p-3 flex gap-3">
+              <div className="text-blue-400 mt-0.5">ℹ️</div>
+              <p className="text-sm text-blue-200">
+                Sending to OceanX or other exchanges may result in loss of funds. Send the tokens to your VeWorld wallet first.
+              </p>
+            </div>
+          </div>
+
           <div className="space-y-2">
-            <Label htmlFor="recipient">Recipient Address</Label>
+            <Label htmlFor="recipient" className="text-base">Receiver Address *</Label>
             <Input
               id="recipient"
-              placeholder="0x..."
+              placeholder="Enter receiver address"
               value={recipientAddress}
               onChange={(e) => setRecipientAddress(e.target.value)}
               disabled={isSending}
+              className="bg-gray-800/50 border-gray-700"
             />
             {recipientAddress && !isValidAddress(recipientAddress) && (
               <p className="text-sm text-destructive">Invalid VeChain address</p>
@@ -117,33 +134,39 @@ export default function SendB3TR() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="amount">Amount (B3TR)</Label>
-            <div className="flex gap-2">
-              <Input
-                id="amount"
-                type="number"
-                step="0.01"
-                min="0"
-                max={tokenBalance}
-                placeholder="0.00"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                disabled={isSending}
-              />
-              <Button 
-                variant="outline" 
-                onClick={() => setAmount(tokenBalance.toString())}
-                disabled={isSending}
-              >
-                Max
-              </Button>
+            <div className="flex justify-between items-center">
+              <Label htmlFor="amount" className="text-base">Amount *</Label>
+              <span className="text-sm text-muted-foreground">Balance: {tokenBalance} B3TR</span>
             </div>
-            <div className="flex justify-between text-sm text-muted-foreground">
-              <span>Available: {tokenBalance} B3TR</span>
-              {amountNum > tokenBalance && (
-                <span className="text-destructive">Insufficient balance</span>
-              )}
+            <Input
+              id="amount"
+              type="number"
+              step="0.01"
+              min="0"
+              max={tokenBalance}
+              placeholder="Enter amount"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              disabled={isSending}
+              className="bg-gray-800/50 border-gray-700"
+            />
+            <div className="grid grid-cols-4 gap-2 mt-2">
+              {[25, 50, 75, 100].map((percent) => (
+                <Button
+                  key={percent}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setAmount(((tokenBalance * percent) / 100).toFixed(2))}
+                  disabled={isSending}
+                  className="bg-gray-800/50 border-gray-700 hover:bg-gray-700"
+                >
+                  {percent}%
+                </Button>
+              ))}
             </div>
+            {amountNum > tokenBalance && (
+              <p className="text-sm text-destructive">Insufficient balance</p>
+            )}
           </div>
 
           {recipientAddress && amount && canSend && (

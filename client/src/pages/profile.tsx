@@ -9,6 +9,8 @@ import LiveWalletAddress from "../components/LiveWalletAddress";
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useSmartNavigation } from "../utils/navigation";
+import { Settings } from "lucide-react";
+import { SettingsMenu } from "../components/SettingsMenu";
 
 const Profile = () => {
   const { isConnected, userId, address, tokenBalance, disconnect } = useWallet();
@@ -16,6 +18,7 @@ const Profile = () => {
   const { goHome } = useSmartNavigation();
   const [showStreakCelebration, setShowStreakCelebration] = useState(false);
   const [streakCount, setStreakCount] = useState(7);
+  const [showSettings, setShowSettings] = useState(false);
 
   const handleConnect = () => {
     // Redirect to home page which has the connect wallet button
@@ -75,7 +78,15 @@ const Profile = () => {
       </div>
       
       {/* Profile Header */}
-      <Card className="bg-white rounded-lg shadow mb-6">
+      <Card className="bg-white rounded-lg shadow mb-6 relative">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute top-4 right-4"
+          onClick={() => setShowSettings(true)}
+        >
+          <Settings className="h-5 w-5 text-gray-600" />
+        </Button>
         <CardContent className="p-6 text-center">
           <div className="inline-block h-24 w-24 rounded-full overflow-hidden bg-gray-100 mb-4">
             <div className="h-full w-full bg-gray-300 flex items-center justify-center">
@@ -94,6 +105,11 @@ const Profile = () => {
           </div>
         </CardContent>
       </Card>
+      
+      <SettingsMenu 
+        isOpen={showSettings} 
+        onClose={() => setShowSettings(false)} 
+      />
       
     </div>
   );

@@ -8,12 +8,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion, AnimatePresence } from "framer-motion";
 import B3trLogo from "../components/B3trLogo";
 import { Transaction } from "../types";
-import { ExternalLink, Search, Clock, CheckCircle, AlertCircle, ArrowRight, ArrowLeft } from "lucide-react";
+import { ExternalLink, Search, Clock, CheckCircle, AlertCircle, ArrowRight, ArrowLeft, ArrowUp, ArrowDown, Wallet } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import Header from "../components/Header";
 import BottomNavigation from "../components/BottomNavigation";
 import { useToast } from "@/hooks/use-toast";
 import { vechain } from "../lib/vechain";
+import { ReceiveModal } from "../components/ReceiveModal";
+import { Link } from "wouter";
 
 // Interface for blockchain transaction details
 interface BlockchainTransaction {
@@ -51,6 +53,7 @@ const TransactionExplorer = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [transactionsPerPage] = useState(10); // Show more transactions per page
+  const [showReceiveModal, setShowReceiveModal] = useState(false);
 
   // Fetch user transactions with refetch capability
   const { 
@@ -300,6 +303,44 @@ const TransactionExplorer = () => {
           </Card>
         ) : (
           <>
+            {/* Connected Wallet Card - Mugshot Style */}
+            <Card className="mb-6 bg-white border-gray-200">
+              <CardContent className="pt-6">
+                <div className="flex flex-col items-center text-center">
+                  <div className="bg-blue-100 rounded-full p-4 mb-3">
+                    <Wallet className="h-8 w-8 text-blue-600" />
+                  </div>
+                  <h3 className="font-semibold text-lg mb-1">Connected Wallet</h3>
+                  <p className="text-sm text-gray-500 mb-4 font-mono">
+                    {formatShortAddress(address)}
+                  </p>
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="text-3xl font-bold text-gray-900">{tokenBalance}</span>
+                    <B3trLogo className="w-6 h-6" color="#38BDF8" />
+                  </div>
+                  <div className="flex gap-3">
+                    <Link href="/send">
+                      <Button 
+                        size="lg"
+                        className="rounded-full bg-cyan-500 hover:bg-cyan-600 text-white w-20 h-20 flex flex-col items-center justify-center gap-1 p-0"
+                      >
+                        <ArrowUp className="h-5 w-5" />
+                        <span className="text-xs">Send</span>
+                      </Button>
+                    </Link>
+                    <Button 
+                      size="lg"
+                      onClick={() => setShowReceiveModal(true)}
+                      className="rounded-full bg-cyan-500 hover:bg-cyan-600 text-white w-20 h-20 flex flex-col items-center justify-center gap-1 p-0"
+                    >
+                      <ArrowDown className="h-5 w-5" />
+                      <span className="text-xs">Receive</span>
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               {/* Wallet Card */}
               <Card className="bg-gray-50 border-gray-200">
@@ -817,6 +858,12 @@ const TransactionExplorer = () => {
           </>
         )}
       </div>
+      
+      <ReceiveModal 
+        address={address || ''} 
+        isOpen={showReceiveModal} 
+        onClose={() => setShowReceiveModal(false)} 
+      />
       
       <BottomNavigation isConnected={isConnected} />
     </div>
