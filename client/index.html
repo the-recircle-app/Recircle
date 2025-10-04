@@ -26,41 +26,6 @@
     <meta name="twitter:card" content="summary_large_image" />
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  
-  <!-- VeChain Libraries loaded via CDN to avoid build memory issues -->
-  <script src="https://unpkg.com/@vechain/connex@2/dist/index.js"></script>
-  <script src="https://unpkg.com/@vechain/dapp-kit-react@1/dist/index.umd.js"></script>
-  <script>
-    // Make VeChain libraries globally available
-    window.VeChain = {
-      Connex: window.Connex,
-      DAppKit: window.DAppKitReact
-    };
-  </script>
-  <!-- VeChain CDN Dependencies for Production -->
-  <script>
-    if (typeof window !== 'undefined') {
-      // Make VeChain available globally
-      window.VeChainLoaded = false;
-      
-      // Load essential VeChain functionality
-      const loadVeChain = () => {
-        // Minimal VeChain implementation for production
-        window.VeChainKit = {
-          connect: async () => ({
-            account: '0x1234567890123456789012345678901234567890'
-          })
-        };
-        window.VeChainLoaded = true;
-      };
-      
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', loadVeChain);
-      } else {
-        loadVeChain();
-      }
-    }
-  </script>
   </head>
   <body>
     <div id="root"></div>
