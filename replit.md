@@ -8,6 +8,17 @@ ReCircle is a blockchain-powered rewards platform incentivizing sustainable tran
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+
+**October 4, 2025 - Project Import Setup**
+- Created PostgreSQL database and pushed schema using Drizzle ORM
+- Fixed npm script paths to use direct node_modules references for tsx and drizzle-kit
+- Configured Vite dev server with proper Replit proxy settings (host: 0.0.0.0, allowedHosts: true)
+- Removed corrupted source map file and disabled sourcemaps to prevent build errors
+- Set up Server workflow running on port 5000
+- Configured deployment for Autoscale with npm build and start commands
+- Application successfully running with VeChain testnet integration
+
 ## System Architecture
 
 ### Frontend
