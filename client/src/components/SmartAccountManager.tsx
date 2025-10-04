@@ -142,30 +142,37 @@ export default function SmartAccountManager() {
         });
       }
       
-      // Sync the smart account address to our WalletContext
-      // DISABLED: Smart account auto-creation causing wallet mismatch issues
-      // Users expect tokens to go to their actual VeWorld wallet, not derived smart accounts
-      console.log('[SMART-ACCOUNT] Smart account available but NOT auto-connecting to preserve user wallet choice');
-      console.log('[SMART-ACCOUNT] Smart account address:', derivedSmartAccountAddress);
-      console.log('[SMART-ACCOUNT] User EOA address (VeWorld wallet):', kitAccount?.address);
+      // Determine which address to use based on wallet source
+      const walletSource = (kitAccount as any)?.source || 'unknown';
+      const isPrivyUser = walletSource === 'privy' || walletSource === 'embedded';
       
-      // Use the EOA address (user's actual VeWorld wallet) instead of smart account
-      if (kitAccount?.address && kitAccount.address !== appAddress) {
-        console.log('[SMART-ACCOUNT] Using user EOA wallet instead of smart account:', kitAccount.address);
+      console.log('[SMART-ACCOUNT] Wallet source detected:', walletSource);
+      console.log('[SMART-ACCOUNT] Smart account address:', derivedSmartAccountAddress);
+      console.log('[SMART-ACCOUNT] EOA address:', kitAccount?.address);
+      console.log('[SMART-ACCOUNT] Is Privy user:', isPrivyUser);
+      
+      // Privy users MUST use smart account address (EOA can't sign transactions)
+      // VeWorld users should use their EOA (actual wallet address)
+      const addressToUse = isPrivyUser ? derivedSmartAccountAddress : kitAccount?.address;
+      const walletType = isPrivyUser ? 'smart-account' : 'veworld';
+      
+      if (addressToUse && addressToUse !== appAddress) {
+        console.log(`[SMART-ACCOUNT] Connecting with ${isPrivyUser ? 'smart account' : 'EOA'} address:`, addressToUse);
         
-        // Connect using the user's actual VeWorld wallet (EOA)
-        const success = await appConnect('veworld', kitAccount.address, {
+        const success = await appConnect(walletType, addressToUse, {
           skipCelebration: true
         });
         
         if (!success) {
-          console.error('[SMART-ACCOUNT] Failed to sync smart account to app context');
+          console.error('[SMART-ACCOUNT] Failed to sync account to app context');
           
           toast({
-            title: "Smart Account Sync Failed",
-            description: "Could not sync smart account with app. Please try reconnecting.",
+            title: "Account Sync Failed",
+            description: "Could not sync your account with the app. Please try reconnecting.",
             variant: "destructive"
           });
+        } else {
+          console.log('[SMART-ACCOUNT] Successfully synced account to app context');
         }
       }
       
