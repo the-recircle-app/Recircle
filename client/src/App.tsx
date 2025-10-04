@@ -23,6 +23,7 @@ import TransactionExplorer from "./pages/transactions";
 import JoinWithReferral from "./pages/join-with-referral";
 import Redeem from "./pages/redeem";
 import ModernRedeem from "./pages/redeem-modern";
+import SendB3TR from "./pages/send";
 import LogoShowcase from "./pages/logo-showcase";
 import PendingSubmissionsAdmin from "./pages/admin/pending-submissions";
 import TestAutoConnect from "./pages/test-auto-connect";
@@ -72,6 +73,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Welcome} />
       <Route path="/home" component={Home} />
+      <Route path="/send" component={SendB3TR} />
       <Route path="/connect-wallet" component={ConnectWallet} />
       <Route path="/join" component={JoinWithReferral} />
       <Route path="/logo-showcase" component={LogoShowcase} />
