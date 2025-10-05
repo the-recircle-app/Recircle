@@ -24,6 +24,7 @@ import JoinWithReferral from "./pages/join-with-referral";
 import Redeem from "./pages/redeem";
 import ModernRedeem from "./pages/redeem-modern";
 import SendB3TR from "./pages/send";
+import GiftCards from "./pages/gift-cards";
 import LogoShowcase from "./pages/logo-showcase";
 import PendingSubmissionsAdmin from "./pages/admin/pending-submissions";
 import TestAutoConnect from "./pages/test-auto-connect";
@@ -138,6 +139,11 @@ function Router() {
       <Route path="/transactions">
         <ProtectedRoute>
           <TransactionExplorer />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/gift-cards">
+        <ProtectedRoute>
+          <GiftCards />
         </ProtectedRoute>
       </Route>
       <Route path="/rewards">

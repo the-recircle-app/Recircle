@@ -1,5 +1,3 @@
-const Tremendous = require('tremendous');
-
 const TREMENDOUS_API_KEY = process.env.TREMENDOUS_API_KEY;
 const IS_SANDBOX = TREMENDOUS_API_KEY?.startsWith('TEST_');
 
@@ -7,13 +5,11 @@ if (!TREMENDOUS_API_KEY) {
   throw new Error('TREMENDOUS_API_KEY environment variable is required');
 }
 
-const tremendous = new Tremendous(TREMENDOUS_API_KEY, {
-  baseUrl: IS_SANDBOX 
-    ? 'https://testflight.tremendous.com/api/v2'
-    : 'https://api.tremendous.com/api/v2'
-});
+const BASE_URL = IS_SANDBOX 
+  ? 'https://testflight.tremendous.com/api/v2'
+  : 'https://api.tremendous.com/api/v2';
 
-console.log(`[TREMENDOUS] Initialized in ${IS_SANDBOX ? 'SANDBOX' : 'PRODUCTION'} mode`);
+console.log(`[TREMENDOUS] Initialized in ${IS_SANDBOX ? 'SANDBOX' : 'PRODUCTION'} mode with base URL: ${BASE_URL}`);
 
 export interface GiftCardProduct {
   id: string;
@@ -43,11 +39,29 @@ export interface TremendousOrderResult {
   deliveryDetails: any;
 }
 
+async function tremendousRequest(path: string, options: RequestInit = {}) {
+  const response = await fetch(`${BASE_URL}${path}`, {
+    ...options,
+    headers: {
+      'Authorization': `Bearer ${TREMENDOUS_API_KEY}`,
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Tremendous API error (${response.status}): ${errorText}`);
+  }
+
+  return response.json();
+}
+
 export async function getCatalog(): Promise<GiftCardProduct[]> {
   try {
     console.log('[TREMENDOUS] Fetching gift card catalog...');
     
-    const response = await tremendous.products.list();
+    const response = await tremendousRequest('/products');
     
     const products: GiftCardProduct[] = response.products.map((product: any) => ({
       id: product.id,
@@ -101,7 +115,10 @@ export async function createOrder(params: CreateOrderParams): Promise<Tremendous
       ],
     };
 
-    const response = await tremendous.orders.create(orderData);
+    const response = await tremendousRequest('/orders', {
+      method: 'POST',
+      body: JSON.stringify(orderData),
+    });
 
     const order = response.order;
     const reward = order.rewards?.[0];
@@ -128,12 +145,10 @@ export async function createOrder(params: CreateOrderParams): Promise<Tremendous
 
 export async function getOrderStatus(orderId: string): Promise<any> {
   try {
-    const response = await tremendous.orders.get(orderId);
+    const response = await tremendousRequest(`/orders/${orderId}`);
     return response.order;
   } catch (error: any) {
     console.error('[TREMENDOUS] Error fetching order status:', error);
     throw new Error(`Failed to fetch order status: ${error.message}`);
   }
 }
-
-export { tremendous };

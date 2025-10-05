@@ -260,6 +260,24 @@ const Home = () => {
           />
           
 
+          {/* Redeem Gift Cards */}
+          <ActivityCard
+            title="Redeem Gift Cards"
+            description="Spend B3TR tokens on Amazon, Visa, Starbucks & more gift cards"
+            icon={
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#EC4899" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="5" width="20" height="14" rx="2" />
+                <line x1="2" y1="10" x2="22" y2="10" />
+              </svg>
+            }
+            color="#EC4899"
+            path="/gift-cards"
+            showReward={false}
+            onClick={isConnected ? undefined : () => {
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
+
           {/* Invite Friend */}
           <ActivityCard
             title="Invite a Friend"
