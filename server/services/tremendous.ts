@@ -63,20 +63,43 @@ export async function getCatalog(): Promise<GiftCardProduct[]> {
     
     const response = await tremendousRequest('/products');
     
-    const products: GiftCardProduct[] = response.products.map((product: any) => ({
-      id: product.id,
-      name: product.name,
-      description: product.description || '',
-      category: product.category || 'gift_card',
-      countries: product.countries || ['US'],
-      currencies: product.currencies || ['USD'],
-      minAmount: product.min_price?.amount || 5,
-      maxAmount: product.max_price?.amount || 500,
-      imageUrl: product.image_url,
-    }));
+    const englishSpeakingCountries = ['US', 'GB', 'CA', 'AU', 'NZ'];
+    const englishCurrencies = ['USD', 'GBP', 'CAD', 'AUD', 'NZD'];
+    
+    const allProducts: GiftCardProduct[] = response.products
+      .map((product: any) => {
+        const countryAbbrs = product.countries?.map((c: any) => c.abbr) || [];
+        const currencyCodes = product.currency_codes || [];
+        const skus = product.skus || [];
+        
+        const minAmount = skus.length > 0 ? Math.min(...skus.map((s: any) => s.min)) : 5;
+        const maxAmount = skus.length > 0 ? Math.max(...skus.map((s: any) => s.max)) : 500;
+        
+        return {
+          id: product.id,
+          name: product.name,
+          description: product.description || '',
+          category: product.category || 'gift_card',
+          countries: countryAbbrs,
+          currencies: currencyCodes,
+          minAmount,
+          maxAmount,
+          imageUrl: product.images?.find((img: any) => img.type === 'card')?.src || '',
+        };
+      })
+      .filter((product: GiftCardProduct) => {
+        const hasEnglishCountry = product.countries.some(c => 
+          englishSpeakingCountries.includes(c)
+        );
+        const hasEnglishCurrency = product.currencies.some(c => 
+          englishCurrencies.includes(c)
+        );
+        
+        return hasEnglishCountry || hasEnglishCurrency;
+      });
 
-    console.log(`[TREMENDOUS] ✅ Fetched ${products.length} products`);
-    return products;
+    console.log(`[TREMENDOUS] ✅ Fetched ${response.products.length} products, filtered to ${allProducts.length} for English-speaking markets`);
+    return allProducts;
 
   } catch (error: any) {
     console.error('[TREMENDOUS] Error fetching catalog:', error);
