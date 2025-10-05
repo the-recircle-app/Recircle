@@ -10,6 +10,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+**October 5, 2025 - VeWorld-Only Platform Access**
+- Implemented browser/platform detection to identify VeWorld app vs desktop/mobile browsers
+- Created VeWorldRequiredMessage component with app store links and setup instructions
+- Updated welcome page to show VeWorld requirement for non-VeWorld users (desktop/mobile browsers)
+- VeWorld app users continue to access the app normally with no changes
+- Decision: Focused on VeWorld-only approach after identifying Privy embedded wallet incompatibility with VeChain Kit v2
+- Platform detection checks user agent for VeWorld/Sync2 keywords and Connex availability
+- Future revenue strategy: Gift card marketplace where users spend B3TR tokens
+
 **October 5, 2025 - Ethers v6 Compatibility Fix**
 - Fixed VTHO balance endpoint bug: replaced ethers.utils.formatUnits with ethers v6 formatUnits import
 - Updated deploy-b3tr-to-solo.js to use ethers v6 formatEther syntax
@@ -58,7 +67,8 @@ Preferred communication style: Simple, everyday language.
 - **Network**: VeChain Thor blockchain (testnet/mainnet ready)
 - **Token**: B3TR tokens distributed via VeBetterDAO
 - **Distribution Model**: 70% to users, 30% to app fund (both via VeBetterDAO treasury system)
-- **Wallet Support**: VeWorld wallet integration via Connex SDK
+- **Wallet Support**: VeWorld wallet ONLY - Desktop/mobile browser users are guided to download VeWorld app
+- **Platform Detection**: Automatic detection of VeWorld app vs regular browsers with friendly guidance
 - **Smart Fee Delegation**: Strategic transaction sponsoring via VeChain Energy with conditional VTHO balance checks based on user VTHO balance thresholds (e.g., newcomers < 5 VTHO, low balance < 10 VTHO).
 
 ### Key Features
