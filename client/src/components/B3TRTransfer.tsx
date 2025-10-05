@@ -91,6 +91,7 @@ export function B3TRTransfer({
     isTransactionPending, 
     error 
   } = useSendTransaction({
+    clauses,
     signerAccountAddress: account?.address,
   });
   
@@ -130,13 +131,13 @@ export function B3TRTransfer({
       amount,
       vthoBalance: vthoBalance || 'checking...',
       feeDelegation: willDelegate ? '✅ ENABLED - VeChain Energy will sponsor' : '❌ DISABLED - User pays own gas',
+      walletType: account ? 'Connected' : 'None',
       clauses
     });
     
     try {
-      const txResult = await sendTransaction(clauses);
+      await sendTransaction();
       console.log('[B3TR-TRANSFER] ✅ Transaction submitted successfully!', {
-        result: txResult,
         feeDelegation: willDelegate ? 'SPONSORED by VeChain Energy' : 'SELF-PAID by user'
       });
     } catch (err) {
