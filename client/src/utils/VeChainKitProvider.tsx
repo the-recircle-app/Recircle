@@ -19,12 +19,18 @@ export function VeChainKitProviderWrapper({ children }: Props) {
   });
 
 
+  console.log('[VIP-191] Fee Delegation Configuration:', {
+    delegatorUrl: config.sponsorUrl,
+    mode: 'AUTO - Social login users only',
+    sponsor: 'VeChain Energy',
+    note: 'VeWorld users pay their own gas; Privy users get sponsored'
+  });
+
   return (
     <VeChainKitProvider
       feeDelegation={{
         delegatorUrl: config.sponsorUrl,
-        // Strategic fee delegation - only for users who need it
-        delegateAllTransactions: false, // We'll handle sponsoring decisions server-side
+        delegateAllTransactions: false,
       }}
       loginMethods={
         (privyAppId && privyClientId)

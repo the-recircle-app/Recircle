@@ -342,6 +342,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // VTHO Balance endpoint for fee delegation decisions
+  app.get("/api/vtho-balance/:address", generalRateLimit, async (req: Request, res: Response) => {
+    try {
+      const { address } = req.params;
+      
+      if (!address || !/^0x[a-fA-F0-9]{40}$/.test(address)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid VeChain address format" 
+        });
+      }
+
+      const { Framework } = await import('@vechain/connex-framework');
+      const { Driver, SimpleNet } = await import('@vechain/connex-driver');
+      
+      const thorEndpoints = [
+        'https://vethor-node-test.vechaindev.com',
+        'https://testnet.veblocks.net',
+      ];
+      
+      const net = new SimpleNet(thorEndpoints[0]);
+      const driver = await Driver.connect(net);
+      const connex = new Framework(driver);
+      
+      const accountInfo = await connex.thor.account(address).get();
+      const vthoWei = accountInfo.energy;
+      const vthoFormatted = ethers.utils.formatUnits(vthoWei, 18);
+      
+      console.log('[VTHO-BALANCE] Address:', address, 'VTHO:', vthoFormatted);
+      
+      res.json({
+        success: true,
+        address,
+        vtho: vthoFormatted,
+        vthoWei: vthoWei,
+        needsDelegation: parseFloat(vthoFormatted) < 10
+      });
+      
+    } catch (error) {
+      console.error('Error fetching VTHO balance:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Error retrieving VTHO balance",
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
   // Receipt Image Viewing Endpoint for Manual Review
   app.get("/api/receipt-image/:receiptId", authRateLimit, requireAuth, requireReceiptAccess, async (req: Request, res: Response) => {
     try {

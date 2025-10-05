@@ -1,4 +1,4 @@
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { useWallet, useSendTransaction } from '@vechain/vechain-kit';
 import { Interface } from '@ethersproject/abi';
 import { parseUnits } from '@ethersproject/units';
@@ -39,6 +39,32 @@ export function B3TRTransfer({
   children 
 }: B3TRTransferProps) {
   const { account } = useWallet();
+  const [vthoBalance, setVthoBalance] = useState<string | null>(null);
+  
+  useEffect(() => {
+    async function checkVTHOBalance() {
+      if (!account?.address) return;
+      
+      try {
+        const response = await fetch(`/api/vtho-balance/${account.address}`);
+        if (response.ok) {
+          const data = await response.json();
+          setVthoBalance(data.vtho);
+          
+          console.log('[FEE-DELEGATION] VTHO Balance Check:', {
+            address: account.address,
+            vthoBalance: data.vtho,
+            willUseDelegation: parseFloat(data.vtho) < 10 ? 'YES - VeChain Energy VIP-191' : 'NO - User pays own gas',
+            threshold: '10 VTHO'
+          });
+        }
+      } catch (error) {
+        console.error('[FEE-DELEGATION] Failed to fetch VTHO balance:', error);
+      }
+    }
+    
+    checkVTHOBalance();
+  }, [account?.address]);
   
   const clauses = useMemo(() => {
     if (!recipientAddress || !amount) return [];
@@ -96,17 +122,25 @@ export function B3TRTransfer({
       return;
     }
     
-    console.log('[B3TR-TRANSFER] Initiating transfer:', {
+    const willDelegate = vthoBalance && parseFloat(vthoBalance) < 10;
+    
+    console.log('[B3TR-TRANSFER] 🚀 Initiating VIP-191 Transfer:', {
       from: account.address,
       to: recipientAddress,
       amount,
+      vthoBalance: vthoBalance || 'checking...',
+      feeDelegation: willDelegate ? '✅ ENABLED - VeChain Energy will sponsor' : '❌ DISABLED - User pays own gas',
       clauses
     });
     
     try {
-      await sendTransaction(clauses);
+      const txResult = await sendTransaction(clauses);
+      console.log('[B3TR-TRANSFER] ✅ Transaction submitted successfully!', {
+        result: txResult,
+        feeDelegation: willDelegate ? 'SPONSORED by VeChain Energy' : 'SELF-PAID by user'
+      });
     } catch (err) {
-      console.error('[B3TR-TRANSFER] Send failed:', err);
+      console.error('[B3TR-TRANSFER] ❌ Transaction failed:', err);
       if (onError) onError(err as Error);
     }
   };
