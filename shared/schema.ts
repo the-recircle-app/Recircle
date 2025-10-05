@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, doublePrecision, index } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, doublePrecision, index, unique } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -212,6 +212,7 @@ export const giftCardOrders = pgTable("gift_card_orders", {
 }, (table) => ({
   userIdIdx: index("gift_card_orders_user_id_idx").on(table.userId),
   statusIdx: index("gift_card_orders_status_idx").on(table.status),
+  userTxHashUnique: unique("gift_card_orders_user_tx_hash_unique").on(table.userTxHash),
 }));
 
 export const insertGiftCardOrderSchema = createInsertSchema(giftCardOrders)

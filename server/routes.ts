@@ -6649,25 +6649,152 @@ app.post("/api/treasury/test-distribution", async (req: Request, res: Response) 
 
   app.post('/api/gift-cards/purchase', requireAuth, receiptSubmissionRateLimit, async (req: Request, res: Response) => {
     try {
-      const { productId, productName, amount, currency, email, userWalletAddress } = req.body;
+      const { productId, productName, amount, currency, email, txHash } = req.body;
 
-      if (!productId || !amount || !email || !userWalletAddress) {
+      if (!productId || !amount || !email || !txHash) {
         return res.status(400).json({
           success: false,
-          error: 'Missing required fields: productId, amount, email, userWalletAddress',
+          error: 'Missing required fields: productId, amount, email, txHash',
         });
       }
 
-      const priceUSD = await getB3TRPriceUSD();
+      // CRITICAL: Get authenticated user's wallet address from database, not request body
+      const authenticatedUserWallet = req.user!.walletAddress;
+      if (!authenticatedUserWallet) {
+        return res.status(400).json({
+          success: false,
+          error: 'No wallet address associated with your account. Please connect your wallet first.',
+        });
+      }
+
       const pricing = calculateB3TRAmount(amount, undefined);
+      const expectedB3TRAmount = pricing.b3trAmount;
+
+      console.log(`[GIFT-CARD-PURCHASE] Verifying payment for ${expectedB3TRAmount} B3TR (txHash: ${txHash})`);
+
+      // CRITICAL: Check for replay attacks - ensure txHash hasn't been used before
+      const existingOrder = await storage.db.select()
+        .from(giftCardOrders)
+        .where(eq(giftCardOrders.userTxHash, txHash))
+        .limit(1);
+
+      if (existingOrder.length > 0) {
+        return res.status(400).json({
+          success: false,
+          error: 'This transaction has already been used for a gift card purchase.',
+        });
+      }
+
+      // Verify the B3TR payment on-chain
+      try {
+        const thorClient = PierreContractsService.getThorClient();
+        const B3TR_CONTRACT = process.env.B3TR_CONTRACT_ADDRESS || '0xbf64cf86894Ee0877C4e7d03936e35Ee8D8b864F';
+        
+        // Get the transaction from blockchain
+        console.log(`[GIFT-CARD-PURCHASE] Fetching transaction ${txHash} from blockchain...`);
+        const txReceipt = await thorClient.transactions.getTransactionReceipt(txHash);
+        
+        if (!txReceipt) {
+          return res.status(400).json({
+            success: false,
+            error: 'Transaction not found on blockchain. Please wait for confirmation and try again.',
+          });
+        }
+
+        // Check if transaction was successful
+        if (txReceipt.reverted) {
+          return res.status(400).json({
+            success: false,
+            error: 'Transaction was reverted on blockchain.',
+          });
+        }
+
+        // Get the transaction details to verify the transfer
+        const tx = await thorClient.transactions.getTransaction(txHash);
+        if (!tx || !tx.clauses || tx.clauses.length === 0) {
+          return res.status(400).json({
+            success: false,
+            error: 'Invalid transaction structure.',
+          });
+        }
+
+        // Verify the transfer was to B3TR contract and to APP_FUND_WALLET
+        const clause = tx.clauses[0];
+        if (clause.to?.toLowerCase() !== B3TR_CONTRACT.toLowerCase()) {
+          return res.status(400).json({
+            success: false,
+            error: 'Transaction is not a B3TR token transfer.',
+          });
+        }
+
+        // Decode the transfer data (ERC20 transfer function signature: 0xa9059cbb)
+        const transferSignature = '0xa9059cbb';
+        if (!clause.data?.startsWith(transferSignature)) {
+          return res.status(400).json({
+            success: false,
+            error: 'Transaction is not a transfer.',
+          });
+        }
+
+        // Extract recipient and amount from transfer data
+        const data = clause.data.slice(10); // Remove '0xa9059cbb'
+        const recipient = '0x' + data.slice(24, 64); // Extract address (32 bytes, last 20 bytes are address)
+        const amountHex = '0x' + data.slice(64, 128); // Extract amount (32 bytes)
+        const transferredAmount = parseFloat(formatUnits(BigInt(amountHex), 18));
+
+        console.log(`[GIFT-CARD-PURCHASE] Transaction details:`, {
+          sender: tx.origin,
+          recipient,
+          transferredAmount,
+          expectedSender: authenticatedUserWallet.toLowerCase(),
+          expectedRecipient: APP_FUND_WALLET.toLowerCase(),
+          expectedAmount: expectedB3TRAmount,
+        });
+
+        // CRITICAL: Verify the sender matches the authenticated user's wallet
+        if (tx.origin.toLowerCase() !== authenticatedUserWallet.toLowerCase()) {
+          return res.status(400).json({
+            success: false,
+            error: `Transaction sender (${tx.origin}) does not match your authenticated wallet address.`,
+          });
+        }
+
+        // Verify recipient is APP_FUND_WALLET
+        if (recipient.toLowerCase() !== APP_FUND_WALLET.toLowerCase()) {
+          return res.status(400).json({
+            success: false,
+            error: `Payment must be sent to ${APP_FUND_WALLET}, but was sent to ${recipient}.`,
+          });
+        }
+
+        // Verify amount matches (with 0.01 tolerance for rounding)
+        const tolerance = 0.01;
+        if (Math.abs(transferredAmount - expectedB3TRAmount) > tolerance) {
+          return res.status(400).json({
+            success: false,
+            error: `Payment amount mismatch. Expected ${expectedB3TRAmount} B3TR, received ${transferredAmount} B3TR.`,
+          });
+        }
+
+        console.log(`[GIFT-CARD-PURCHASE] ✅ Payment verified: ${transferredAmount} B3TR from ${tx.origin} to ${recipient}`);
+
+      } catch (verifyError: any) {
+        console.error('[GIFT-CARD-PURCHASE] Payment verification failed:', verifyError);
+        return res.status(400).json({
+          success: false,
+          error: `Payment verification failed: ${verifyError.message}`,
+        });
+      }
 
       const externalId = `recircle_${req.user!.id}_${Date.now()}`;
 
+      // Create order record with verified payment
       const orderRecord = await storage.db.insert(giftCardOrders).values({
         userId: req.user!.id,
         userEmail: email,
-        userWalletAddress,
+        userWalletAddress: authenticatedUserWallet,
         appWalletAddress: APP_FUND_WALLET,
+        userTxHash: txHash,
         giftCardSku: productId,
         giftCardName: productName || 'Gift Card',
         usdAmount: amount,
@@ -6713,15 +6840,23 @@ app.post("/api/treasury/test-distribution", async (req: Request, res: Response) 
         });
 
       } catch (error: any) {
+        console.error('[GIFT-CARD-PURCHASE] Tremendous order failed after payment verified:', error);
+        
+        // IMPORTANT: Payment was already verified and received
+        // Mark as failed but note that refund may be needed
         await storage.db.update(giftCardOrders)
           .set({
             status: 'failed',
-            failureReason: error.message,
+            failureReason: `Tremendous order failed: ${error.message}. Payment received, manual refund may be required.`,
             updatedAt: new Date(),
           })
           .where(eq(giftCardOrders.id, order.id));
 
-        throw error;
+        return res.status(500).json({
+          success: false,
+          error: 'Gift card order failed. Payment was received. Please contact support for refund.',
+          orderId: order.id,
+        });
       }
 
     } catch (error: any) {

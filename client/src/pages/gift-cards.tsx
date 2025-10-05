@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Gift, CreditCard, CheckCircle, Clock, XCircle, Search } from "lucide-react";
 import LiveB3TRBalance from "../components/LiveB3TRBalance";
 import B3trLogo from "../components/B3trLogo";
+import { B3TRTransfer } from "../components/B3TRTransfer";
 import { formatDistanceToNow } from "date-fns";
 
 interface GiftCardProduct {
@@ -40,6 +41,8 @@ export default function GiftCards() {
   const [purchaseModalOpen, setPurchaseModalOpen] = useState(false);
   const [amount, setAmount] = useState("");
   const [email, setEmail] = useState("");
+  const [isPaymentStep, setIsPaymentStep] = useState(false);
+  const [paymentTxHash, setPaymentTxHash] = useState<string | null>(null);
   
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -104,6 +107,8 @@ export default function GiftCards() {
       setAmount("");
       setEmail("");
       setSelectedProduct(null);
+      setIsPaymentStep(false);
+      setPaymentTxHash(null);
       queryClient.invalidateQueries({ queryKey: ['/api/gift-cards/orders'] });
     },
     onError: (error: Error) => {
@@ -112,6 +117,7 @@ export default function GiftCards() {
         description: error.message,
         variant: "destructive",
       });
+      setIsPaymentStep(false);
     },
   });
 
@@ -145,14 +151,37 @@ export default function GiftCards() {
       return;
     }
 
-    purchaseMutation.mutate({
-      productId: selectedProduct.id,
-      productName: selectedProduct.name,
-      amount: amountNum,
-      currency: 'USD',
-      email,
-      userWalletAddress: account.address,
+    // Move to payment step
+    setIsPaymentStep(true);
+  };
+
+  const handlePaymentSuccess = (txId: string) => {
+    console.log('[GIFT-CARD] Payment successful, txId:', txId);
+    setPaymentTxHash(txId);
+    
+    // Now call the purchase API with the transaction hash
+    // Backend verifies payment using authenticated user's wallet from database
+    if (selectedProduct && amount && email) {
+      const amountNum = parseFloat(amount);
+      purchaseMutation.mutate({
+        productId: selectedProduct.id,
+        productName: selectedProduct.name,
+        amount: amountNum,
+        currency: 'USD',
+        email,
+        txHash: txId,
+      });
+    }
+  };
+
+  const handlePaymentError = (error: Error) => {
+    console.error('[GIFT-CARD] Payment failed:', error);
+    toast({
+      title: "Payment failed",
+      description: error.message || "B3TR transfer failed. Please try again.",
+      variant: "destructive",
     });
+    setIsPaymentStep(false);
   };
 
   const calculateB3TRCost = (usdAmount: number): number => {
@@ -348,81 +377,145 @@ export default function GiftCards() {
         </Tabs>
       </div>
 
-      <Dialog open={purchaseModalOpen} onOpenChange={setPurchaseModalOpen}>
+      <Dialog open={purchaseModalOpen} onOpenChange={(open) => {
+        setPurchaseModalOpen(open);
+        if (!open) {
+          setIsPaymentStep(false);
+          setPaymentTxHash(null);
+        }
+      }}>
         <DialogContent className="bg-gray-800 text-white border-gray-700">
           <DialogHeader>
             <DialogTitle>Redeem {selectedProduct?.name}</DialogTitle>
             <DialogDescription className="text-gray-400">
-              Enter the amount and your email to receive the gift card
+              {isPaymentStep ? 'Confirm payment in your VeWorld wallet' : 'Enter the amount and your email to receive the gift card'}
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="amount" className="block text-sm font-medium mb-1">Gift Card Amount (USD)</label>
-              <Input
-                id="amount"
-                type="number"
-                placeholder={`${selectedProduct?.minAmount} - ${selectedProduct?.maxAmount}`}
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                min={selectedProduct?.minAmount}
-                max={selectedProduct?.maxAmount}
-                className="bg-gray-700 border-gray-600 text-white"
-              />
-            </div>
+          {!isPaymentStep ? (
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="amount" className="block text-sm font-medium mb-1">Gift Card Amount (USD)</label>
+                <Input
+                  id="amount"
+                  type="number"
+                  placeholder={`${selectedProduct?.minAmount} - ${selectedProduct?.maxAmount}`}
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  min={selectedProduct?.minAmount}
+                  max={selectedProduct?.maxAmount}
+                  className="bg-gray-700 border-gray-600 text-white"
+                />
+              </div>
 
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium mb-1">Email Address</label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="your@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="bg-gray-700 border-gray-600 text-white"
-              />
-              <p className="text-xs text-gray-500 mt-1">Gift card will be sent to this email</p>
-            </div>
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium mb-1">Email Address</label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="your@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="bg-gray-700 border-gray-600 text-white"
+                />
+                <p className="text-xs text-gray-500 mt-1">Gift card will be sent to this email</p>
+              </div>
 
-            {amount && parseFloat(amount) >= (selectedProduct?.minAmount || 0) && (
-              <div className="bg-gray-700 rounded-lg p-3 space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-400">Gift Card Value:</span>
-                  <span className="text-white">${parseFloat(amount).toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-400">Markup:</span>
-                  <span className="text-white">${catalogData?.markupUsd.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-sm font-bold border-t border-gray-600 pt-2">
-                  <span className="text-gray-300">B3TR Cost:</span>
-                  <div className="flex items-center gap-1">
-                    <span className="text-blue-400">{calculateB3TRCost(parseFloat(amount)).toFixed(2)}</span>
-                    <B3trLogo className="w-4 h-4" color="#38BDF8" />
+              {amount && parseFloat(amount) >= (selectedProduct?.minAmount || 0) && (
+                <div className="bg-gray-700 rounded-lg p-3 space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-400">Gift Card Value:</span>
+                    <span className="text-white">${parseFloat(amount).toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-400">Markup:</span>
+                    <span className="text-white">${catalogData?.markupUsd.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm font-bold border-t border-gray-600 pt-2">
+                    <span className="text-gray-300">B3TR Cost:</span>
+                    <div className="flex items-center gap-1">
+                      <span className="text-blue-400">{calculateB3TRCost(parseFloat(amount)).toFixed(2)}</span>
+                      <B3trLogo className="w-4 h-4" color="#38BDF8" />
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
-
-            <Button
-              onClick={handlePurchase}
-              disabled={purchaseMutation.isPending || !amount || !email}
-              className="w-full bg-pink-600 hover:bg-pink-700"
-            >
-              {purchaseMutation.isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                <>
-                  <CreditCard className="mr-2 h-4 w-4" />
-                  Confirm Purchase
-                </>
               )}
-            </Button>
-          </div>
+
+              <Button
+                onClick={handlePurchase}
+                disabled={!amount || !email}
+                className="w-full bg-pink-600 hover:bg-pink-700"
+              >
+                <CreditCard className="mr-2 h-4 w-4" />
+                Continue to Payment
+              </Button>
+            </div>
+          ) : (
+            <B3TRTransfer
+              recipientAddress={process.env.VITE_APP_FUND_WALLET || '0x119761865b79bea9e7924edaa630942322ca09d1'}
+              amount={calculateB3TRCost(parseFloat(amount || '0')).toString()}
+              onSuccess={handlePaymentSuccess}
+              onError={handlePaymentError}
+            >
+              {({ sendTransfer, isPending, error, txReceipt }) => (
+                <div className="space-y-4">
+                  <div className="bg-gray-700 rounded-lg p-4 space-y-3">
+                    <h4 className="font-semibold text-white">Payment Required</h4>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Gift Card:</span>
+                        <span className="text-white">${parseFloat(amount || '0').toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Markup:</span>
+                        <span className="text-white">${catalogData?.markupUsd.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between font-bold border-t border-gray-600 pt-2">
+                        <span className="text-gray-300">B3TR Payment:</span>
+                        <div className="flex items-center gap-1">
+                          <span className="text-blue-400">{calculateB3TRCost(parseFloat(amount || '0')).toFixed(2)}</span>
+                          <B3trLogo className="w-4 h-4" color="#38BDF8" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {!txReceipt && (
+                    <Button
+                      onClick={sendTransfer}
+                      disabled={isPending || purchaseMutation.isPending}
+                      className="w-full bg-pink-600 hover:bg-pink-700"
+                    >
+                      {isPending ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Waiting for wallet confirmation...
+                        </>
+                      ) : (
+                        <>
+                          <CreditCard className="mr-2 h-4 w-4" />
+                          Pay with B3TR
+                        </>
+                      )}
+                    </Button>
+                  )}
+
+                  {purchaseMutation.isPending && (
+                    <div className="flex items-center justify-center gap-2 text-sm text-gray-400">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Creating your gift card order...
+                    </div>
+                  )}
+
+                  {error && !txReceipt && (
+                    <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-sm text-red-400">
+                      Payment failed. Please try again.
+                    </div>
+                  )}
+                </div>
+              )}
+            </B3TRTransfer>
+          )}
         </DialogContent>
       </Dialog>
 
