@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useWallet } from "../context/WalletContext";
+import { useWallet as useVeChainKitWallet } from "@vechain/vechain-kit";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,16 +34,16 @@ interface BlockchainTransaction {
 
 const TransactionExplorer = () => {
   const { userId, address, isConnected, tokenBalance, refreshTokenBalance } = useWallet();
+  const { account: kitAccount } = useVeChainKitWallet();
   const { toast } = useToast();
 
-  // Helper function for safe address display
-  const getConnectedAddress = () => {
-    return address || localStorage.getItem('walletAddress') || '';
-  };
+  // CRITICAL FIX: Use VeChain Kit's account address for display (EOA for VeWorld)
+  // This is what the home page WalletButton uses internally
+  const displayAddress = kitAccount?.address || address;
 
   // Helper function for safe short address display
   const formatShortAddress = (addr?: string) => {
-    const safeAddr = addr || getConnectedAddress();
+    const safeAddr = addr || displayAddress;
     return (safeAddr && safeAddr.length >= 14) 
       ? `${safeAddr.substring(0, 8)}...${safeAddr.substring(safeAddr.length - 6)}` 
       : safeAddr || '';
@@ -312,7 +313,7 @@ const TransactionExplorer = () => {
                   </div>
                   <h3 className="font-semibold text-lg mb-1">Connected Wallet</h3>
                   <p className="text-sm text-gray-500 mb-4 font-mono">
-                    {formatShortAddress(address)}
+                    {formatShortAddress(displayAddress)}
                   </p>
                   <div className="flex items-center gap-2 mb-4">
                     <span className="text-3xl font-bold text-gray-900">{tokenBalance}</span>
@@ -355,7 +356,7 @@ const TransactionExplorer = () => {
                     </div>
                     <h3 className="font-medium text-lg">Connected Wallet</h3>
                     <p className="text-sm text-gray-500 break-all text-center mt-1 mb-2">
-                      {formatShortAddress(address)}
+                      {formatShortAddress(displayAddress)}
                     </p>
                     <div className="flex items-center text-primary mt-2 text-lg font-bold">
                       {tokenBalance} <B3trLogo className="w-5 h-5 ml-1" color="#38BDF8" />
@@ -860,7 +861,7 @@ const TransactionExplorer = () => {
       </div>
       
       <ReceiveModal 
-        address={address || ''} 
+        address={displayAddress || ''} 
         isOpen={showReceiveModal} 
         onClose={() => setShowReceiveModal(false)} 
       />
