@@ -174,6 +174,52 @@ export const insertReceiptImageSchema = createInsertSchema(receiptImages)
 export type InsertReceiptImage = z.infer<typeof insertReceiptImageSchema>;
 export type ReceiptImage = typeof receiptImages.$inferSelect;
 
+// Gift card orders table for tracking Tremendous purchases
+export const giftCardOrders = pgTable("gift_card_orders", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  userEmail: text("user_email").notNull(), // Email where gift card is sent
+  userWalletAddress: text("user_wallet_address").notNull(), // User's wallet that sent B3TR
+  appWalletAddress: text("app_wallet_address").notNull(), // App fund wallet that received B3TR
+  
+  // Gift card details
+  giftCardSku: text("gift_card_sku").notNull(), // Tremendous product ID
+  giftCardName: text("gift_card_name").notNull(), // e.g., "Amazon.com Gift Card"
+  usdAmount: doublePrecision("usd_amount").notNull(), // Face value of gift card
+  
+  // Pricing details
+  markupUsd: doublePrecision("markup_usd").notNull(), // App markup ($1.50-2.00)
+  totalUsd: doublePrecision("total_usd").notNull(), // usdAmount + markupUsd
+  b3trAmount: doublePrecision("b3tr_amount").notNull(), // B3TR tokens charged
+  b3trPriceAtPurchase: doublePrecision("b3tr_price_at_purchase").notNull(), // B3TR/USD price when purchased
+  
+  // Blockchain tracking
+  userTxHash: text("user_tx_hash"), // Transaction hash of B3TR transfer from user to app
+  refundTxHash: text("refund_tx_hash"), // Transaction hash if refunded
+  
+  // Tremendous tracking
+  tremendousOrderId: text("tremendous_order_id").unique(), // Unique Tremendous order ID
+  tremendousRewardId: text("tremendous_reward_id"), // Reward ID within the order
+  tremendousDeliveryStatus: text("tremendous_delivery_status"), // PENDING, SENT, DELIVERED, FAILED
+  tremendousDeliveryDetails: text("tremendous_delivery_details"), // JSON with delivery info
+  
+  // Order status
+  status: text("status").notNull().default("pending"), // pending, processing, fulfilled, failed, refunded
+  failureReason: text("failure_reason"), // Error message if failed
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  userIdIdx: index("gift_card_orders_user_id_idx").on(table.userId),
+  statusIdx: index("gift_card_orders_status_idx").on(table.status),
+}));
+
+export const insertGiftCardOrderSchema = createInsertSchema(giftCardOrders)
+  .omit({ id: true, createdAt: true, updatedAt: true });
+
+export type InsertGiftCardOrder = z.infer<typeof insertGiftCardOrderSchema>;
+export type GiftCardOrder = typeof giftCardOrders.$inferSelect;
+
 export type ThriftStore = Store;
 export type InsertThriftStore = InsertStore;
 export const thriftStores = sustainableStores;

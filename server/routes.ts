@@ -45,8 +45,11 @@ import {
   insertStoreSchema, 
   insertReceiptSchema, 
   insertTransactionSchema,
-  insertReferralSchema
+  insertReferralSchema,
+  giftCardOrders
 } from "@shared/schema";
+import { getB3TRPriceUSD, calculateB3TRAmount } from './services/b3trPricing';
+import { getCatalog as getTremendousCatalog, createOrder as createTremendousOrder } from './services/tremendous';
 import { 
   generalRateLimit, 
   receiptValidationRateLimit, 
@@ -6587,6 +6590,167 @@ app.post("/api/treasury/test-distribution", async (req: Request, res: Response) 
 </body>
 </html>`;
     res.send(testPage);
+  });
+
+  // ===========================
+  // Gift Card Marketplace Routes
+  // ===========================
+
+  app.get('/api/b3tr/price', async (req: Request, res: Response) => {
+    try {
+      const priceUSD = await getB3TRPriceUSD();
+      res.json({
+        success: true,
+        price: priceUSD,
+        timestamp: Date.now(),
+      });
+    } catch (error: any) {
+      console.error('[API] Error fetching B3TR price:', error);
+      res.status(503).json({
+        success: false,
+        error: 'Unable to fetch B3TR price at this time',
+      });
+    }
+  });
+
+  app.get('/api/gift-cards/catalog', generalRateLimit, async (req: Request, res: Response) => {
+    try {
+      const catalog = await getTremendousCatalog();
+      
+      const priceUSD = await getB3TRPriceUSD();
+      const markupUsd = parseFloat(process.env.GIFT_CARD_MARKUP_USD || '1.75');
+
+      const catalogWithPricing = catalog.map(product => {
+        const totalUsd = product.minAmount + markupUsd;
+        const b3trAmount = totalUsd / priceUSD;
+
+        return {
+          ...product,
+          minB3TRAmount: Math.ceil(b3trAmount * 100) / 100,
+          markupUsd,
+          b3trPriceUsd: priceUSD,
+        };
+      });
+
+      res.json({
+        success: true,
+        catalog: catalogWithPricing,
+        b3trPriceUsd: priceUSD,
+        markupUsd,
+      });
+    } catch (error: any) {
+      console.error('[API] Error fetching gift card catalog:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to fetch gift card catalog',
+      });
+    }
+  });
+
+  app.post('/api/gift-cards/purchase', requireAuth, receiptSubmissionRateLimit, async (req: Request, res: Response) => {
+    try {
+      const { productId, productName, amount, currency, email, userWalletAddress } = req.body;
+
+      if (!productId || !amount || !email || !userWalletAddress) {
+        return res.status(400).json({
+          success: false,
+          error: 'Missing required fields: productId, amount, email, userWalletAddress',
+        });
+      }
+
+      const priceUSD = await getB3TRPriceUSD();
+      const pricing = calculateB3TRAmount(amount, undefined);
+
+      const externalId = `recircle_${req.user!.id}_${Date.now()}`;
+
+      const orderRecord = await storage.db.insert(giftCardOrders).values({
+        userId: req.user!.id,
+        userEmail: email,
+        userWalletAddress,
+        appWalletAddress: APP_FUND_WALLET,
+        giftCardSku: productId,
+        giftCardName: productName || 'Gift Card',
+        usdAmount: amount,
+        markupUsd: pricing.markupUsd,
+        totalUsd: pricing.totalUsd,
+        b3trAmount: pricing.b3trAmount,
+        b3trPriceAtPurchase: pricing.b3trPriceUsed,
+        status: 'processing',
+      }).returning();
+
+      const order = orderRecord[0];
+
+      try {
+        const tremendousResult = await createTremendousOrder({
+          recipientEmail: email,
+          recipientName: req.user!.username || 'ReCircle User',
+          productId,
+          amount,
+          currency: currency || 'USD',
+          externalId,
+        });
+
+        await storage.db.update(giftCardOrders)
+          .set({
+            tremendousOrderId: tremendousResult.orderId,
+            tremendousRewardId: tremendousResult.rewardId,
+            tremendousDeliveryStatus: tremendousResult.deliveryStatus,
+            tremendousDeliveryDetails: JSON.stringify(tremendousResult.deliveryDetails),
+            status: 'fulfilled',
+            updatedAt: new Date(),
+          })
+          .where(eq(giftCardOrders.id, order.id));
+
+        res.json({
+          success: true,
+          order: {
+            id: order.id,
+            b3trAmount: pricing.b3trAmount,
+            totalUsd: pricing.totalUsd,
+            tremendousOrderId: tremendousResult.orderId,
+            status: 'fulfilled',
+          },
+        });
+
+      } catch (error: any) {
+        await storage.db.update(giftCardOrders)
+          .set({
+            status: 'failed',
+            failureReason: error.message,
+            updatedAt: new Date(),
+          })
+          .where(eq(giftCardOrders.id, order.id));
+
+        throw error;
+      }
+
+    } catch (error: any) {
+      console.error('[API] Error purchasing gift card:', error);
+      res.status(500).json({
+        success: false,
+        error: error.message || 'Failed to purchase gift card',
+      });
+    }
+  });
+
+  app.get('/api/gift-cards/orders', requireAuth, generalRateLimit, async (req: Request, res: Response) => {
+    try {
+      const orders = await storage.db.select()
+        .from(giftCardOrders)
+        .where(eq(giftCardOrders.userId, req.user!.id))
+        .orderBy(giftCardOrders.createdAt);
+
+      res.json({
+        success: true,
+        orders,
+      });
+    } catch (error: any) {
+      console.error('[API] Error fetching gift card orders:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to fetch orders',
+      });
+    }
   });
 
   const httpServer = createServer(app);
