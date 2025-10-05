@@ -74,6 +74,13 @@ export default function SmartAccountManager() {
 
   // Handle smart account setup when VeChainKit connects
   useEffect(() => {
+    // CRITICAL FIX: Skip SmartAccountManager entirely if Connex is available (VeWorld user)
+    // VeWorld users have window.connex and should NEVER have their address overridden
+    if (typeof window !== 'undefined' && (window as any).connex) {
+      console.log('[SMART-ACCOUNT] Connex detected - this is a VeWorld user, skipping SmartAccountManager entirely');
+      return;
+    }
+    
     if (kitAccount?.address && derivedSmartAccountAddress && 
         !isProcessingSmartAccount && 
         setupCompleted !== derivedSmartAccountAddress) {
