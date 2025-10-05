@@ -2,7 +2,7 @@ import express, { type Express, Request, Response, NextFunction } from "express"
 import { createServer, type Server } from "http";
 import path from "path";
 import { storage } from "./storage";
-import { ethers } from "ethers";
+import { ethers, formatUnits } from "ethers";
 
 // Memory optimization middleware
 function memoryOptimizationMiddleware(req: Request, res: Response, next: NextFunction) {
@@ -368,7 +368,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const accountInfo = await connex.thor.account(address).get();
       const vthoWei = accountInfo.energy;
-      const vthoFormatted = ethers.utils.formatUnits(vthoWei, 18);
+      const vthoFormatted = formatUnits(vthoWei, 18);
       
       console.log('[VTHO-BALANCE] Address:', address, 'VTHO:', vthoFormatted);
       
