@@ -144,36 +144,46 @@ export default function SmartAccountManager() {
       
       // Determine which address to use based on wallet source
       const walletSource = (kitAccount as any)?.source || 'unknown';
-      const isPrivyUser = walletSource === 'privy' || walletSource === 'embedded';
+      const smartAccountOwnerSource = (smartAccount as any)?.owner?.source || '';
+      const isPrivyUser = walletSource === 'privy' || walletSource === 'embedded' || smartAccountOwnerSource === 'privy';
       
       console.log('[SMART-ACCOUNT] Wallet source detected:', walletSource);
+      console.log('[SMART-ACCOUNT] Smart account owner source:', smartAccountOwnerSource);
       console.log('[SMART-ACCOUNT] Smart account address:', derivedSmartAccountAddress);
       console.log('[SMART-ACCOUNT] EOA address:', kitAccount?.address);
       console.log('[SMART-ACCOUNT] Is Privy user:', isPrivyUser);
       
-      // Privy users MUST use smart account address (EOA can't sign transactions)
-      // VeWorld users should use their EOA (actual wallet address)
-      const addressToUse = isPrivyUser ? derivedSmartAccountAddress : kitAccount?.address;
-      const walletType = isPrivyUser ? 'smart-account' : 'veworld';
-      
-      if (addressToUse && addressToUse !== appAddress) {
-        console.log(`[SMART-ACCOUNT] Connecting with ${isPrivyUser ? 'smart account' : 'EOA'} address:`, addressToUse);
+      // CRITICAL: Only override the app address for Privy users
+      // VeWorld users should keep their EOA address (already set by WalletProvider)
+      if (isPrivyUser) {
+        // Privy users MUST use smart account address (EOA can't sign transactions)
+        const addressToUse = derivedSmartAccountAddress;
+        const walletType = 'smart-account';
         
-        const success = await appConnect(walletType, addressToUse, {
-          skipCelebration: true
-        });
-        
-        if (!success) {
-          console.error('[SMART-ACCOUNT] Failed to sync account to app context');
+        if (addressToUse && addressToUse !== appAddress) {
+          console.log('[SMART-ACCOUNT] Privy user detected - connecting with smart account address:', addressToUse);
           
-          toast({
-            title: "Account Sync Failed",
-            description: "Could not sync your account with the app. Please try reconnecting.",
-            variant: "destructive"
+          const success = await appConnect(walletType, addressToUse, {
+            skipCelebration: true
           });
-        } else {
-          console.log('[SMART-ACCOUNT] Successfully synced account to app context');
+          
+          if (!success) {
+            console.error('[SMART-ACCOUNT] Failed to sync smart account to app context');
+            
+            toast({
+              title: "Account Sync Failed",
+              description: "Could not sync your account with the app. Please try reconnecting.",
+              variant: "destructive"
+            });
+          } else {
+            console.log('[SMART-ACCOUNT] Successfully synced smart account to app context');
+          }
         }
+      } else {
+        // VeWorld users - DO NOT call appConnect here
+        // They're already connected with their EOA via WalletProvider
+        console.log('[SMART-ACCOUNT] VeWorld user detected - skipping address override, keeping EOA:', kitAccount?.address);
+        console.log('[SMART-ACCOUNT] Current app address is correct:', appAddress);
       }
       
       // Mark setup as completed for this smart account address
