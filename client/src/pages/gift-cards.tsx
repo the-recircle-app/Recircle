@@ -8,11 +8,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Gift, CreditCard } from "lucide-react";
+import { Loader2, Gift, CreditCard, CheckCircle, Clock, XCircle } from "lucide-react";
 import LiveB3TRBalance from "../components/LiveB3TRBalance";
 import B3trLogo from "../components/B3trLogo";
+import { formatDistanceToNow } from "date-fns";
 
 interface GiftCardProduct {
   id: string;
@@ -53,6 +55,14 @@ export default function GiftCards() {
   }>({
     queryKey: ['/api/b3tr/price'],
     refetchInterval: 60000,
+  });
+
+  const { data: ordersData } = useQuery<{
+    success: boolean;
+    orders: any[];
+  }>({
+    queryKey: ['/api/gift-cards/orders'],
+    enabled: isConnected,
   });
 
   const purchaseMutation = useMutation({
@@ -177,51 +187,132 @@ export default function GiftCards() {
           </div>
         </div>
 
-        {catalogLoading ? (
-          <div className="flex justify-center items-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {catalogData?.catalog?.map((product: GiftCardProduct) => (
-              <Card key={product.id} className="bg-gray-800 border-gray-700">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className="text-lg text-white">{product.name}</CardTitle>
-                      <p className="text-sm text-gray-400 mt-1">{product.description}</p>
-                    </div>
-                    <Gift className="h-6 w-6 text-pink-500" />
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div>
-                      <p className="text-xs text-gray-500">Amount Range</p>
-                      <p className="text-sm text-gray-300">${product.minAmount} - ${product.maxAmount}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500">Starting from</p>
-                      <div className="flex items-center gap-2">
-                        <p className="text-lg font-bold text-blue-400">{product.minB3TRAmount}</p>
-                        <B3trLogo className="w-5 h-5" color="#38BDF8" />
+        <Tabs defaultValue="marketplace" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 bg-gray-800">
+            <TabsTrigger value="marketplace" className="data-[state=active]:bg-pink-600">
+              Marketplace
+            </TabsTrigger>
+            <TabsTrigger value="orders" className="data-[state=active]:bg-pink-600">
+              My Orders
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="marketplace" className="mt-4">
+            {catalogLoading ? (
+              <div className="flex justify-center items-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {catalogData?.catalog?.map((product: GiftCardProduct) => (
+                  <Card key={product.id} className="bg-gray-800 border-gray-700">
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <CardTitle className="text-lg text-white">{product.name}</CardTitle>
+                          <p className="text-sm text-gray-400 mt-1">{product.description}</p>
+                        </div>
+                        <Gift className="h-6 w-6 text-pink-500" />
                       </div>
-                    </div>
-                    <Button
-                      onClick={() => {
-                        setSelectedProduct(product);
-                        setPurchaseModalOpen(true);
-                      }}
-                      className="w-full bg-pink-600 hover:bg-pink-700"
-                    >
-                      Redeem
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div>
+                          <p className="text-xs text-gray-500">Amount Range</p>
+                          <p className="text-sm text-gray-300">${product.minAmount} - ${product.maxAmount}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500">Starting from</p>
+                          <div className="flex items-center gap-2">
+                            <p className="text-lg font-bold text-blue-400">{product.minB3TRAmount}</p>
+                            <B3trLogo className="w-5 h-5" color="#38BDF8" />
+                          </div>
+                        </div>
+                        <Button
+                          onClick={() => {
+                            setSelectedProduct(product);
+                            setPurchaseModalOpen(true);
+                          }}
+                          className="w-full bg-pink-600 hover:bg-pink-700"
+                        >
+                          Redeem
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="orders" className="mt-4">
+            <div className="space-y-4">
+              {ordersData?.orders && ordersData.orders.length > 0 ? (
+                ordersData.orders.map((order: any) => (
+                  <Card key={order.id} className="bg-gray-800 border-gray-700">
+                    <CardContent className="pt-6">
+                      <div className="flex items-start justify-between mb-3">
+                        <div>
+                          <h3 className="font-semibold text-white">{order.giftCardName}</h3>
+                          <p className="text-sm text-gray-400">${order.usdAmount} Gift Card</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {order.status === 'fulfilled' && (
+                            <CheckCircle className="h-5 w-5 text-green-500" />
+                          )}
+                          {order.status === 'processing' && (
+                            <Clock className="h-5 w-5 text-yellow-500" />
+                          )}
+                          {order.status === 'failed' && (
+                            <XCircle className="h-5 w-5 text-red-500" />
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Status:</span>
+                          <span className="text-gray-300 capitalize">{order.status}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">B3TR Spent:</span>
+                          <div className="flex items-center gap-1">
+                            <span className="text-blue-400">{order.b3trAmount?.toFixed(2)}</span>
+                            <B3trLogo className="w-4 h-4" color="#38BDF8" />
+                          </div>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Email:</span>
+                          <span className="text-gray-300 truncate max-w-[150px]">{order.userEmail}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Purchased:</span>
+                          <span className="text-gray-300">
+                            {formatDistanceToNow(new Date(order.createdAt), { addSuffix: true })}
+                          </span>
+                        </div>
+                        {order.tremendousOrderId && (
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">Order ID:</span>
+                            <span className="text-gray-300 font-mono text-xs truncate max-w-[150px]">
+                              {order.tremendousOrderId}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                <div className="text-center py-12">
+                  <Gift className="h-12 w-12 text-gray-600 mx-auto mb-3" />
+                  <p className="text-gray-400">No orders yet</p>
+                  <p className="text-sm text-gray-500 mt-2">Start redeeming gift cards with your B3TR!</p>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
 
       <Dialog open={purchaseModalOpen} onOpenChange={setPurchaseModalOpen}>
