@@ -53,7 +53,7 @@ const NETWORK_CONFIGS: Record<VeChainNetwork, VeChainNetworkConfig> = {
       'https://sync-testnet.veblocks.net'
     ],
     explorerUrl: 'https://explore-testnet.vechain.org',
-    sponsorUrl: 'https://sponsor-testnet.vechain.energy/by/441',
+    sponsorUrl: getClientEnvVar('VECHAIN_TESTNET_SPONSOR_URL') || 'https://sponsor-testnet.vechain.energy/by/441',
     contracts: {
       b3trToken: process.env.B3TR_CONTRACT_ADDRESS || '0xbf64cf86894Ee0877C4e7d03936e35Ee8D8b864F',
       x2earnRewardsPool: process.env.X2EARNREWARDSPOOL_ADDRESS || '0x5F8f86B8D0Fa93cdaE20936d150175dF0205fB38'
