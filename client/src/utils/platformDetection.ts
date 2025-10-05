@@ -28,6 +28,16 @@ export function detectPlatform(): PlatformInfo {
     platformName = 'Mobile Browser';
   }
   
+  console.log('[PLATFORM-DETECTION]', {
+    userAgent,
+    hasConnex,
+    isVeWorld,
+    isMobile,
+    isDesktop,
+    platformName,
+    windowConnex: typeof window !== 'undefined' ? window.connex : 'no window'
+  });
+  
   return {
     isVeWorld,
     isDesktop,

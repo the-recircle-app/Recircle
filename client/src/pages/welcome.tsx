@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,7 +9,43 @@ import { shouldShowVeWorldWarning } from "@/utils/platformDetection";
 // VeChainKitProviderWrapper removed - using the one from App.tsx instead
 
 export default function Welcome() {
-  if (shouldShowVeWorldWarning()) {
+  const [showWarning, setShowWarning] = useState<boolean | null>(null);
+  
+  useEffect(() => {
+    const checkPlatform = () => {
+      const shouldWarn = shouldShowVeWorldWarning();
+      setShowWarning(shouldWarn);
+    };
+    
+    checkPlatform();
+    
+    const interval = setInterval(() => {
+      if (typeof window !== 'undefined' && 'connex' in window) {
+        checkPlatform();
+        clearInterval(interval);
+      }
+    }, 100);
+    
+    setTimeout(() => {
+      clearInterval(interval);
+      checkPlatform();
+    }, 3000);
+    
+    return () => clearInterval(interval);
+  }, []);
+  
+  if (showWarning === null) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-green-50 to-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  if (showWarning) {
     return <VeWorldRequiredMessage />;
   }
   
