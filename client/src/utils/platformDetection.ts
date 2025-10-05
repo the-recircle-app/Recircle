@@ -8,10 +8,12 @@ export interface PlatformInfo {
 export function detectPlatform(): PlatformInfo {
   const userAgent = navigator.userAgent.toLowerCase();
   
+  const hasConnex = typeof window !== 'undefined' && 'connex' in window;
+  
   const isVeWorld = 
+    hasConnex ||
     userAgent.includes('veworld') || 
-    userAgent.includes('sync2') ||
-    (typeof window !== 'undefined' && 'connex' in window && userAgent.includes('mobile'));
+    userAgent.includes('sync2');
   
   const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
   
