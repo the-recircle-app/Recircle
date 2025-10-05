@@ -10,6 +10,13 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+**October 5, 2025 - Ethers v6 Compatibility Fix**
+- Fixed VTHO balance endpoint bug: replaced ethers.utils.formatUnits with ethers v6 formatUnits import
+- Updated deploy-b3tr-to-solo.js to use ethers v6 formatEther syntax
+- Updated VECHAIN_INTEGRATION.md documentation with correct ethers v6 API usage
+- Verified VTHO balance endpoint working correctly with fee delegation logic (< 10 VTHO threshold)
+- All blockchain transactions continue to use VIP-191 fee delegation via VeChain Energy
+
 **October 4, 2025 - Send/Receive Features & Settings Implementation**
 - Built B3TR transfer component using VeChain Kit V2 useSendTransaction hook with proper amount conversion (parseUnits)
 - Updated SmartAccountManager to correctly use smart account addresses for Privy users and EOA addresses for VeWorld users
