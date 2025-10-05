@@ -10,8 +10,11 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-**October 5, 2025 - Referral Code System & UI Improvements**
-- Fixed transactions page to show correct EOA address for VeWorld users (was showing smart account address)
+**October 5, 2025 - Referral Code System & Transactions Page Fix**
+- **CRITICAL FIX:** Transactions page now correctly displays VeWorld users' EOA address and balance
+  - Uses VeChain Kit's account.address directly (same as home page WalletButton)
+  - Uses LiveB3TRBalance component to fetch EOA balance from blockchain
+  - Fixed SmartAccountManager to skip processing when Connex detected (VeWorld users)
 - Updated welcome page with "Coming Soon" badge for social login and changed "Advanced:" to "Or use:"
 - Rebuilt referral system to use codes instead of links (VeWorld-compatible approach)
 - Users now copy/paste referral codes directly (e.g., "ABC123XYZ") via text/social media

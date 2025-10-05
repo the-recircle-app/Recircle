@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion, AnimatePresence } from "framer-motion";
 import B3trLogo from "../components/B3trLogo";
+import LiveB3TRBalance from "../components/LiveB3TRBalance";
 import { Transaction } from "../types";
 import { ExternalLink, Search, Clock, CheckCircle, AlertCircle, ArrowRight, ArrowLeft, ArrowUp, ArrowDown, Wallet } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
@@ -316,7 +317,9 @@ const TransactionExplorer = () => {
                     {formatShortAddress(displayAddress)}
                   </p>
                   <div className="flex items-center gap-2 mb-4">
-                    <span className="text-3xl font-bold text-gray-900">{tokenBalance}</span>
+                    <span className="text-3xl font-bold text-gray-900">
+                      <LiveB3TRBalance fallbackBalance={tokenBalance} />
+                    </span>
                     <B3trLogo className="w-6 h-6" color="#38BDF8" />
                   </div>
                   <div className="flex gap-3">
@@ -359,7 +362,7 @@ const TransactionExplorer = () => {
                       {formatShortAddress(displayAddress)}
                     </p>
                     <div className="flex items-center text-primary mt-2 text-lg font-bold">
-                      {tokenBalance} <B3trLogo className="w-5 h-5 ml-1" color="#38BDF8" />
+                      <LiveB3TRBalance fallbackBalance={tokenBalance} /> <B3trLogo className="w-5 h-5 ml-1" color="#38BDF8" />
                     </div>
                   </div>
                 </CardContent>
