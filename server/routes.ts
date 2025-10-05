@@ -4486,6 +4486,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to validate referral code" });
     }
   });
+
+  app.post("/api/users/:userId/apply-referral", async (req: Request, res: Response) => {
+    try {
+      const { userId } = req.params;
+      const { referralCode } = req.body;
+      const idNum = parseInt(userId);
+      
+      if (isNaN(idNum)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+      
+      if (!referralCode || typeof referralCode !== 'string') {
+        return res.status(400).json({ message: "Referral code is required" });
+      }
+      
+      // Check if user already used a referral code
+      const existingReferral = await storage.getReferralByReferredUser(idNum);
+      if (existingReferral) {
+        return res.status(400).json({ message: "You have already used a referral code" });
+      }
+      
+      // Find the referrer based on the code
+      const referrer = await storage.getUserByReferralCode(referralCode.toUpperCase());
+      
+      if (!referrer) {
+        return res.status(404).json({ message: "Invalid referral code" });
+      }
+      
+      // Can't refer yourself
+      if (referrer.id === idNum) {
+        return res.status(400).json({ message: "You cannot use your own referral code" });
+      }
+      
+      // Create the referral record
+      const newReferral = await storage.createReferral({
+        referrerId: referrer.id,
+        referredId: idNum,
+        code: referralCode.toUpperCase(),
+        status: "pending"
+      });
+      
+      res.status(201).json({ 
+        message: "Referral code applied successfully",
+        referral: newReferral 
+      });
+    } catch (error) {
+      console.error("Error applying referral code:", error);
+      res.status(500).json({ message: "Failed to apply referral code" });
+    }
+  });
   
   // VeBetterDAO Treasury Test Endpoint
     // Distribution configuration endpoint

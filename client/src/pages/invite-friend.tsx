@@ -3,13 +3,12 @@ import { useLocation } from 'wouter';
 import { useSmartNavigation } from '../utils/navigation';
 import { useWallet } from '../context/WalletContext';
 import { useToast } from '../hooks/use-toast';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '../lib/queryClient';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Label } from '@/components/ui/label';
 import B3trLogo from '../components/B3trLogo';
 import BottomNavigation from '../components/BottomNavigation';
 
@@ -18,10 +17,14 @@ const InviteFriend = () => {
   const { goHome } = useSmartNavigation();
   const { isConnected, userId, tokenBalance } = useWallet();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  
   const [isCopied, setIsCopied] = useState(false);
-  const inviteLinkRef = useRef<HTMLInputElement>(null);
+  const referralCodeRef = useRef<HTMLInputElement>(null);
   const [referralCode, setReferralCode] = useState<string | null>(null);
   const [referralCount, setReferralCount] = useState(0);
+  const [enteredCode, setEnteredCode] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Fetch user's referral code
   const { data: referralCodeData, isLoading: isLoadingCode } = useQuery({
@@ -62,21 +65,15 @@ const InviteFriend = () => {
     }
   }, [referralsData]);
 
-  // Create invite link based on the user's referral code
-  const appBaseUrl = window.location.origin;
-  const inviteLink = referralCode 
-    ? `${appBaseUrl}/join?ref=${referralCode}`
-    : 'Loading your unique invite link...';
-
-  const handleCopyLink = () => {
-    if (inviteLinkRef.current) {
-      inviteLinkRef.current.select();
-      document.execCommand('copy');
+  const handleCopyCode = () => {
+    if (referralCodeRef.current && referralCode) {
+      referralCodeRef.current.select();
+      navigator.clipboard.writeText(referralCode);
       setIsCopied(true);
       
       toast({
-        title: 'Link Copied',
-        description: 'Invite link copied to clipboard',
+        title: 'Code Copied',
+        description: 'Referral code copied to clipboard',
       });
       
       setTimeout(() => {
@@ -85,31 +82,28 @@ const InviteFriend = () => {
     }
   };
 
-
   const handleShareSocial = (platform: string) => {
-    const shareText = "Join ReCircle and earn B3TR tokens for sustainable transportation! Use my invite code to get started.";
-    const shareUrl = inviteLink;
+    if (!referralCode) return;
     
-    // Open appropriate share URL based on platform
+    const shareText = `Join ReCircle and earn B3TR tokens for sustainable transportation! Use my referral code: ${referralCode}`;
+    
     let shareUrl2 = "";
     
     switch (platform) {
       case 'X':
-        shareUrl2 = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
+        shareUrl2 = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`;
         break;
       case 'Facebook':
-        shareUrl2 = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`;
+        shareUrl2 = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.origin)}&quote=${encodeURIComponent(shareText)}`;
         break;
       case 'WhatsApp':
-        shareUrl2 = `https://wa.me/?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`;
+        shareUrl2 = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
         break;
       case 'Instagram':
-        // Instagram doesn't have a direct sharing URL, we'll use Web Share API if supported
         if (navigator.share) {
           navigator.share({
             title: 'Join ReCircle',
             text: shareText,
-            url: shareUrl,
           }).catch(error => console.log('Error sharing:', error));
           
           toast({
@@ -118,25 +112,18 @@ const InviteFriend = () => {
           });
           return;
         } else {
-          // Fall back to copying to clipboard for Instagram
-          if (inviteLinkRef.current) {
-            inviteLinkRef.current.select();
-            document.execCommand('copy');
-            
-            toast({
-              title: 'Link Copied for Instagram',
-              description: 'Copy this link to your Instagram bio or direct message',
-            });
-          }
+          navigator.clipboard.writeText(shareText);
+          toast({
+            title: 'Code Copied for Instagram',
+            description: 'Paste this code in your Instagram bio or direct message',
+          });
           return;
         }
       default:
-        // Use Web Share API for other platforms if available
         if (navigator.share) {
           navigator.share({
             title: 'Join ReCircle',
             text: shareText,
-            url: shareUrl,
           }).catch(error => console.log('Error sharing:', error));
           
           toast({
@@ -147,7 +134,6 @@ const InviteFriend = () => {
         }
     }
     
-    // Open the share URL in a new window/tab
     if (shareUrl2) {
       window.open(shareUrl2, '_blank', 'noopener,noreferrer');
       
@@ -158,12 +144,54 @@ const InviteFriend = () => {
     }
   };
 
+  const handleSubmitReferralCode = async () => {
+    if (!enteredCode.trim()) {
+      toast({
+        title: 'Invalid Code',
+        description: 'Please enter a referral code',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const res = await apiRequest('POST', `/api/users/${userId}/apply-referral`, {
+        referralCode: enteredCode.trim().toUpperCase()
+      });
+
+      if (res.ok) {
+        toast({
+          title: 'Success!',
+          description: 'Referral code applied successfully',
+        });
+        setEnteredCode('');
+        queryClient.invalidateQueries({ queryKey: ['/api/users', userId] });
+      } else {
+        const error = await res.json();
+        toast({
+          title: 'Invalid Code',
+          description: error.message || 'This referral code is invalid or has already been used',
+          variant: 'destructive'
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to apply referral code',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleBackToHome = () => {
     goHome();
   };
 
   const renderShareButtons = () => {
-    // Define custom X logo as SVG (larger and centered as the only content)
     const XLogo = () => (
       <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
         <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
@@ -223,39 +251,51 @@ const InviteFriend = () => {
       </div>
 
       <div className="p-4">
+        {/* Your Referral Code Card */}
         <Card className="mb-6">
           <CardHeader className="pb-3">
-            <CardTitle>Share Your Invite Link</CardTitle>
+            <CardTitle>Your Referral Code</CardTitle>
             <CardDescription>
-              Copy your unique invite link and share it with friends
+              Share this code with friends to earn rewards
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="relative">
+            <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg text-center mb-4">
+              <p className="text-sm text-gray-600 mb-2">Your Code</p>
+              {isLoadingCode ? (
+                <div className="h-12 flex items-center justify-center">
+                  <div className="h-6 w-6 rounded-full border-2 border-blue-500 border-t-transparent animate-spin" />
+                </div>
+              ) : (
+                <div className="text-4xl font-bold text-gray-900 tracking-wider mb-4">
+                  {referralCode || 'LOADING...'}
+                </div>
+              )}
               <Input
-                ref={inviteLinkRef}
-                value={inviteLink}
+                ref={referralCodeRef}
+                value={referralCode || ''}
                 readOnly
-                className="pr-24"
+                className="hidden"
               />
               <Button
-                className="absolute right-0 top-0 h-full rounded-l-none"
-                onClick={handleCopyLink}
+                className="w-full bg-blue-600 hover:bg-blue-700"
+                onClick={handleCopyCode}
+                disabled={!referralCode}
               >
                 {isCopied ? (
                   <>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
                       <path d="M20 6L9 17l-5-5" />
                     </svg>
-                    Copied
+                    Copied!
                   </>
                 ) : (
                   <>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
                       <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
                       <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
                     </svg>
-                    Copy
+                    Copy Code
                   </>
                 )}
               </Button>
@@ -263,12 +303,44 @@ const InviteFriend = () => {
           </CardContent>
         </Card>
 
+        {/* Have a Referral Code Card */}
+        <Card className="mb-6">
+          <CardHeader className="pb-3">
+            <CardTitle>Have a Referral Code?</CardTitle>
+            <CardDescription>
+              Enter a friend's code to get started with a bonus
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <div>
+                <Label htmlFor="referral-code-input">Referral Code</Label>
+                <Input
+                  id="referral-code-input"
+                  value={enteredCode}
+                  onChange={(e) => setEnteredCode(e.target.value.toUpperCase())}
+                  placeholder="Enter code here..."
+                  className="mt-1"
+                  maxLength={20}
+                />
+              </div>
+              <Button
+                className="w-full"
+                onClick={handleSubmitReferralCode}
+                disabled={isSubmitting || !enteredCode.trim()}
+              >
+                {isSubmitting ? 'Applying...' : 'Apply Code'}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
+        {/* Social Sharing Card */}
         <Card>
           <CardHeader className="pb-3">
             <CardTitle>Share on Social Media</CardTitle>
             <CardDescription>
-              Share your invitation on your favorite platforms
+              Share your referral code on your favorite platforms
             </CardDescription>
           </CardHeader>
           <CardContent>

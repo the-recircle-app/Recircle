@@ -10,6 +10,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+**October 5, 2025 - Referral Code System & UI Improvements**
+- Fixed transactions page to show correct EOA address for VeWorld users (was showing smart account address)
+- Updated welcome page with "Coming Soon" badge for social login and changed "Advanced:" to "Or use:"
+- Rebuilt referral system to use codes instead of links (VeWorld-compatible approach)
+- Users now copy/paste referral codes directly (e.g., "ABC123XYZ") via text/social media
+- Added "Have a referral code?" input section for new users to apply codes
+- Created POST /api/users/:userId/apply-referral endpoint for code validation
+- Updated social sharing to include referral code in message text (no URL dependency)
+- Referral code system works without web links, perfect for VeWorld mobile app users
+
 **October 5, 2025 - VeWorld-Only Platform Access**
 - Implemented browser/platform detection to identify VeWorld app vs desktop/mobile browsers
 - Created VeWorldRequiredMessage component with app store links and setup instructions

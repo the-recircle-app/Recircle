@@ -355,7 +355,7 @@ const TransactionExplorer = () => {
                     </div>
                     <h3 className="font-medium text-lg">Connected Wallet</h3>
                     <p className="text-sm text-gray-500 break-all text-center mt-1 mb-2">
-                      {formatShortAddress()}
+                      {formatShortAddress(address)}
                     </p>
                     <div className="flex items-center text-primary mt-2 text-lg font-bold">
                       {tokenBalance} <B3trLogo className="w-5 h-5 ml-1" color="#38BDF8" />
