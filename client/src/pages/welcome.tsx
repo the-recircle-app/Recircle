@@ -3,9 +3,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Scan, Coins, Leaf, ArrowRight, Car, Bus, Zap, Smartphone, Download, Wallet, DollarSign, CheckCircle } from "lucide-react";
 import SmartWalletConnect from "@/components/SmartWalletConnect";
+import { VeWorldRequiredMessage } from "@/components/VeWorldRequiredMessage";
+import { shouldShowVeWorldWarning } from "@/utils/platformDetection";
 // VeChainKitProviderWrapper removed - using the one from App.tsx instead
 
 export default function Welcome() {
+  if (shouldShowVeWorldWarning()) {
+    return <VeWorldRequiredMessage />;
+  }
+  
   return (
     <div className="min-h-screen bg-gray-100 pb-8">
       {/* Hero Section */}
