@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useWallet } from "../context/WalletContext";
 import { useWallet as useVeChainKitWallet } from "@vechain/vechain-kit";
@@ -10,8 +10,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Gift, CreditCard, CheckCircle, Clock, XCircle } from "lucide-react";
+import { Loader2, Gift, CreditCard, CheckCircle, Clock, XCircle, Search, Filter } from "lucide-react";
 import LiveB3TRBalance from "../components/LiveB3TRBalance";
 import B3trLogo from "../components/B3trLogo";
 import { formatDistanceToNow } from "date-fns";
@@ -27,6 +28,8 @@ interface GiftCardProduct {
   minB3TRAmount: number;
   markupUsd: number;
   b3trPriceUsd: number;
+  countries?: string[];
+  currencies?: string[];
 }
 
 export default function GiftCards() {
@@ -39,6 +42,12 @@ export default function GiftCards() {
   const [purchaseModalOpen, setPurchaseModalOpen] = useState(false);
   const [amount, setAmount] = useState("");
   const [email, setEmail] = useState("");
+  
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCountry, setSelectedCountry] = useState('all');
+  const [maxPrice, setMaxPrice] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
 
   const { data: catalogData, isLoading: catalogLoading } = useQuery<{
     catalog: GiftCardProduct[];
@@ -64,6 +73,52 @@ export default function GiftCards() {
     queryKey: ['/api/gift-cards/orders'],
     enabled: isConnected,
   });
+
+  const categories = useMemo(() => {
+    if (!catalogData?.catalog) return [];
+    const cats = new Set(catalogData.catalog.map(p => p.category));
+    return Array.from(cats).sort();
+  }, [catalogData]);
+
+  const countries = useMemo(() => {
+    if (!catalogData?.catalog) return [];
+    const countrySet = new Set<string>();
+    catalogData.catalog.forEach(p => {
+      if (p.countries) {
+        p.countries.forEach(c => countrySet.add(c));
+      }
+    });
+    return Array.from(countrySet).sort();
+  }, [catalogData]);
+
+  const filteredCatalog = useMemo(() => {
+    if (!catalogData?.catalog) return [];
+    
+    return catalogData.catalog.filter(product => {
+      if (searchQuery && !product.name.toLowerCase().includes(searchQuery.toLowerCase())) {
+        return false;
+      }
+      
+      if (selectedCategory !== 'all' && product.category !== selectedCategory) {
+        return false;
+      }
+      
+      if (selectedCountry !== 'all') {
+        if (!product.countries || !product.countries.includes(selectedCountry)) {
+          return false;
+        }
+      }
+      
+      if (maxPrice) {
+        const maxPriceNum = parseFloat(maxPrice);
+        if (!isNaN(maxPriceNum) && product.minB3TRAmount > maxPriceNum) {
+          return false;
+        }
+      }
+      
+      return true;
+    });
+  }, [catalogData, searchQuery, selectedCategory, selectedCountry, maxPrice]);
 
   const purchaseMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -203,8 +258,105 @@ export default function GiftCards() {
                 <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {catalogData?.catalog?.map((product: GiftCardProduct) => (
+              <>
+                <div className="mb-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowFilters(!showFilters)}
+                      className="bg-gray-800 border-gray-700 text-white hover:bg-gray-700"
+                    >
+                      <Filter className="h-4 w-4 mr-2" />
+                      Filters {filteredCatalog.length !== catalogData?.catalog?.length && `(${filteredCatalog.length})`}
+                    </Button>
+                    <span className="text-sm text-gray-400">
+                      {filteredCatalog.length} gift cards
+                    </span>
+                  </div>
+
+                  {showFilters && (
+                    <Card className="bg-gray-800 border-gray-700">
+                      <CardContent className="pt-4 space-y-3">
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                          <Input
+                            placeholder="Search gift cards..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="pl-10 bg-gray-900 border-gray-700 text-white"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                          <div>
+                            <Label className="text-xs text-gray-400 mb-1">Category</Label>
+                            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                              <SelectTrigger className="bg-gray-900 border-gray-700 text-white">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent className="bg-gray-800 border-gray-700">
+                                <SelectItem value="all" className="text-white">All Categories</SelectItem>
+                                {categories.map(cat => (
+                                  <SelectItem key={cat} value={cat} className="text-white capitalize">
+                                    {cat.replace(/_/g, ' ')}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div>
+                            <Label className="text-xs text-gray-400 mb-1">Country</Label>
+                            <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+                              <SelectTrigger className="bg-gray-900 border-gray-700 text-white">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent className="bg-gray-800 border-gray-700">
+                                <SelectItem value="all" className="text-white">All Countries</SelectItem>
+                                {countries.map(country => (
+                                  <SelectItem key={country} value={country} className="text-white">
+                                    {country}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div>
+                            <Label className="text-xs text-gray-400 mb-1">Max B3TR Price</Label>
+                            <Input
+                              type="number"
+                              placeholder="Any price"
+                              value={maxPrice}
+                              onChange={(e) => setMaxPrice(e.target.value)}
+                              className="bg-gray-900 border-gray-700 text-white"
+                            />
+                          </div>
+                        </div>
+
+                        {(searchQuery || selectedCategory !== 'all' || selectedCountry !== 'all' || maxPrice) && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setSearchQuery('');
+                              setSelectedCategory('all');
+                              setSelectedCountry('all');
+                              setMaxPrice('');
+                            }}
+                            className="text-pink-400 hover:text-pink-300"
+                          >
+                            Clear all filters
+                          </Button>
+                        )}
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {filteredCatalog?.map((product: GiftCardProduct) => (
                   <Card key={product.id} className="bg-gray-800 border-gray-700">
                     <CardHeader>
                       <div className="flex items-start justify-between">
@@ -242,6 +394,7 @@ export default function GiftCards() {
                   </Card>
                 ))}
               </div>
+              </>
             )}
           </TabsContent>
 

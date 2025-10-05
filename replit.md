@@ -18,6 +18,7 @@ Preferred communication style: Simple, everyday language.
 - Built marketplace UI with catalog grid, checkout modal (email capture), live B3TR pricing display
 - Added order history tab with status tracking (fulfilled/processing/failed)
 - Added "Redeem Gift Cards" activity card to home page
+- **Filter System**: Search, category, country, and max B3TR price filters (662 gift cards from English-speaking markets)
 - **CRITICAL TODO BEFORE PRODUCTION:** Add blockchain B3TR transfer from user wallet to app fund wallet in purchase flow
   - Currently in TESTING MODE: Orders create without actual B3TR payment (for Tremendous sandbox testing)
   - Must implement on-chain transfer validation before live deployment
