@@ -10,6 +10,21 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+**October 5, 2025 - Gift Card Marketplace (Tremendous Integration) - TESTING MODE**
+- Built complete gift card marketplace with Tremendous API sandbox integration
+- Created B3TR pricing service with CoinGecko API (60s cache, fallback to last known price)
+- Added gift_card_orders database table with full audit trail (email, amounts, delivery status, timestamps)
+- Implemented API endpoints: /api/b3tr/price, /api/gift-cards/catalog, /api/gift-cards/purchase, /api/gift-cards/orders
+- Built marketplace UI with catalog grid, checkout modal (email capture), live B3TR pricing display
+- Added order history tab with status tracking (fulfilled/processing/failed)
+- Added "Redeem Gift Cards" activity card to home page
+- **CRITICAL TODO BEFORE PRODUCTION:** Add blockchain B3TR transfer from user wallet to app fund wallet in purchase flow
+  - Currently in TESTING MODE: Orders create without actual B3TR payment (for Tremendous sandbox testing)
+  - Must implement on-chain transfer validation before live deployment
+  - Must add refund logic if Tremendous order fails after payment
+- Configurable markup via GIFT_CARD_MARKUP_USD environment variable (default $1.75)
+- Tremendous sandbox mode using TEST_ API key prefix for risk-free development
+
 **October 5, 2025 - Referral Code System & Transactions Page Fix**
 - **CRITICAL FIX:** Transactions page now correctly displays VeWorld users' EOA address and balance
   - Uses VeChain Kit's account.address directly (same as home page WalletButton)
