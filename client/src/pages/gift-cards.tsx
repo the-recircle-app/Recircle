@@ -161,7 +161,8 @@ export default function GiftCards() {
     
     // Now call the purchase API with the transaction hash
     // Backend verifies payment using authenticated user's wallet from database
-    if (selectedProduct && amount && email) {
+    // and checks that current connected wallet matches stored wallet
+    if (selectedProduct && amount && email && account?.address) {
       const amountNum = parseFloat(amount);
       purchaseMutation.mutate({
         productId: selectedProduct.id,
@@ -170,6 +171,7 @@ export default function GiftCards() {
         currency: 'USD',
         email,
         txHash: txId,
+        connectedWallet: account.address, // Current VeChain Kit connected wallet
       });
     }
   };

@@ -6649,21 +6649,30 @@ app.post("/api/treasury/test-distribution", async (req: Request, res: Response) 
 
   app.post('/api/gift-cards/purchase', requireAuth, receiptSubmissionRateLimit, async (req: Request, res: Response) => {
     try {
-      const { productId, productName, amount, currency, email, txHash } = req.body;
+      const { productId, productName, amount, currency, email, txHash, connectedWallet } = req.body;
 
-      if (!productId || !amount || !email || !txHash) {
+      if (!productId || !amount || !email || !txHash || !connectedWallet) {
         return res.status(400).json({
           success: false,
-          error: 'Missing required fields: productId, amount, email, txHash',
+          error: 'Missing required fields: productId, amount, email, txHash, connectedWallet',
         });
       }
 
-      // CRITICAL: Get authenticated user's wallet address from database, not request body
+      // CRITICAL: Get authenticated user's wallet address from database
       const authenticatedUserWallet = req.user!.walletAddress;
       if (!authenticatedUserWallet) {
         return res.status(400).json({
           success: false,
           error: 'No wallet address associated with your account. Please connect your wallet first.',
+        });
+      }
+
+      // CRITICAL: Verify the currently connected wallet matches the authenticated user's stored wallet
+      // This ensures the user has the wallet connected in their current session
+      if (connectedWallet.toLowerCase() !== authenticatedUserWallet.toLowerCase()) {
+        return res.status(400).json({
+          success: false,
+          error: 'Connected wallet does not match your account wallet. Please reconnect with the correct wallet.',
         });
       }
 
