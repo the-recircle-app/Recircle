@@ -74,9 +74,29 @@ export default function GiftCards() {
     enabled: isConnected,
   });
 
+  const categoryMapping: Record<string, string> = {
+    'merchant_card': 'Shopping',
+    'prepaid_card': 'Prepaid Cards',
+    'digital_prepaid_card': 'Prepaid Cards',
+    'gift_card': 'Shopping',
+    'charity': 'Charity',
+    'entertainment': 'Entertainment',
+    'dining': 'Dining',
+    'fashion': 'Fashion',
+    'health': 'Health & Wellness',
+    'travel': 'Travel',
+    'travel_and_hospitality': 'Travel',
+  };
+
+  const getUserFriendlyCategory = (techCategory: string): string => {
+    return categoryMapping[techCategory.toLowerCase()] || 'Shopping';
+  };
+
   const categories = useMemo(() => {
     if (!catalogData?.catalog) return [];
-    const cats = new Set(catalogData.catalog.map(p => p.category));
+    const cats = new Set(
+      catalogData.catalog.map(p => getUserFriendlyCategory(p.category))
+    );
     return Array.from(cats).sort();
   }, [catalogData]);
 
@@ -99,8 +119,11 @@ export default function GiftCards() {
         return false;
       }
       
-      if (selectedCategory !== 'all' && product.category !== selectedCategory) {
-        return false;
+      if (selectedCategory !== 'all') {
+        const productFriendlyCategory = getUserFriendlyCategory(product.category);
+        if (productFriendlyCategory !== selectedCategory) {
+          return false;
+        }
       }
       
       if (selectedCountry !== 'all') {
