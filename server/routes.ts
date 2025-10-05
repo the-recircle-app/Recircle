@@ -2,7 +2,7 @@ import express, { type Express, Request, Response, NextFunction } from "express"
 import { createServer, type Server } from "http";
 import path from "path";
 import { storage } from "./storage";
-import { ethers, formatUnits } from "ethers";
+import { ethers, formatUnits, parseUnits } from "ethers";
 
 // Memory optimization middleware
 function memoryOptimizationMiddleware(req: Request, res: Response, next: NextFunction) {

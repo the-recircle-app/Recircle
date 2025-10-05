@@ -294,10 +294,10 @@ export class RewardDistributor {
   
   private encodeTransfer(to: string, amount: number): string {
     // Encode ERC20 transfer function call
-    const iface = new ethers.utils.Interface(ERC20_ABI);
+    const iface = new ethers.Interface(ERC20_ABI);
     return iface.encodeFunctionData('transfer', [
       to,
-      ethers.utils.parseUnits(amount.toString(), 18)
+      ethers.parseUnits(amount.toString(), 18)
     ]);
   }
 }
@@ -339,9 +339,10 @@ export class VeBetterDAOClient {
     metadata: any
   ): string {
     // Encode VeBetterDAO allocation function
-    return ethers.utils.defaultAbiCoder.encode(
+    const abiCoder = ethers.AbiCoder.defaultAbiCoder();
+    return abiCoder.encode(
       ['address', 'uint256', 'bytes'],
-      [user, ethers.utils.parseUnits(amount.toString(), 18), metadata]
+      [user, ethers.parseUnits(amount.toString(), 18), metadata]
     );
   }
 }
