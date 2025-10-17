@@ -6647,7 +6647,7 @@ app.post("/api/treasury/test-distribution", async (req: Request, res: Response) 
     }
   });
 
-  app.post('/api/gift-cards/purchase', requireAuth, receiptSubmissionRateLimit, async (req: Request, res: Response) => {
+  app.post('/api/gift-cards/purchase', receiptSubmissionRateLimit, async (req: Request, res: Response) => {
     try {
       const { productId, productName, amount, currency, email, txHash, connectedWallet } = req.body;
 
@@ -6658,21 +6658,12 @@ app.post("/api/treasury/test-distribution", async (req: Request, res: Response) 
         });
       }
 
-      // CRITICAL: Get authenticated user's wallet address from database
-      const authenticatedUserWallet = req.user!.walletAddress;
-      if (!authenticatedUserWallet) {
+      // Get user by wallet address (transaction verification will prove ownership)
+      const user = await storage.getUserByWalletAddress(connectedWallet.toLowerCase());
+      if (!user) {
         return res.status(400).json({
           success: false,
-          error: 'No wallet address associated with your account. Please connect your wallet first.',
-        });
-      }
-
-      // CRITICAL: Verify the currently connected wallet matches the authenticated user's stored wallet
-      // This ensures the user has the wallet connected in their current session
-      if (connectedWallet.toLowerCase() !== authenticatedUserWallet.toLowerCase()) {
-        return res.status(400).json({
-          success: false,
-          error: 'Connected wallet does not match your account wallet. Please reconnect with the correct wallet.',
+          error: 'Wallet not registered. Please connect your wallet first.',
         });
       }
 
@@ -6755,16 +6746,16 @@ app.post("/api/treasury/test-distribution", async (req: Request, res: Response) 
           sender: tx.origin,
           recipient,
           transferredAmount,
-          expectedSender: authenticatedUserWallet.toLowerCase(),
+          expectedSender: connectedWallet.toLowerCase(),
           expectedRecipient: APP_FUND_WALLET.toLowerCase(),
           expectedAmount: expectedB3TRAmount,
         });
 
-        // CRITICAL: Verify the sender matches the authenticated user's wallet
-        if (tx.origin.toLowerCase() !== authenticatedUserWallet.toLowerCase()) {
+        // CRITICAL: Verify the sender matches the connected wallet
+        if (tx.origin.toLowerCase() !== connectedWallet.toLowerCase()) {
           return res.status(400).json({
             success: false,
-            error: `Transaction sender (${tx.origin}) does not match your authenticated wallet address.`,
+            error: `Transaction sender (${tx.origin}) does not match your connected wallet address.`,
           });
         }
 
@@ -6795,13 +6786,13 @@ app.post("/api/treasury/test-distribution", async (req: Request, res: Response) 
         });
       }
 
-      const externalId = `recircle_${req.user!.id}_${Date.now()}`;
+      const externalId = `recircle_${user.id}_${Date.now()}`;
 
       // Create order record with verified payment
       const orderRecord = await storage.db.insert(giftCardOrders).values({
-        userId: req.user!.id,
+        userId: user.id,
         userEmail: email,
-        userWalletAddress: authenticatedUserWallet,
+        userWalletAddress: connectedWallet.toLowerCase(),
         appWalletAddress: APP_FUND_WALLET,
         userTxHash: txHash,
         giftCardSku: productId,
@@ -6819,7 +6810,7 @@ app.post("/api/treasury/test-distribution", async (req: Request, res: Response) 
       try {
         const tremendousResult = await createTremendousOrder({
           recipientEmail: email,
-          recipientName: req.user!.username || 'ReCircle User',
+          recipientName: user.username || 'ReCircle User',
           productId,
           amount,
           currency: currency || 'USD',
