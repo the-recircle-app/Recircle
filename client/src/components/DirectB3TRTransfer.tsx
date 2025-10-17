@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Interface } from '@ethersproject/abi';
 import { parseUnits } from '@ethersproject/units';
+import { useSendTransaction } from '@vechain/dapp-kit-react';
 
 const B3TR_CONTRACT_ADDRESS = '0xbf64cf86894Ee0877C4e7d03936e35Ee8D8b864F';
 
@@ -49,43 +50,9 @@ export function DirectB3TRTransfer({
   const [processedError, setProcessedError] = useState<TransactionError | null>(null);
   const [txReceipt, setTxReceipt] = useState<any>(null);
   const [isPending, setIsPending] = useState(false);
-  const [connexAvailable, setConnexAvailable] = useState(false);
-
-  // Check for Connex availability
-  useEffect(() => {
-    const checkConnex = () => {
-      if (window.connex) {
-        console.log('[DIRECT-B3TR] ✅ Connex detected!', {
-          version: window.connex.version,
-          genesis: window.connex.thor?.genesis,
-        });
-        setConnexAvailable(true);
-        return true;
-      }
-      return false;
-    };
-
-    // Check immediately
-    if (checkConnex()) return;
-
-    // If not available, set up polling
-    const interval = setInterval(() => {
-      if (checkConnex()) {
-        clearInterval(interval);
-      }
-    }, 500);
-
-    // Clean up after 10 seconds
-    const timeout = setTimeout(() => {
-      clearInterval(interval);
-      console.error('[DIRECT-B3TR] Connex not available after 10 seconds');
-    }, 10000);
-
-    return () => {
-      clearInterval(interval);
-      clearTimeout(timeout);
-    };
-  }, []);
+  
+  // Use VeChain Kit's sendTransaction hook - works with VeWorld mobile!
+  const { send } = useSendTransaction();
 
   // Process and categorize errors
   const processError = (err: any): TransactionError => {
@@ -114,12 +81,11 @@ export function DirectB3TRTransfer({
   };
 
   const sendTransfer = useCallback(async () => {
-    console.log('[DIRECT-B3TR] sendTransfer called!', {
+    console.log('[DIRECT-B3TR] sendTransfer called with VeChain Kit!', {
       userAddress,
       recipientAddress,
       amount,
-      connexAvailable,
-      hasConnex: !!window.connex,
+      hasVeChainKit: !!send,
     });
 
     // Reset states
@@ -135,8 +101,8 @@ export function DirectB3TRTransfer({
       return;
     }
 
-    if (!connexAvailable || !window.connex) {
-      const error = new Error('VeWorld wallet not available. Please ensure you are using the VeWorld app.') as TransactionError;
+    if (!send) {
+      const error = new Error('VeChain Kit not available. Please ensure you are connected.') as TransactionError;
       error.type = 'technical';
       setProcessedError(error);
       setTransactionState('error');
@@ -148,7 +114,7 @@ export function DirectB3TRTransfer({
       setIsPending(true);
       setTransactionState('signing');
 
-      // Create transfer clause
+      // Create transfer clause using VeChain Kit
       const b3trInterface = new Interface(VIP180_ABI);
       const amountInWei = parseUnits(amount, 18).toString();
       
@@ -159,49 +125,32 @@ export function DirectB3TRTransfer({
           recipientAddress,
           amountInWei,
         ]),
-        comment: `Transfer ${amount} B3TR tokens`,
       };
 
-      console.log('[DIRECT-B3TR] Sending transaction with clause:', clause);
+      console.log('[DIRECT-B3TR] Sending transaction with VeChain Kit:', clause);
 
-      // Use proper chained syntax according to VeChain documentation
-      const result = await window.connex.vendor
-        .sign('tx', [clause])
-        .comment(`Transfer ${amount} B3TR to ${recipientAddress}`)
-        .request();
+      // Use VeChain Kit's send method - works with VeWorld mobile!
+      const result = await send({
+        clauses: [clause],
+        comment: `Transfer ${amount} B3TR to ${recipientAddress}`,
+      });
       
       console.log('[DIRECT-B3TR] Transaction result:', result);
 
-      if (result) {
+      if (result && result.txId) {
         setTransactionState('confirming');
         
-        // Wait for transaction to be included in a block
-        const ticker = window.connex.thor.ticker();
-        await ticker.next();
+        const receiptData = {
+          meta: {
+            txID: result.txId,
+          },
+        };
         
-        // Get transaction receipt
-        const receipt = await window.connex.thor.transaction(result.txid).getReceipt();
+        setTxReceipt(receiptData);
+        setTransactionState('success');
         
-        console.log('[DIRECT-B3TR] Transaction receipt:', receipt);
-        
-        if (receipt) {
-          const receiptData = {
-            meta: {
-              txID: result.txid,
-              blockNumber: receipt.meta.blockNumber,
-              blockTimestamp: receipt.meta.blockTimestamp
-            },
-            gasUsed: receipt.gasUsed,
-            reverted: receipt.reverted,
-            outputs: receipt.outputs
-          };
-          
-          setTxReceipt(receiptData);
-          setTransactionState('success');
-          
-          if (onSuccess) {
-            onSuccess(result.txid, receiptData);
-          }
+        if (onSuccess) {
+          onSuccess(result.txId, receiptData);
         }
       }
     } catch (err: any) {
@@ -216,7 +165,7 @@ export function DirectB3TRTransfer({
     } finally {
       setIsPending(false);
     }
-  }, [userAddress, recipientAddress, amount, connexAvailable, onSuccess, onError]);
+  }, [userAddress, recipientAddress, amount, send, onSuccess, onError]);
 
   return children({
     sendTransfer,
