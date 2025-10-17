@@ -99,41 +99,40 @@ export class MobileConnexInitializer {
   }
 
   /**
-   * Create Connex manually for VeWorld mobile
-   * VeWorld mobile doesn't auto-inject Connex - we must create it ourselves
+   * Wait for VeWorld's native Connex injection
+   * VeWorld mobile DOES inject Connex, it just takes 5-15 seconds
    */
   private async createConnexForVeWorldMobile(): Promise<void> {
-    console.log('[MOBILE-CONNEX] Creating Connex manually for VeWorld mobile...');
+    console.log('[MOBILE-CONNEX] Waiting for VeWorld native Connex...');
     
-    // Check if Connex is already available (desktop/extension)
+    // Check if already available
     if (window.connex && window.connex.vendor && window.connex.vendor.sign) {
-      console.log('[MOBILE-CONNEX] ✅ Connex already exists (desktop/extension)');
+      console.log('[MOBILE-CONNEX] ✅ Real Connex already exists!');
       return;
     }
     
-    try {
-      // Import Connex library (default export)
-      const Connex = (await import('@vechain/connex')).default;
+    // Wait up to 20 seconds for VeWorld to inject Connex
+    const maxWait = 20000;
+    const checkInterval = 500;
+    const startTime = Date.now();
+    
+    while (Date.now() - startTime < maxWait) {
+      if (window.connex && window.connex.vendor && window.connex.vendor.sign) {
+        const waitedMs = Date.now() - startTime;
+        console.log('[MOBILE-CONNEX] ✅ VeWorld native Connex detected!', {
+          waitedMs,
+          hasVendor: !!window.connex.vendor,
+          hasSign: !!window.connex.vendor?.sign,
+          hasThor: !!window.connex.thor
+        });
+        return;
+      }
       
-      // Create Connex instance with testnet configuration
-      const connex = new Connex({
-        node: 'https://vethor-node-test.vechaindev.com', // Testnet node
-        network: 'test', // Testnet
-      });
-      
-      // Inject it into window for compatibility
-      window.connex = connex;
-      
-      console.log('[MOBILE-CONNEX] ✅ Connex created successfully!', {
-        version: connex.version,
-        hasVendor: !!connex.vendor,
-        hasSign: !!connex.vendor?.sign,
-        hasThor: !!connex.thor
-      });
-    } catch (error) {
-      console.error('[MOBILE-CONNEX] Failed to create Connex:', error);
-      throw error;
+      await new Promise(resolve => setTimeout(resolve, checkInterval));
     }
+    
+    console.warn('[MOBILE-CONNEX] ⚠️ Timeout waiting for VeWorld Connex after 20s');
+    throw new Error('VeWorld Connex not available after 20 seconds. Please refresh the page.');
   }
 
   /**
