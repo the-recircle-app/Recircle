@@ -1,9 +1,9 @@
 import NodeCache from 'node-cache';
 
 const COINGECKO_API = 'https://api.coingecko.com/api/v3';
-const B3TR_COINGECKO_ID = 'vechain-vtho';
+const B3TR_COINGECKO_ID = 'vebetterdao';
 const CACHE_TTL_SECONDS = 60;
-const TESTING_FALLBACK_PRICE = 0.50;
+const TESTING_FALLBACK_PRICE = 0.07;
 
 const priceCache = new NodeCache({ stdTTL: CACHE_TTL_SECONDS });
 

@@ -199,7 +199,7 @@ export default function GiftCards() {
         <div className="p-4 text-center">
           <p className="text-gray-400">Connect your wallet to access the gift card marketplace</p>
         </div>
-        <BottomNavigation />
+        <BottomNavigation isConnected={isConnected} />
       </div>
     );
   }

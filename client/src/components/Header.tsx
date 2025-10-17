@@ -9,6 +9,7 @@ import B3trLogo from './B3trLogo';
 import LiveB3TRBalance from './LiveB3TRBalance';
 import { Link } from 'wouter';
 import { featureFlags } from '../lib/environment';
+import { useWallet } from '../context/WalletContext';
 
 interface HeaderProps {
   className?: string;
@@ -25,6 +26,7 @@ const Header: React.FC<HeaderProps> = ({
   useIntegratedLogo = true,
   useEarthColors = true // Default to using earth colors
 }) => {
+  const { isConnected } = useWallet();
   const blue = "#1565C0"; // Rich blue color
   
   const highlightBlue = "#38BDF8"; // Bright cyan/blue for dark theme
@@ -34,7 +36,7 @@ const Header: React.FC<HeaderProps> = ({
       <div className="flex items-center justify-between">
         {/* Left side: Brand Logo */}
         <div className="flex items-center">
-          <Link href="/">
+          <Link href={isConnected ? "/home" : "/"}>
             <div className="flex items-center cursor-pointer">
               {useEarthColors ? (
                 <ReCircleLogoEarth size="md" variant="gradient" />
