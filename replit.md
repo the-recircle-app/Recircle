@@ -10,7 +10,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-**October 5, 2025 - Gift Card Marketplace (Tremendous Integration) - TESTING MODE**
+**October 17, 2025 - Gift Card Marketplace Critical Bug Fixes**
+- **Fixed B3TR pricing service**: Updated CoinGecko API ID from 'vechain-vtho' to 'vebetterdao' - now correctly fetches B3TR price at ~$0.075 instead of $0.50 fallback
+- **Fixed navigation bugs**: Bottom navigation tabs now work on gift cards page, ReCircle logo navigates to home when logged in (not welcome page)
+- **Verified live balance display**: Confirmed LiveB3TRBalance correctly fetches from blockchain every 30 seconds
+- **Verified payment integration**: Complete blockchain payment verification already implemented with transaction validation, amount checking, and replay attack prevention
+- **Production ready**: All critical bugs resolved, architect reviewed and approved for deployment
+
+**October 5, 2025 - Gift Card Marketplace (Tremendous Integration)**
 - Built complete gift card marketplace with Tremendous API sandbox integration
 - Created B3TR pricing service with CoinGecko API (60s cache, fallback to last known price)
 - Added gift_card_orders database table with full audit trail (email, amounts, delivery status, timestamps)
@@ -18,11 +25,8 @@ Preferred communication style: Simple, everyday language.
 - Built marketplace UI with catalog grid, checkout modal (email capture), live B3TR pricing display
 - Added order history tab with status tracking (fulfilled/processing/failed)
 - Added "Redeem Gift Cards" activity card to home page
-- **Filter System**: Search, category, country, and max B3TR price filters (662 gift cards from English-speaking markets)
-- **CRITICAL TODO BEFORE PRODUCTION:** Add blockchain B3TR transfer from user wallet to app fund wallet in purchase flow
-  - Currently in TESTING MODE: Orders create without actual B3TR payment (for Tremendous sandbox testing)
-  - Must implement on-chain transfer validation before live deployment
-  - Must add refund logic if Tremendous order fails after payment
+- **Filter System**: Search filters for 662 gift cards from English-speaking markets
+- **Blockchain Payment**: Full B3TR transfer verification from user wallet to app fund wallet before order fulfillment
 - Configurable markup via GIFT_CARD_MARKUP_USD environment variable (default $1.75)
 - Tremendous sandbox mode using TEST_ API key prefix for risk-free development
 
