@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
+import { useWallet } from '@vechain/vechain-kit';
 import { Interface } from '@ethersproject/abi';
 import { parseUnits } from '@ethersproject/units';
 
@@ -45,12 +46,13 @@ export function DirectB3TRTransfer({
   onError,
   children 
 }: DirectB3TRTransferProps) {
+  const { account } = useWallet();
   const [isPending, setIsPending] = useState(false);
   const [processedError, setProcessedError] = useState<TransactionError | null>(null);
   const [txReceipt, setTxReceipt] = useState<any>(null);
   const [transactionState, setTransactionState] = useState<'idle' | 'preparing' | 'signing' | 'sending' | 'confirming' | 'success' | 'error'>('idle');
 
-  // Build clause for raw Connex
+  // Build clause for transaction
   const clause = useMemo(() => {
     if (!recipientAddress || !amount) return null;
     
@@ -97,7 +99,7 @@ export function DirectB3TRTransfer({
     return error;
   }, []);
 
-  // Send transaction using raw window.connex
+  // Send transaction - detects wallet type and uses correct signing method
   const handleSendTransfer = useCallback(async () => {
     if (!userAddress) {
       const error = new Error('No wallet address available') as TransactionError;
@@ -117,31 +119,58 @@ export function DirectB3TRTransfer({
       return;
     }
 
-    if (typeof window === 'undefined' || !window.connex) {
-      const error = new Error('Connex not available - please use VeWorld wallet') as TransactionError;
-      error.type = 'technical';
-      setProcessedError(error);
-      setTransactionState('error');
-      if (onError) onError(error);
-      return;
-    }
-
     try {
       setIsPending(true);
       setTransactionState('preparing');
       setProcessedError(null);
       
-      console.log('[DIRECT-B3TR] Sending via raw Connex:', { clause, userAddress });
+      const walletType = (account as any)?.type || 'unknown';
+      console.log('[DIRECT-B3TR] Wallet detection:', {
+        walletType,
+        hasAccount: !!account,
+        accountAddress: account?.address,
+        userAddress,
+        clause
+      });
       
-      setTransactionState('signing');
+      let result: any;
       
-      // Use raw Connex API - same pattern as the working test button
-      const result = await window.connex.vendor
-        .sign('tx', [clause])
-        .signer(userAddress)
-        .request();
-      
-      console.log('[DIRECT-B3TR] Transaction result:', result);
+      // VeWorld mobile uses DAppKit
+      if (walletType === 'dappKit') {
+        console.log('[DIRECT-B3TR] 🔵 Using DAppKit signing for VeWorld mobile');
+        setTransactionState('signing');
+        
+        if (!account || !(account as any).signTransaction) {
+          throw new Error('DAppKit account missing signTransaction method');
+        }
+        
+        result = await (account as any).signTransaction({
+          clauses: [clause],
+          comment: `Transfer ${amount} B3TR`,
+          callbacks: {
+            returnUrl: window.location.href
+          }
+        });
+        
+        console.log('[DIRECT-B3TR] ✅ DAppKit transaction result:', result);
+      } 
+      // Desktop VeWorld uses Connex
+      else {
+        console.log('[DIRECT-B3TR] 🟢 Using Connex signing for desktop VeWorld');
+        
+        if (typeof window === 'undefined' || !window.connex) {
+          throw new Error('Connex not available');
+        }
+        
+        setTransactionState('signing');
+        
+        result = await window.connex.vendor
+          .sign('tx', [clause])
+          .signer(userAddress)
+          .request();
+        
+        console.log('[DIRECT-B3TR] ✅ Connex transaction result:', result);
+      }
       
       setTransactionState('success');
       setTxReceipt(result);
@@ -151,7 +180,7 @@ export function DirectB3TRTransfer({
         onSuccess(result.txid, result);
       }
     } catch (err: any) {
-      console.error('[DIRECT-B3TR] Transaction failed:', err);
+      console.error('[DIRECT-B3TR] ❌ Transaction failed:', err);
       const processedErr = processError(err);
       setProcessedError(processedErr);
       setTransactionState('error');
@@ -159,7 +188,7 @@ export function DirectB3TRTransfer({
       
       if (onError) onError(processedErr);
     }
-  }, [userAddress, clause, processError, onSuccess, onError]);
+  }, [userAddress, account, clause, amount, processError, onSuccess, onError]);
 
   return children({
     sendTransfer: handleSendTransfer,
