@@ -488,15 +488,15 @@ export const vechain = {
                 } else {
                   throw new Error("User rejected the connection request");
                 }
-              }
-            })
-          }
-        };
-        
-        // Also create comprehensive vechain object for compatibility
-        window.vechain = {
-          isVeWorld: true,
-          newConnexSigner: () => ({
+            }
+          })
+        }
+      };
+      
+      // Also create comprehensive vechain object for compatibility
+      window.vechain = {
+        isVeWorld: true,
+        newConnexSigner: () => ({
             sign: async (kind: string, message: any) => {
               const userConfirmed = confirm(
                 `VeWorld Connection Request\n\n${message.payload?.content || 'Connect wallet'}\n\nConnect your wallet?`
@@ -532,6 +532,7 @@ export const vechain = {
         
         console.log("Mock VeWorld environment created for development");
       }, 5000); // Wait 5 seconds before creating mock
-    }
   }
 };
+
+export default vechain;
