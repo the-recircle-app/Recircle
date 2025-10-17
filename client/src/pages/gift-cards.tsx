@@ -33,7 +33,7 @@ interface GiftCardProduct {
 }
 
 export default function GiftCards() {
-  const { userId, tokenBalance, isConnected } = useWallet();
+  const { userId, tokenBalance, isConnected, address: walletAddress } = useWallet();
   const { account } = useVeChainKitWallet();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -596,7 +596,7 @@ export default function GiftCards() {
             <DirectB3TRTransfer
               recipientAddress='0x119761865b79bea9e7924edaa630942322ca09d1'
               amount={calculateB3TRCost(parseFloat(amount || '0')).toString()}
-              userAddress={account?.address || ''}
+              userAddress={walletAddress || ''}
               onSuccess={handlePaymentSuccess}
               onError={handlePaymentError}
             >
@@ -609,7 +609,8 @@ export default function GiftCards() {
                   paymentStatus,
                   amount: calculateB3TRCost(parseFloat(amount || '0')).toString(),
                   recipientAddress: '0x119761865b79bea9e7924edaa630942322ca09d1',
-                  userAddress: account?.address,
+                  userAddress: walletAddress,
+                  accountAddress: account?.address,
                   hasConnex: !!window.connex,
                 });
                 return (
