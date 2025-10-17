@@ -231,20 +231,20 @@ function App() {
       }
     }, 1000);
     
-    // DISABLED - Mobile Connex creates mock transactions
-    // const initMobileWallet = async () => {
-    //   try {
-    //     const success = await mobileConnexInit.initializeMobileConnex();
-    //     if (success) {
-    //       console.log('[APP] Mobile Connex initialized successfully');
-    //     }
-    //   } catch (error) {
-    //     console.log('[APP] Mobile Connex initialization skipped:', (error as Error).message);
-    //   }
-    // };
-    // 
-    // initMobileWallet();
-    console.log('[APP] Mobile Connex initialization DISABLED - No mock transactions');
+    // Initialize mobile Connex for VeWorld app (but no mock transactions)
+    const initMobileWallet = async () => {
+      try {
+        const success = await mobileConnexInit.initializeMobileConnex();
+        if (success) {
+          console.log('[APP] Mobile Connex initialized successfully');
+        }
+      } catch (error) {
+        console.log('[APP] Mobile Connex initialization skipped:', (error as Error).message);
+      }
+    };
+    
+    initMobileWallet();
+    console.log('[APP] Mobile Connex initialization enabled (mock transactions disabled)');
   }, []);
 
   return (

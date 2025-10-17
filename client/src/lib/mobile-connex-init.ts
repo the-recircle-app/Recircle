@@ -80,10 +80,28 @@ export class MobileConnexInitializer {
    */
   private isVeWorldMobileApp(): boolean {
     const userAgent = navigator.userAgent.toLowerCase();
-    const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
-    const hasVeChainProvider = typeof window.vechain !== 'undefined';
     
-    return isMobile && hasVeChainProvider;
+    // Check if user agent contains VeWorld
+    const isVeWorldUserAgent = userAgent.includes('veworld');
+    
+    // Check if mobile device
+    const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+    
+    // ALWAYS try to initialize in development mode to help VeWorld work
+    // This helps both desktop and mobile VeWorld browsers
+    console.log('[MOBILE-CONNEX] User agent check:', {
+      userAgent: userAgent,
+      isVeWorldUserAgent,
+      isMobile,
+      isDevelopment: import.meta.env.DEV
+    });
+    
+    // In development, always try to help VeWorld inject Connex
+    if (import.meta.env.DEV) {
+      return true; // Always wait for VeWorld in development
+    }
+    
+    return isVeWorldUserAgent || isMobile;
   }
 
   /**
@@ -93,28 +111,32 @@ export class MobileConnexInitializer {
     console.log('[MOBILE-CONNEX] Waiting for VeWorld providers...');
     
     let attempts = 0;
-    const maxAttempts = 30; // 6 seconds total (VeWorld can take 2+ seconds)
+    const maxAttempts = 60; // 12 seconds total (VeWorld can take 5-10 seconds)
     
     while (attempts < maxAttempts) {
-      // Check for real Connex first
+      // Check for real Connex first (THIS is what we want!)
       if (window.connex && window.connex.vendor && window.connex.vendor.sign) {
-        console.log('[MOBILE-CONNEX] Real Connex found after', attempts * 200, 'ms');
+        console.log('[MOBILE-CONNEX] ✅ Real Connex found after', attempts * 200, 'ms');
+        console.log('[MOBILE-CONNEX] Real Connex details:', {
+          version: window.connex.version,
+          hasVendor: !!window.connex.vendor,
+          hasSign: !!window.connex.vendor?.sign,
+          hasThor: !!window.connex.thor
+        });
         return;
       }
       
       // Then check for vechain provider
       if (window.vechain) {
         console.log('[MOBILE-CONNEX] VeChain provider found after', attempts * 200, 'ms');
-        // Wait a bit more for Connex to be injected
-        await new Promise(resolve => setTimeout(resolve, 500));
-        return;
+        // Keep waiting for Connex to be injected
       }
       
       await new Promise(resolve => setTimeout(resolve, 200));
       attempts++;
     }
     
-    console.log('[MOBILE-CONNEX] No providers found after 6 seconds - VeWorld might not have injected them');
+    console.log('[MOBILE-CONNEX] No Connex found after 12 seconds - may need to create bridge');
   }
 
   /**
