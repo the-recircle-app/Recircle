@@ -443,8 +443,8 @@ export default function GiftCards() {
                 console.log('[TEST] Sending transaction with clause:', clause);
                 console.log('[TEST] walletAddress:', walletAddress);
                 
-                // Sign without .comment() since VeWorld mobile doesn't support it
-                const signingService = window.connex.vendor.sign('tx', [clause]);
+                // Use correct Connex API: clauses go in .request(), not .sign()
+                const signingService = window.connex.vendor.sign('tx');
                 
                 // Log available methods to debug
                 console.log('[TEST] SigningService type:', typeof signingService);
@@ -460,7 +460,7 @@ export default function GiftCards() {
                   signingService.gas(100000);
                 }
                 
-                const result = await signingService.request();
+                const result = await signingService.request([clause]);
                 console.log('[TEST] Transaction result:', result);
                 alert(`✅ Transaction sent! TX ID: ${result.txid}`);
                 
