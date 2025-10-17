@@ -154,10 +154,10 @@ export function DirectB3TRTransfer({
 
       console.log('[DIRECT-B3TR] Sending transaction with clause:', clause);
 
-      // Use Connex vendor.sign method
+      // Use Connex vendor.sign method (clauses go in .request(), not .sign())
       const result = await window.connex.vendor
-        .sign('tx', [clause])
-        .request();
+        .sign('tx')
+        .request([clause]);
       
       console.log('[DIRECT-B3TR] Transaction result:', result);
 
