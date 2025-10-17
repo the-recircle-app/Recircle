@@ -423,6 +423,12 @@ export const vechain = {
 
   // Development mode: Create mock VeWorld environment
   initializeDevelopmentMode() {
+    // COMPLETELY DISABLED - NO MOCK CREATION
+    console.log("[VECHAIN] Mock creation DISABLED - Real VeWorld only");
+    return;
+    
+    // All the mock creation code below is now unreachable
+    /*
     // NEVER create mock in production
     if (!import.meta.env.DEV) {
       return;
@@ -532,6 +538,7 @@ export const vechain = {
         
         console.log("Mock VeWorld environment created for development");
       }, 5000); // Wait 5 seconds before creating mock
+      */
   }
 };
 
