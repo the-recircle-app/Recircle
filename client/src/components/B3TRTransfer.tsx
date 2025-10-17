@@ -260,6 +260,16 @@ export function B3TRTransfer({
   }, [error, onError]);
   
   const sendTransfer = async () => {
+    console.log('[B3TR-TRANSFER] sendTransfer called!', {
+      hasAccount: !!account?.address,
+      account: account?.address,
+      hasConnexNow: !!window.connex,
+      connexVersion: window.connex?.version,
+      recipientAddress,
+      amount,
+      clausesLength: clauses.length,
+    });
+    
     // Reset states
     setTransactionState('preparing');
     setProcessedError(null);

@@ -657,7 +657,17 @@ export default function GiftCards() {
 
                   {!txReceipt && paymentStatus !== 'verifying' && paymentStatus !== 'creating_order' && paymentStatus !== 'success' && (
                     <Button
-                      onClick={sendTransfer}
+                      onClick={() => {
+                        console.log('[GIFT-CARD] Pay button clicked!', {
+                          sendTransfer: typeof sendTransfer,
+                          isPending,
+                          purchaseMutation: purchaseMutation.isPending,
+                          paymentStatus,
+                          hasConnex: !!window.connex,
+                          connexVersion: window.connex?.version,
+                        });
+                        sendTransfer();
+                      }}
                       disabled={isPending || purchaseMutation.isPending}
                       className="w-full bg-pink-600 hover:bg-pink-700"
                     >
