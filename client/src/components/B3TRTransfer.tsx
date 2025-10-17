@@ -1,5 +1,5 @@
 import { useMemo, useEffect, useState } from 'react';
-import { useWallet, useSendTransaction } from '@vechain/vechain-kit';
+import { useWallet } from '@vechain/vechain-kit';
 import { Interface } from '@ethersproject/abi';
 import { parseUnits } from '@ethersproject/units';
 
@@ -74,6 +74,11 @@ export function B3TRTransfer({
     checkVTHOBalance();
   }, [account?.address]);
   
+  const [txReceipt, setTxReceipt] = useState<any>(null);
+  const [isTransactionPending, setIsTransactionPending] = useState(false);
+  const [status, setStatus] = useState<'idle' | 'pending' | 'success' | 'error'>('idle');
+  const [error, setError] = useState<any>(null);
+
   const clauses = useMemo(() => {
     if (!recipientAddress || !amount) return [];
     
@@ -96,16 +101,58 @@ export function B3TRTransfer({
     }
   }, [recipientAddress, amount]);
   
-  const { 
-    sendTransaction, 
-    status, 
-    txReceipt, 
-    isTransactionPending, 
-    error 
-  } = useSendTransaction({
-    clauses,
-    signerAccountAddress: account?.address,
-  });
+  // Direct Connex transaction function for VeWorld compatibility
+  const sendTransaction = async () => {
+    if (!window.connex) {
+      throw new Error('VeWorld wallet not detected. Please ensure you are using the VeWorld app.');
+    }
+    
+    if (!account?.address || clauses.length === 0) {
+      throw new Error('Invalid transaction parameters');
+    }
+    
+    try {
+      setIsTransactionPending(true);
+      setStatus('pending');
+      setError(null);
+      
+      // Use Connex directly for VeWorld mobile compatibility
+      const tx = window.connex.vendor.sign('tx', clauses)
+        .signer(account.address)
+        .comment(`Transfer ${amount} B3TR tokens to ${recipientAddress}`);
+      
+      const result = await tx.request();
+      
+      if (result) {
+        // Wait for transaction receipt
+        const ticker = window.connex.thor.ticker();
+        await ticker.next();
+        
+        // Get transaction receipt
+        const receipt = await window.connex.thor.transaction(result.txid).getReceipt();
+        
+        if (receipt) {
+          setTxReceipt({
+            meta: {
+              txID: result.txid,
+              blockNumber: receipt.meta.blockNumber,
+              blockTimestamp: receipt.meta.blockTimestamp
+            },
+            gasUsed: receipt.gasUsed,
+            reverted: receipt.reverted,
+            outputs: receipt.outputs
+          });
+          setStatus('success');
+        }
+      }
+    } catch (err: any) {
+      setError(err);
+      setStatus('error');
+      throw err;
+    } finally {
+      setIsTransactionPending(false);
+    }
+  };
   
   // Process and categorize errors
   const processError = (err: any): TransactionError => {
