@@ -423,6 +423,11 @@ export const vechain = {
 
   // Development mode: Create mock VeWorld environment
   initializeDevelopmentMode() {
+    // NEVER create mock in production
+    if (!import.meta.env.DEV) {
+      return;
+    }
+
     // Check if we're in actual VeWorld browser first
     const userAgent = navigator.userAgent;
     const isVeWorldMobile = userAgent.includes('VeWorld') || userAgent.includes('veworld');
@@ -433,36 +438,36 @@ export const vechain = {
       return;
     }
     
-    if (import.meta.env.DEV && !window.connex) {
-      console.log("Development mode: Creating mock Connex after delay");
+    // Wait longer (5 seconds) to give VeWorld time to inject Connex
+    console.log("Development mode: Will check for mock creation in 5 seconds...");
+    
+    setTimeout(() => {
+      // Double-check VeWorld isn't available before creating mocks
+      // Need to check for vendor.sign specifically as that's what we use for transactions
+      if ((window.connex && window.connex.vendor && window.connex.vendor.sign) || window.vechain) {
+        console.log("Real VeWorld providers found - skipping mock creation");
+        return;
+      }
       
-      setTimeout(() => {
-        // Double-check VeWorld isn't available before creating mocks
-        // Need to check for vendor.sign specifically as that's what we use for transactions
-        if ((window.connex && window.connex.vendor && window.connex.vendor.sign) || window.vechain) {
-          console.log("Real VeWorld providers found - aborting mock creation");
-          return;
-        }
-        
-        console.log("Creating mock Connex for development");
-        
-        // Mock Connex for development testing
-        window.connex = {
-          version: "2.0",
-          thor: {
-            genesis: {
-              id: '0x000000000b2bce3c70bc649a02749e8687721b09ed2e15997f466536b20bb127' // TestNet
-            },
-            account: (addr: string) => ({
-              get: async () => ({
-                balance: '0x56bc75e2d630eb20',
-                energy: '0x56bc75e2d630eb20'
-              })
-            })
+      console.log("No VeWorld detected after 5 seconds - creating mock Connex for development");
+      
+      // Mock Connex for development testing
+      window.connex = {
+        version: "2.0",
+        thor: {
+          genesis: {
+            id: '0x000000000b2bce3c70bc649a02749e8687721b09ed2e15997f466536b20bb127' // TestNet
           },
-          vendor: {
-            sign: (kind: string, message: any) => ({
-              request: async () => {
+          account: (addr: string) => ({
+            get: async () => ({
+              balance: '0x56bc75e2d630eb20',
+              energy: '0x56bc75e2d630eb20'
+            })
+          })
+        },
+        vendor: {
+          sign: (kind: string, message: any) => ({
+            request: async () => {
                 console.log("=== VeWorld Connection Attempt ===");
                 console.log("Sign request:", { kind, message });
                 
@@ -526,7 +531,7 @@ export const vechain = {
         };
         
         console.log("Mock VeWorld environment created for development");
-      }, 2000);
+      }, 5000); // Wait 5 seconds before creating mock
     }
   }
 };
