@@ -14,7 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Gift, CreditCard, CheckCircle, Clock, XCircle, Search, AlertCircle, Wallet, ExternalLink, ShieldCheck } from "lucide-react";
 import LiveB3TRBalance from "../components/LiveB3TRBalance";
 import B3trLogo from "../components/B3trLogo";
-import { B3TRTransfer } from "../components/B3TRTransfer";
+import { DirectB3TRTransfer } from "../components/DirectB3TRTransfer";
 import { formatDistanceToNow } from "date-fns";
 
 interface GiftCardProduct {
@@ -593,14 +593,15 @@ export default function GiftCards() {
               </Button>
             </div>
           ) : (
-            <B3TRTransfer
+            <DirectB3TRTransfer
               recipientAddress='0x119761865b79bea9e7924edaa630942322ca09d1'
               amount={calculateB3TRCost(parseFloat(amount || '0')).toString()}
+              userAddress={account?.address || ''}
               onSuccess={handlePaymentSuccess}
               onError={handlePaymentError}
             >
               {({ sendTransfer, isPending, error, txReceipt }) => {
-                console.log('[GIFT-CARD] B3TRTransfer render:', {
+                console.log('[GIFT-CARD] DirectB3TRTransfer render:', {
                   sendTransfer: typeof sendTransfer,
                   isPending,
                   error: error?.message,
@@ -608,6 +609,7 @@ export default function GiftCards() {
                   paymentStatus,
                   amount: calculateB3TRCost(parseFloat(amount || '0')).toString(),
                   recipientAddress: '0x119761865b79bea9e7924edaa630942322ca09d1',
+                  userAddress: account?.address,
                   hasConnex: !!window.connex,
                 });
                 return (
@@ -730,7 +732,7 @@ export default function GiftCards() {
                   )}
                 </div>
               )}}
-            </B3TRTransfer>
+            </DirectB3TRTransfer>
           )}
         </DialogContent>
       </Dialog>
