@@ -101,9 +101,34 @@ export function B3TRTransfer({
     }
   }, [recipientAddress, amount]);
   
+  // Wait for Connex to be available (VeWorld mobile injects it asynchronously)
+  const waitForConnex = async (maxWaitMs = 5000): Promise<boolean> => {
+    const checkInterval = 100; // Check every 100ms
+    const maxChecks = maxWaitMs / checkInterval;
+    
+    for (let i = 0; i < maxChecks; i++) {
+      if (window.connex) {
+        console.log('[B3TR-TRANSFER] ✅ Connex detected after', i * checkInterval, 'ms');
+        return true;
+      }
+      
+      if (i === 0) {
+        console.log('[B3TR-TRANSFER] Waiting for VeWorld Connex to be available...');
+      }
+      
+      await new Promise(resolve => setTimeout(resolve, checkInterval));
+    }
+    
+    console.error('[B3TR-TRANSFER] Connex not available after', maxWaitMs, 'ms');
+    return false;
+  };
+  
   // Direct Connex transaction function for VeWorld compatibility
   const sendTransaction = async () => {
-    if (!window.connex) {
+    // Wait for Connex to be available (VeWorld mobile loads it asynchronously)
+    const connexAvailable = await waitForConnex();
+    
+    if (!connexAvailable || !window.connex) {
       throw new Error('VeWorld wallet not detected. Please ensure you are using the VeWorld app.');
     }
     
