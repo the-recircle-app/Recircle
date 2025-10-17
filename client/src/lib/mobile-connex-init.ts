@@ -182,14 +182,9 @@ export class MobileConnexInitializer {
                   }
                 }
               } else if (type === 'tx') {
-                // Transaction signing - return mock result for now
-                console.log('[MOBILE-CONNEX] Mock transaction signing requested:', payload);
-                // Generate a fake transaction ID
-                const txid = '0x' + Array(64).fill(0).map(() => Math.floor(Math.random() * 16).toString(16)).join('');
-                return {
-                  txid: txid,
-                  signer: vechain.selectedAddress || vechain.accounts?.[0] || '0x0000000000000000000000000000000000000000'
-                };
+                // Don't create mock transactions - throw error to force real VeWorld
+                console.log('[MOBILE-CONNEX] Transaction signing requested but VeWorld not available');
+                throw new Error('Real VeWorld wallet required for transactions');
               }
               
               throw new Error('Mobile wallet signing not available');
