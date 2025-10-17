@@ -181,6 +181,15 @@ export class MobileConnexInitializer {
                     console.log('[MOBILE-CONNEX] enable method failed');
                   }
                 }
+              } else if (type === 'tx') {
+                // Transaction signing - return mock result for now
+                console.log('[MOBILE-CONNEX] Mock transaction signing requested:', payload);
+                // Generate a fake transaction ID
+                const txid = '0x' + Array(64).fill(0).map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+                return {
+                  txid: txid,
+                  signer: vechain.selectedAddress || vechain.accounts?.[0] || '0x0000000000000000000000000000000000000000'
+                };
               }
               
               throw new Error('Mobile wallet signing not available');

@@ -438,7 +438,8 @@ export const vechain = {
       
       setTimeout(() => {
         // Double-check VeWorld isn't available before creating mocks
-        if (window.connex || window.vechain) {
+        // Need to check for vendor.sign specifically as that's what we use for transactions
+        if ((window.connex && window.connex.vendor && window.connex.vendor.sign) || window.vechain) {
           console.log("Real VeWorld providers found - aborting mock creation");
           return;
         }
