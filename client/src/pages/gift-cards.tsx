@@ -594,7 +594,7 @@ export default function GiftCards() {
             </div>
           ) : (
             <B3TRTransfer
-              recipientAddress={process.env.VITE_APP_FUND_WALLET || '0x119761865b79bea9e7924edaa630942322ca09d1'}
+              recipientAddress='0x119761865b79bea9e7924edaa630942322ca09d1'
               amount={calculateB3TRCost(parseFloat(amount || '0')).toString()}
               onSuccess={handlePaymentSuccess}
               onError={handlePaymentError}
