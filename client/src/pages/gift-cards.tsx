@@ -437,7 +437,6 @@ export default function GiftCards() {
                     APP_FUND_WALLET,
                     amountInWei,
                   ]),
-                  comment: 'Test B3TR transfer',
                 };
                 
                 console.log('[TEST] Sending transaction with clause:', clause);
