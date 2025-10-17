@@ -5,6 +5,7 @@ import { storage } from "./storage";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 import { ethers, formatUnits, parseUnits } from "ethers";
+import { ThorClient } from '@vechain/sdk-network';
 
 // Memory optimization middleware
 function memoryOptimizationMiddleware(req: Request, res: Response, next: NextFunction) {
@@ -6689,7 +6690,7 @@ app.post("/api/treasury/test-distribution", async (req: Request, res: Response) 
 
       // Verify the B3TR payment on-chain
       try {
-        const thorClient = PierreContractsService.getThorClient();
+        const thorClient = new ThorClient('https://vethor-node-test.vechaindev.com');
         const B3TR_CONTRACT = process.env.B3TR_CONTRACT_ADDRESS || '0xbf64cf86894Ee0877C4e7d03936e35Ee8D8b864F';
         
         // Get the transaction from blockchain
