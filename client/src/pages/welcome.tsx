@@ -13,6 +13,11 @@ export default function Welcome() {
   
   useEffect(() => {
     const checkPlatform = () => {
+      const isDev = import.meta.env.DEV;
+      if (isDev) {
+        setShowWarning(false);
+        return;
+      }
       const shouldWarn = shouldShowVeWorldWarning();
       setShowWarning(shouldWarn);
     };
@@ -29,7 +34,7 @@ export default function Welcome() {
     setTimeout(() => {
       clearInterval(interval);
       checkPlatform();
-    }, 3000);
+    }, 10000);
     
     return () => clearInterval(interval);
   }, []);
