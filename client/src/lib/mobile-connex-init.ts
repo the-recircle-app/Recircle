@@ -55,18 +55,19 @@ export class MobileConnexInitializer {
       // Wait for VeWorld to inject providers
       await this.waitForVeWorldProviders();
 
-      // Create Connex if missing
-      if (!window.connex && window.vechain) {
-        console.log('[MOBILE-CONNEX] Creating Connex from VeChain provider...');
-        await this.createConnexFromVeChain();
+      // Check if real Connex was injected by VeWorld
+      if (window.connex && window.connex.vendor && window.connex.vendor.sign) {
+        console.log('[MOBILE-CONNEX] ✅ Real VeWorld Connex detected after wait!');
+        const connexWorking = await this.verifyConnex();
+        this.initSuccess = connexWorking;
+        return connexWorking;
       }
 
-      // Verify Connex is working
-      const connexWorking = await this.verifyConnex();
-      console.log('[MOBILE-CONNEX] Connex verification result:', connexWorking);
-
-      this.initSuccess = connexWorking;
-      return connexWorking;
+      // DO NOT create mock Connex - it causes "Real VeWorld wallet required" error
+      console.log('[MOBILE-CONNEX] ❌ Real Connex not found - VeWorld did not inject it');
+      console.log('[MOBILE-CONNEX] Mock Connex creation DISABLED to prevent transaction errors');
+      this.initSuccess = false;
+      return false;
 
     } catch (error) {
       console.error('[MOBILE-CONNEX] Initialization failed:', error);
