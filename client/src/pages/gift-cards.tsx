@@ -53,6 +53,31 @@ export default function GiftCards() {
   const [balanceCheckData, setBalanceCheckData] = useState<{ required: number; available: number } | null>(null);
   
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // Debug Connex state
+  const [connexDebugInfo, setConnexDebugInfo] = useState<any>(null);
+  
+  useEffect(() => {
+    const checkConnex = () => {
+      const info = {
+        hasWindow: typeof window !== 'undefined',
+        hasConnex: !!(window as any).connex,
+        hasVendor: !!(window as any).connex?.vendor,
+        hasSign: !!(window as any).connex?.vendor?.sign,
+        hasThor: !!(window as any).connex?.thor,
+        connexVersion: (window as any).connex?.version || 'N/A',
+        timestamp: new Date().toISOString()
+      };
+      setConnexDebugInfo(info);
+      console.log('[GIFT-CARDS] Connex check:', info);
+    };
+    
+    // Check immediately and every 2 seconds
+    checkConnex();
+    const interval = setInterval(checkConnex, 2000);
+    
+    return () => clearInterval(interval);
+  }, []);
 
   const { data: catalogData, isLoading: catalogLoading } = useQuery<{
     catalog: GiftCardProduct[];
@@ -913,6 +938,20 @@ export default function GiftCards() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* DEBUG PANEL - Remove after testing */}
+      {connexDebugInfo && (
+        <div className="fixed bottom-20 right-4 bg-black/90 text-green-400 p-4 rounded-lg text-xs font-mono max-w-xs z-50 border border-green-500">
+          <div className="text-yellow-400 mb-2">🔍 CONNEX DEBUG</div>
+          <div>Window: {connexDebugInfo.hasWindow ? '✅' : '❌'}</div>
+          <div>Connex: {connexDebugInfo.hasConnex ? '✅' : '❌'}</div>
+          <div>Vendor: {connexDebugInfo.hasVendor ? '✅' : '❌'}</div>
+          <div>Sign: {connexDebugInfo.hasSign ? '✅' : '❌'}</div>
+          <div>Thor: {connexDebugInfo.hasThor ? '✅' : '❌'}</div>
+          <div>Version: {connexDebugInfo.connexVersion}</div>
+          <div className="text-gray-500 mt-1">{new Date(connexDebugInfo.timestamp).toLocaleTimeString()}</div>
+        </div>
+      )}
 
       <BottomNavigation isConnected={isConnected} />
     </div>
