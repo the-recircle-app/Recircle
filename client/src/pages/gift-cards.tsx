@@ -253,9 +253,13 @@ export default function GiftCards() {
     console.error('[GIFT-CARD] Payment failed:', error);
     setPaymentStatus('error');
     
+    // Show the actual error message for debugging
+    const actualError = error.message || error.toString() || "Unknown error";
+    console.error('[GIFT-CARD] Actual error message:', actualError);
+    
     // Distinguish between different error types
     let errorTitle = "❌ Payment Failed";
-    let errorDescription = "B3TR transfer failed. Please try again.";
+    let errorDescription = actualError; // Show actual error for debugging
     
     if (error.message?.toLowerCase().includes('reject') || error.message?.toLowerCase().includes('denied')) {
       errorTitle = "🚫 Transaction Rejected";
@@ -266,13 +270,19 @@ export default function GiftCards() {
     } else if (error.message?.toLowerCase().includes('network') || error.message?.toLowerCase().includes('timeout')) {
       errorTitle = "🌐 Network Error";
       errorDescription = "Network connection issue. Please check your connection and try again.";
+    } else if (error.message?.toLowerCase().includes('connex')) {
+      errorTitle = "🔗 VeWorld Not Detected";
+      errorDescription = "Cannot connect to VeWorld wallet. Please ensure you're using the VeWorld app and try again.";
+    } else if (error.message?.toLowerCase().includes('invalid transaction')) {
+      errorTitle = "⚠️ Transaction Setup Failed";
+      errorDescription = "Could not prepare the transaction. Please refresh and try again.";
     }
     
     toast({
       title: errorTitle,
       description: errorDescription,
       variant: "destructive",
-      duration: 6000,
+      duration: 8000,
     });
     
     setIsPaymentStep(false);
