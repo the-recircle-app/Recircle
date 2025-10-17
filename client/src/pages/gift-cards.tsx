@@ -521,7 +521,7 @@ export default function GiftCards() {
         </DialogContent>
       </Dialog>
 
-      <BottomNavigation />
+      <BottomNavigation isConnected={isConnected} />
     </div>
   );
 }
