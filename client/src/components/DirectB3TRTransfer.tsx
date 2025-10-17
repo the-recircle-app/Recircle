@@ -164,14 +164,11 @@ export function DirectB3TRTransfer({
 
       console.log('[DIRECT-B3TR] Sending transaction with clause:', clause);
 
-      // Use Connex directly with correct syntax
-      const signingService = window.connex.vendor.sign('tx', [clause]);
-      
-      // Add comment for transaction
-      signingService.comment(`Transfer ${amount} B3TR to ${recipientAddress}`);
-      
-      // Request signature (this opens VeWorld)
-      const result = await signingService.request();
+      // Use proper chained syntax according to VeChain documentation
+      const result = await window.connex.vendor
+        .sign('tx', [clause])
+        .comment(`Transfer ${amount} B3TR to ${recipientAddress}`)
+        .request();
       
       console.log('[DIRECT-B3TR] Transaction result:', result);
 

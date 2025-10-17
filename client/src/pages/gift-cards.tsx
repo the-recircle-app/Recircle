@@ -416,15 +416,13 @@ export default function GiftCards() {
                 };
                 
                 console.log('[TEST] Sending transaction with clause:', clause);
+                console.log('[TEST] walletAddress:', walletAddress);
                 
-                // Create signing service with proper syntax
-                const signingService = window.connex.vendor.sign('tx', [clause]);
-                
-                // Add comment
-                signingService.comment('Test: Send 1 B3TR');
-                
-                // Request signature from user (this will open VeWorld)
-                const result = await signingService.request();
+                // Use proper chained syntax according to VeChain docs
+                const result = await window.connex.vendor
+                  .sign('tx', [clause])
+                  .comment('Test: Send 1 B3TR')
+                  .request();
                 console.log('[TEST] Transaction result:', result);
                 alert(`✅ Transaction sent! TX ID: ${result.txid}`);
                 
