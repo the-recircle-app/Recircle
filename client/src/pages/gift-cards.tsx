@@ -343,6 +343,37 @@ export default function GiftCards() {
           </div>
         </div>
 
+        {/* Debug Test Button */}
+        <div className="mb-4">
+          <Button 
+            onClick={() => {
+              console.log('[TEST] Test button clicked!');
+              console.log('[TEST] window.connex:', window.connex);
+              console.log('[TEST] walletAddress:', walletAddress);
+              
+              // Force refresh to ensure we have latest code
+              window.location.reload();
+            }}
+            className="bg-purple-600 hover:bg-purple-700"
+          >
+            🔄 Reload Page (Force Refresh)
+          </Button>
+          
+          <Button 
+            onClick={() => {
+              console.log('[TEST] Connex test clicked!');
+              if (window.connex) {
+                alert(`✅ Connex Found! Version: ${window.connex.version}`);
+              } else {
+                alert('❌ Connex NOT found!');
+              }
+            }}
+            className="bg-green-600 hover:bg-green-700 ml-2"
+          >
+            🧪 Test Connex
+          </Button>
+        </div>
+
         <Tabs defaultValue="marketplace" className="w-full">
           <TabsList className="grid w-full grid-cols-2 bg-gray-800">
             <TabsTrigger value="marketplace" className="data-[state=active]:bg-pink-600">
