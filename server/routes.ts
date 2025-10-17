@@ -63,6 +63,7 @@ import {
   requireOwnership, 
   requireReceiptAccess 
 } from "./middlewares/authentication";
+import { requireGiftCardAuth } from "./middlewares/giftCardAuth";
 import productionTestRoutes from './routes/production-test.js';
 import { 
   calculateReceiptReward, 
@@ -6647,7 +6648,7 @@ app.post("/api/treasury/test-distribution", async (req: Request, res: Response) 
     }
   });
 
-  app.post('/api/gift-cards/purchase', requireAuth, receiptSubmissionRateLimit, async (req: Request, res: Response) => {
+  app.post('/api/gift-cards/purchase', requireGiftCardAuth, receiptSubmissionRateLimit, async (req: Request, res: Response) => {
     try {
       const { productId, productName, amount, currency, email, txHash, connectedWallet } = req.body;
 
