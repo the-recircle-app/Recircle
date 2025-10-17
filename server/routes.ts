@@ -2,6 +2,8 @@ import express, { type Express, Request, Response, NextFunction } from "express"
 import { createServer, type Server } from "http";
 import path from "path";
 import { storage } from "./storage";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 import { ethers, formatUnits, parseUnits } from "ethers";
 
 // Memory optimization middleware
@@ -6673,7 +6675,7 @@ app.post("/api/treasury/test-distribution", async (req: Request, res: Response) 
       console.log(`[GIFT-CARD-PURCHASE] Verifying payment for ${expectedB3TRAmount} B3TR (txHash: ${txHash})`);
 
       // CRITICAL: Check for replay attacks - ensure txHash hasn't been used before
-      const existingOrder = await storage.db.select()
+      const existingOrder = await db.select()
         .from(giftCardOrders)
         .where(eq(giftCardOrders.userTxHash, txHash))
         .limit(1);
@@ -6789,7 +6791,7 @@ app.post("/api/treasury/test-distribution", async (req: Request, res: Response) 
       const externalId = `recircle_${user.id}_${Date.now()}`;
 
       // Create order record with verified payment
-      const orderRecord = await storage.db.insert(giftCardOrders).values({
+      const orderRecord = await db.insert(giftCardOrders).values({
         userId: user.id,
         userEmail: email,
         userWalletAddress: connectedWallet.toLowerCase(),
@@ -6817,7 +6819,7 @@ app.post("/api/treasury/test-distribution", async (req: Request, res: Response) 
           externalId,
         });
 
-        await storage.db.update(giftCardOrders)
+        await db.update(giftCardOrders)
           .set({
             tremendousOrderId: tremendousResult.orderId,
             tremendousRewardId: tremendousResult.rewardId,
@@ -6844,7 +6846,7 @@ app.post("/api/treasury/test-distribution", async (req: Request, res: Response) 
         
         // IMPORTANT: Payment was already verified and received
         // Mark as failed but note that refund may be needed
-        await storage.db.update(giftCardOrders)
+        await db.update(giftCardOrders)
           .set({
             status: 'failed',
             failureReason: `Tremendous order failed: ${error.message}. Payment received, manual refund may be required.`,
@@ -6870,7 +6872,7 @@ app.post("/api/treasury/test-distribution", async (req: Request, res: Response) 
 
   app.get('/api/gift-cards/orders', requireAuth, generalRateLimit, async (req: Request, res: Response) => {
     try {
-      const orders = await storage.db.select()
+      const orders = await db.select()
         .from(giftCardOrders)
         .where(eq(giftCardOrders.userId, req.user!.id))
         .orderBy(giftCardOrders.createdAt);
