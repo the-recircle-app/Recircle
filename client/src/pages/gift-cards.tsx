@@ -372,6 +372,77 @@ export default function GiftCards() {
           >
             🧪 Test Connex
           </Button>
+          
+          <Button 
+            onClick={async () => {
+              console.log('[TEST] Send B3TR test clicked!');
+              if (!window.connex) {
+                alert('❌ Connex not available!');
+                return;
+              }
+              
+              try {
+                // Import ethers functions
+                const { Interface } = await import('@ethersproject/abi');
+                const { parseUnits } = await import('@ethersproject/units');
+                
+                const VIP180_ABI = [
+                  {
+                    "constant": false,
+                    "inputs": [
+                      { "name": "_to", "type": "address" },
+                      { "name": "_value", "type": "uint256" }
+                    ],
+                    "name": "transfer",
+                    "outputs": [{ "name": "success", "type": "bool" }],
+                    "type": "function"
+                  }
+                ];
+                
+                const B3TR_CONTRACT = '0xbf64cf86894Ee0877C4e7d03936e35Ee8D8b864F';
+                const APP_FUND_WALLET = '0x119761865b79bea9e7924edaa630942322ca09d1';
+                
+                const b3trInterface = new Interface(VIP180_ABI);
+                const amountInWei = parseUnits('1', 18).toString(); // Send 1 B3TR as test
+                
+                const clause = {
+                  to: B3TR_CONTRACT,
+                  value: '0x0',
+                  data: b3trInterface.encodeFunctionData('transfer', [
+                    APP_FUND_WALLET,
+                    amountInWei,
+                  ]),
+                  comment: 'Test B3TR transfer',
+                };
+                
+                console.log('[TEST] Sending transaction with clause:', clause);
+                
+                const tx = window.connex.vendor.sign('tx', [clause])
+                  .signer(walletAddress || '')
+                  .comment('Test: Send 1 B3TR');
+                
+                const result = await tx.request();
+                console.log('[TEST] Transaction result:', result);
+                alert(`✅ Transaction sent! TX ID: ${result.txid}`);
+                
+                toast({
+                  title: "✅ B3TR Transfer Success!",
+                  description: `Sent 1 B3TR. TX: ${result.txid.slice(0, 10)}...`,
+                });
+              } catch (err: any) {
+                console.error('[TEST] Transaction error:', err);
+                alert(`❌ Error: ${err.message || 'Transaction failed'}`);
+                toast({
+                  title: "❌ Transfer Failed",
+                  description: err.message || 'Unknown error',
+                  variant: "destructive",
+                });
+              }
+            }}
+            className="bg-blue-600 hover:bg-blue-700 ml-2"
+          >
+            💸 Test Send 1 B3TR
+          </Button>
         </div>
 
         <Tabs defaultValue="marketplace" className="w-full">
