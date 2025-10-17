@@ -417,11 +417,14 @@ export default function GiftCards() {
                 
                 console.log('[TEST] Sending transaction with clause:', clause);
                 
-                const tx = window.connex.vendor.sign('tx', [clause])
-                  .signer(walletAddress || '')
-                  .comment('Test: Send 1 B3TR');
+                // Create signing service with proper syntax
+                const signingService = window.connex.vendor.sign('tx', [clause]);
                 
-                const result = await tx.request();
+                // Add comment
+                signingService.comment('Test: Send 1 B3TR');
+                
+                // Request signature from user (this will open VeWorld)
+                const result = await signingService.request();
                 console.log('[TEST] Transaction result:', result);
                 alert(`✅ Transaction sent! TX ID: ${result.txid}`);
                 
