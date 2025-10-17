@@ -215,18 +215,21 @@ function App() {
     console.log("Preloading wallet addresses...");
     vechain.preloadWalletAddresses();
     
-    // Wait much longer before creating mock - VeWorld can take 10+ seconds
-    // Only create mock if we're absolutely sure VeWorld isn't coming
-    setTimeout(() => {
-      // Check multiple times if VeWorld has arrived
-      if (!window.connex || !window.connex.vendor || !window.connex.vendor.sign) {
-        // Still no Connex after 10 seconds, probably not VeWorld
-        console.log('[APP] No Connex after 10 seconds - initializing mock for development');
-        vechain.initializeDevelopmentMode();
-      } else {
-        console.log('[APP] Real Connex detected - no mock needed');
+    // TEMPORARILY DISABLED - No mock creation to test real VeWorld
+    console.log('[APP] Mock creation disabled - using real VeWorld only');
+    
+    // Check periodically to see when VeWorld arrives
+    let checkCount = 0;
+    const checkInterval = setInterval(() => {
+      checkCount++;
+      if (window.connex && window.connex.vendor && window.connex.vendor.sign) {
+        console.log(`[APP] Real Connex detected after ${checkCount} seconds`);
+        clearInterval(checkInterval);
+      } else if (checkCount > 20) {
+        console.log('[APP] No Connex after 20 seconds - VeWorld may not be available');
+        clearInterval(checkInterval);
       }
-    }, 10000); // Wait 10 full seconds before any mock creation
+    }, 1000);
     
     // Initialize mobile Connex for VeWorld app
     const initMobileWallet = async () => {
