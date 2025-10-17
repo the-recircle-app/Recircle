@@ -35,7 +35,6 @@ export function detectPlatform(): PlatformInfo {
     isMobile,
     isDesktop,
     platformName,
-    windowConnex: typeof window !== 'undefined' ? window.connex : 'no window'
   });
   
   return {
