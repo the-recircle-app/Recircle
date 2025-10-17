@@ -599,7 +599,18 @@ export default function GiftCards() {
               onSuccess={handlePaymentSuccess}
               onError={handlePaymentError}
             >
-              {({ sendTransfer, isPending, error, txReceipt }) => (
+              {({ sendTransfer, isPending, error, txReceipt }) => {
+                console.log('[GIFT-CARD] B3TRTransfer render:', {
+                  sendTransfer: typeof sendTransfer,
+                  isPending,
+                  error: error?.message,
+                  txReceipt: !!txReceipt,
+                  paymentStatus,
+                  amount: calculateB3TRCost(parseFloat(amount || '0')).toString(),
+                  recipientAddress: '0x119761865b79bea9e7924edaa630942322ca09d1',
+                  hasConnex: !!window.connex,
+                });
+                return (
                 <div className="space-y-4">
                   {/* Payment status indicator */}
                   {paymentStatus === 'success' && (
@@ -718,7 +729,7 @@ export default function GiftCards() {
                     </div>
                   )}
                 </div>
-              )}
+              )}}
             </B3TRTransfer>
           )}
         </DialogContent>
