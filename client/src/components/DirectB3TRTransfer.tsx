@@ -1,5 +1,5 @@
-import { useState, useCallback, useMemo } from 'react';
-import { useWallet } from '@vechain/vechain-kit';
+import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useWallet, useSendTransaction } from '@vechain/vechain-kit';
 import { Interface } from '@ethersproject/abi';
 import { parseUnits } from '@ethersproject/units';
 
@@ -47,41 +47,51 @@ export function DirectB3TRTransfer({
   children 
 }: DirectB3TRTransferProps) {
   const { account } = useWallet();
-  const [isPending, setIsPending] = useState(false);
   const [processedError, setProcessedError] = useState<TransactionError | null>(null);
-  const [txReceipt, setTxReceipt] = useState<any>(null);
   const [transactionState, setTransactionState] = useState<'idle' | 'preparing' | 'signing' | 'sending' | 'confirming' | 'success' | 'error'>('idle');
 
-  // Build clause for transaction
-  const clause = useMemo(() => {
-    if (!recipientAddress || !amount) return null;
+  // Build clauses for VeChain Kit (following official docs pattern)
+  const clauses = useMemo(() => {
+    if (!recipientAddress || !amount) return [];
     
     try {
       const b3trInterface = new Interface(VIP180_ABI);
       const amountInWei = parseUnits(amount, 18).toString();
       
-      return {
+      return [{
         to: B3TR_CONTRACT_ADDRESS,
         value: '0x0',
         data: b3trInterface.encodeFunctionData('transfer', [
           recipientAddress,
           amountInWei,
         ]),
-      };
+        comment: `Transfer ${amount} B3TR`,
+      }];
     } catch (error) {
-      console.error('[DIRECT-B3TR] Error creating clause:', error);
-      return null;
+      console.error('[DIRECT-B3TR] Error creating clauses:', error);
+      return [];
     }
   }, [recipientAddress, amount]);
 
-  // Process errors
+  // Use VeChain Kit's transaction hook (handles all wallet types automatically per docs)
+  const { 
+    sendTransaction, 
+    status, 
+    txReceipt, 
+    isTransactionPending,
+    error: txError,
+  } = useSendTransaction({
+    signerAccountAddress: userAddress || account?.address || '',
+  });
+
+  // Process VeChain Kit errors
   const processError = useCallback((err: any): TransactionError => {
     const error = new Error() as TransactionError;
     const errorMsg = err?.message?.toLowerCase() || err?.toString()?.toLowerCase() || '';
     
-    console.error('[DIRECT-B3TR] Processing error:', { err, errorMsg });
+    console.error('[DIRECT-B3TR] Processing error:', { err, errorMsg, errorType: err?.type });
     
-    if (errorMsg.includes('reject') || errorMsg.includes('denied') || errorMsg.includes('cancelled')) {
+    if (err?.type === 'UserRejectedError' || errorMsg.includes('reject') || errorMsg.includes('denied') || errorMsg.includes('cancelled')) {
       error.type = 'user_rejection';
       error.message = 'You rejected the transaction in your wallet. No B3TR was transferred.';
     } else if (errorMsg.includes('insufficient') || errorMsg.includes('balance')) {
@@ -99,9 +109,9 @@ export function DirectB3TRTransfer({
     return error;
   }, []);
 
-  // Send transaction - detects wallet type and uses correct signing method
+  // Wrapper function for sending (following official docs pattern)
   const handleSendTransfer = useCallback(async () => {
-    if (!userAddress) {
+    if (!userAddress && !account?.address) {
       const error = new Error('No wallet address available') as TransactionError;
       error.type = 'technical';
       setProcessedError(error);
@@ -110,7 +120,7 @@ export function DirectB3TRTransfer({
       return;
     }
 
-    if (!clause) {
+    if (clauses.length === 0) {
       const error = new Error('Invalid transaction parameters') as TransactionError;
       error.type = 'technical';
       setProcessedError(error);
@@ -120,81 +130,60 @@ export function DirectB3TRTransfer({
     }
 
     try {
-      setIsPending(true);
       setTransactionState('preparing');
       setProcessedError(null);
       
-      const walletType = (account as any)?.type || 'unknown';
-      console.log('[DIRECT-B3TR] Wallet detection:', {
-        walletType,
-        hasAccount: !!account,
-        accountAddress: account?.address,
+      console.log('[DIRECT-B3TR] 🚀 Sending via VeChain Kit useSendTransaction hook:', {
+        clauses,
         userAddress,
-        clause
+        accountAddress: account?.address,
+        walletConnected: !!account
       });
       
-      let result: any;
+      setTransactionState('signing');
       
-      // VeWorld mobile uses DAppKit
-      if (walletType === 'dappKit') {
-        console.log('[DIRECT-B3TR] 🔵 Using DAppKit signing for VeWorld mobile');
-        setTransactionState('signing');
-        
-        if (!account || !(account as any).signTransaction) {
-          throw new Error('DAppKit account missing signTransaction method');
-        }
-        
-        result = await (account as any).signTransaction({
-          clauses: [clause],
-          comment: `Transfer ${amount} B3TR`,
-          callbacks: {
-            returnUrl: window.location.href
-          }
-        });
-        
-        console.log('[DIRECT-B3TR] ✅ DAppKit transaction result:', result);
-      } 
-      // Desktop VeWorld uses Connex
-      else {
-        console.log('[DIRECT-B3TR] 🟢 Using Connex signing for desktop VeWorld');
-        
-        if (typeof window === 'undefined' || !window.connex) {
-          throw new Error('Connex not available');
-        }
-        
-        setTransactionState('signing');
-        
-        result = await window.connex.vendor
-          .sign('tx', [clause])
-          .signer(userAddress)
-          .request();
-        
-        console.log('[DIRECT-B3TR] ✅ Connex transaction result:', result);
-      }
+      // VeChain Kit's hook handles all wallet types automatically (DAppKit, Connex, Privy)
+      await sendTransaction(clauses);
       
-      setTransactionState('success');
-      setTxReceipt(result);
-      setIsPending(false);
+      console.log('[DIRECT-B3TR] ✅ Transaction submitted via VeChain Kit');
       
-      if (onSuccess) {
-        onSuccess(result.txid, result);
-      }
+      // Success is handled by status changes in useEffect
     } catch (err: any) {
       console.error('[DIRECT-B3TR] ❌ Transaction failed:', err);
       const processedErr = processError(err);
       setProcessedError(processedErr);
       setTransactionState('error');
-      setIsPending(false);
       
       if (onError) onError(processedErr);
     }
-  }, [userAddress, account, clause, amount, processError, onSuccess, onError]);
+  }, [userAddress, account?.address, clauses, sendTransaction, processError, onError]);
+
+  // Update state based on VeChain Kit status (following official docs pattern)
+  useEffect(() => {
+    console.log('[DIRECT-B3TR] Status update:', { status, txReceipt, txError });
+    
+    if (status === 'pending' || status === 'waitingConfirmation') {
+      setTransactionState('signing');
+    } else if (status === 'success') {
+      setTransactionState('success');
+      if (txReceipt && onSuccess) {
+        console.log('[DIRECT-B3TR] ✅ Transaction success:', txReceipt);
+        const txId = txReceipt.meta?.txID || (txReceipt as any).txid || 'unknown';
+        onSuccess(txId, txReceipt);
+      }
+    } else if (status === 'error' && txError) {
+      const processedErr = processError(txError);
+      setProcessedError(processedErr);
+      setTransactionState('error');
+      if (onError) onError(processedErr);
+    }
+  }, [status, txReceipt, txError, onSuccess, onError, processError]);
 
   return children({
     sendTransfer: handleSendTransfer,
-    isPending,
+    isPending: isTransactionPending,
     error: processedError,
-    txReceipt,
+    txReceipt: txReceipt || null,
     transactionState,
   });
 }
