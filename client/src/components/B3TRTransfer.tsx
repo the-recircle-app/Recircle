@@ -18,16 +18,22 @@ const VIP180_ABI = [
   }
 ];
 
+export interface TransactionError extends Error {
+  type?: 'user_rejection' | 'insufficient_funds' | 'network' | 'technical' | 'unknown';
+  originalError?: any;
+}
+
 interface B3TRTransferProps {
   recipientAddress: string;
   amount: string;
-  onSuccess?: (txId: string) => void;
-  onError?: (error: Error) => void;
+  onSuccess?: (txId: string, txDetails?: any) => void;
+  onError?: (error: TransactionError) => void;
   children: (props: {
     sendTransfer: () => Promise<void>;
     isPending: boolean;
-    error: Error | null;
+    error: TransactionError | null;
     txReceipt: any;
+    transactionState: 'idle' | 'preparing' | 'signing' | 'sending' | 'confirming' | 'success' | 'error';
   }) => React.ReactNode;
 }
 
@@ -40,6 +46,8 @@ export function B3TRTransfer({
 }: B3TRTransferProps) {
   const { account } = useWallet();
   const [vthoBalance, setVthoBalance] = useState<string | null>(null);
+  const [transactionState, setTransactionState] = useState<'idle' | 'preparing' | 'signing' | 'sending' | 'confirming' | 'success' | 'error'>('idle');
+  const [processedError, setProcessedError] = useState<TransactionError | null>(null);
   
   useEffect(() => {
     async function checkVTHOBalance() {
@@ -69,19 +77,23 @@ export function B3TRTransfer({
   const clauses = useMemo(() => {
     if (!recipientAddress || !amount) return [];
     
-    const b3trInterface = new Interface(VIP180_ABI);
-    
-    const amountInWei = parseUnits(amount, 18).toString();
-    
-    return [{
-      to: B3TR_CONTRACT_ADDRESS,
-      value: '0x0',
-      data: b3trInterface.encodeFunctionData('transfer', [
-        recipientAddress,
-        amountInWei,
-      ]),
-      comment: `Transfer ${amount} B3TR tokens`,
-    }];
+    try {
+      const b3trInterface = new Interface(VIP180_ABI);
+      const amountInWei = parseUnits(amount, 18).toString();
+      
+      return [{
+        to: B3TR_CONTRACT_ADDRESS,
+        value: '0x0',
+        data: b3trInterface.encodeFunctionData('transfer', [
+          recipientAddress,
+          amountInWei,
+        ]),
+        comment: `Transfer ${amount} B3TR tokens`,
+      }];
+    } catch (error) {
+      console.error('[B3TR-TRANSFER] Error creating clauses:', error);
+      return [];
+    }
   }, [recipientAddress, amount]);
   
   const { 
@@ -95,61 +107,173 @@ export function B3TRTransfer({
     signerAccountAddress: account?.address,
   });
   
+  // Process and categorize errors
+  const processError = (err: any): TransactionError => {
+    const error = new Error() as TransactionError;
+    
+    // Check error message for specific patterns
+    const errorMsg = err?.message?.toLowerCase() || err?.toString()?.toLowerCase() || '';
+    
+    if (errorMsg.includes('reject') || errorMsg.includes('denied') || errorMsg.includes('cancel')) {
+      error.type = 'user_rejection';
+      error.message = 'Transaction was rejected by the user';
+    } else if (errorMsg.includes('insufficient') || errorMsg.includes('balance')) {
+      error.type = 'insufficient_funds';
+      error.message = 'Insufficient B3TR balance to complete this transaction';
+    } else if (errorMsg.includes('network') || errorMsg.includes('timeout') || errorMsg.includes('connection')) {
+      error.type = 'network';
+      error.message = 'Network connection issue. Please check your connection and try again';
+    } else if (errorMsg.includes('revert') || errorMsg.includes('failed')) {
+      error.type = 'technical';
+      error.message = 'Transaction failed. The smart contract rejected this transaction';
+    } else {
+      error.type = 'unknown';
+      error.message = err?.message || 'An unexpected error occurred during the transaction';
+    }
+    
+    error.originalError = err;
+    return error;
+  };
+  
+  // Track transaction state changes
+  useEffect(() => {
+    if (isTransactionPending && transactionState !== 'signing') {
+      setTransactionState('signing');
+    } else if (status === 'pending' && transactionState === 'signing') {
+      setTransactionState('sending');
+    } else if (status === 'success' && transactionState !== 'success') {
+      setTransactionState('success');
+    } else if (status === 'error' && transactionState !== 'error') {
+      setTransactionState('error');
+    }
+  }, [isTransactionPending, status, transactionState]);
+  
+  // Handle successful transaction
   useEffect(() => {
     if (txReceipt?.meta?.txID && onSuccess) {
-      onSuccess(txReceipt.meta.txID);
+      console.log('[B3TR-TRANSFER] ✅ Transaction confirmed:', {
+        txId: txReceipt.meta.txID,
+        blockNumber: txReceipt.meta.blockNumber,
+        timestamp: txReceipt.meta.blockTimestamp,
+        gasUsed: txReceipt.gasUsed,
+      });
+      
+      setTransactionState('success');
+      onSuccess(txReceipt.meta.txID, {
+        blockNumber: txReceipt.meta.blockNumber,
+        timestamp: txReceipt.meta.blockTimestamp,
+        gasUsed: txReceipt.gasUsed,
+        receipt: txReceipt
+      });
     }
   }, [txReceipt, onSuccess]);
   
+  // Handle errors
   useEffect(() => {
-    if (error && onError) {
-      console.error('[B3TR-TRANSFER] Transaction failed:', error);
-      onError(error as unknown as Error);
+    if (error) {
+      const processedErr = processError(error);
+      setProcessedError(processedErr);
+      setTransactionState('error');
+      
+      console.error('[B3TR-TRANSFER] ❌ Transaction failed:', {
+        type: processedErr.type,
+        message: processedErr.message,
+        originalError: error
+      });
+      
+      if (onError) {
+        onError(processedErr);
+      }
     }
   }, [error, onError]);
   
   const sendTransfer = async () => {
+    // Reset states
+    setTransactionState('preparing');
+    setProcessedError(null);
+    
     if (!account?.address) {
-      const noAccountError = new Error('No wallet connected');
+      const noAccountError = new Error('No wallet connected. Please connect your VeWorld wallet first') as TransactionError;
+      noAccountError.type = 'technical';
       console.error('[B3TR-TRANSFER]', noAccountError);
+      setProcessedError(noAccountError);
+      setTransactionState('error');
       if (onError) onError(noAccountError);
       return;
     }
     
     if (clauses.length === 0) {
-      const invalidParamsError = new Error('Invalid transfer parameters');
+      const invalidParamsError = new Error('Invalid transfer parameters. Please check the amount and try again') as TransactionError;
+      invalidParamsError.type = 'technical';
       console.error('[B3TR-TRANSFER]', invalidParamsError);
+      setProcessedError(invalidParamsError);
+      setTransactionState('error');
       if (onError) onError(invalidParamsError);
+      return;
+    }
+    
+    // Check if amount is valid
+    try {
+      const amountNum = parseFloat(amount);
+      if (isNaN(amountNum) || amountNum <= 0) {
+        const invalidAmountError = new Error('Invalid amount. Please enter a valid positive number') as TransactionError;
+        invalidAmountError.type = 'technical';
+        setProcessedError(invalidAmountError);
+        setTransactionState('error');
+        if (onError) onError(invalidAmountError);
+        return;
+      }
+    } catch (err) {
+      const parseError = new Error('Failed to parse amount. Please check the value') as TransactionError;
+      parseError.type = 'technical';
+      setProcessedError(parseError);
+      setTransactionState('error');
+      if (onError) onError(parseError);
       return;
     }
     
     const willDelegate = vthoBalance && parseFloat(vthoBalance) < 10;
     
-    console.log('[B3TR-TRANSFER] 🚀 Initiating VIP-191 Transfer:', {
+    console.log('[B3TR-TRANSFER] 🚀 Initiating B3TR Transfer:', {
       from: account.address,
       to: recipientAddress,
-      amount,
+      amount: `${amount} B3TR`,
       vthoBalance: vthoBalance || 'checking...',
       feeDelegation: willDelegate ? '✅ ENABLED - VeChain Energy will sponsor' : '❌ DISABLED - User pays own gas',
-      walletType: account ? 'Connected' : 'None',
-      clauses
+      walletType: 'VeWorld',
+      timestamp: new Date().toISOString()
     });
     
     try {
+      setTransactionState('signing');
       await sendTransaction();
+      
       console.log('[B3TR-TRANSFER] ✅ Transaction submitted successfully!', {
-        feeDelegation: willDelegate ? 'SPONSORED by VeChain Energy' : 'SELF-PAID by user'
+        feeDelegation: willDelegate ? 'SPONSORED by VeChain Energy' : 'SELF-PAID by user',
+        status: 'awaiting_confirmation'
       });
-    } catch (err) {
-      console.error('[B3TR-TRANSFER] ❌ Transaction failed:', err);
-      if (onError) onError(err as Error);
+      
+      setTransactionState('confirming');
+    } catch (err: any) {
+      const processedErr = processError(err);
+      setProcessedError(processedErr);
+      setTransactionState('error');
+      
+      console.error('[B3TR-TRANSFER] ❌ Transaction failed:', {
+        type: processedErr.type,
+        message: processedErr.message,
+        details: err
+      });
+      
+      if (onError) onError(processedErr);
     }
   };
   
   return children({
     sendTransfer,
     isPending: isTransactionPending,
-    error: error as unknown as Error | null,
-    txReceipt
+    error: processedError,
+    txReceipt,
+    transactionState
   });
 }

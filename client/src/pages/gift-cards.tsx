@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useWallet } from "../context/WalletContext";
 import { useWallet as useVeChainKitWallet } from "@vechain/vechain-kit";
@@ -9,8 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Gift, CreditCard, CheckCircle, Clock, XCircle, Search } from "lucide-react";
+import { Loader2, Gift, CreditCard, CheckCircle, Clock, XCircle, Search, AlertCircle, Wallet, ExternalLink, ShieldCheck } from "lucide-react";
 import LiveB3TRBalance from "../components/LiveB3TRBalance";
 import B3trLogo from "../components/B3trLogo";
 import { B3TRTransfer } from "../components/B3TRTransfer";
@@ -43,6 +44,13 @@ export default function GiftCards() {
   const [email, setEmail] = useState("");
   const [isPaymentStep, setIsPaymentStep] = useState(false);
   const [paymentTxHash, setPaymentTxHash] = useState<string | null>(null);
+  const [isVerifyingPayment, setIsVerifyingPayment] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState<'idle' | 'transferring' | 'verifying' | 'creating_order' | 'success' | 'error'>('idle');
+  
+  // Balance check states
+  const [liveBalance, setLiveBalance] = useState<number>(tokenBalance);
+  const [insufficientBalanceDialog, setInsufficientBalanceDialog] = useState(false);
+  const [balanceCheckData, setBalanceCheckData] = useState<{ required: number; available: number } | null>(null);
   
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -84,6 +92,7 @@ export default function GiftCards() {
 
   const purchaseMutation = useMutation({
     mutationFn: async (data: any) => {
+      setPaymentStatus('creating_order');
       const response = await fetch('/api/gift-cards/purchase', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -98,34 +107,77 @@ export default function GiftCards() {
 
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      setPaymentStatus('success');
+      
+      // Success toast with transaction details
       toast({
-        title: "Gift card purchased!",
-        description: "Check your email for your gift card details.",
+        title: "✅ Gift Card Purchased Successfully!",
+        description: (
+          <div className="space-y-2 mt-2">
+            <p>Your ${amount} {selectedProduct?.name} gift card has been sent to {email}</p>
+            {paymentTxHash && (
+              <div className="flex items-center gap-2 text-xs">
+                <ExternalLink className="h-3 w-3" />
+                <span>TX: {paymentTxHash.slice(0, 10)}...{paymentTxHash.slice(-8)}</span>
+              </div>
+            )}
+            <p className="text-xs text-gray-400 mt-2">Check your email for redemption details</p>
+          </div>
+        ),
+        duration: 8000,
       });
-      setPurchaseModalOpen(false);
-      setAmount("");
-      setEmail("");
-      setSelectedProduct(null);
-      setIsPaymentStep(false);
-      setPaymentTxHash(null);
+      
+      // Reset states after short delay to show success
+      setTimeout(() => {
+        setPurchaseModalOpen(false);
+        setAmount("");
+        setEmail("");
+        setSelectedProduct(null);
+        setIsPaymentStep(false);
+        setPaymentTxHash(null);
+        setPaymentStatus('idle');
+        setIsVerifyingPayment(false);
+      }, 2000);
+      
       queryClient.invalidateQueries({ queryKey: ['/api/gift-cards/orders'] });
     },
     onError: (error: Error) => {
+      setPaymentStatus('error');
+      
+      // More detailed error messages based on error type
+      let errorTitle = "Purchase Failed";
+      let errorDescription = error.message;
+      
+      if (error.message.includes('blockchain verification')) {
+        errorTitle = "❌ Payment Verification Failed";
+        errorDescription = "Could not verify your B3TR payment on the blockchain. Please ensure the transaction was confirmed.";
+      } else if (error.message.includes('network')) {
+        errorTitle = "🌐 Network Error";
+        errorDescription = "Connection issue occurred. Please check your network and try again.";
+      } else if (error.message.includes('insufficient')) {
+        errorTitle = "💰 Insufficient Funds";
+        errorDescription = "Your B3TR balance is too low for this purchase.";
+      }
+      
       toast({
-        title: "Purchase failed",
-        description: error.message,
+        title: errorTitle,
+        description: errorDescription,
         variant: "destructive",
+        duration: 6000,
       });
+      
       setIsPaymentStep(false);
+      setPaymentStatus('idle');
+      setIsVerifyingPayment(false);
     },
   });
 
   const handlePurchase = () => {
     if (!selectedProduct || !amount || !email || !account?.address) {
       toast({
-        title: "Missing information",
-        description: "Please fill in all fields",
+        title: "⚠️ Missing Information",
+        description: "Please fill in all required fields",
         variant: "destructive",
       });
       return;
@@ -134,7 +186,7 @@ export default function GiftCards() {
     const amountNum = parseFloat(amount);
     if (isNaN(amountNum) || amountNum < selectedProduct.minAmount || amountNum > selectedProduct.maxAmount) {
       toast({
-        title: "Invalid amount",
+        title: "⚠️ Invalid Amount",
         description: `Amount must be between $${selectedProduct.minAmount} and $${selectedProduct.maxAmount}`,
         variant: "destructive",
       });
@@ -142,54 +194,91 @@ export default function GiftCards() {
     }
 
     const b3trCost = calculateB3TRCost(amountNum);
-    if (b3trCost > tokenBalance) {
-      toast({
-        title: "Insufficient balance",
-        description: `You need ${b3trCost.toFixed(2)} B3TR but only have ${tokenBalance.toFixed(2)} B3TR`,
-        variant: "destructive",
+    
+    // Check live balance before proceeding
+    if (b3trCost > liveBalance) {
+      setBalanceCheckData({
+        required: b3trCost,
+        available: liveBalance
       });
+      setInsufficientBalanceDialog(true);
       return;
     }
 
     // Move to payment step
     setIsPaymentStep(true);
+    setPaymentStatus('idle');
   };
 
   const handlePaymentSuccess = (txId: string) => {
     console.log('[GIFT-CARD] Payment successful, txId:', txId);
     setPaymentTxHash(txId);
+    setPaymentStatus('verifying');
+    setIsVerifyingPayment(true);
     
-    // Now call the purchase API with the transaction hash
-    // Backend verifies payment using authenticated user's wallet from database
-    // and checks that current connected wallet matches stored wallet
-    if (selectedProduct && amount && email && account?.address) {
-      const amountNum = parseFloat(amount);
-      purchaseMutation.mutate({
-        productId: selectedProduct.id,
-        productName: selectedProduct.name,
-        amount: amountNum,
-        currency: 'USD',
-        email,
-        txHash: txId,
-        connectedWallet: account.address, // Current VeChain Kit connected wallet
-      });
-    }
+    // Show verifying toast
+    toast({
+      title: "🔍 Verifying Payment",
+      description: "Confirming your B3TR transaction on the blockchain...",
+      duration: 3000,
+    });
+    
+    // Simulate blockchain verification delay before calling purchase API
+    setTimeout(() => {
+      if (selectedProduct && amount && email && account?.address) {
+        const amountNum = parseFloat(amount);
+        purchaseMutation.mutate({
+          productId: selectedProduct.id,
+          productName: selectedProduct.name,
+          amount: amountNum,
+          currency: 'USD',
+          email,
+          txHash: txId,
+          connectedWallet: account.address,
+        });
+      }
+    }, 1500);
   };
 
   const handlePaymentError = (error: Error) => {
     console.error('[GIFT-CARD] Payment failed:', error);
+    setPaymentStatus('error');
+    
+    // Distinguish between different error types
+    let errorTitle = "❌ Payment Failed";
+    let errorDescription = "B3TR transfer failed. Please try again.";
+    
+    if (error.message?.toLowerCase().includes('reject') || error.message?.toLowerCase().includes('denied')) {
+      errorTitle = "🚫 Transaction Rejected";
+      errorDescription = "You rejected the transaction in your wallet. No B3TR was transferred.";
+    } else if (error.message?.toLowerCase().includes('insufficient')) {
+      errorTitle = "💰 Insufficient B3TR Balance";
+      errorDescription = `You don't have enough B3TR. Required: ${calculateB3TRCost(parseFloat(amount || '0')).toFixed(2)} B3TR`;
+    } else if (error.message?.toLowerCase().includes('network') || error.message?.toLowerCase().includes('timeout')) {
+      errorTitle = "🌐 Network Error";
+      errorDescription = "Network connection issue. Please check your connection and try again.";
+    }
+    
     toast({
-      title: "Payment failed",
-      description: error.message || "B3TR transfer failed. Please try again.",
+      title: errorTitle,
+      description: errorDescription,
       variant: "destructive",
+      duration: 6000,
     });
+    
     setIsPaymentStep(false);
+    setPaymentStatus('idle');
   };
 
   const calculateB3TRCost = (usdAmount: number): number => {
     if (!catalogData?.markupUsd || !catalogData?.b3trPriceUsd) return 0;
     const totalUsd = usdAmount + catalogData.markupUsd;
     return Math.ceil((totalUsd / catalogData.b3trPriceUsd) * 100) / 100;
+  };
+
+  // Update live balance when it changes
+  const handleBalanceChange = (newBalance: number) => {
+    setLiveBalance(newBalance);
   };
 
   if (!isConnected) {
@@ -218,7 +307,10 @@ export default function GiftCards() {
               <span className="text-gray-400">Your Balance:</span>
               <div className="flex items-center gap-2">
                 <span className="text-2xl font-bold">
-                  <LiveB3TRBalance fallbackBalance={tokenBalance} />
+                  <LiveB3TRBalance 
+                    fallbackBalance={tokenBalance} 
+                    onBalanceChange={handleBalanceChange}
+                  />
                 </span>
                 <B3trLogo className="w-6 h-6" color="#38BDF8" />
               </div>
@@ -363,6 +455,14 @@ export default function GiftCards() {
                             </span>
                           </div>
                         )}
+                        {order.txHash && (
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">Transaction:</span>
+                            <span className="text-gray-300 font-mono text-xs truncate max-w-[150px]">
+                              {order.txHash.slice(0, 6)}...{order.txHash.slice(-4)}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
@@ -384,13 +484,23 @@ export default function GiftCards() {
         if (!open) {
           setIsPaymentStep(false);
           setPaymentTxHash(null);
+          setPaymentStatus('idle');
+          setIsVerifyingPayment(false);
         }
       }}>
         <DialogContent className="bg-gray-800 text-white border-gray-700">
           <DialogHeader>
             <DialogTitle>Redeem {selectedProduct?.name}</DialogTitle>
             <DialogDescription className="text-gray-400">
-              {isPaymentStep ? 'Confirm payment in your VeWorld wallet' : 'Enter the amount and your email to receive the gift card'}
+              {isPaymentStep ? (
+                paymentStatus === 'verifying' ? 
+                  'Verifying your payment on the blockchain...' :
+                paymentStatus === 'creating_order' ?
+                  'Creating your gift card order...' :
+                paymentStatus === 'success' ?
+                  'Purchase successful! Check your email.' :
+                  'Confirm payment in your VeWorld wallet'
+              ) : 'Enter the amount and your email to receive the gift card'}
             </DialogDescription>
           </DialogHeader>
 
@@ -440,6 +550,17 @@ export default function GiftCards() {
                       <B3trLogo className="w-4 h-4" color="#38BDF8" />
                     </div>
                   </div>
+                  
+                  {/* Live balance check */}
+                  <div className="flex justify-between text-sm pt-1">
+                    <span className="text-gray-400">Your Balance:</span>
+                    <div className="flex items-center gap-1">
+                      <span className={calculateB3TRCost(parseFloat(amount)) > liveBalance ? "text-red-400" : "text-green-400"}>
+                        {liveBalance.toFixed(2)}
+                      </span>
+                      <B3trLogo className="w-4 h-4" color={calculateB3TRCost(parseFloat(amount)) > liveBalance ? "#EF4444" : "#10B981"} />
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -461,28 +582,61 @@ export default function GiftCards() {
             >
               {({ sendTransfer, isPending, error, txReceipt }) => (
                 <div className="space-y-4">
-                  <div className="bg-gray-700 rounded-lg p-4 space-y-3">
-                    <h4 className="font-semibold text-white">Payment Required</h4>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Gift Card:</span>
-                        <span className="text-white">${parseFloat(amount || '0').toFixed(2)}</span>
+                  {/* Payment status indicator */}
+                  {paymentStatus === 'success' && (
+                    <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4 flex items-center gap-3">
+                      <CheckCircle className="h-6 w-6 text-green-500" />
+                      <div>
+                        <p className="font-semibold text-green-400">Purchase Successful!</p>
+                        <p className="text-sm text-gray-400">Your gift card has been sent to {email}</p>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Markup:</span>
-                        <span className="text-white">${catalogData?.markupUsd.toFixed(2)}</span>
+                    </div>
+                  )}
+
+                  {paymentStatus === 'verifying' && (
+                    <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 flex items-center gap-3">
+                      <ShieldCheck className="h-6 w-6 text-blue-500 animate-pulse" />
+                      <div>
+                        <p className="font-semibold text-blue-400">Verifying Payment</p>
+                        <p className="text-sm text-gray-400">Confirming transaction on blockchain...</p>
                       </div>
-                      <div className="flex justify-between font-bold border-t border-gray-600 pt-2">
-                        <span className="text-gray-300">B3TR Payment:</span>
-                        <div className="flex items-center gap-1">
-                          <span className="text-blue-400">{calculateB3TRCost(parseFloat(amount || '0')).toFixed(2)}</span>
-                          <B3trLogo className="w-4 h-4" color="#38BDF8" />
+                    </div>
+                  )}
+
+                  {paymentStatus === 'creating_order' && (
+                    <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4 flex items-center gap-3">
+                      <Loader2 className="h-6 w-6 text-purple-500 animate-spin" />
+                      <div>
+                        <p className="font-semibold text-purple-400">Creating Order</p>
+                        <p className="text-sm text-gray-400">Processing your gift card purchase...</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {paymentStatus !== 'success' && paymentStatus !== 'verifying' && paymentStatus !== 'creating_order' && (
+                    <div className="bg-gray-700 rounded-lg p-4 space-y-3">
+                      <h4 className="font-semibold text-white">Payment Required</h4>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">Gift Card:</span>
+                          <span className="text-white">${parseFloat(amount || '0').toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">Markup:</span>
+                          <span className="text-white">${catalogData?.markupUsd.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between font-bold border-t border-gray-600 pt-2">
+                          <span className="text-gray-300">B3TR Payment:</span>
+                          <div className="flex items-center gap-1">
+                            <span className="text-blue-400">{calculateB3TRCost(parseFloat(amount || '0')).toFixed(2)}</span>
+                            <B3trLogo className="w-4 h-4" color="#38BDF8" />
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
+                  )}
 
-                  {!txReceipt && (
+                  {!txReceipt && paymentStatus !== 'verifying' && paymentStatus !== 'creating_order' && paymentStatus !== 'success' && (
                     <Button
                       onClick={sendTransfer}
                       disabled={isPending || purchaseMutation.isPending}
@@ -502,16 +656,36 @@ export default function GiftCards() {
                     </Button>
                   )}
 
+                  {txReceipt && !purchaseMutation.isPending && paymentStatus !== 'success' && (
+                    <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 flex items-center gap-2">
+                      <CheckCircle className="h-5 w-5 text-green-500" />
+                      <div className="flex-1">
+                        <p className="text-sm text-green-400 font-semibold">Payment sent!</p>
+                        <p className="text-xs text-gray-400 mt-1">TX: {txReceipt.meta?.txID?.slice(0, 10)}...</p>
+                      </div>
+                    </div>
+                  )}
+
                   {purchaseMutation.isPending && (
                     <div className="flex items-center justify-center gap-2 text-sm text-gray-400">
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      Creating your gift card order...
+                      {paymentStatus === 'verifying' ? 'Verifying payment...' : 'Creating your gift card order...'}
                     </div>
                   )}
 
                   {error && !txReceipt && (
-                    <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-sm text-red-400">
-                      Payment failed. Please try again.
+                    <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3">
+                      <div className="flex items-start gap-2">
+                        <AlertCircle className="h-5 w-5 text-red-400 mt-0.5" />
+                        <div>
+                          <p className="text-sm font-semibold text-red-400">Payment Failed</p>
+                          <p className="text-xs text-gray-400 mt-1">
+                            {error.message?.toLowerCase().includes('reject') ? 
+                              'Transaction was rejected in wallet' :
+                              'Please try again or contact support'}
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -520,6 +694,66 @@ export default function GiftCards() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Insufficient Balance Warning Dialog */}
+      <AlertDialog open={insufficientBalanceDialog} onOpenChange={setInsufficientBalanceDialog}>
+        <AlertDialogContent className="bg-gray-800 text-white border-gray-700">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Wallet className="h-5 w-5 text-yellow-500" />
+              Insufficient B3TR Balance
+            </AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-4 text-gray-300">
+                <p>You don't have enough B3TR tokens to complete this purchase.</p>
+                
+                {balanceCheckData && (
+                  <div className="bg-gray-700 rounded-lg p-3 space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-400">Required:</span>
+                      <div className="flex items-center gap-1">
+                        <span className="text-red-400 font-bold">{balanceCheckData.required.toFixed(2)}</span>
+                        <B3trLogo className="w-4 h-4" color="#EF4444" />
+                      </div>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-400">Your Balance:</span>
+                      <div className="flex items-center gap-1">
+                        <span className="text-yellow-400 font-bold">{balanceCheckData.available.toFixed(2)}</span>
+                        <B3trLogo className="w-4 h-4" color="#EAB308" />
+                      </div>
+                    </div>
+                    <div className="flex justify-between text-sm border-t border-gray-600 pt-2">
+                      <span className="text-gray-400">Shortage:</span>
+                      <div className="flex items-center gap-1">
+                        <span className="text-orange-400 font-bold">
+                          {(balanceCheckData.required - balanceCheckData.available).toFixed(2)}
+                        </span>
+                        <B3trLogo className="w-4 h-4" color="#FB923C" />
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                <p className="text-sm">You can earn more B3TR tokens by:</p>
+                <ul className="text-sm space-y-1 ml-4">
+                  <li>• Recycling more items</li>
+                  <li>• Completing daily challenges</li>
+                  <li>• Maintaining your streak</li>
+                </ul>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction 
+              className="bg-gray-700 hover:bg-gray-600"
+              onClick={() => setInsufficientBalanceDialog(false)}
+            >
+              Got it
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <BottomNavigation isConnected={isConnected} />
     </div>
