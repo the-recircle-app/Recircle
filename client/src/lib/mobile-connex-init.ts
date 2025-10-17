@@ -44,6 +44,14 @@ export class MobileConnexInitializer {
         return false;
       }
 
+      // Check if real Connex already exists and is working
+      if (window.connex && window.connex.vendor && window.connex.vendor.sign) {
+        console.log('[MOBILE-CONNEX] Real Connex already exists - not overriding');
+        const connexWorking = await this.verifyConnex();
+        this.initSuccess = connexWorking;
+        return connexWorking;
+      }
+
       // Wait for VeWorld to inject providers
       await this.waitForVeWorldProviders();
 
@@ -85,11 +93,20 @@ export class MobileConnexInitializer {
     console.log('[MOBILE-CONNEX] Waiting for VeWorld providers...');
     
     let attempts = 0;
-    const maxAttempts = 20; // 4 seconds total
+    const maxAttempts = 30; // 6 seconds total (VeWorld can take 2+ seconds)
     
     while (attempts < maxAttempts) {
+      // Check for real Connex first
+      if (window.connex && window.connex.vendor && window.connex.vendor.sign) {
+        console.log('[MOBILE-CONNEX] Real Connex found after', attempts * 200, 'ms');
+        return;
+      }
+      
+      // Then check for vechain provider
       if (window.vechain) {
         console.log('[MOBILE-CONNEX] VeChain provider found after', attempts * 200, 'ms');
+        // Wait a bit more for Connex to be injected
+        await new Promise(resolve => setTimeout(resolve, 500));
         return;
       }
       
@@ -97,7 +114,7 @@ export class MobileConnexInitializer {
       attempts++;
     }
     
-    throw new Error('VeWorld providers not found after 4 seconds');
+    console.log('[MOBILE-CONNEX] No providers found after 6 seconds - VeWorld might not have injected them');
   }
 
   /**
