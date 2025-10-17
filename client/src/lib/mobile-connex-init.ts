@@ -99,27 +99,36 @@ export class MobileConnexInitializer {
   }
 
   /**
-   * Wait for VeWorld's native Connex injection
-   * VeWorld mobile DOES inject Connex, it just takes 5-15 seconds
+   * Create minimal Connex stub to trigger VeWorld wallet-buddy
+   * Then wait for wallet-buddy to inject the REAL VeWorld Connex
    */
   private async createConnexForVeWorldMobile(): Promise<void> {
-    console.log('[MOBILE-CONNEX] Waiting for VeWorld native Connex...');
+    console.log('[MOBILE-CONNEX] Setting up VeWorld Connex trigger...');
     
-    // Check if already available
+    // Check if real Connex already exists
     if (window.connex && window.connex.vendor && window.connex.vendor.sign) {
       console.log('[MOBILE-CONNEX] ✅ Real Connex already exists!');
       return;
     }
     
-    // Wait up to 20 seconds for VeWorld to inject Connex
-    const maxWait = 20000;
-    const checkInterval = 500;
+    // Create minimal stub to trigger wallet-buddy (VeWorld detects this)
+    if (!window.connex) {
+      (window as any).connex = {
+        version: '2.0.0',
+        thor: { genesis: { id: '0x000000000b2bce3c70bc649a02749e8687721b09ed2e15997f466536b20bb127' } }
+      };
+      console.log('[MOBILE-CONNEX] Created Connex stub to trigger wallet-buddy');
+    }
+    
+    // Now wait for wallet-buddy to load and inject the REAL Connex with vendor.sign()
+    const maxWait = 15000;
+    const checkInterval = 300;
     const startTime = Date.now();
     
     while (Date.now() - startTime < maxWait) {
       if (window.connex && window.connex.vendor && window.connex.vendor.sign) {
         const waitedMs = Date.now() - startTime;
-        console.log('[MOBILE-CONNEX] ✅ VeWorld native Connex detected!', {
+        console.log('[MOBILE-CONNEX] ✅ VeWorld native Connex loaded via wallet-buddy!', {
           waitedMs,
           hasVendor: !!window.connex.vendor,
           hasSign: !!window.connex.vendor?.sign,
@@ -131,8 +140,8 @@ export class MobileConnexInitializer {
       await new Promise(resolve => setTimeout(resolve, checkInterval));
     }
     
-    console.warn('[MOBILE-CONNEX] ⚠️ Timeout waiting for VeWorld Connex after 20s');
-    throw new Error('VeWorld Connex not available after 20 seconds. Please refresh the page.');
+    console.warn('[MOBILE-CONNEX] ⚠️ Wallet-buddy did not load real Connex after 15s');
+    throw new Error('VeWorld Connex not fully loaded. Please refresh the page.');
   }
 
   /**
