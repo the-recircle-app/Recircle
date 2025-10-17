@@ -442,24 +442,11 @@ export default function GiftCards() {
                 console.log('[TEST] Sending transaction with clause:', clause);
                 console.log('[TEST] walletAddress:', walletAddress);
                 
-                // Use correct Connex API: clauses go in .request(), not .sign()
-                const signingService = window.connex.vendor.sign('tx');
-                
-                // Log available methods to debug
-                console.log('[TEST] SigningService type:', typeof signingService);
-                console.log('[TEST] SigningService keys:', Object.keys(signingService));
-                
-                // Check if methods exist
-                if (signingService.signer) {
-                  console.log('[TEST] .signer() method exists');
-                  signingService.signer(walletAddress);
-                }
-                if (signingService.gas) {
-                  console.log('[TEST] .gas() method exists');
-                  signingService.gas(100000);
-                }
-                
-                const result = await signingService.request([clause]);
+                // Use correct Connex API: clauses as 2nd param, then chain .signer(), then .request()
+                const result = await window.connex.vendor
+                  .sign('tx', [clause])
+                  .signer(walletAddress)
+                  .request();
                 console.log('[TEST] Transaction result:', result);
                 alert(`✅ Transaction sent! TX ID: ${result.txid}`);
                 

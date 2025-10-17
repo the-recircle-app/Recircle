@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useWallet, useSendTransaction } from '@vechain/vechain-kit';
 import { Interface } from '@ethersproject/abi';
 import { parseUnits } from '@ethersproject/units';
 
@@ -25,7 +26,7 @@ export interface TransactionError extends Error {
 interface DirectB3TRTransferProps {
   recipientAddress: string;
   amount: string;
-  userAddress: string; // Pass the user's address directly
+  userAddress: string;
   onSuccess?: (txId: string, txDetails?: any) => void;
   onError?: (error: TransactionError) => void;
   children: (props: {
@@ -45,80 +46,71 @@ export function DirectB3TRTransfer({
   onError,
   children 
 }: DirectB3TRTransferProps) {
-  const [transactionState, setTransactionState] = useState<'idle' | 'preparing' | 'signing' | 'sending' | 'confirming' | 'success' | 'error'>('idle');
+  const { account } = useWallet();
   const [processedError, setProcessedError] = useState<TransactionError | null>(null);
-  const [txReceipt, setTxReceipt] = useState<any>(null);
-  const [isPending, setIsPending] = useState(false);
-  const [connexAvailable, setConnexAvailable] = useState(false);
+  const [transactionState, setTransactionState] = useState<'idle' | 'preparing' | 'signing' | 'sending' | 'confirming' | 'success' | 'error'>('idle');
 
-  // Check for Connex availability with longer wait time
-  useEffect(() => {
-    let attempts = 0;
-    const maxAttempts = 60; // 30 seconds total
+  // Build clauses for VeChain Kit
+  const clauses = useMemo(() => {
+    if (!recipientAddress || !amount) return [];
     
-    const checkConnex = () => {
-      if (window.connex && window.connex.vendor && window.connex.vendor.sign) {
-        console.log('[DIRECT-B3TR] ✅ Connex detected!', {
-          version: window.connex.version,
-          genesis: window.connex.thor?.genesis,
-        });
-        setConnexAvailable(true);
-        return true;
-      }
+    try {
+      const b3trInterface = new Interface(VIP180_ABI);
+      const amountInWei = parseUnits(amount, 18).toString();
       
-      attempts++;
-      if (attempts < maxAttempts) {
-        setTimeout(checkConnex, 500);
-      } else {
-        console.error('[DIRECT-B3TR] Connex not available after 30 seconds');
-      }
-      return false;
-    };
+      return [{
+        to: B3TR_CONTRACT_ADDRESS,
+        value: '0x0',
+        data: b3trInterface.encodeFunctionData('transfer', [
+          recipientAddress,
+          amountInWei,
+        ]),
+        comment: `Transfer ${amount} B3TR`,
+      }];
+    } catch (error) {
+      console.error('[DIRECT-B3TR] Error creating clauses:', error);
+      return [];
+    }
+  }, [recipientAddress, amount]);
 
-    checkConnex();
-  }, []);
+  // Use VeChain Kit's transaction hook
+  const { 
+    sendTransaction, 
+    status, 
+    txReceipt, 
+    isTransactionPending,
+    error: txError,
+  } = useSendTransaction({
+    signerAccountAddress: userAddress || account?.address || '',
+  });
 
-  // Process and categorize errors
-  const processError = (err: any): TransactionError => {
+  // Process VeChain Kit errors
+  const processError = useCallback((err: any): TransactionError => {
     const error = new Error() as TransactionError;
     const errorMsg = err?.message?.toLowerCase() || err?.toString()?.toLowerCase() || '';
     
-    if (errorMsg.includes('reject') || errorMsg.includes('denied') || errorMsg.includes('cancel')) {
+    if (err?.type === 'UserRejectedError' || errorMsg.includes('reject') || errorMsg.includes('denied')) {
       error.type = 'user_rejection';
       error.message = 'Transaction was rejected by the user';
     } else if (errorMsg.includes('insufficient') || errorMsg.includes('balance')) {
       error.type = 'insufficient_funds';
-      error.message = 'Insufficient B3TR balance to complete this transaction';
-    } else if (errorMsg.includes('network') || errorMsg.includes('timeout') || errorMsg.includes('connection')) {
+      error.message = 'Insufficient B3TR balance';
+    } else if (errorMsg.includes('network') || errorMsg.includes('timeout')) {
       error.type = 'network';
-      error.message = 'Network connection issue. Please check your connection and try again';
-    } else if (errorMsg.includes('revert') || errorMsg.includes('failed')) {
-      error.type = 'technical';
-      error.message = 'Transaction failed. The smart contract rejected this transaction';
+      error.message = 'Network connection issue';
     } else {
       error.type = 'unknown';
-      error.message = err?.message || 'An unexpected error occurred during the transaction';
+      error.message = err?.message || 'Transaction failed';
     }
     
     error.originalError = err;
     return error;
-  };
+  }, []);
 
-  const sendTransfer = useCallback(async () => {
-    console.log('[DIRECT-B3TR] sendTransfer called!', {
-      userAddress,
-      recipientAddress,
-      amount,
-      connexAvailable,
-      hasConnex: !!window.connex,
-    });
-
-    // Reset states
-    setTransactionState('preparing');
-    setProcessedError(null);
-
-    if (!userAddress) {
-      const error = new Error('No wallet address provided') as TransactionError;
+  // Wrapper function for sending
+  const handleSendTransfer = useCallback(async () => {
+    if (!userAddress && !account?.address) {
+      const error = new Error('No wallet address available') as TransactionError;
       error.type = 'technical';
       setProcessedError(error);
       setTransactionState('error');
@@ -126,8 +118,8 @@ export function DirectB3TRTransfer({
       return;
     }
 
-    if (!connexAvailable || !window.connex) {
-      const error = new Error('VeWorld wallet not available. Please ensure you are using the VeWorld app and wait for it to load.') as TransactionError;
+    if (clauses.length === 0) {
+      const error = new Error('Invalid transaction parameters') as TransactionError;
       error.type = 'technical';
       setProcessedError(error);
       setTransactionState('error');
@@ -136,66 +128,47 @@ export function DirectB3TRTransfer({
     }
 
     try {
-      setIsPending(true);
+      setTransactionState('preparing');
+      setProcessedError(null);
+      
+      console.log('[DIRECT-B3TR] Sending via VeChain Kit:', { clauses, userAddress });
+      
       setTransactionState('signing');
-
-      // Create transfer clause
-      const b3trInterface = new Interface(VIP180_ABI);
-      const amountInWei = parseUnits(amount, 18).toString();
+      await sendTransaction(clauses);
       
-      const clause = {
-        to: B3TR_CONTRACT_ADDRESS,
-        value: '0x0',
-        data: b3trInterface.encodeFunctionData('transfer', [
-          recipientAddress,
-          amountInWei,
-        ]),
-      };
-
-      console.log('[DIRECT-B3TR] Sending transaction with clause:', clause);
-
-      // Use Connex vendor.sign method (clauses go in .request(), not .sign())
-      const result = await window.connex.vendor
-        .sign('tx')
-        .request([clause]);
-      
-      console.log('[DIRECT-B3TR] Transaction result:', result);
-
-      if (result && result.txid) {
-        setTransactionState('confirming');
-        
-        const receiptData = {
-          meta: {
-            txID: result.txid,
-          },
-        };
-        
-        setTxReceipt(receiptData);
-        setTransactionState('success');
-        
-        if (onSuccess) {
-          onSuccess(result.txid, receiptData);
-        }
-      }
+      // Success is handled by status changes
     } catch (err: any) {
       console.error('[DIRECT-B3TR] Transaction failed:', err);
       const processedErr = processError(err);
       setProcessedError(processedErr);
       setTransactionState('error');
       
-      if (onError) {
-        onError(processedErr);
-      }
-    } finally {
-      setIsPending(false);
+      if (onError) onError(processedErr);
     }
-  }, [userAddress, recipientAddress, amount, connexAvailable, onSuccess, onError]);
+  }, [userAddress, account?.address, clauses, sendTransaction, processError, onError]);
+
+  // Update state based on VeChain Kit status
+  useEffect(() => {
+    if (status === 'pending' || status === 'waitingConfirmation') {
+      setTransactionState('signing');
+    } else if (status === 'success') {
+      setTransactionState('success');
+      if (txReceipt && onSuccess) {
+        onSuccess(txReceipt.meta.txID, txReceipt);
+      }
+    } else if (status === 'error' && txError) {
+      const processedErr = processError(txError);
+      setProcessedError(processedErr);
+      setTransactionState('error');
+      if (onError) onError(processedErr);
+    }
+  }, [status, txReceipt, txError, onSuccess, onError, processError]);
 
   return children({
-    sendTransfer,
-    isPending,
+    sendTransfer: handleSendTransfer,
+    isPending: isTransactionPending,
     error: processedError,
-    txReceipt,
-    transactionState
+    txReceipt: txReceipt || null,
+    transactionState,
   });
 }

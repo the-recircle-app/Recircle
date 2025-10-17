@@ -231,20 +231,10 @@ function App() {
       }
     }, 1000);
     
-    // Initialize mobile Connex for VeWorld app (but no mock transactions)
-    const initMobileWallet = async () => {
-      try {
-        const success = await mobileConnexInit.initializeMobileConnex();
-        if (success) {
-          console.log('[APP] Mobile Connex initialized successfully');
-        }
-      } catch (error) {
-        console.log('[APP] Mobile Connex initialization skipped:', (error as Error).message);
-      }
-    };
-    
-    initMobileWallet();
-    console.log('[APP] Mobile Connex initialization enabled (mock transactions disabled)');
+    // REMOVED: Mobile Connex initialization - let VeWorld inject naturally
+    // VeWorld mobile DOES inject window.connex, it just takes 5-10 seconds
+    // Don't create anything manually - it blocks the real injection!
+    console.log('[APP] Waiting for VeWorld to inject Connex naturally...');
   }, []);
 
   return (
