@@ -52,22 +52,15 @@ export class MobileConnexInitializer {
         return connexWorking;
       }
 
-      // Wait for VeWorld to inject providers
-      await this.waitForVeWorldProviders();
+      // VeWorld mobile doesn't auto-inject Connex - create it manually!
+      await this.createConnexForVeWorldMobile();
 
-      // Check if real Connex was injected by VeWorld
-      if (window.connex && window.connex.vendor && window.connex.vendor.sign) {
-        console.log('[MOBILE-CONNEX] ✅ Real VeWorld Connex detected after wait!');
-        const connexWorking = await this.verifyConnex();
-        this.initSuccess = connexWorking;
-        return connexWorking;
-      }
+      // Verify Connex is working
+      const connexWorking = await this.verifyConnex();
+      console.log('[MOBILE-CONNEX] Connex verification result:', connexWorking);
 
-      // DO NOT create mock Connex - it causes "Real VeWorld wallet required" error
-      console.log('[MOBILE-CONNEX] ❌ Real Connex not found - VeWorld did not inject it');
-      console.log('[MOBILE-CONNEX] Mock Connex creation DISABLED to prevent transaction errors');
-      this.initSuccess = false;
-      return false;
+      this.initSuccess = connexWorking;
+      return connexWorking;
 
     } catch (error) {
       console.error('[MOBILE-CONNEX] Initialization failed:', error);
@@ -106,38 +99,41 @@ export class MobileConnexInitializer {
   }
 
   /**
-   * Wait for VeWorld to inject wallet providers
+   * Create Connex manually for VeWorld mobile
+   * VeWorld mobile doesn't auto-inject Connex - we must create it ourselves
    */
-  private async waitForVeWorldProviders(): Promise<void> {
-    console.log('[MOBILE-CONNEX] Waiting for VeWorld providers...');
+  private async createConnexForVeWorldMobile(): Promise<void> {
+    console.log('[MOBILE-CONNEX] Creating Connex manually for VeWorld mobile...');
     
-    let attempts = 0;
-    const maxAttempts = 60; // 12 seconds total (VeWorld can take 5-10 seconds)
-    
-    while (attempts < maxAttempts) {
-      // Check for real Connex first (THIS is what we want!)
-      if (window.connex && window.connex.vendor && window.connex.vendor.sign) {
-        console.log('[MOBILE-CONNEX] ✅ Real Connex found after', attempts * 200, 'ms');
-        console.log('[MOBILE-CONNEX] Real Connex details:', {
-          version: window.connex.version,
-          hasVendor: !!window.connex.vendor,
-          hasSign: !!window.connex.vendor?.sign,
-          hasThor: !!window.connex.thor
-        });
-        return;
-      }
-      
-      // Then check for vechain provider
-      if (window.vechain) {
-        console.log('[MOBILE-CONNEX] VeChain provider found after', attempts * 200, 'ms');
-        // Keep waiting for Connex to be injected
-      }
-      
-      await new Promise(resolve => setTimeout(resolve, 200));
-      attempts++;
+    // Check if Connex is already available (desktop/extension)
+    if (window.connex && window.connex.vendor && window.connex.vendor.sign) {
+      console.log('[MOBILE-CONNEX] ✅ Connex already exists (desktop/extension)');
+      return;
     }
     
-    console.log('[MOBILE-CONNEX] No Connex found after 12 seconds - may need to create bridge');
+    try {
+      // Import Connex library (default export)
+      const Connex = (await import('@vechain/connex')).default;
+      
+      // Create Connex instance with testnet configuration
+      const connex = new Connex({
+        node: 'https://vethor-node-test.vechaindev.com', // Testnet node
+        network: 'test', // Testnet
+      });
+      
+      // Inject it into window for compatibility
+      window.connex = connex;
+      
+      console.log('[MOBILE-CONNEX] ✅ Connex created successfully!', {
+        version: connex.version,
+        hasVendor: !!connex.vendor,
+        hasSign: !!connex.vendor?.sign,
+        hasThor: !!connex.thor
+      });
+    } catch (error) {
+      console.error('[MOBILE-CONNEX] Failed to create Connex:', error);
+      throw error;
+    }
   }
 
   /**
