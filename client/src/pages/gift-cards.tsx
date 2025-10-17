@@ -174,10 +174,19 @@ export default function GiftCards() {
   });
 
   const handlePurchase = () => {
-    if (!selectedProduct || !amount || !email || !account?.address) {
+    if (!selectedProduct || !amount || !email) {
       toast({
         title: "⚠️ Missing Information",
         description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!account?.address) {
+      toast({
+        title: "⚠️ Wallet Not Connected",
+        description: "Please connect your VeWorld wallet to continue",
         variant: "destructive",
       });
       return;

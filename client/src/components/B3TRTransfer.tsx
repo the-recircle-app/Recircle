@@ -232,6 +232,20 @@ export function B3TRTransfer({
       return;
     }
     
+    // Check if sendTransaction is a function before calling it
+    if (typeof sendTransaction !== 'function') {
+      const walletError = new Error('Wallet transaction function not available. Please refresh the page and try again') as TransactionError;
+      walletError.type = 'technical';
+      console.error('[B3TR-TRANSFER] sendTransaction is not a function:', {
+        sendTransaction,
+        type: typeof sendTransaction
+      });
+      setProcessedError(walletError);
+      setTransactionState('error');
+      if (onError) onError(walletError);
+      return;
+    }
+    
     const willDelegate = vthoBalance && parseFloat(vthoBalance) < 10;
     
     console.log('[B3TR-TRANSFER] 🚀 Initiating B3TR Transfer:', {
