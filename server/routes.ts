@@ -6650,6 +6650,90 @@ app.post("/api/treasury/test-distribution", async (req: Request, res: Response) 
     }
   });
 
+  /**
+   * Verify B3TR transaction on-chain
+   * @returns {success: boolean, error?: string}
+   */
+  async function verifyB3TRTransaction(
+    txHash: string,
+    expectedSender: string,
+    expectedRecipient: string,
+    expectedAmount: number
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      console.log(`[TX-VERIFY] Verifying transaction ${txHash} from ${expectedSender}`);
+      
+      // Initialize ThorClient for testnet
+      const B3TR_CONTRACT_ADDRESS = process.env.B3TR_CONTRACT_ADDRESS || '0xbf64cf86894Ee0877C4e7d03936e35Ee8D8b864F';
+      const TESTNET_URL = process.env.VECHAIN_NODE_URL || 'https://vethor-node-test.vechaindev.com';
+      const thorClient = ThorClient.at(TESTNET_URL);
+      
+      // Get transaction and receipt from blockchain
+      const tx = await thorClient.transactions.getTransaction(txHash);
+      const receipt = await thorClient.transactions.getTransactionReceipt(txHash);
+      
+      // Check if transaction exists
+      if (!tx) {
+        return { success: false, error: 'Transaction not found on blockchain' };
+      }
+      
+      if (!receipt) {
+        return { success: false, error: 'Transaction not yet confirmed - please wait and try again' };
+      }
+      
+      // Check if transaction was reverted (failed)
+      if (receipt.reverted) {
+        return { success: false, error: 'Transaction failed on blockchain' };
+      }
+      
+      // Verify sender matches (origin is the actual sender)
+      if (tx.origin.toLowerCase() !== expectedSender.toLowerCase()) {
+        console.log(`[TX-VERIFY] ❌ Sender mismatch: expected ${expectedSender}, got ${tx.origin}`);
+        return { success: false, error: 'Transaction sender does not match your wallet' };
+      }
+      
+      // Verify the transaction contains a B3TR transfer to the app fund wallet
+      // B3TR transfers emit Transfer events with signature: Transfer(address indexed from, address indexed to, uint256 value)
+      const transferEvents = receipt.outputs[0]?.events?.filter((event: any) => 
+        event.address.toLowerCase() === B3TR_CONTRACT_ADDRESS.toLowerCase() &&
+        event.topics[0] === '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef' // Transfer event signature
+      ) || [];
+      
+      if (transferEvents.length === 0) {
+        return { success: false, error: 'No B3TR transfer found in transaction' };
+      }
+      
+      // Find the transfer to app fund wallet
+      const appFundTransfer = transferEvents.find((event: any) => {
+        // topic1 = from (indexed), topic2 = to (indexed), data = amount
+        const toAddress = '0x' + event.topics[2].slice(26); // Remove padding from indexed address
+        return toAddress.toLowerCase() === expectedRecipient.toLowerCase();
+      });
+      
+      if (!appFundTransfer) {
+        return { success: false, error: `B3TR was not sent to the correct address` };
+      }
+      
+      // Decode the transfer amount from event data (in wei, 18 decimals)
+      const transferredWei = BigInt(appFundTransfer.data);
+      const transferredB3TR = Number(formatUnits(transferredWei, 18));
+      
+      // Allow 1% tolerance for rounding differences
+      const tolerance = expectedAmount * 0.01;
+      if (transferredB3TR < (expectedAmount - tolerance)) {
+        console.log(`[TX-VERIFY] ❌ Amount mismatch: expected ${expectedAmount}, got ${transferredB3TR}`);
+        return { success: false, error: `Insufficient B3TR transferred: expected ${expectedAmount}, got ${transferredB3TR}` };
+      }
+      
+      console.log(`[TX-VERIFY] ✅ Transaction verified: ${transferredB3TR} B3TR from ${tx.origin} to ${expectedRecipient}`);
+      return { success: true };
+      
+    } catch (error: any) {
+      console.error('[TX-VERIFY] Verification failed:', error);
+      return { success: false, error: `Verification failed: ${error.message}` };
+    }
+  }
+
   app.post('/api/gift-cards/purchase', receiptSubmissionRateLimit, async (req: Request, res: Response) => {
     try {
       const { productId, productName, amount, currency, email, txHash, connectedWallet } = req.body;
@@ -6682,9 +6766,18 @@ app.post("/api/treasury/test-distribution", async (req: Request, res: Response) 
         .limit(1);
 
       if (existingOrder.length > 0) {
-        // Transaction already used - return existing order instead of error
-        // This handles duplicate API calls with the same transaction gracefully
+        // Transaction already used - check if it belongs to this user
         const order = existingOrder[0];
+        
+        // Security: Only return order if it belongs to the requesting user
+        if (order.userId !== user.id) {
+          console.log(`[GIFT-CARD-PURCHASE] ⚠️ Replay attack detected: tx ${txHash} belongs to different user`);
+          return res.status(403).json({
+            success: false,
+            error: 'This transaction has already been used by another account.',
+          });
+        }
+        
         console.log(`[GIFT-CARD-PURCHASE] ⚠️ Duplicate purchase attempt detected - returning existing order ${order.id}`);
         
         return res.json({
@@ -6700,10 +6793,23 @@ app.post("/api/treasury/test-distribution", async (req: Request, res: Response) 
         });
       }
 
-      // TODO: Add full on-chain transaction verification after consulting VeChain community
-      // For now, we trust that the user provided a valid transaction hash
-      // The transaction hash itself serves as proof of payment
-      console.log(`[GIFT-CARD-PURCHASE] ✅ Payment accepted with txHash: ${txHash}`);
+      // CRITICAL: Verify transaction on-chain before accepting payment
+      const verification = await verifyB3TRTransaction(
+        txHash,
+        connectedWallet.toLowerCase(),
+        APP_FUND_WALLET.toLowerCase(),
+        expectedB3TRAmount
+      );
+      
+      if (!verification.success) {
+        console.log(`[GIFT-CARD-PURCHASE] ❌ Transaction verification failed: ${verification.error}`);
+        return res.status(400).json({
+          success: false,
+          error: verification.error || 'Payment verification failed',
+        });
+      }
+      
+      console.log(`[GIFT-CARD-PURCHASE] ✅ Payment verified on blockchain`);
 
       const externalId = `recircle_${user.id}_${Date.now()}`;
 
