@@ -1,8 +1,13 @@
 const TREMENDOUS_API_KEY = process.env.TREMENDOUS_API_KEY;
+const TREMENDOUS_FUNDING_SOURCE_ID = process.env.TREMENDOUS_FUNDING_SOURCE_ID;
 const IS_SANDBOX = TREMENDOUS_API_KEY?.startsWith('TEST_');
 
 if (!TREMENDOUS_API_KEY) {
   throw new Error('TREMENDOUS_API_KEY environment variable is required');
+}
+
+if (!TREMENDOUS_FUNDING_SOURCE_ID) {
+  throw new Error('TREMENDOUS_FUNDING_SOURCE_ID environment variable is required');
 }
 
 const BASE_URL = IS_SANDBOX 
@@ -118,7 +123,7 @@ export async function createOrder(params: CreateOrderParams): Promise<Tremendous
     const orderData = {
       external_id: params.externalId,
       payment: {
-        funding_source_id: IS_SANDBOX ? 'SANDBOX_FUNDING_SOURCE' : undefined,
+        funding_source_id: TREMENDOUS_FUNDING_SOURCE_ID,
       },
       rewards: [
         {

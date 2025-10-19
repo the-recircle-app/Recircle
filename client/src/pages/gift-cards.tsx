@@ -208,6 +208,17 @@ export default function GiftCards() {
       return;
     }
 
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast({
+        title: "⚠️ Invalid Email",
+        description: "Please enter a valid email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!account?.address) {
       toast({
         title: "⚠️ Wallet Not Connected",
@@ -574,10 +585,10 @@ export default function GiftCards() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="bg-gray-700 border-gray-600 text-white"
+                  required
                 />
                 <p className="text-xs text-gray-500 mt-1">Gift card will be sent to this email</p>
               </div>
-
               {amount && parseFloat(amount) >= (selectedProduct?.minAmount || 0) && (
                 <div className="bg-gray-700 rounded-lg p-3 space-y-2">
                   <div className="flex justify-between text-sm">
