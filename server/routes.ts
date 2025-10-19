@@ -6682,9 +6682,21 @@ app.post("/api/treasury/test-distribution", async (req: Request, res: Response) 
         .limit(1);
 
       if (existingOrder.length > 0) {
-        return res.status(400).json({
-          success: false,
-          error: 'This transaction has already been used for a gift card purchase.',
+        // Transaction already used - return existing order instead of error
+        // This handles duplicate API calls with the same transaction gracefully
+        const order = existingOrder[0];
+        console.log(`[GIFT-CARD-PURCHASE] ⚠️ Duplicate purchase attempt detected - returning existing order ${order.id}`);
+        
+        return res.json({
+          success: true,
+          order: {
+            id: order.id,
+            b3trAmount: order.b3trAmount,
+            totalUsd: order.totalUsd,
+            tremendousOrderId: order.tremendousOrderId,
+            status: order.status,
+          },
+          duplicate: true, // Flag to help with debugging
         });
       }
 
