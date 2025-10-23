@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useWallet, useSendTransaction } from '@vechain/vechain-kit';
 import { Interface } from '@ethersproject/abi';
 import { parseUnits } from '@ethersproject/units';
@@ -49,6 +49,9 @@ export function DirectB3TRTransfer({
   const { account } = useWallet();
   const [processedError, setProcessedError] = useState<TransactionError | null>(null);
   const [transactionState, setTransactionState] = useState<'idle' | 'preparing' | 'signing' | 'sending' | 'confirming' | 'success' | 'error'>('idle');
+  
+  // Track processed transactions to prevent duplicate onSuccess calls
+  const processedTxIds = useRef<Set<string>>(new Set());
 
   // Build clauses for VeChain Kit (following official docs pattern)
   const clauses = useMemo(() => {
@@ -167,9 +170,16 @@ export function DirectB3TRTransfer({
     } else if (status === 'success') {
       setTransactionState('success');
       if (txReceipt && onSuccess) {
-        console.log('[DIRECT-B3TR] ✅ Transaction success:', txReceipt);
         const txId = txReceipt.meta?.txID || (txReceipt as any).txid || 'unknown';
-        onSuccess(txId, txReceipt);
+        
+        // CRITICAL: Prevent duplicate onSuccess calls for the same transaction
+        if (!processedTxIds.current.has(txId)) {
+          console.log('[DIRECT-B3TR] ✅ Transaction success (first time):', txId);
+          processedTxIds.current.add(txId);
+          onSuccess(txId, txReceipt);
+        } else {
+          console.log('[DIRECT-B3TR] ⚠️ Skipping duplicate onSuccess call for:', txId);
+        }
       }
     } else if (status === 'error' && txError) {
       const processedErr = processError(txError);
