@@ -42,6 +42,7 @@ export default function GiftCards() {
   const [purchaseModalOpen, setPurchaseModalOpen] = useState(false);
   const [amount, setAmount] = useState("");
   const [email, setEmail] = useState("");
+  const [confirmEmail, setConfirmEmail] = useState("");
   const [isPaymentStep, setIsPaymentStep] = useState(false);
   const [paymentTxHash, setPaymentTxHash] = useState<string | null>(null);
   const [isVerifyingPayment, setIsVerifyingPayment] = useState(false);
@@ -199,7 +200,7 @@ export default function GiftCards() {
   });
 
   const handlePurchase = () => {
-    if (!selectedProduct || !amount || !email) {
+    if (!selectedProduct || !amount || !email || !confirmEmail) {
       toast({
         title: "⚠️ Missing Information",
         description: "Please fill in all required fields",
@@ -214,6 +215,16 @@ export default function GiftCards() {
       toast({
         title: "⚠️ Invalid Email",
         description: "Please enter a valid email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate emails match
+    if (email !== confirmEmail) {
+      toast({
+        title: "⚠️ Emails Don't Match",
+        description: "Please make sure both email addresses are the same",
         variant: "destructive",
       });
       return;
@@ -542,6 +553,9 @@ export default function GiftCards() {
           setPaymentTxHash(null);
           setPaymentStatus('idle');
           setIsVerifyingPayment(false);
+          setEmail("");
+          setConfirmEmail("");
+          setAmount("");
         }
       }}>
         <DialogContent className="bg-gray-800 text-white border-gray-700">
@@ -556,7 +570,7 @@ export default function GiftCards() {
                 paymentStatus === 'success' ?
                   'Purchase successful! Check your email.' :
                   'Confirm payment in your VeWorld wallet'
-              ) : 'Enter the amount and your email to receive the gift card'}
+              ) : 'Enter amount and confirm your email address to continue'}
             </DialogDescription>
           </DialogHeader>
 
@@ -587,7 +601,20 @@ export default function GiftCards() {
                   className="bg-gray-700 border-gray-600 text-white"
                   required
                 />
-                <p className="text-xs text-gray-500 mt-1">Gift card will be sent to this email</p>
+              </div>
+
+              <div>
+                <label htmlFor="confirmEmail" className="block text-sm font-medium mb-1">Confirm Email Address</label>
+                <Input
+                  id="confirmEmail"
+                  type="email"
+                  placeholder="your@email.com"
+                  value={confirmEmail}
+                  onChange={(e) => setConfirmEmail(e.target.value)}
+                  className="bg-gray-700 border-gray-600 text-white"
+                  required
+                />
+                <p className="text-xs text-gray-500 mt-1">Gift card will be sent to this email - please double-check!</p>
               </div>
               {amount && parseFloat(amount) >= (selectedProduct?.minAmount || 0) && (
                 <div className="bg-gray-700 rounded-lg p-3 space-y-2">
@@ -622,7 +649,7 @@ export default function GiftCards() {
 
               <Button
                 onClick={handlePurchase}
-                disabled={!amount || !email}
+                disabled={!amount || !email || !confirmEmail}
                 className="w-full bg-pink-600 hover:bg-pink-700"
               >
                 <CreditCard className="mr-2 h-4 w-4" />
