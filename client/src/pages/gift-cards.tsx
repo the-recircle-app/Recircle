@@ -209,9 +209,13 @@ export default function GiftCards() {
       return;
     }
 
+    // Normalize emails (trim whitespace, lowercase)
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedConfirmEmail = confirmEmail.trim().toLowerCase();
+
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(normalizedEmail)) {
       toast({
         title: "⚠️ Invalid Email",
         description: "Please enter a valid email address",
@@ -221,7 +225,7 @@ export default function GiftCards() {
     }
 
     // Validate emails match
-    if (email !== confirmEmail) {
+    if (normalizedEmail !== normalizedConfirmEmail) {
       toast({
         title: "⚠️ Emails Don't Match",
         description: "Please make sure both email addresses are the same",
@@ -288,7 +292,7 @@ export default function GiftCards() {
           productName: selectedProduct.name,
           amount: amountNum,
           currency: 'USD',
-          email,
+          email: email.trim().toLowerCase(),
           txHash: txId,
           connectedWallet: account.address,
         });
