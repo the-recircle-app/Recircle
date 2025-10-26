@@ -707,7 +707,19 @@ export default function GiftCards() {
                   )}
 
                   {!txReceipt && paymentStatus !== 'verifying' && paymentStatus !== 'creating_order' && paymentStatus !== 'success' && (
-                    <Button
+                    <>
+                      {/* Warning: Don't close browser */}
+                      <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 flex items-start gap-2">
+                        <AlertCircle className="h-5 w-5 text-red-400 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1">
+                          <p className="text-sm font-semibold text-red-400">Important: Do not close this window</p>
+                          <p className="text-xs text-gray-400 mt-1">
+                            After approving the payment in your wallet, wait for the order confirmation. Closing the app early may result in losing your B3TR without receiving the gift card.
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <Button
                       onClick={() => {
                         console.log('[GIFT-CARD] Pay button clicked!', {
                           sendTransfer: typeof sendTransfer,
@@ -734,6 +746,7 @@ export default function GiftCards() {
                         </>
                       )}
                     </Button>
+                    </>
                   )}
 
                   {txReceipt && !purchaseMutation.isPending && paymentStatus !== 'success' && (
