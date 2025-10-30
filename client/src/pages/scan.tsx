@@ -133,11 +133,38 @@ const ScanReceipt = () => {
                 <ProductionReceiptUpload
                   userId={userId?.toString() || "102"}
                   walletAddress={userId?.toString() || "0x7567d83b7b8d80addcb281a71d54fc7b3364ffed"}
-                  onValidationComplete={(result) => {
+                  onValidationComplete={async (result) => {
                     console.log("[SCAN] Production validation complete:", result);
                     if (result.tokenDistributed) {
                       setCurrentStep(ScanStep.SUCCESS);
                       setRewardAmount(result.actualReward);
+                      
+                      // Check for first receipt achievement (use same fallback as ProductionReceiptUpload)
+                      const receiptUserId = userId?.toString() || "102";
+                      try {
+                        const receiptsResponse = await fetch(`/api/users/${receiptUserId}/receipts`);
+                        if (receiptsResponse.ok) {
+                          const receipts = await receiptsResponse.json();
+                          console.log("[SCAN] Receipt count:", receipts.length);
+                          
+                          // Trigger achievement notification for first receipt
+                          if (receipts.length === 1) {
+                            setTimeout(() => {
+                              console.log("[SCAN] Triggering first_receipt achievement");
+                              const achievementEvent = new CustomEvent('triggerAchievement', {
+                                detail: { type: 'first_receipt' }
+                              });
+                              window.dispatchEvent(achievementEvent);
+                              
+                              // Invalidate achievement-related queries to refresh the achievements tab
+                              queryClient.invalidateQueries({ queryKey: [`/api/users/${receiptUserId}/receipts`] });
+                              queryClient.invalidateQueries({ queryKey: [`/api/users/${receiptUserId}/transactions`] });
+                            }, 500);
+                          }
+                        }
+                      } catch (error) {
+                        console.error("[SCAN] Error checking achievements:", error);
+                      }
                     }
                     // Refresh token balance
                     if (refreshTokenBalance) {

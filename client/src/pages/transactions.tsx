@@ -182,13 +182,13 @@ const TransactionExplorer = () => {
       
       // Determine from/to addresses based on transaction type
       let fromAddress = platformWalletAddress;
-      let toAddress = getConnectedAddress(); // Use actual connected wallet address
+      let toAddress = displayAddress || address || ""; // Use actual connected wallet address
       
       // For user rewards (receipt_verification, achievement_reward, store_addition), 
       // the user is receiving tokens FROM the platform
       if (tx.type === "receipt_verification" || tx.type === "achievement_reward" || tx.type === "store_addition") {
         fromAddress = platformWalletAddress;
-        toAddress = getConnectedAddress(); // Use actual connected wallet address
+        toAddress = displayAddress || address || ""; // Use actual connected wallet address
       } 
       // Set proper addresses for sustainability transactions
       else if (tx.type === "sustainability_creator") {
@@ -616,10 +616,30 @@ const TransactionExplorer = () => {
                               </div>
                               <div className="text-xs text-gray-600">
                                 {selectedTx.type === "receipt_verification" && (
-                                  <p>
-                                    This reward was earned by verifying a transportation receipt. 
-                                    The reward amount is based on the receipt value and other factors.
-                                  </p>
+                                  <div className="space-y-2">
+                                    <p>
+                                      This reward was earned by verifying a transportation receipt. 
+                                      The reward amount is based on the receipt value and other factors.
+                                    </p>
+                                    <div className="bg-white/60 rounded-md p-2 space-y-1">
+                                      <div className="font-medium text-gray-700 text-xs mb-1">Reward Distribution:</div>
+                                      <div className="flex justify-between text-xs">
+                                        <span className="text-gray-600">Total Earned:</span>
+                                        <span className="font-medium">{(selectedTx.amount / 0.7).toFixed(1)} B3TR</span>
+                                      </div>
+                                      <div className="flex justify-between text-xs">
+                                        <span className="text-green-600">• You Received (70%):</span>
+                                        <span className="font-medium text-green-600">{selectedTx.amount.toFixed(1)} B3TR</span>
+                                      </div>
+                                      <div className="flex justify-between text-xs">
+                                        <span className="text-gray-500">• Platform Fund (30%):</span>
+                                        <span className="font-medium text-gray-500">{(selectedTx.amount / 0.7 * 0.3).toFixed(1)} B3TR</span>
+                                      </div>
+                                      <p className="text-xs text-gray-500 mt-1 pt-1 border-t">
+                                        30% supports platform development and sustainability initiatives
+                                      </p>
+                                    </div>
+                                  </div>
                                 )}
                                 {selectedTx.type === "store_addition" && (
                                   <p>
