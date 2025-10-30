@@ -74,6 +74,12 @@ const ScanReceipt = () => {
   const { userId, isConnected, refreshTokenBalance, tokenBalance } = useWallet();
   const { toast } = useToast();
 
+  // Fetch user data to get streak count
+  const { data: userData } = useQuery({
+    queryKey: [`/api/users/${userId}`],
+    enabled: !!userId,
+  });
+
   // State management
   const [currentStep, setCurrentStep] = useState<ScanStep>(ScanStep.CAMERA);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
@@ -104,7 +110,10 @@ const ScanReceipt = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
+      <Header 
+        streak={userData?.currentStreak}
+        gems={tokenBalance}
+      />
       
       <div className="container mx-auto px-4 py-6 pb-24">
         <div className="max-w-2xl mx-auto">
