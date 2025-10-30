@@ -650,6 +650,20 @@ export class MemStorage implements IStorage {
     }
   }
 
+  async updateTransactionAmount(transactionId: number, amount: number): Promise<boolean> {
+    const transaction = this.transactions.get(transactionId);
+    if (transaction) {
+      console.log(`[MEMORY] Updating transaction ${transactionId} amount: ${transaction.amount} → ${amount} B3TR`);
+      transaction.amount = amount;
+      this.transactions.set(transactionId, transaction);
+      console.log(`[MEMORY] ✅ Transaction ${transactionId} amount updated successfully`);
+      return true;
+    } else {
+      console.log(`[MEMORY] ⚠️ Transaction ${transactionId} not found for amount update`);
+      return false;
+    }
+  }
+
   async deleteTransaction(id: number): Promise<boolean> {
     const success = this.transactions.delete(id);
     return success;
@@ -959,6 +973,27 @@ export class PgStorage implements IStorage {
       }
     } catch (error) {
       console.error(`[DB] ❌ Failed to update transaction ${transactionId} hash:`, error);
+      return false;
+    }
+  }
+
+  async updateTransactionAmount(transactionId: number, amount: number): Promise<boolean> {
+    try {
+      console.log(`[DB] Updating transaction ${transactionId} amount to ${amount} B3TR`);
+      const result = await db.update(transactions)
+        .set({ amount: amount })
+        .where(eq(transactions.id, transactionId))
+        .returning();
+      
+      if (result.length > 0) {
+        console.log(`[DB] ✅ Transaction ${transactionId} amount updated successfully`);
+        return true;
+      } else {
+        console.log(`[DB] ⚠️ Transaction ${transactionId} not found for amount update`);
+        return false;
+      }
+    } catch (error) {
+      console.error(`[DB] ❌ Failed to update transaction ${transactionId} amount:`, error);
       return false;
     }
   }

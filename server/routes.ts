@@ -3780,6 +3780,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   console.log(`[BLOCKCHAIN] 🔄 Updating database transaction with real hash: ${distributionResult.txHash}`);
                   await storage.updateTransactionHash(receiptTransaction.id, distributionResult.txHash);
                   console.log(`[BLOCKCHAIN] ✅ Database transaction updated with real VeChain hash`);
+                  
+                  // 🎯 CRITICAL FIX: Update transaction amount with actual user reward (70% of total)
+                  const actualUserAmount = distributionResult.userAmount || distributionResult.userReward;
+                  if (actualUserAmount && actualUserAmount !== finalReward) {
+                    console.log(`[BLOCKCHAIN] 🔄 Updating transaction amount: ${finalReward} → ${actualUserAmount} B3TR (70% after split)`);
+                    await storage.updateTransactionAmount(receiptTransaction.id, actualUserAmount);
+                    console.log(`[BLOCKCHAIN] ✅ Transaction amount updated to reflect actual distribution`);
+                  }
                 }
               } else {
                 console.log(`[BLOCKCHAIN] ❌ Distribution failed: ${distributionResult.error}`);
