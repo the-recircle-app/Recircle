@@ -141,13 +141,19 @@ const ScanReceipt = () => {
                       
                       // Check for first receipt achievement (use same fallback as ProductionReceiptUpload)
                       const receiptUserId = userId?.toString() || "102";
+                      
+                      // 🎯 ALWAYS invalidate queries after EVERY receipt upload (not just first)
+                      queryClient.invalidateQueries({ queryKey: [`/api/users/${receiptUserId}/receipts`] });
+                      queryClient.invalidateQueries({ queryKey: [`/api/users/${receiptUserId}/transactions`] });
+                      queryClient.invalidateQueries({ queryKey: [`/api/users/${receiptUserId}`] });
+                      
                       try {
                         const receiptsResponse = await fetch(`/api/users/${receiptUserId}/receipts`);
                         if (receiptsResponse.ok) {
                           const receipts = await receiptsResponse.json();
                           console.log("[SCAN] Receipt count:", receipts.length);
                           
-                          // Trigger achievement notification for first receipt
+                          // Trigger achievement notification for first receipt only
                           if (receipts.length === 1) {
                             setTimeout(() => {
                               console.log("[SCAN] Triggering first_receipt achievement");
@@ -155,10 +161,6 @@ const ScanReceipt = () => {
                                 detail: { type: 'first_receipt' }
                               });
                               window.dispatchEvent(achievementEvent);
-                              
-                              // Invalidate achievement-related queries to refresh the achievements tab
-                              queryClient.invalidateQueries({ queryKey: [`/api/users/${receiptUserId}/receipts`] });
-                              queryClient.invalidateQueries({ queryKey: [`/api/users/${receiptUserId}/transactions`] });
                             }, 500);
                           }
                         }
