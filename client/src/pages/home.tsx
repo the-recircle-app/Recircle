@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useWallet } from "../context/WalletContext";
+import { useWallet as useVeChainKitWallet } from "@vechain/vechain-kit";
 import { Button } from "../components/ui/button";
 import ReCircleLogo from "../components/ReCircleLogo";
 import ReCircleSymbol from "../components/ReCircleSymbol";
@@ -15,6 +16,10 @@ import { Link } from "wouter";
 
 const Home = () => {
   const { userId, isConnected, tokenBalance, refreshTokenBalance, address } = useWallet();
+  const { account: kitAccount } = useVeChainKitWallet();
+  
+  // Use VeChainKit account address first (for VeWorld users), fallback to WalletContext address
+  const displayAddress = kitAccount?.address || address;
   const [stats, setStats] = useState({
     totalRewards: 0,
     receiptsCount: 0,
@@ -135,7 +140,7 @@ const Home = () => {
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-medium text-gray-300">Connected Wallet</div>
                 <div className="text-xs text-gray-400 truncate font-mono">
-                  {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : ''}
+                  {displayAddress ? `${displayAddress.slice(0, 6)}...${displayAddress.slice(-4)}` : ''}
                 </div>
               </div>
             </div>
