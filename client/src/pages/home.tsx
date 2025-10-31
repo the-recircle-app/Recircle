@@ -20,6 +20,10 @@ const Home = () => {
   
   // Use VeChainKit account address first (for VeWorld users), fallback to WalletContext address
   const displayAddress = kitAccount?.address || address;
+  
+  // Gift cards feature flag - defaults to false (disabled/coming soon)
+  const giftCardsEnabled = import.meta.env.VITE_GIFT_CARDS_ENABLED === 'true';
+  
   const [stats, setStats] = useState({
     totalRewards: 0,
     receiptsCount: 0,
@@ -278,6 +282,7 @@ const Home = () => {
             color="#EC4899"
             path="/gift-cards"
             showReward={false}
+            comingSoon={!giftCardsEnabled}
             onClick={isConnected ? undefined : () => {
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
