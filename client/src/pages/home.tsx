@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useWallet } from "../context/WalletContext";
-import { WalletButton } from '@vechain/vechain-kit';
 import { Button } from "../components/ui/button";
 import ReCircleLogo from "../components/ReCircleLogo";
 import ReCircleSymbol from "../components/ReCircleSymbol";
@@ -15,7 +14,7 @@ import TokenBalanceRefresher from "../components/TokenBalanceRefresher";
 import { Link } from "wouter";
 
 const Home = () => {
-  const { userId, isConnected, tokenBalance, refreshTokenBalance } = useWallet();
+  const { userId, isConnected, tokenBalance, refreshTokenBalance, address } = useWallet();
   const [stats, setStats] = useState({
     totalRewards: 0,
     receiptsCount: 0,
@@ -120,24 +119,25 @@ const Home = () => {
         />
       )} */}
       
-      {/* VeChain Kit Smart Account Display */}
+      {/* Connected Wallet Display */}
       {isConnected ? (
         <div className="p-4 border-b border-gray-700">
           <div className="bg-gray-800 rounded-lg p-3">
             <div className="flex items-center space-x-3">
-              {/* Use VeChain Kit's WalletButton - automatically shows smart account */}
-              <WalletButton 
-                mobileVariant="iconDomainAndAddress"
-                desktopVariant="iconDomainAndAddress"
-                buttonStyle={{
-                  background: 'transparent',
-                  border: 'none',
-                  padding: '0',
-                  minHeight: 'auto',
-                  fontSize: '14px',
-                  color: '#f3f4f6'
-                }}
-              />
+              {/* Green checkmark icon */}
+              <div className="flex-shrink-0">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-green-500">
+                  <circle cx="12" cy="12" r="10" fill="currentColor" />
+                  <path d="M9 12l2 2 4-4" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+              {/* Connected Wallet text and address */}
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-medium text-gray-300">Connected Wallet</div>
+                <div className="text-xs text-gray-400 truncate font-mono">
+                  {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : ''}
+                </div>
+              </div>
             </div>
           </div>
         </div>
