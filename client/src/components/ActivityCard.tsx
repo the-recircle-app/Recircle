@@ -13,6 +13,7 @@ interface ActivityCardProps {
   showReward?: boolean;
   hideSymbol?: boolean;
   onClick?: () => void;
+  comingSoon?: boolean;
 }
 
 const ActivityCard: React.FC<ActivityCardProps> = ({
@@ -25,12 +26,20 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
   progress = 100,
   showReward = true,
   hideSymbol = false,
-  onClick
+  onClick,
+  comingSoon = false
 }) => {
   const blue = "#38BDF8"; // Bright cyan/blue for dark theme
   
   const cardContent = (
-    <div className="cursor-pointer bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-700 hover:shadow-lg transition-shadow duration-200">
+    <div className={`relative ${comingSoon ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'} bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-700 ${comingSoon ? '' : 'hover:shadow-lg'} transition-shadow duration-200`}>
+        {comingSoon && (
+          <div className="absolute top-2 right-2 z-10">
+            <span className="bg-yellow-500 text-gray-900 text-xs font-bold px-2 py-1 rounded-full">
+              Coming Soon
+            </span>
+          </div>
+        )}
         <div 
           className="p-4 flex items-center justify-between" 
           style={{ backgroundColor: `${color}15` }} // Very dark version of the color
@@ -81,6 +90,10 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
         )}
       </div>
   );
+
+  if (comingSoon) {
+    return <div>{cardContent}</div>;
+  }
 
   if (onClick) {
     return <div onClick={onClick}>{cardContent}</div>;
