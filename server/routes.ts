@@ -3813,17 +3813,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (!needsManualReview) {
           // Check if this is the first receipt submission ever
           if (isFirstReceipt) {
-            // First receipt always sets streak to 1, regardless of test mode
+            // First receipt always sets streak to 1
             newStreak = 1;
             streakIncreased = true;
             console.log("First receipt ever - setting streak to 1");
-          } else if (process.env.NODE_ENV === 'development' && req.body.isTestMode) {
-            // In test mode for subsequent receipts, don't increment artificially
-            newStreak = initialUserData.currentStreak || 0;
-            streakIncreased = false;
-            console.log("Test mode - maintaining current streak");
           } else {
-            // Normal streak calculation for real production usage
+            // Normal streak calculation based on last activity date
             if (initialUserData.lastActivityDate) {
               // Check if this activity counts for a streak increase
               const lastDate = new Date(initialUserData.lastActivityDate);
@@ -3842,18 +3837,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 // Activity was yesterday, streak increases
                 newStreak++;
                 streakIncreased = true;
+                console.log(`Streak increased: ${initialUserData.currentStreak} → ${newStreak} (last activity was yesterday)`);
               } else if (lastDateStr === todayStr) {
                 // Activity was already today, streak maintains
-                streakIncreased = false; 
+                streakIncreased = false;
+                console.log(`Streak maintained at ${newStreak} (already uploaded today)`);
               } else {
                 // Activity was more than a day ago, streak resets
                 newStreak = 1;
                 streakIncreased = true;
+                console.log(`Streak reset to 1 (last activity was ${lastDateStr})`);
               }
             } else {
               // First activity ever, start streak at 1
               newStreak = 1;
               streakIncreased = true;
+              console.log("First activity ever - starting streak at 1");
             }
           }
         } else {
