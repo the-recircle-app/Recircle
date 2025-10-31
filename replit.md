@@ -10,6 +10,22 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+**October 31, 2025 - Gift Card "Coming Soon" Feature Flag**
+- Added `VITE_GIFT_CARDS_ENABLED` environment variable to control gift card marketplace availability
+- Gift cards now show with "Coming Soon" badge by default (grayed out, non-clickable)
+- Updated ActivityCard component with `comingSoon` prop for disabled state with badge
+- Enables phased launch: receipts first, then gift cards 2-4 weeks later
+- To enable gift cards: Add `VITE_GIFT_CARDS_ENABLED=true` to Replit Secrets
+- Professional UX: Shows users what's coming without allowing access yet
+
+**October 31, 2025 - Wallet Display & Send Page Updates**
+- Replaced clickable wallet modal with static "Connected Wallet" display on home page
+- Shows green checkmark, "Connected Wallet" label, and shortened wallet address
+- Fixed wallet address display to use VeChainKit account (real VeWorld address) not WalletContext
+- Updated Send page to use DirectB3TRTransfer component (same as gift card marketplace)
+- Replaced database balance with LiveB3TRBalance showing real blockchain balance
+- Send button tested and working - ready for mainnet testing
+
 **October 17, 2025 - Gift Card VeWorld Mobile Authentication Fix (MAJOR PROGRESS)**
 - **BREAKTHROUGH**: Fixed VeWorld mobile gift card purchases - blockchain payment now successfully reaches backend!
 - **Authentication fix**: Removed VeChain certificate requirement that blocked VeWorld mobile users
