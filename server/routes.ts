@@ -845,16 +845,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
       
-      // Calculate correct streak based on receipt activity
-      const userReceipts = await storage.getUserReceipts(idNum);
-      const correctStreak = userReceipts.length > 0 ? 1 : 0;
-      
-      // Update user with correct streak if it's different
+      // NOTE: Streak is now managed by receipt upload logic based on lastActivityDate
+      // No longer auto-correcting streaks on user fetch to allow multi-day streaks
       let updatedUser = user;
-      if (user.currentStreak !== correctStreak) {
-        updatedUser = await storage.updateUserStreak(idNum, correctStreak) || user;
-        console.log(`[User API] Fixed user ${idNum} streak from ${user.currentStreak} to ${correctStreak}`);
-      }
       
       // For development testing, log detailed user info
       if (process.env.NODE_ENV === 'development') {
