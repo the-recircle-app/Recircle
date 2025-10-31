@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useWallet } from '@/context/WalletContext';
-import { B3TRTransfer } from '@/components/B3TRTransfer';
+import { useWallet as useVeChainKitWallet } from '@vechain/vechain-kit';
+import { DirectB3TRTransfer } from '@/components/DirectB3TRTransfer';
+import LiveB3TRBalance from '@/components/LiveB3TRBalance';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -12,11 +14,13 @@ import TokenIcon from '@/components/TokenIcon';
 import { Link } from 'wouter';
 
 export default function SendB3TR() {
-  const { isConnected, tokenBalance, address: walletAddress, refreshUserData } = useWallet();
+  const { isConnected, address: walletAddress } = useWallet();
+  const { account } = useVeChainKitWallet();
   const { toast } = useToast();
   const [recipientAddress, setRecipientAddress] = useState('');
   const [amount, setAmount] = useState('');
   const [isSending, setIsSending] = useState(false);
+  const [liveBalance, setLiveBalance] = useState(0);
 
   if (!isConnected || !walletAddress) {
     return (
@@ -53,8 +57,6 @@ export default function SendB3TR() {
     setRecipientAddress('');
     setAmount('');
     setIsSending(false);
-    
-    await refreshUserData();
   };
 
   const handleError = (error: Error) => {
@@ -81,8 +83,8 @@ export default function SendB3TR() {
   };
 
   const amountNum = parseFloat(amount) || 0;
-  const isValidAmount = amountNum > 0 && amountNum <= tokenBalance;
-  const canSend = isValidAddress(recipientAddress) && isValidAmount;
+  const isValidAmount = amountNum > 0 && amountNum <= liveBalance;
+  const canSend = isValidAddress(recipientAddress) && isValidAmount && walletAddress;
 
   return (
     <div className="container mx-auto px-4 py-8 pb-24">
@@ -91,7 +93,12 @@ export default function SendB3TR() {
           <BackButton href="/home" />
           <h1 className="text-2xl font-bold">Send B3TR</h1>
         </div>
-        <TokenIcon value={tokenBalance} size="lg" />
+        <div className="flex items-center gap-2">
+          <span className="text-2xl font-bold">
+            <LiveB3TRBalance fallbackBalance={0} onBalanceChange={setLiveBalance} />
+          </span>
+          <TokenIcon value={liveBalance} size="lg" />
+        </div>
       </div>
 
       <Card className="mb-6">
@@ -136,14 +143,16 @@ export default function SendB3TR() {
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <Label htmlFor="amount" className="text-base">Amount *</Label>
-              <span className="text-sm text-muted-foreground">Balance: {tokenBalance} B3TR</span>
+              <span className="text-sm text-muted-foreground">
+                Balance: <LiveB3TRBalance fallbackBalance={0} onBalanceChange={setLiveBalance} /> B3TR
+              </span>
             </div>
             <Input
               id="amount"
               type="number"
               step="0.01"
               min="0"
-              max={tokenBalance}
+              max={liveBalance}
               placeholder="Enter amount"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
@@ -156,15 +165,15 @@ export default function SendB3TR() {
                   key={percent}
                   variant="outline"
                   size="sm"
-                  onClick={() => setAmount(((tokenBalance * percent) / 100).toFixed(2))}
-                  disabled={isSending}
+                  onClick={() => setAmount(((liveBalance * percent) / 100).toFixed(2))}
+                  disabled={isSending || liveBalance === 0}
                   className="bg-gray-800/50 border-gray-700 hover:bg-gray-700"
                 >
                   {percent}%
                 </Button>
               ))}
             </div>
-            {amountNum > tokenBalance && (
+            {amountNum > liveBalance && (
               <p className="text-sm text-destructive">Insufficient balance</p>
             )}
           </div>
@@ -186,9 +195,10 @@ export default function SendB3TR() {
           )}
         </CardContent>
         <CardFooter>
-          <B3TRTransfer
+          <DirectB3TRTransfer
             recipientAddress={recipientAddress}
             amount={amount}
+            userAddress={walletAddress || account?.address || ''}
             onSuccess={handleSuccess}
             onError={handleError}
           >
@@ -215,7 +225,7 @@ export default function SendB3TR() {
                 )}
               </Button>
             )}
-          </B3TRTransfer>
+          </DirectB3TRTransfer>
         </CardFooter>
       </Card>
 
