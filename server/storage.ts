@@ -865,7 +865,14 @@ export class PgStorage implements IStorage {
 
   async getUserReferralCode(userId: number): Promise<string | null> {
     const user = await this.getUser(userId);
-    return user?.referralCode || null;
+    if (!user) return null;
+    
+    // Generate a referral code if user doesn't have one yet
+    if (!user.referralCode) {
+      return this.generateReferralCode(userId);
+    }
+    
+    return user.referralCode;
   }
 
   // Development and testing methods
