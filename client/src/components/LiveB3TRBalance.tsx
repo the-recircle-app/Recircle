@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useWallet as useVeChainKitWallet } from '@vechain/vechain-kit';
+import { getVeChainConfig } from '../../../shared/vechain-config';
 
 /**
- * LiveB3TRBalance - Gets real B3TR balance directly from VeChainKit (same source as wallet modal)
- * This bypasses the database and shows the actual blockchain balance that VeChainKit displays
+ * LiveB3TRBalance - Gets real B3TR balance directly from blockchain
+ * Network-aware: automatically uses mainnet or testnet based on VECHAIN_NETWORK env var
  */
 interface LiveB3TRBalanceProps {
   fallbackBalance?: number;
@@ -24,17 +25,20 @@ export default function LiveB3TRBalance({ fallbackBalance = 0, onBalanceChange }
     const fetchLiveBalance = async () => {
       try {
         setIsLoading(true);
-        console.log(`[LIVE-BALANCE] Fetching live B3TR balance for ${account.address}`);
         
-        // Use the same testnet RPC and B3TR contract that the wallet modal uses
-        const TESTNET_RPC = 'https://vethor-node-test.vechaindev.com';
-        const B3TR_CONTRACT_ADDRESS = '0xbf64cf86894Ee0877C4e7d03936e35Ee8D8b864F';
+        // Get network config dynamically (mainnet or testnet)
+        const config = getVeChainConfig();
+        const RPC_URL = config.thorEndpoints[0];
+        const B3TR_CONTRACT = config.contracts.b3trToken;
         
-        // Call balanceOf function on B3TR contract (same as wallet modal)
+        console.log(`[LIVE-BALANCE] Fetching ${config.network.toUpperCase()} B3TR balance for ${account.address}`);
+        console.log(`[LIVE-BALANCE] RPC: ${RPC_URL}, Contract: ${B3TR_CONTRACT}`);
+        
+        // Call balanceOf function on B3TR contract
         const balanceOfSignature = '0x70a08231'; // balanceOf(address)
         const paddedAddress = account.address.slice(2).padStart(64, '0');
         
-        const response = await fetch(`${TESTNET_RPC}/accounts/${B3TR_CONTRACT_ADDRESS}`, {
+        const response = await fetch(`${RPC_URL}/accounts/${B3TR_CONTRACT}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
