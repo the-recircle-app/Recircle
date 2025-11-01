@@ -64,8 +64,9 @@ const NETWORK_CONFIGS: Record<VeChainNetwork, VeChainNetworkConfig> = {
     chainTag: 0x4a, // 74 in decimal
     networkId: '0x4a',
     thorEndpoints: [
-      'https://mainnet.veblocks.net',
-      'https://sync-mainnet.veblocks.net'
+      'https://mainnet.vechain.org',
+      'https://vethor-node.vechain.com',
+      'https://sync-mainnet.vechain.org'
     ],
     explorerUrl: 'https://explore.vechain.org',
     sponsorUrl: getClientEnvVar('VECHAIN_MAINNET_SPONSOR_URL'),
