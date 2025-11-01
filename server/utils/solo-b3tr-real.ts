@@ -3,6 +3,8 @@
  * Uses our working solo node with real B3TR token contract
  */
 
+import { getVeChainConfig } from '../../shared/vechain-config';
+
 // Solo node B3TR contract address
 const SOLO_B3TR_ADDRESS = '0x5ef79995fe8a89e0812330e4378eb2660cede699';
 const SOLO_BASE_URL = 'http://localhost:5000/solo';
@@ -60,15 +62,15 @@ export async function getSoloB3TRBalance(address: string): Promise<string> {
   try {
     console.log(`[BALANCE-CHECK] Getting B3TR balance for ${address}`);
     
-    // PRIORITY 1: Try real VeChain testnet balance first (where real tokens are)
-    const testnetBalance = await getTestnetB3TRBalance(address);
-    if (testnetBalance !== '0') {
-      console.log(`[BALANCE-CHECK] ✅ Found testnet balance: ${testnetBalance} B3TR`);
-      return testnetBalance;
+    // PRIORITY 1: Try real VeChain blockchain balance first (network-aware)
+    const blockchainBalance = await getBlockchainB3TRBalance(address);
+    if (blockchainBalance !== '0') {
+      console.log(`[BALANCE-CHECK] ✅ Found blockchain balance: ${blockchainBalance} B3TR`);
+      return blockchainBalance;
     }
     
     // PRIORITY 2: Fallback to solo node for development
-    console.log(`[BALANCE-CHECK] No testnet balance, checking solo node...`);
+    console.log(`[BALANCE-CHECK] No blockchain balance, checking solo node...`);
     const response = await fetch(`${SOLO_BASE_URL}/contracts/${SOLO_B3TR_ADDRESS}/balances/${address}`);
     const { balance } = await response.json();
     
@@ -82,19 +84,21 @@ export async function getSoloB3TRBalance(address: string): Promise<string> {
   }
 }
 
-// Get B3TR balance from real VeChain testnet
-async function getTestnetB3TRBalance(address: string): Promise<string> {
+// Get B3TR balance from real VeChain blockchain (network-aware)
+async function getBlockchainB3TRBalance(address: string): Promise<string> {
   try {
-    const TESTNET_RPC = 'https://vethor-node-test.vechaindev.com';
-    const B3TR_TESTNET_ADDRESS = process.env.B3TR_CONTRACT_ADDRESS || '0xbf64cf86894Ee0877C4e7d03936e35Ee8D8b864F';
+    // Get network config dynamically
+    const config = getVeChainConfig();
+    const RPC_URL = config.thorEndpoints[0];
+    const B3TR_ADDRESS = config.contracts.b3trToken;
     
-    console.log(`[TESTNET-BALANCE] Checking testnet balance for ${address} at ${B3TR_TESTNET_ADDRESS}`);
+    console.log(`[BLOCKCHAIN-BALANCE] Checking ${config.network} balance for ${address} at ${B3TR_ADDRESS}`);
     
     // Call balanceOf function on B3TR contract
     const balanceOfSignature = '0x70a08231'; // balanceOf(address)
     const paddedAddress = address.slice(2).padStart(64, '0'); // Remove 0x and pad to 32 bytes
     
-    const response = await fetch(`${TESTNET_RPC}/accounts/${B3TR_TESTNET_ADDRESS}`, {
+    const response = await fetch(`${RPC_URL}/accounts/${B3TR_ADDRESS}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -105,7 +109,7 @@ async function getTestnetB3TRBalance(address: string): Promise<string> {
     });
     
     if (!response.ok) {
-      console.log(`[TESTNET-BALANCE] API call failed: ${response.status}`);
+      console.log(`[BLOCKCHAIN-BALANCE] API call failed: ${response.status}`);
       return '0';
     }
     
@@ -113,7 +117,7 @@ async function getTestnetB3TRBalance(address: string): Promise<string> {
     const balanceHex = result.data;
     
     if (!balanceHex || balanceHex === '0x') {
-      console.log(`[TESTNET-BALANCE] No balance data returned`);
+      console.log(`[BLOCKCHAIN-BALANCE] No balance data returned`);
       return '0';
     }
     
@@ -121,11 +125,11 @@ async function getTestnetB3TRBalance(address: string): Promise<string> {
     const balanceWei = BigInt(balanceHex);
     const balanceB3TR = balanceWei / BigInt('1000000000000000000');
     
-    console.log(`[TESTNET-BALANCE] Raw hex: ${balanceHex}, Wei: ${balanceWei.toString()}, B3TR: ${balanceB3TR.toString()}`);
+    console.log(`[BLOCKCHAIN-BALANCE] Raw hex: ${balanceHex}, Wei: ${balanceWei.toString()}, B3TR: ${balanceB3TR.toString()}`);
     return balanceB3TR.toString();
     
   } catch (error) {
-    console.error('[TESTNET-BALANCE] Error checking testnet balance:', error);
+    console.error('[BLOCKCHAIN-BALANCE] Error checking blockchain balance:', error);
     return '0';
   }
 }
