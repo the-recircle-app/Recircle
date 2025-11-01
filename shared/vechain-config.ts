@@ -23,9 +23,9 @@ export interface VeChainNetworkConfig {
 // Environment detection - defaults to testnet for safety
 function getVeChainNetwork(): VeChainNetwork {
   // Check both client and server environment variables
-  const network = (typeof window !== 'undefined' 
+  const network = ((typeof window !== 'undefined' 
     ? import.meta.env.VITE_VECHAIN_NETWORK 
-    : process.env.VECHAIN_NETWORK) || 'testnet';
+    : process.env.VECHAIN_NETWORK) || 'testnet').trim();
   
   return network === 'mainnet' ? 'mainnet' : 'testnet';
 }
