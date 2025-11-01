@@ -3,15 +3,11 @@
  * 
  * Uses the PROVEN working-distribution.ts pattern but sources tokens 
  * from VeBetterDAO treasury instead of personal wallet
+ * Now network-aware (testnet/mainnet)
  */
 
 import * as thor from 'thor-devkit';
-
-const TESTNET_RPC = 'https://testnet.vechain.org';
-const CONTRACTS = {
-  B3TR_TOKEN: process.env.B3TR_CONTRACT_ADDRESS || '0xbf64cf86894Ee0877C4e7d03936e35Ee8D8b864F',
-  X2EARN_REWARDS_POOL: process.env.X2EARNREWARDSPOOL_ADDRESS || '0x5F8f86B8D0Fa93cdaE20936d150175dF0205fB38'
-};
+import { getVeChainConfig } from '../../shared/vechain-config';
 
 // Use VeBetterDAO treasury wallet instead of personal wallet
 const TREASURY_PRIVATE_KEY = process.env.TREASURY_DISTRIBUTOR_KEY;
@@ -41,13 +37,18 @@ export async function distributeTreasuryB3TR(
   receiptId: number
 ): Promise<TreasuryDistributionResult> {
   
-  console.log(`[TREASURY-SIMPLE] 🏛️ Distributing ${totalAmount} B3TR from VeBetterDAO treasury`);
+  // Get network config dynamically
+  const config = getVeChainConfig();
+  const RPC_URL = config.thorEndpoints[0];
+  const B3TR_TOKEN = config.contracts.b3trToken;
+  
+  console.log(`[TREASURY-SIMPLE] 🏛️ Distributing ${totalAmount} B3TR from VeBetterDAO treasury on ${config.network}`);
   console.log(`[TREASURY-SIMPLE] Using PROVEN working-distribution.ts pattern`);
   
   // Check environment
   const treasuryKey = TREASURY_PRIVATE_KEY || process.env.DISTRIBUTOR_PRIVATE_KEY;
   console.log(`[TREASURY-SIMPLE] Treasury key: ${treasuryKey ? 'SET' : 'MISSING'}`);
-  console.log(`[TREASURY-SIMPLE] B3TR contract: ${CONTRACTS.B3TR_TOKEN}`);
+  console.log(`[TREASURY-SIMPLE] B3TR contract: ${B3TR_TOKEN}`);
   
   if (!treasuryKey) {
     throw new Error('Treasury distributor private key not configured');
@@ -103,8 +104,8 @@ export async function distributeTreasuryB3TR(
   ]);
 
   // Get best block (same as working system)
-  console.log(`[TREASURY-SIMPLE] Fetching best block from ${TESTNET_RPC}/blocks/best`);
-  const response = await fetch(`${TESTNET_RPC}/blocks/best`);
+  console.log(`[TREASURY-SIMPLE] Fetching best block from ${RPC_URL}/blocks/best`);
+  const response = await fetch(`${RPC_URL}/blocks/best`);
   if (!response.ok) {
     throw new Error(`Failed to fetch best block: ${response.status} ${response.statusText}`);
   }
@@ -112,16 +113,16 @@ export async function distributeTreasuryB3TR(
   const bestBlock = await response.json();
   console.log(`[TREASURY-SIMPLE] Using block ${bestBlock.number} (${bestBlock.id})`);
 
-  // Build transactions (same pattern as working system)
+  // Build transactions with dynamic chain tag (same pattern as working system)
   const baseNonce = Date.now();
 
   // User transaction
   const userTxBody = {
-    chainTag: 0x27,
+    chainTag: config.chainTag, // Dynamic chain tag (0x27 testnet, 0x4a mainnet)
     blockRef: bestBlock.id.slice(0, 18),
     expiration: 32,
     clauses: [{
-      to: CONTRACTS.B3TR_TOKEN,
+      to: B3TR_TOKEN,
       value: '0x0',
       data: '0x' + userTransferData.toString('hex')
     }],
@@ -133,11 +134,11 @@ export async function distributeTreasuryB3TR(
 
   // App fund transaction
   const appTxBody = {
-    chainTag: 0x27,
+    chainTag: config.chainTag, // Dynamic chain tag (0x27 testnet, 0x4a mainnet)
     blockRef: bestBlock.id.slice(0, 18),
     expiration: 32,
     clauses: [{
-      to: CONTRACTS.B3TR_TOKEN,
+      to: B3TR_TOKEN,
       value: '0x0',
       data: '0x' + appTransferData.toString('hex')
     }],
@@ -165,7 +166,7 @@ export async function distributeTreasuryB3TR(
   const appRawTx = '0x' + appTx.encode().toString('hex');
 
   console.log(`[TREASURY-SIMPLE] Submitting user transaction...`);
-  const userSubmitResponse = await fetch(`${TESTNET_RPC}/transactions`, {
+  const userSubmitResponse = await fetch(`${RPC_URL}/transactions`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ raw: userRawTx })
@@ -177,7 +178,7 @@ export async function distributeTreasuryB3TR(
   }
 
   console.log(`[TREASURY-SIMPLE] Submitting app transaction...`);
-  const appSubmitResponse = await fetch(`${TESTNET_RPC}/transactions`, {
+  const appSubmitResponse = await fetch(`${RPC_URL}/transactions`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ raw: appRawTx })

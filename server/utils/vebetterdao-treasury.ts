@@ -161,9 +161,9 @@ export async function distributeTreasuryReward(
     
     console.log(`📋 User Distribution Call Data: ${userFunctionCall}`);
     
-    // Create transaction using thor-devkit
+    // Create transaction using thor-devkit with dynamic chain tag
     const userTxBody = {
-      chainTag: 0x27, // VeChain testnet chain tag (fixed)
+      chainTag: config.chainTag, // Dynamic chain tag from network config (0x27 testnet, 0x4a mainnet)
       blockRef: '0x0000000000000000', // Will be updated with latest block
       expiration: 32,
       clauses: [{
@@ -232,9 +232,9 @@ export async function distributeTreasuryReward(
         appProof                   // string proof
       ]);
       
-      // Create app fund VeBetterDAO treasury transaction
+      // Create app fund VeBetterDAO treasury transaction with dynamic chain tag
       const appTxBody = {
-        chainTag: 0x27, // VeChain testnet chain tag (fixed)
+        chainTag: config.chainTag, // Dynamic chain tag from network config (0x27 testnet, 0x4a mainnet)
         blockRef: latestBlock.id.slice(0, 18),
         expiration: 32,
         clauses: [{

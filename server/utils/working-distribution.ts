@@ -1,18 +1,11 @@
 /**
  * Working B3TR Distribution - Production Ready
  * Fixes all HDNode and thor-devkit API issues
+ * Now network-aware (testnet/mainnet)
  */
 
 import * as thor from 'thor-devkit';
-
-// Real VeBetterDAO contract addresses from environment
-const CONTRACTS = {
-    B3TR_TOKEN: process.env.B3TR_CONTRACT_ADDRESS || '',
-    X2EARN_REWARDS_POOL: process.env.X2EARNREWARDSPOOL_ADDRESS || ''
-};
-
-// Working VeChain testnet RPC endpoint (fixed for current connectivity issues)
-const TESTNET_RPC = 'https://vethor-node-test.vechaindev.com';
+import { getVeChainConfig } from '../../shared/vechain-config';
 
 // ERC20 transfer function signature
 const ERC20_TRANSFER_SIG = 'transfer(address,uint256)';
@@ -42,7 +35,12 @@ export async function distributeRealB3TR(
     console.log(`[REAL-B3TR] 🔥 DISTRIBUTION FUNCTION CALLED - Starting error-resistant distribution`);
     
     try {
-        console.log(`[REAL-B3TR] 🚀 Starting real B3TR distribution`);
+        // Get network config dynamically
+        const config = getVeChainConfig();
+        const RPC_URL = config.thorEndpoints[0];
+        const B3TR_TOKEN = config.contracts.b3trToken;
+        
+        console.log(`[REAL-B3TR] 🚀 Starting real B3TR distribution on ${config.network}`);
         console.log(`[REAL-B3TR] Recipient: ${recipientAddress}`);
         console.log(`[REAL-B3TR] Total: ${totalAmount} B3TR → User: ${totalAmount * 0.7}, App: ${totalAmount * 0.3}`);
 
@@ -50,18 +48,14 @@ export async function distributeRealB3TR(
         const privateKey = process.env.DISTRIBUTOR_PRIVATE_KEY;
         console.log(`[REAL-B3TR] Environment check:`);
         console.log(`[REAL-B3TR] - DISTRIBUTOR_PRIVATE_KEY: ${privateKey ? 'SET' : 'MISSING'}`);
-        console.log(`[REAL-B3TR] - B3TR_CONTRACT_ADDRESS: ${CONTRACTS.B3TR_TOKEN || 'MISSING'}`);
-        console.log(`[REAL-B3TR] - X2EARNREWARDSPOOL_ADDRESS: ${CONTRACTS.X2EARN_REWARDS_POOL || 'MISSING'}`);
+        console.log(`[REAL-B3TR] - B3TR Token: ${B3TR_TOKEN}`);
+        console.log(`[REAL-B3TR] - Network: ${config.network}`);
 
         if (!privateKey) {
             throw new Error('DISTRIBUTOR_PRIVATE_KEY environment variable is missing');
         }
 
-        if (!CONTRACTS.B3TR_TOKEN) {
-            throw new Error('B3TR_CONTRACT_ADDRESS environment variable is missing');
-        }
-
-        console.log(`[REAL-B3TR] Connected to VeChain testnet at ${TESTNET_RPC}`);
+        console.log(`[REAL-B3TR] Connected to VeChain ${config.network} at ${RPC_URL}`);
 
         // Create wallet using thor.secp256k1 directly (HDNode.fromPrivateKey has issues)
         let distributorPrivateKey: Buffer;
@@ -133,8 +127,8 @@ export async function distributeRealB3TR(
         ]);
 
         // Get best block
-        console.log(`[REAL-B3TR] Fetching best block from ${TESTNET_RPC}/blocks/best`);
-        const response = await fetch(`${TESTNET_RPC}/blocks/best`);
+        console.log(`[REAL-B3TR] Fetching best block from ${RPC_URL}/blocks/best`);
+        const response = await fetch(`${RPC_URL}/blocks/best`);
         if (!response.ok) {
             throw new Error(`Failed to fetch best block: ${response.status} ${response.statusText}`);
         }
@@ -142,16 +136,16 @@ export async function distributeRealB3TR(
         const bestBlock = await response.json();
         console.log(`[REAL-B3TR] Using block ${bestBlock.number} (${bestBlock.id})`);
 
-        // Build transactions with proper nonce
+        // Build transactions with proper nonce and dynamic chain tag
         const baseNonce = Date.now();
 
         // User transaction
         const userTxBody = {
-            chainTag: 0x27,
+            chainTag: config.chainTag, // Dynamic chain tag (0x27 testnet, 0x4a mainnet)
             blockRef: bestBlock.id.slice(0, 18),
             expiration: 32,
             clauses: [{
-                to: CONTRACTS.B3TR_TOKEN,
+                to: B3TR_TOKEN,
                 value: '0x0',
                 data: `0x${userTransferData.toString('hex')}`
             }],
@@ -163,11 +157,11 @@ export async function distributeRealB3TR(
 
         // App transaction
         const appTxBody = {
-            chainTag: 0x27,
+            chainTag: config.chainTag, // Dynamic chain tag (0x27 testnet, 0x4a mainnet)
             blockRef: bestBlock.id.slice(0, 18),
             expiration: 32,
             clauses: [{
-                to: CONTRACTS.B3TR_TOKEN,
+                to: B3TR_TOKEN,
                 value: '0x0',
                 data: `0x${appTransferData.toString('hex')}`
             }],
@@ -192,15 +186,15 @@ export async function distributeRealB3TR(
         const userTxRaw = `0x${userTx.encode().toString('hex')}`;
         const appTxRaw = `0x${appTx.encode().toString('hex')}`;
 
-        console.log(`[REAL-B3TR] Submitting user transaction to ${TESTNET_RPC}/transactions`);
-        const userTxResponse = await fetch(`${TESTNET_RPC}/transactions`, {
+        console.log(`[REAL-B3TR] Submitting user transaction to ${RPC_URL}/transactions`);
+        const userTxResponse = await fetch(`${RPC_URL}/transactions`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ raw: userTxRaw })
         });
 
-        console.log(`[REAL-B3TR] Submitting app transaction to ${TESTNET_RPC}/transactions`);
-        const appTxResponse = await fetch(`${TESTNET_RPC}/transactions`, {
+        console.log(`[REAL-B3TR] Submitting app transaction to ${RPC_URL}/transactions`);
+        const appTxResponse = await fetch(`${RPC_URL}/transactions`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ raw: appTxRaw })
