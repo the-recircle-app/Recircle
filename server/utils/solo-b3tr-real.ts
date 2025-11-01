@@ -1,20 +1,35 @@
 /**
- * Real B3TR Token Distribution on Solo Node
- * Uses our working solo node with real B3TR token contract
+ * DEPRECATED: This file is for local solo node development only.
+ * Production code should use working-distribution.ts instead.
+ * 
+ * Real B3TR Token Distribution - Network Aware
+ * Redirects to working-distribution.ts for non-solo environments
  */
 
 import { getVeChainConfig } from '../../shared/vechain-config';
 
-// Solo node B3TR contract address
+// Solo node B3TR contract address (only used in development/solo mode)
 const SOLO_B3TR_ADDRESS = '0x5ef79995fe8a89e0812330e4378eb2660cede699';
 const SOLO_BASE_URL = 'http://localhost:5000/solo';
 
-// Pre-funded distributor account from solo node
+// Pre-funded distributor account from solo node (only used in development/solo mode)
 const DISTRIBUTOR_ADDRESS = '0x7567d83b7b8d80addcb281a71d54fc7b3364ffed';
 
 export async function distributeRealB3TR(userAddress: string, amount: number): Promise<{ success: boolean; txHash?: string; error?: string }> {
   try {
-    console.log(`[SOLO-B3TR] 🎯 Distributing ${amount} B3TR to ${userAddress}`);
+    // Check if we're in solo mode
+    const config = getVeChainConfig();
+    const isSoloMode = process.env.NODE_ENV === 'development' && 
+                       (process.env.SOLO_MODE_ENABLED === 'true' || process.env.VITE_SOLO_MODE_ENABLED === 'true');
+    
+    if (!isSoloMode) {
+      console.log(`[SOLO-B3TR] ⚠️ Not in solo mode (network: ${config.network}). Redirecting to working-distribution.ts`);
+      // Import and use the proper distribution function
+      const { distributeRealB3TR: workingDistribute } = await import('./working-distribution.js');
+      return await workingDistribute(userAddress, amount, 0); // Use 0 as placeholder receipt ID
+    }
+    
+    console.log(`[SOLO-B3TR] 🎯 Distributing ${amount} B3TR to ${userAddress} (SOLO MODE)`);
 
     // Convert amount to wei (18 decimals)
     const amountWei = (BigInt(amount) * BigInt('1000000000000000000')).toString();

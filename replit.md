@@ -10,6 +10,31 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+**November 1, 2025 - Mainnet Migration Complete**
+- ✅ Successfully migrated entire platform from VeChain testnet to mainnet
+- Fixed critical network detection bug: Removed trailing spaces from environment variables in vechain-config.ts using .trim()
+- Eliminated all hardcoded testnet values across codebase:
+  - Replaced hardcoded testnet B3TR contract (0xbf64cf86...) with dynamic config.contracts.b3trToken
+  - Replaced hardcoded chain tags (0x27 testnet) with dynamic config.chainTag (0x4a mainnet)
+  - Replaced hardcoded testnet RPC URLs with dynamic config.thorEndpoints
+- Updated distribution utilities to be network-aware:
+  - solo-b3tr-real.ts: Uses getVeChainConfig() for dynamic network selection
+  - vebetterdao-treasury.ts: Network-aware with mainnet/testnet contract addresses
+  - working-distribution.ts: Dynamic chain tag and RPC URL configuration
+  - treasury-simple-distribution.ts: Full network awareness for future treasury distribution
+- Verified mainnet configuration:
+  - Network: MAINNET
+  - B3TR Token: 0x5ef79995FE8a89e0812330E4378eB2660ceDe699
+  - X2EarnRewardsPool: 0x6Bee7DDab6c99d5B2Af0554EaEA484CE18F52631
+  - VeChain Energy Sponsor: https://sponsor.vechain.energy/by/1248
+- Production site live at www.recirclerewards.app with real mainnet B3TR balances
+- All blockchain operations (balance fetching, token transfers, rewards distribution) now use mainnet contracts
+- **Next steps**: 
+  - Get VeBetterDAO Creator NFT endorsed (need 100 points from node holders)
+  - Once endorsed, enable treasury-based rewards distribution for receipt submissions
+  - Test wallet-to-wallet transfers on mainnet (works without endorsement)
+  - Monitor gift card marketplace (currently "Coming Soon" until Tremendous API funding configured)
+
 **October 31, 2025 - Gift Card "Coming Soon" Feature Flag**
 - Added `VITE_GIFT_CARDS_ENABLED` environment variable to control gift card marketplace availability
 - Gift cards now show with "Coming Soon" badge by default (grayed out, non-clickable)

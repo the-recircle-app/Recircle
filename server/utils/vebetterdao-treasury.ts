@@ -10,10 +10,6 @@ import { getVeChainConfig } from '../../shared/vechain-config';
 import { createThorClient } from './vechain-thor-client';
 import { makeSponsoringDecision, formatSponsoringMessage, type SponsoringDecision } from './smart-sponsoring';
 
-// VeBetterDAO Contract Addresses (Testnet) - REAL CONFIGURED VALUES
-const X2EARN_REWARDS_POOL_ADDRESS = process.env.X2EARNREWARDSPOOL_ADDRESS || '0x5F8f86B8D0Fa93cdaE20936d150175dF0205fB38';
-const B3TR_TOKEN_ADDRESS = process.env.B3TR_CONTRACT_ADDRESS || '0xbf64cf86894Ee0877C4e7d03936e35Ee8D8b864F';
-
 // Your REAL VeBetterDAO App ID (already registered!)
 const RECIRCLE_APP_ID = process.env.APP_ID || '0x90178ff5f95f31644b5e21b11ba6e173ea0d9b9595e675cb84593c0d2df730c1';
 
