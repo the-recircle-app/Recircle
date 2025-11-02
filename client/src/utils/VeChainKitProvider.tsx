@@ -37,6 +37,9 @@ export function VeChainKitProviderWrapper({ children }: Props) {
         delegatorUrl: config.sponsorUrl,
         delegateAllTransactions: false,
       }}
+      loginMethods={[
+        { method: "vechain", gridColumn: 4 }, // VeChain ecosystem login
+      ]}
       dappKit={{
         allowedWallets: ["veworld", "sync2"],
         // VeWorld mobile app and Sync2 wallet support
