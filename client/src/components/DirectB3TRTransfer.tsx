@@ -2,8 +2,7 @@ import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useWallet, useSendTransaction } from '@vechain/vechain-kit';
 import { Interface } from '@ethersproject/abi';
 import { parseUnits } from '@ethersproject/units';
-
-const B3TR_CONTRACT_ADDRESS = '0xbf64cf86894Ee0877C4e7d03936e35Ee8D8b864F';
+import { getVeChainConfig } from '@/../../shared/vechain-config';
 
 const VIP180_ABI = [
   {
@@ -58,8 +57,15 @@ export function DirectB3TRTransfer({
     if (!recipientAddress || !amount) return [];
     
     try {
+      const config = getVeChainConfig();
+      const B3TR_CONTRACT_ADDRESS = config.contracts.b3trToken;
+      
+      console.log(`[DIRECT-B3TR] Using ${config.network.toUpperCase()} B3TR contract: ${B3TR_CONTRACT_ADDRESS}`);
+      
       const b3trInterface = new Interface(VIP180_ABI);
       const amountInWei = parseUnits(amount, 18).toString();
+      
+      console.log(`[DIRECT-B3TR] Preparing transfer: ${amount} B3TR (${amountInWei} wei) to ${recipientAddress}`);
       
       return [{
         to: B3TR_CONTRACT_ADDRESS,
