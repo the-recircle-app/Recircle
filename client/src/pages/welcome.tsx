@@ -31,6 +31,7 @@ export default function Welcome() {
       }
     }, 100);
     
+    // Extended timeout for VeWorld Connex injection on custom domains
     setTimeout(() => {
       clearInterval(interval);
       checkPlatform();
