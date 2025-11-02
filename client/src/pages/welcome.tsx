@@ -13,7 +13,7 @@ export default function Welcome() {
   
   useEffect(() => {
     // Version marker for deployment verification
-    console.log('🚀 ReCircle Welcome Page - Version: Nov 2 2025 - 7:50 AM - Build 003');
+    console.log('🚀 ReCircle Welcome Page - Version: Nov 2 2025 - 8:05 AM - Build 004');
     
     const checkPlatform = () => {
       const isDev = import.meta.env.DEV;
@@ -203,7 +203,7 @@ export default function Welcome() {
       
       {/* Version marker - visible for deployment verification */}
       <div className="py-4 text-center">
-        <p className="text-xs text-gray-400">v2025.11.02-003</p>
+        <p className="text-xs text-gray-400">v2025.11.02-004</p>
       </div>
     </div>
   );

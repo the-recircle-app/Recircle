@@ -11,9 +11,8 @@ export function detectPlatform(): PlatformInfo {
   const hasConnex = typeof window !== 'undefined' && 'connex' in window;
   
   // Case-insensitive check for VeWorld indicators
-  const isVeWorld = 
-    hasConnex ||
-    /veworld|sync2|vechain/i.test(navigator.userAgent);
+  const userAgentMatch = /veworld|sync2|vechain/i.test(navigator.userAgent);
+  const isVeWorld = hasConnex || userAgentMatch;
   
   const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
   
@@ -28,13 +27,17 @@ export function detectPlatform(): PlatformInfo {
     platformName = 'Mobile Browser';
   }
   
-  console.log('[PLATFORM-DETECTION]', {
-    userAgent,
-    hasConnex,
-    isVeWorld,
-    isMobile,
-    isDesktop,
-    platformName,
+  // Enhanced debug logging
+  console.log('🔍 [PLATFORM-DETECTION] Full Debug:', {
+    'Raw User Agent': navigator.userAgent,
+    'Lowercase UA': userAgent,
+    'Has Connex in window': hasConnex,
+    'Window.connex exists': typeof window !== 'undefined' ? ('connex' in window) : 'N/A',
+    'User Agent Match (VeWorld/Sync2/VeChain)': userAgentMatch,
+    'Final isVeWorld': isVeWorld,
+    'Is Mobile': isMobile,
+    'Is Desktop': isDesktop,
+    'Platform Name': platformName,
   });
   
   return {
