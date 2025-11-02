@@ -14,7 +14,7 @@ export default function Welcome() {
   
   useEffect(() => {
     // Version marker for deployment verification
-    console.log('🚀 ReCircle Welcome Page - Version: Nov 2 2025 - 12:05 PM - Build 022 - Both Login Options with Guidance');
+    console.log('🚀 ReCircle Welcome Page - Version: Nov 2 2025 - 12:10 PM - Build 023 - Bold Warnings');
     console.log('[WELCOME] Detection disabled - universal access enabled');
   }, []);
   
@@ -104,9 +104,11 @@ export default function Welcome() {
               <p className="text-gray-600 max-w-md mx-auto leading-relaxed mb-3">
                 Sign in with Google or email - instant access with no app downloads needed. Perfect for trying ReCircle quickly!
               </p>
-              <p className="text-sm text-amber-600 max-w-md mx-auto leading-relaxed">
-                Note: To easily withdraw your earned B3TR tokens later, we recommend VeWorld wallet.
-              </p>
+              <div className="bg-amber-50 border-2 border-amber-400 rounded-lg p-4 max-w-md mx-auto">
+                <p className="text-sm font-bold text-amber-800 leading-relaxed">
+                  ⚠️ Important: Token withdrawals are not yet available for social login users. We recommend using VeWorld wallet for full token control and withdrawal capabilities.
+                </p>
+              </div>
             </div>
             
             {/* Or use: VeWorld Wallet */}
@@ -118,9 +120,14 @@ export default function Welcome() {
                 <h3 className="text-2xl font-bold text-gray-800">Recommended: VeWorld Wallet</h3>
                 <span className="bg-purple-100 text-purple-700 text-sm font-semibold px-3 py-1 rounded-full">Best Experience</span>
               </div>
-              <p className="text-gray-600 max-w-md mx-auto leading-relaxed">
+              <p className="text-gray-600 max-w-md mx-auto leading-relaxed mb-3">
                 Get the VeWorld app for complete control over your B3TR tokens. Easy withdrawals, full ownership, and works across all VeChain apps.
               </p>
+              <div className="bg-green-50 border-2 border-green-400 rounded-lg p-4 max-w-md mx-auto">
+                <p className="text-sm font-bold text-green-800 leading-relaxed">
+                  ✓ Full token control • Instant withdrawals • Gift card purchases • Works across VeChain ecosystem
+                </p>
+              </div>
             </div>
             
             {/* Start Earning B3TR Tokens */}
@@ -167,7 +174,7 @@ export default function Welcome() {
       
       {/* Version marker - visible for deployment verification */}
       <div className="py-4 text-center">
-        <p className="text-xs text-gray-400">v2025.11.02-022</p>
+        <p className="text-xs text-gray-400">v2025.11.02-023</p>
       </div>
     </div>
   );
