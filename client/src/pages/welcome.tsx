@@ -13,17 +13,11 @@ export default function Welcome() {
   
   useEffect(() => {
     // Version marker for deployment verification
-    console.log('🚀 ReCircle Welcome Page - Version: Nov 2 2025 - 8:30 AM - Build 006');
+    console.log('🚀 ReCircle Welcome Page - Version: Nov 2 2025 - 8:45 AM - Build 007');
     
     const checkPlatform = () => {
-      const isDev = import.meta.env.DEV;
-      if (isDev) {
-        console.log('[WELCOME] Dev mode detected - bypassing VeWorld check');
-        setShowWarning(false);
-        return;
-      }
       const shouldWarn = shouldShowVeWorldWarning();
-      console.log('[WELCOME] Production mode - VeWorld check result:', shouldWarn);
+      console.log('[WELCOME] VeWorld check result:', shouldWarn);
       setShowWarning(shouldWarn);
     };
     
@@ -205,7 +199,7 @@ export default function Welcome() {
       
       {/* Version marker - visible for deployment verification */}
       <div className="py-4 text-center">
-        <p className="text-xs text-gray-400">v2025.11.02-006</p>
+        <p className="text-xs text-gray-400">v2025.11.02-007</p>
       </div>
     </div>
   );
