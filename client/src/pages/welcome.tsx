@@ -13,7 +13,7 @@ export default function Welcome() {
   
   useEffect(() => {
     // Version marker for deployment verification
-    console.log('🚀 ReCircle Welcome Page - Version: Nov 2 2025 - 8:45 AM - Build 007');
+    console.log('🚀 ReCircle Welcome Page - Version: Nov 2 2025 - 9:00 AM - Build 008');
     
     const checkPlatform = () => {
       const shouldWarn = shouldShowVeWorldWarning();
@@ -25,7 +25,10 @@ export default function Welcome() {
     // Start with null (loading state) instead of checking right away
     
     const interval = setInterval(() => {
-      if (typeof window !== 'undefined' && 'connex' in window) {
+      // CRITICAL: Read window.connex to trigger VeWorld's lazy getter
+      // Using 'connex' in window doesn't trigger injection
+      const connex = typeof window !== 'undefined' ? (window as any).connex : undefined;
+      if (connex) {
         console.log('[WELCOME] Connex detected! User is in VeWorld');
         setShowWarning(false);
         clearInterval(interval);
@@ -199,7 +202,7 @@ export default function Welcome() {
       
       {/* Version marker - visible for deployment verification */}
       <div className="py-4 text-center">
-        <p className="text-xs text-gray-400">v2025.11.02-007</p>
+        <p className="text-xs text-gray-400">v2025.11.02-008</p>
       </div>
     </div>
   );
