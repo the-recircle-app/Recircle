@@ -10,12 +10,17 @@ export function VeChainKitProviderWrapper({ children }: Props) {
   const config = getVeChainConfig();
   const privyAppId = import.meta.env.VITE_PRIVY_APP_ID;
   const privyClientId = import.meta.env.VITE_PRIVY_CLIENT_ID;
+  const socialLoginEnabled = import.meta.env.VITE_ENABLE_SOCIAL_LOGIN === 'true';
+  
+  // Only enable Privy if: credentials exist AND feature flag is enabled
+  const enablePrivy = !!(privyAppId && privyClientId && socialLoginEnabled);
   
   console.log('[PRIVY-DEBUG] Configuration check:', {
     appId: privyAppId ? 'present' : 'missing',
     clientId: privyClientId ? 'present' : 'missing',
-    appIdPrefix: privyAppId?.substring(0, 4),
-    readyForSocialLogin: !!(privyAppId && privyClientId)
+    featureFlagEnabled: socialLoginEnabled,
+    privyEnabled: enablePrivy,
+    note: enablePrivy ? 'Social login ENABLED' : 'VeWorld-only mode'
   });
 
 
@@ -32,42 +37,35 @@ export function VeChainKitProviderWrapper({ children }: Props) {
         delegatorUrl: config.sponsorUrl,
         delegateAllTransactions: false,
       }}
-      loginMethods={
-        (privyAppId && privyClientId)
-          ? [
-              { method: "vechain", gridColumn: 4 }, // VeChain ecosystem login - shows all Privy social options + VeWorld mobile
-            ]
-          : [
-              { method: "vechain", gridColumn: 4 }, // VeChain ecosystem login
-            ]
-      }
+      loginMethods={[
+        { method: "vechain", gridColumn: 4 }, // VeChain ecosystem login
+      ]}
       dappKit={{
         allowedWallets: ["veworld", "sync2"],
         // VeWorld mobile app and Sync2 wallet support
       }}
-      // Privy configuration for social login (requires both App ID and Client ID)
-      privy={(privyAppId && privyClientId) ? {
+      // Privy configuration - controlled by VITE_ENABLE_SOCIAL_LOGIN feature flag
+      privy={enablePrivy ? {
         appId: privyAppId,
-        clientId: privyClientId, // Required for mobile support
+        clientId: privyClientId,
         loginMethods: [
           'email', 
           'google', 
           'apple', 
           'github', 
-          'twitter',  // X (formerly Twitter)
+          'twitter',
           'discord',
           'instagram',
           'linkedin'
-        ], // 🔥 EXPANDED: All available social login options
+        ],
         appearance: {
-          accentColor: '#8B5CF6', // Purple to match ReCircle branding
+          accentColor: '#8B5CF6',
           loginMessage: 'Sign up or log in to start earning B3TR tokens for sustainable transportation',
-          logo: '/mascot.png', // Use ReCircle mascot
+          logo: '/mascot.png',
         },
         embeddedWallets: {
-          createOnLogin: 'users-without-wallets', // Create embedded wallets for social users
+          createOnLogin: 'users-without-wallets',
         },
-        // All social login methods configured in loginMethods above
       } : undefined}
       darkMode={false} // Light mode to match ReCircle branding
       language="en"
