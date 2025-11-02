@@ -69,6 +69,9 @@ export function VeWorldRequiredMessage() {
           <p className="text-xs text-center text-gray-500 dark:text-gray-400">
             Already have VeWorld? Open this page in the VeWorld app browser.
           </p>
+          <p className="text-xs text-center text-gray-400 dark:text-gray-600 mt-2">
+            v2025.11.02-003
+          </p>
         </div>
       </div>
     </div>
