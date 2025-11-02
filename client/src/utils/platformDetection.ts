@@ -10,10 +10,10 @@ export function detectPlatform(): PlatformInfo {
   
   const hasConnex = typeof window !== 'undefined' && 'connex' in window;
   
+  // Case-insensitive check for VeWorld indicators
   const isVeWorld = 
     hasConnex ||
-    userAgent.includes('veworld') || 
-    userAgent.includes('sync2');
+    /veworld|sync2|vechain/i.test(navigator.userAgent);
   
   const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
   

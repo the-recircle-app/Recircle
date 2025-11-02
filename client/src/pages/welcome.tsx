@@ -34,7 +34,7 @@ export default function Welcome() {
     setTimeout(() => {
       clearInterval(interval);
       checkPlatform();
-    }, 10000);
+    }, 30000);
     
     return () => clearInterval(interval);
   }, []);
