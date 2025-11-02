@@ -13,7 +13,7 @@ export default function Welcome() {
   
   useEffect(() => {
     // Version marker for deployment verification
-    console.log('🚀 ReCircle Welcome Page - Version: Nov 2 2025 - 8:10 AM - Build 005');
+    console.log('🚀 ReCircle Welcome Page - Version: Nov 2 2025 - 8:30 AM - Build 006');
     
     const checkPlatform = () => {
       const isDev = import.meta.env.DEV;
@@ -27,16 +27,18 @@ export default function Welcome() {
       setShowWarning(shouldWarn);
     };
     
-    checkPlatform();
+    // DON'T check immediately - wait for Connex to inject first!
+    // Start with null (loading state) instead of checking right away
     
     const interval = setInterval(() => {
       if (typeof window !== 'undefined' && 'connex' in window) {
-        checkPlatform();
+        console.log('[WELCOME] Connex detected! User is in VeWorld');
+        setShowWarning(false);
         clearInterval(interval);
       }
     }, 100);
     
-    // Extended timeout for VeWorld Connex injection on custom domains
+    // Only check after 30 seconds if Connex still hasn't appeared
     setTimeout(() => {
       clearInterval(interval);
       checkPlatform();
@@ -203,7 +205,7 @@ export default function Welcome() {
       
       {/* Version marker - visible for deployment verification */}
       <div className="py-4 text-center">
-        <p className="text-xs text-gray-400">v2025.11.02-005</p>
+        <p className="text-xs text-gray-400">v2025.11.02-006</p>
       </div>
     </div>
   );
