@@ -14,7 +14,7 @@ export default function Welcome() {
   
   useEffect(() => {
     // Version marker for deployment verification
-    console.log('🚀 ReCircle Welcome Page - Version: Nov 2 2025 - 11:35 AM - Build 018 - REVERTED');
+    console.log('🚀 ReCircle Welcome Page - Version: Nov 2 2025 - 11:45 AM - Build 019 - VeWorld-Only (Clean Cache)');
     console.log('[WELCOME] Detection disabled - universal access enabled');
   }, []);
   
@@ -161,7 +161,7 @@ export default function Welcome() {
       
       {/* Version marker - visible for deployment verification */}
       <div className="py-4 text-center">
-        <p className="text-xs text-gray-400">v2025.11.02-018</p>
+        <p className="text-xs text-gray-400">v2025.11.02-019</p>
       </div>
     </div>
   );
