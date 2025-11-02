@@ -13,6 +13,10 @@ export default function Welcome() {
   
   useEffect(() => {
     const checkPlatform = () => {
+      // Temporarily disable VeWorld check to debug production deployment
+      setShowWarning(false);
+      return;
+      
       const isDev = import.meta.env.DEV;
       if (isDev) {
         setShowWarning(false);
