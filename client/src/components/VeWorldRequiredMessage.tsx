@@ -86,7 +86,7 @@ export function VeWorldRequiredMessage() {
           </div>
           
           <p className="text-xs text-center text-gray-400 dark:text-gray-600 mt-2">
-            v2025.11.02-015
+            v2025.11.02-016
           </p>
         </div>
       </div>
