@@ -8,7 +8,10 @@ export interface PlatformInfo {
 export function detectPlatform(): PlatformInfo {
   const userAgent = navigator.userAgent.toLowerCase();
   
-  const hasConnex = typeof window !== 'undefined' && 'connex' in window;
+  // CRITICAL: Read window.connex to trigger VeWorld's lazy getter
+  // Using 'connex' in window doesn't trigger injection
+  const connex = typeof window !== 'undefined' ? (window as any).connex : undefined;
+  const hasConnex = Boolean(connex);
   
   // Case-insensitive check for VeWorld indicators
   const userAgentMatch = /veworld|sync2|vechain/i.test(navigator.userAgent);
@@ -31,8 +34,8 @@ export function detectPlatform(): PlatformInfo {
   console.log('🔍 [PLATFORM-DETECTION] Full Debug:', {
     'Raw User Agent': navigator.userAgent,
     'Lowercase UA': userAgent,
-    'Has Connex in window': hasConnex,
-    'Window.connex exists': typeof window !== 'undefined' ? ('connex' in window) : 'N/A',
+    'Connex Object': connex ? 'Found ✅' : 'Not found ❌',
+    'Has Connex': hasConnex,
     'User Agent Match (VeWorld/Sync2/VeChain)': userAgentMatch,
     'Final isVeWorld': isVeWorld,
     'Is Mobile': isMobile,
