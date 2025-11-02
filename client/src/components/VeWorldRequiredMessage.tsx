@@ -4,6 +4,11 @@ import { detectPlatform } from '../utils/platformDetection';
 export function VeWorldRequiredMessage() {
   const platform = detectPlatform();
   
+  // Debug info
+  const hasConnex = typeof window !== 'undefined' && 'connex' in window;
+  const userAgent = typeof navigator !== 'undefined' ? navigator.userAgent : '';
+  const userAgentMatch = /veworld|sync2|vechain/i.test(userAgent);
+  
   return (
     <div className="min-h-screen bg-gradient-to-b from-green-50 to-white dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 space-y-6">
@@ -69,8 +74,19 @@ export function VeWorldRequiredMessage() {
           <p className="text-xs text-center text-gray-500 dark:text-gray-400">
             Already have VeWorld? Open this page in the VeWorld app browser.
           </p>
+          
+          {/* Debug info */}
+          <div className="mt-4 p-3 bg-gray-100 dark:bg-gray-900 rounded-lg text-left">
+            <p className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">Debug Info:</p>
+            <div className="space-y-1 text-xs text-gray-600 dark:text-gray-400 font-mono">
+              <p>Connex: {hasConnex ? '✅ Found' : '❌ Not found'}</p>
+              <p>UA Match: {userAgentMatch ? '✅ Yes' : '❌ No'}</p>
+              <p className="break-all">UA: {userAgent.substring(0, 60)}...</p>
+            </div>
+          </div>
+          
           <p className="text-xs text-center text-gray-400 dark:text-gray-600 mt-2">
-            v2025.11.02-004
+            v2025.11.02-005
           </p>
         </div>
       </div>
