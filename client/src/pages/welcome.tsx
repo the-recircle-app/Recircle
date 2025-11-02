@@ -9,55 +9,14 @@ import { shouldShowVeWorldWarning } from "@/utils/platformDetection";
 // VeChainKitProviderWrapper removed - using the one from App.tsx instead
 
 export default function Welcome() {
-  const [showWarning, setShowWarning] = useState<boolean | null>(null);
+  // Detection disabled - welcome page loads immediately for all users
+  const showWarning = false;
   
   useEffect(() => {
     // Version marker for deployment verification
-    console.log('🚀 ReCircle Welcome Page - Version: Nov 2 2025 - 9:15 AM - Build 009');
-    
-    const checkPlatform = () => {
-      const shouldWarn = shouldShowVeWorldWarning();
-      console.log('[WELCOME] VeWorld check result:', shouldWarn);
-      setShowWarning(shouldWarn);
-    };
-    
-    // DON'T check immediately - wait for Connex to inject first!
-    // Start with null (loading state) instead of checking right away
-    
-    const interval = setInterval(() => {
-      // CRITICAL: Read window.connex to trigger VeWorld's lazy getter
-      // Using 'connex' in window doesn't trigger injection
-      const connex = typeof window !== 'undefined' ? (window as any).connex : undefined;
-      if (connex) {
-        console.log('[WELCOME] Connex detected! User is in VeWorld');
-        setShowWarning(false);
-        clearInterval(interval);
-      }
-    }, 100);
-    
-    // Only check after 30 seconds if Connex still hasn't appeared
-    setTimeout(() => {
-      clearInterval(interval);
-      checkPlatform();
-    }, 30000);
-    
-    return () => clearInterval(interval);
+    console.log('🚀 ReCircle Welcome Page - Version: Nov 2 2025 - 9:30 AM - Build 010');
+    console.log('[WELCOME] Detection disabled - universal access enabled');
   }, []);
-  
-  if (showWarning === null) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-green-50 to-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-  
-  if (showWarning) {
-    return <VeWorldRequiredMessage />;
-  }
   
   return (
     <div className="min-h-screen bg-gray-100 pb-8">
@@ -202,7 +161,7 @@ export default function Welcome() {
       
       {/* Version marker - visible for deployment verification */}
       <div className="py-4 text-center">
-        <p className="text-xs text-gray-400">v2025.11.02-009</p>
+        <p className="text-xs text-gray-400">v2025.11.02-010</p>
       </div>
     </div>
   );
