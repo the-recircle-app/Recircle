@@ -52,6 +52,8 @@ export function detectPlatform(): PlatformInfo {
 }
 
 export function shouldShowVeWorldWarning(): boolean {
-  const platform = detectPlatform();
-  return !platform.isVeWorld;
+  // Detection disabled - allow all users to access the app
+  // VeWorld users can connect via VeWorld wallet
+  // Desktop/mobile users can use social login
+  return false;
 }
