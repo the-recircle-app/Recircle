@@ -200,6 +200,11 @@ export default function Welcome() {
           </div>
         </div>
       </div>
+      
+      {/* Version marker - visible for deployment verification */}
+      <div className="py-4 text-center">
+        <p className="text-xs text-gray-400">v2025.11.02-002</p>
+      </div>
     </div>
   );
 }
