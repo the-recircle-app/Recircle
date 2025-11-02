@@ -12,17 +12,18 @@ export default function Welcome() {
   const [showWarning, setShowWarning] = useState<boolean | null>(null);
   
   useEffect(() => {
+    // Version marker for deployment verification
+    console.log('🚀 ReCircle Welcome Page - Version: Nov 2 2025 - 7:15 AM - Build 002');
+    
     const checkPlatform = () => {
-      // Temporarily disable VeWorld check to debug production deployment
-      setShowWarning(false);
-      return;
-      
       const isDev = import.meta.env.DEV;
       if (isDev) {
+        console.log('[WELCOME] Dev mode detected - bypassing VeWorld check');
         setShowWarning(false);
         return;
       }
       const shouldWarn = shouldShowVeWorldWarning();
+      console.log('[WELCOME] Production mode - VeWorld check result:', shouldWarn);
       setShowWarning(shouldWarn);
     };
     
