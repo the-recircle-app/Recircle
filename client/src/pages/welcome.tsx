@@ -14,7 +14,7 @@ export default function Welcome() {
   
   useEffect(() => {
     // Version marker for deployment verification
-    console.log('🚀 ReCircle Welcome Page - Version: Nov 2 2025 - 11:55 AM - Build 021 - VeWorld-Only (Proper Method)');
+    console.log('🚀 ReCircle Welcome Page - Version: Nov 2 2025 - 12:05 PM - Build 022 - Both Login Options with Guidance');
     console.log('[WELCOME] Detection disabled - universal access enabled');
   }, []);
   
@@ -98,11 +98,14 @@ export default function Welcome() {
                 <Smartphone className="w-10 h-10 text-white" />
               </div>
               <div className="flex items-center justify-center gap-3 mb-4">
-                <h3 className="text-2xl font-bold text-gray-800">Easy Start: Social Login</h3>
-                <span className="bg-blue-100 text-blue-700 text-sm font-semibold px-3 py-1 rounded-full">Coming Soon</span>
+                <h3 className="text-2xl font-bold text-gray-800">Quick Start: Social Login</h3>
+                <span className="bg-green-100 text-green-700 text-sm font-semibold px-3 py-1 rounded-full">Available Now</span>
               </div>
-              <p className="text-gray-600 max-w-md mx-auto leading-relaxed">
-                Connect with Google or email. We'll create a secure blockchain wallet automatically - no app downloads needed.
+              <p className="text-gray-600 max-w-md mx-auto leading-relaxed mb-3">
+                Sign in with Google or email - instant access with no app downloads needed. Perfect for trying ReCircle quickly!
+              </p>
+              <p className="text-sm text-amber-600 max-w-md mx-auto leading-relaxed">
+                Note: To easily withdraw your earned B3TR tokens later, we recommend VeWorld wallet.
               </p>
             </div>
             
@@ -111,9 +114,12 @@ export default function Welcome() {
               <div className="w-20 h-20 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Download className="w-10 h-10 text-white" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-800 mb-4">Or use: VeWorld Wallet</h3>
+              <div className="flex items-center justify-center gap-3 mb-4">
+                <h3 className="text-2xl font-bold text-gray-800">Recommended: VeWorld Wallet</h3>
+                <span className="bg-purple-100 text-purple-700 text-sm font-semibold px-3 py-1 rounded-full">Best Experience</span>
+              </div>
               <p className="text-gray-600 max-w-md mx-auto leading-relaxed">
-                Download VeWorld for full control. This gives you complete ownership of tokens and works across all VeChain apps.
+                Get the VeWorld app for complete control over your B3TR tokens. Easy withdrawals, full ownership, and works across all VeChain apps.
               </p>
             </div>
             
@@ -161,7 +167,7 @@ export default function Welcome() {
       
       {/* Version marker - visible for deployment verification */}
       <div className="py-4 text-center">
-        <p className="text-xs text-gray-400">v2025.11.02-021</p>
+        <p className="text-xs text-gray-400">v2025.11.02-022</p>
       </div>
     </div>
   );
