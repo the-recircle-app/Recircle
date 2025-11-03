@@ -93,16 +93,11 @@ export default function Welcome() {
               </div>
               <div className="flex items-center justify-center gap-3 mb-4">
                 <h3 className="text-2xl font-bold text-gray-800">Quick Start: Social Login</h3>
-                <span className="bg-green-100 text-green-700 text-sm font-semibold px-3 py-1 rounded-full">Available Now</span>
+                <span className="bg-blue-100 text-blue-700 text-sm font-semibold px-3 py-1 rounded-full">Coming Soon</span>
               </div>
-              <p className="text-gray-600 max-w-md mx-auto leading-relaxed mb-3">
+              <p className="text-gray-600 max-w-md mx-auto leading-relaxed">
                 Sign in with Google or email - instant access with no app downloads needed. Perfect for trying ReCircle quickly!
               </p>
-              <div className="bg-amber-50 border-2 border-amber-400 rounded-lg p-4 max-w-md mx-auto">
-                <p className="text-sm font-bold text-amber-800 leading-relaxed">
-                  ⚠️ Important: Token withdrawals are not yet available for social login users. We recommend using VeWorld wallet for full token control and withdrawal capabilities.
-                </p>
-              </div>
             </div>
             
             {/* Or use: VeWorld Wallet */}

@@ -126,7 +126,7 @@ export function VeWorldBrowserGate({
           </h1>
           
           <p className="text-gray-600 mb-8">
-            ReCircle is a mobile-only app that requires VeWorld wallet to scan receipts and earn B3TR tokens for sustainable transportation
+            ReCircle is a mobile-only app that requires VeWorld wallet to upload receipts and earn B3TR tokens for sustainable transportation
           </p>
 
           <div className="space-y-4 mb-8">
@@ -155,9 +155,9 @@ export function VeWorldBrowserGate({
             <div className="flex items-start gap-3">
               <Smartphone className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
               <div className="text-sm text-blue-900">
-                <p className="font-semibold mb-1">Using VeWorld browser extension?</p>
+                <p className="font-semibold mb-1">Already have VeWorld?</p>
                 <p className="text-blue-700">
-                  Make sure VeWorld is installed and enabled in your browser, then refresh this page.
+                  Download the VeWorld app on your mobile device to get started with ReCircle.
                 </p>
               </div>
             </div>
