@@ -8,8 +8,8 @@ import SmartWalletConnect from "@/components/SmartWalletConnect";
 export default function Welcome() {
   useEffect(() => {
     // Version marker for deployment verification
-    console.log('🚀 ReCircle Welcome Page - Version: Nov 3 2025 - Build 025 - VeWorld Browser Detection');
-    console.log('[WELCOME] VeWorld browser detection active - showing download page for non-VeWorld browsers');
+    console.log('🚀 ReCircle Welcome Page - Version: Nov 3 2025 - Build 026 - Mobile-Only + VeWorld Detection');
+    console.log('[WELCOME] Mobile-only app - desktop browsers blocked, VeWorld required on mobile');
   }, []);
   
   return (
@@ -168,7 +168,7 @@ export default function Welcome() {
       
       {/* Version marker - visible for deployment verification */}
       <div className="py-4 text-center">
-        <p className="text-xs text-gray-400">v2025.11.03-025</p>
+        <p className="text-xs text-gray-400">v2025.11.03-026</p>
       </div>
     </div>
   );

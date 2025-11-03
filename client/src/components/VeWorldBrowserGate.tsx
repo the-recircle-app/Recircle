@@ -22,16 +22,31 @@ export function VeWorldBrowserGate({
 
   useEffect(() => {
     console.log('[VEWORLD-GATE] useEffect starting detection...');
+    
+    // STEP 1: Check if mobile device (REQUIRED for camera features)
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+    
+    if (!isMobile) {
+      console.log('[VEWORLD-GATE] Desktop browser detected - ReCircle is mobile-only (requires camera)', {
+        userAgent: navigator.userAgent
+      });
+      setDetectionReason('Desktop browser - ReCircle requires mobile device for camera features');
+      setIsVeWorldBrowser(false);
+      return;
+    }
+    
+    console.log('[VEWORLD-GATE] Mobile device detected, checking for VeWorld...');
+    
     let pollCount = 0;
     const maxPolls = Math.floor(detectionTimeout / pollInterval);
     
-    // Check for VeWorld-specific user agents as a fast path
-    const userAgent = navigator.userAgent.toLowerCase();
+    // STEP 2: Check for VeWorld-specific user agents as a fast path
     const isVeWorldUserAgent = userAgent.includes('veworld') || userAgent.includes('vechain');
     
     if (isVeWorldUserAgent) {
       console.log('[VEWORLD-GATE] VeWorld user-agent detected, allowing access immediately');
-      setDetectionReason('VeWorld user-agent detected');
+      setDetectionReason('VeWorld mobile browser detected');
       setIsVeWorldBrowser(true);
       return;
     }
@@ -111,7 +126,7 @@ export function VeWorldBrowserGate({
           </h1>
           
           <p className="text-gray-600 mb-8">
-            ReCircle requires VeWorld wallet to earn and manage your B3TR tokens for sustainable transportation
+            ReCircle is a mobile-only app that requires VeWorld wallet to scan receipts and earn B3TR tokens for sustainable transportation
           </p>
 
           <div className="space-y-4 mb-8">
