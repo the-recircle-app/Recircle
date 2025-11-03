@@ -17,7 +17,11 @@ export function VeWorldBrowserGate({
   const [isVeWorldBrowser, setIsVeWorldBrowser] = useState<boolean | null>(null);
   const [detectionReason, setDetectionReason] = useState<string>('');
 
+  // Debug logging
+  console.log('[VEWORLD-GATE] Component render - isVeWorldBrowser:', isVeWorldBrowser, 'reason:', detectionReason);
+
   useEffect(() => {
+    console.log('[VEWORLD-GATE] useEffect starting detection...');
     let pollCount = 0;
     const maxPolls = Math.floor(detectionTimeout / pollInterval);
     
@@ -72,6 +76,7 @@ export function VeWorldBrowserGate({
           userAgent: navigator.userAgent
         });
         setDetectionReason(`No VeWorld injection after ${detectionTimeout}ms`);
+        console.log('[VEWORLD-GATE] Setting isVeWorldBrowser to FALSE');
         setIsVeWorldBrowser(false);
         clearInterval(pollInterval_id);
       }
@@ -83,7 +88,12 @@ export function VeWorldBrowserGate({
   if (isVeWorldBrowser === null) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-pulse text-gray-400">Loading...</div>
+        <div className="text-center">
+          <div className="w-16 h-16 mx-auto mb-4">
+            <img src="/mascot.png" alt="ReCircle" className="w-full h-full object-contain animate-pulse" />
+          </div>
+          <p className="text-sm text-gray-500">Checking for VeWorld...</p>
+        </div>
       </div>
     );
   }
