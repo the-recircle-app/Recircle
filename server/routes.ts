@@ -132,7 +132,7 @@ import { checkDailyActionLimit, MAX_DAILY_ACTIONS } from "./utils/dailyActions";
 import { logReceiptToGoogleSheets, sendReceiptForManualReview } from "./utils/webhooks";
 import { updateApprovedReceiptStatus } from "./utils/updateWebhooks";
 import { sendReward, convertB3TRToWei, getReceiptProofData } from "./utils/distributeReward-hybrid";
-import { storeReceiptImage, getReceiptImage } from "./utils/imageStorage";
+import { storeReceiptImage, getReceiptImage, calculateImageHash, getImageByHash } from "./utils/imageStorage";
 import { z } from "zod";
 import { log } from "./vite";
 
@@ -2996,24 +2996,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Log each receipt for debugging purposes
         log(`Checking ${userReceipts.length} existing receipts for duplicates`, "receipts");
         
-        // Calculate image hash if available (basic detection for duplicate images)
+        // Calculate real SHA-256 image hash for duplicate detection
         let imageHash = "";
         if (imageUrl && imageUrl.length > 0) {
-          // Use a simple image hash based on first 100 chars of the image URL
-          // This is a simple proxy for image content but more reliable than nothing
-          imageHash = imageUrl.substring(0, 100);
-          console.log(`Duplicate check - Image hash calculated: ${imageHash.substring(0, 30)}...`);
+          try {
+            // Extract base64 data from data URI (format: data:image/png;base64,...)
+            const base64Data = imageUrl.includes(',') ? imageUrl.split(',')[1] : imageUrl;
+            imageHash = calculateImageHash(base64Data);
+            console.log(`Duplicate check - SHA-256 hash calculated: ${imageHash.substring(0, 16)}...`);
+          } catch (error) {
+            console.error("Error calculating image hash:", error);
+            log(`Error calculating image hash for duplicate detection: ${error}`, "receipts");
+          }
         }
         
         // Use a more robust duplicate detection algorithm
         const potentialDuplicates = userReceipts.filter((receipt: any) => {
-          // Image content match - if we have image hash and they match, it's almost certainly a duplicate
+          // Image content match using SHA-256 hash - if hashes match, it's 100% the same image
           let sameImage = false;
-          if (imageHash && receipt.imageUrl) {
-            const receiptImageHash = receipt.imageUrl.substring(0, 100);
-            sameImage = (imageHash === receiptImageHash);
+          if (imageHash && receipt.id) {
+            // Check if this receipt has a matching image hash in the receiptImages table
+            // Note: We'll do a direct comparison if the receipt has an imageHash stored
+            // The actual database check happens during image storage (storeReceiptImage)
+            // For now, we rely on the image being stored later and use URL comparison as fallback
+            const receiptImageHash = receipt.imageUrl && receipt.imageUrl.includes(',') 
+              ? calculateImageHash(receipt.imageUrl.split(',')[1])
+              : "";
+            sameImage = imageHash === receiptImageHash && receiptImageHash.length > 0;
             if (sameImage) {
-              console.log(`DUPLICATE IMAGE DETECTED - Same image hash as receipt #${receipt.id}`);
+              console.log(`🚨 EXACT DUPLICATE IMAGE DETECTED - Same SHA-256 hash as receipt #${receipt.id}`);
             }
           }
           
