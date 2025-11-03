@@ -1,7 +1,12 @@
 # ReCircle - Sustainable Transportation Rewards Platform
 
 ## Overview
-ReCircle is a blockchain-powered rewards platform designed to incentivize sustainable transportation. It distributes B3TR tokens for approved ride-share, EV rental, and public transport receipts. The platform integrates with VeBetterDAO's smart contracts and utilizes OpenAI Vision API for receipt validation. Its core purpose is to promote eco-friendly travel while offering a scalable, revenue-generating solution for rewarding users. The project aims to contribute to a greener future by making sustainable choices more rewarding.
+ReCircle is a mobile-only blockchain-powered rewards platform designed to incentivize sustainable transportation. It distributes B3TR tokens for approved ride-share, EV rental, and public transport receipts. The platform integrates with VeBetterDAO's smart contracts and utilizes OpenAI Vision API for receipt validation. Its core purpose is to promote eco-friendly travel while offering a scalable, revenue-generating solution for rewarding users. The project aims to contribute to a greener future by making sustainable choices more rewarding.
+
+**Platform Requirements:**
+- Mobile device required (iOS or Android) for camera-based receipt scanning
+- VeWorld wallet required for blockchain interactions and B3TR token management
+- Desktop browsers are blocked with a download page directing users to VeWorld mobile app
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
@@ -28,8 +33,9 @@ Preferred communication style: Simple, everyday language.
 - **Network**: VeChain Thor blockchain (mainnet ready)
 - **Token**: B3TR tokens distributed via VeBetterDAO
 - **Distribution Model**: 70% to users, 30% to app fund (both via VeBetterDAO treasury system)
-- **Wallet Support**: Primarily VeWorld wallet. Universal app access is enabled, allowing VeWorld mobile users to connect via VeWorld wallet and desktop/mobile browser users to use Privy social login.
-- **Platform Detection**: Removed VeWorld platform detection for universal app access.
+- **Wallet Support**: VeWorld wallet only (mobile app or mobile browser with VeWorld)
+- **Platform Detection**: Mobile-only access with VeWorld browser detection. Desktop browsers (including those with VeWorld extension) are blocked and shown a download page. Matches Greencart/Mugshot access pattern.
+- **Access Control**: VeWorldBrowserGate component checks for mobile device first, then polls for VeWorld injection (window.vechain/connex) for up to 3 seconds before deciding access.
 - **Smart Fee Delegation**: Strategic transaction sponsoring via VeChain Energy with conditional VTHO balance checks.
 
 ### Key Features
@@ -58,4 +64,4 @@ Preferred communication style: Simple, everyday language.
 - **Google Sheets API**: For manual review workflow integration.
 - **Tremendous API**: For gift card marketplace integration.
 - **CoinGecko API**: For B3TR token pricing.
-- **Privy**: For social login authentication (for non-VeWorld users).
+- **Privy**: Configured but not actively used (mobile-only + VeWorld-only access pattern).
