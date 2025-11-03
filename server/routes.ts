@@ -94,11 +94,12 @@ const CREATOR_FUND_WALLET = process.env.CREATOR_FUND_WALLET || '0x87c844e3314396
 const APP_FUND_WALLET = process.env.APP_FUND_WALLET || '0x119761865b79bea9e7924edaa630942322ca09d1';
 const REWARD_DISTRIBUTOR_WALLET = process.env.REWARD_DISTRIBUTOR_WALLET || '0xF1f72b305b7bf7b25e85D356927aF36b88dC84Ee';
 
-// Debug log to ensure we're using the correct values from environment
+// Security: Redact wallet addresses in logs - only show last 4 characters
+const redactAddress = (addr: string) => addr ? `0x...${addr.slice(-4)}` : 'NOT SET';
 console.log(`Server initialized with wallet addresses: 
-  - REWARD_DISTRIBUTOR_WALLET: ${REWARD_DISTRIBUTOR_WALLET || 'NOT SET'}
-  - CREATOR_FUND_WALLET: ${CREATOR_FUND_WALLET || 'NOT SET'}
-  - APP_FUND_WALLET: ${APP_FUND_WALLET || 'NOT SET'}
+  - REWARD_DISTRIBUTOR_WALLET: ${redactAddress(REWARD_DISTRIBUTOR_WALLET)}
+  - CREATOR_FUND_WALLET: ${redactAddress(CREATOR_FUND_WALLET)}
+  - APP_FUND_WALLET: ${redactAddress(APP_FUND_WALLET)}
 `);
 
 // Log warning if wallet addresses are not configured (except in test environments)

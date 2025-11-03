@@ -37,12 +37,13 @@ if (VECHAIN_PRIVATE_KEY) {
   try {
     const wallet = new ethers.Wallet(VECHAIN_PRIVATE_KEY);
     DISTRIBUTOR_PRIVATE_KEY = VECHAIN_PRIVATE_KEY;
-    console.log(`[BLOCKCHAIN] ✅ Using private key for wallet: ${wallet.address}`);
+    // Redact wallet address for security - only show last 4 characters
+    const redacted = `0x...${wallet.address.slice(-4)}`;
+    console.log(`[BLOCKCHAIN] ✅ Using private key for wallet: ${redacted}`);
     console.log(`[BLOCKCHAIN] Real blockchain transactions enabled`);
     
     if (wallet.address.toLowerCase() !== REWARD_DISTRIBUTOR_WALLET.toLowerCase()) {
-      console.log(`[BLOCKCHAIN] ⚠️ Private key wallet (${wallet.address}) doesn't match REWARD_DISTRIBUTOR_WALLET (${REWARD_DISTRIBUTOR_WALLET})`);
-      console.log(`[BLOCKCHAIN] Updating REWARD_DISTRIBUTOR_WALLET to match private key`);
+      console.log(`[BLOCKCHAIN] ⚠️ Private key wallet doesn't match REWARD_DISTRIBUTOR_WALLET - updating`);
       process.env.REWARD_DISTRIBUTOR_WALLET = wallet.address;
     }
   } catch (error) {
@@ -52,8 +53,8 @@ if (VECHAIN_PRIVATE_KEY) {
   try {
     // Fallback: Try mnemonic (though it doesn't control the funded wallet)
     const wallet = ethers.Wallet.fromPhrase(TESTNET_MNEMONIC, "m/44'/818'/0'/0/0");
-    console.log(`[BLOCKCHAIN] ⚠️ Using mnemonic-derived wallet: ${wallet.address}`);
-    console.log(`[BLOCKCHAIN] This is NOT your funded wallet (${REWARD_DISTRIBUTOR_WALLET})`);
+    const redacted = `0x...${wallet.address.slice(-4)}`;
+    console.log(`[BLOCKCHAIN] ⚠️ Using mnemonic-derived wallet: ${redacted}`);
     console.log(`[BLOCKCHAIN] Provide VECHAIN_PRIVATE_KEY for real transactions`);
     DISTRIBUTOR_PRIVATE_KEY = null; // Don't use the wrong wallet
   } catch (error) {
