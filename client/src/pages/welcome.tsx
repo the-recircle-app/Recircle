@@ -4,22 +4,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Scan, Coins, Leaf, ArrowRight, Car, Bus, Zap, Smartphone, Download, Wallet, DollarSign, CheckCircle } from "lucide-react";
 import SmartWalletConnect from "@/components/SmartWalletConnect";
-import { VeWorldRequiredMessage } from "@/components/VeWorldRequiredMessage";
-import { shouldShowVeWorldWarning } from "@/utils/platformDetection";
+import { VeWorldDetectionOverlay } from "@/components/VeWorldDetectionOverlay";
 // VeChainKitProviderWrapper removed - using the one from App.tsx instead
 
 export default function Welcome() {
-  // Detection disabled - welcome page loads immediately for all users
-  const showWarning = false;
-  
   useEffect(() => {
     // Version marker for deployment verification
-    console.log('🚀 ReCircle Welcome Page - Version: Nov 2 2025 - 12:10 PM - Build 023 - Bold Warnings');
-    console.log('[WELCOME] Detection disabled - universal access enabled');
+    console.log('🚀 ReCircle Welcome Page - Version: Nov 2 2025 - 12:15 PM - Build 024 - Overlay Pattern (No Blocking)');
+    console.log('[WELCOME] App mounts immediately - overlay shows after 1s grace period if needed');
   }, []);
   
   return (
     <div className="min-h-screen bg-gray-100 pb-8">
+      {/* Soft VeWorld Detection Overlay - shows after 1s grace period, doesn't block app mount */}
+      <VeWorldDetectionOverlay gracePeriod={1000} />
+      
       {/* Hero Section */}
       <div className="px-6 pt-16 pb-16 text-center">
         <div className="max-w-2xl mx-auto">
@@ -174,7 +173,7 @@ export default function Welcome() {
       
       {/* Version marker - visible for deployment verification */}
       <div className="py-4 text-center">
-        <p className="text-xs text-gray-400">v2025.11.02-023</p>
+        <p className="text-xs text-gray-400">v2025.11.02-024</p>
       </div>
     </div>
   );
