@@ -835,7 +835,7 @@ const TransactionExplorer = () => {
                                     // For real transactions on testnet or mainnet
                                     // Determine which network we're on based on environment variable
                                     // In a production app, this would come from the wallet connection
-                                    const isTestnet = import.meta.env.VITE_NETWORK === 'testnet';
+                                    const isTestnet = import.meta.env.VITE_VECHAIN_NETWORK === 'testnet';
                                     
                                     // Use appropriate explorer for the network
                                     // VeChainStats is generally better for mainnet

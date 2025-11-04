@@ -82,8 +82,8 @@ export default function LiveB3TRBalance({ fallbackBalance = 0, onBalanceChange }
     // Fetch balance immediately
     fetchLiveBalance();
 
-    // Refresh balance every 30 seconds to keep it up to date
-    const interval = setInterval(fetchLiveBalance, 30000);
+    // Refresh balance every 10 seconds to keep it up to date (faster than 30s for better UX after transactions)
+    const interval = setInterval(fetchLiveBalance, 10000);
     
     return () => clearInterval(interval);
   }, [account?.address, fallbackBalance, onBalanceChange]);
