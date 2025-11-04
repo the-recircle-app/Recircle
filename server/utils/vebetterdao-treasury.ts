@@ -140,21 +140,13 @@ export async function distributeTreasuryReward(
     console.log(`🏛️ Treasury Contract: ${config.contracts.x2earnRewardsPool}`);
     console.log(`🪙 B3TR Token: ${config.contracts.b3trToken}`);
     
-    // Create the distributeReward function call data for user with VeBetterDAO-compliant proof structure
-    // Calculate CO2 savings: average ~2.5kg CO2 per $10 spent on sustainable transport vs car
-    const co2SavedKg = Math.round((userAmount / 10) * 2.5);
-    
+    // Create the distributeReward function call data for user
+    // Use SIMPLE proof format - the structured format breaks VeWorld recognition!
     const userProof = JSON.stringify({
-      version: "2",
-      description: `Sustainable transportation receipt - earned ${userAmount} B3TR for eco-friendly travel`,
-      proof: {
-        receiptId: receiptProof,
-        timestamp: new Date().toISOString()
-      },
-      impact: {
-        carbon: co2SavedKg, // kg CO2 saved
-        transportationType: "sustainable_transportation"
-      }
+      receiptId: receiptProof,
+      transportationType: "sustainable_transportation", 
+      timestamp: new Date().toISOString(),
+      userReward: userAmount
     });
     
     const userFunctionCall = encodeFunctionCall(DISTRIBUTE_REWARD_ABI, [
@@ -224,21 +216,12 @@ export async function distributeTreasuryReward(
       
       const appFundAddress = process.env.APP_FUND_WALLET || '0x119761865b79bea9e7924edaa630942322ca09d1';
       
-      // App fund proof also needs VeBetterDAO-compliant structure
-      const appCo2SavedKg = Math.round((appAmount / 10) * 2.5);
-      
+      // Use SIMPLE proof format for app fund too
       const appProof = JSON.stringify({
-        version: "2",
-        description: `ReCircle app fund allocation - ${appAmount} B3TR from sustainable transportation activity`,
-        proof: {
-          receiptId: receiptProof,
-          timestamp: new Date().toISOString(),
-          type: "app_fund_allocation"
-        },
-        impact: {
-          carbon: appCo2SavedKg, // kg CO2 saved (30% of user's impact)
-          transportationType: "sustainable_transportation"
-        }
+        receiptId: receiptProof,
+        transportationType: "sustainable_transportation", 
+        timestamp: new Date().toISOString(),
+        appFundReward: appAmount
       });
       
       const appFunctionCall = encodeFunctionCall(DISTRIBUTE_REWARD_ABI, [
