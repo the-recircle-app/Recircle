@@ -3720,9 +3720,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // FORCE EXECUTION - Real B3TR tokens to actual VeWorld wallet
           console.log(`[BLOCKCHAIN] 🚀 FORCED EXECUTION: Distributing ${totalRewards} B3TR to VeWorld wallet`);
           
-          // Get the wallet address from request body if user data doesn't have it
-          const targetWallet = initialUserData.walletAddress || req.body.walletAddress;
+          // CRITICAL FIX: Use wallet address from request body (source of truth from VeWorld)
+          // The userId in localStorage can be stale if user switches wallets
+          const targetWallet = req.body.walletAddress || initialUserData.walletAddress;
+          
+          // SECURITY: Validate wallet address matches the user record to prevent token theft
+          if (initialUserData.walletAddress && req.body.walletAddress && 
+              initialUserData.walletAddress.toLowerCase() !== req.body.walletAddress.toLowerCase()) {
+            console.error(`[BLOCKCHAIN] ⚠️ WALLET MISMATCH DETECTED!`);
+            console.error(`[BLOCKCHAIN] User ${initialUserData.id} DB wallet: ${initialUserData.walletAddress.slice(-8)}`);
+            console.error(`[BLOCKCHAIN] Request wallet: ${req.body.walletAddress.slice(-8)}`);
+            console.error(`[BLOCKCHAIN] Using request wallet as source of truth and updating user record`);
+            
+            // Update user's wallet address to match the connected wallet
+            await storage.updateUserWalletAddress(initialUserData.id, req.body.walletAddress);
+          }
+          
           console.log(`[BLOCKCHAIN] User wallet: ${targetWallet}`);
+          console.log(`[BLOCKCHAIN] User ID: ${initialUserData.id}`);
           console.log(`[BLOCKCHAIN] Total rewards: ${totalRewards} B3TR`);
           console.log(`[BLOCKCHAIN] Receipt ID: ${newReceipt.id}`);
           

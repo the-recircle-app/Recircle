@@ -17,6 +17,7 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, updates: Partial<User>): Promise<User | undefined>;
   updateUserTokenBalance(id: number, newBalance: number): Promise<User | undefined>;
+  updateUserWalletAddress(id: number, walletAddress: string): Promise<User | undefined>;
   updateUserStreak(id: number, streak: number): Promise<User | undefined>;
   updateUserLastActivity(id: number): Promise<User | undefined>;
   generateReferralCode(userId: number): Promise<string>;
@@ -428,6 +429,16 @@ export class MemStorage implements IStorage {
     const safeBalance = Math.max(0, newBalance);
     
     const updatedUser = { ...user, tokenBalance: safeBalance };
+    this.users.set(id, updatedUser);
+    return updatedUser;
+  }
+
+  async updateUserWalletAddress(id: number, walletAddress: string): Promise<User | undefined> {
+    const user = await this.getUser(id);
+    if (!user) return undefined;
+    
+    console.log(`[MEMORY] Updating user ${id} wallet address to ${walletAddress.slice(-8)}`);
+    const updatedUser = { ...user, walletAddress };
     this.users.set(id, updatedUser);
     return updatedUser;
   }
@@ -858,6 +869,12 @@ export class PgStorage implements IStorage {
   async updateUserTokenBalance(id: number, newBalance: number): Promise<User | undefined> {
     const result = await db.update(users).set({ tokenBalance: newBalance }).where(eq(users.id, id)).returning();
     console.log(`[User API] Updated user ${id} balance to ${newBalance} B3TR`);
+    return result[0];
+  }
+
+  async updateUserWalletAddress(id: number, walletAddress: string): Promise<User | undefined> {
+    const result = await db.update(users).set({ walletAddress }).where(eq(users.id, id)).returning();
+    console.log(`[DB] Updated user ${id} wallet address to ${walletAddress.slice(-8)}`);
     return result[0];
   }
 
