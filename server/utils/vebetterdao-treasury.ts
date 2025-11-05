@@ -398,11 +398,39 @@ function encodeFunctionCall(abi: any, params: any[]): string {
   console.log(`[ABI-ENCODE] Selector: 0x${selector.toString('hex')}`);
   
   // Proper ABI encoding for VeChain VIP180 contracts
-  // This matches the successful Mugshot transaction pattern
   let encodedData = Buffer.from([]);
   
+  // For distributeRewardWithProof(bytes32, uint256, address, string[], string[], string[], uint256[], string)
+  if (params.length === 8) {
+    const [appId, amount, recipient, proofTypes, proofValues, impactCodes, impactValues, description] = params;
+    
+    console.log(`[ABI-ENCODE] Encoding distributeRewardWithProof with 8 parameters`);
+    
+    // Use thor-devkit's ABI encoder for complex types
+    const { abi } = thor;
+    
+    try {
+      // Encode using thor-devkit ABI encoder
+      const encoded = abi.encodeParameters(
+        ['bytes32', 'uint256', 'address', 'string[]', 'string[]', 'string[]', 'uint256[]', 'string'],
+        [appId, amount, recipient, proofTypes, proofValues, impactCodes, impactValues, description]
+      );
+      
+      encodedData = Buffer.from(encoded.slice(2), 'hex'); // Remove 0x prefix
+      
+      console.log(`[ABI-ENCODE] AppId: ${appId}`);
+      console.log(`[ABI-ENCODE] Amount: ${amount}`);
+      console.log(`[ABI-ENCODE] Recipient: ${recipient}`);
+      console.log(`[ABI-ENCODE] ProofTypes: ${JSON.stringify(proofTypes)}`);
+      console.log(`[ABI-ENCODE] ImpactCodes: ${JSON.stringify(impactCodes)}`);
+      console.log(`[ABI-ENCODE] ImpactValues: ${JSON.stringify(impactValues)}`);
+    } catch (error) {
+      console.error(`[ABI-ENCODE] Error encoding parameters:`, error);
+      throw error;
+    }
+  }
   // For distributeReward(bytes32 appId, uint256 amount, address recipient, string proof)
-  if (params.length === 4) {
+  else if (params.length === 4) {
     const [appId, amount, recipient, proof] = params;
     
     // Parameter 1: bytes32 appId (32 bytes)
