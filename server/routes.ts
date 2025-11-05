@@ -3335,10 +3335,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Force numeric types for storeId and userId
+      // CRITICAL FIX: Use totalAmount from OpenAI validation instead of client-submitted amount
+      const correctAmount = analysisResult.totalAmount || (typeof amount === 'string' ? parseFloat(amount) : amount);
+      
       const receiptData = {
         storeId: typeof storeId === 'string' ? parseInt(storeId) : storeId, 
         userId: typeof userId === 'string' ? parseInt(userId) : userId, 
-        amount: typeof amount === 'string' ? parseFloat(amount) : amount, 
+        amount: correctAmount, // Use OpenAI-validated amount, not client-submitted
         purchaseDate: new Date(validatedPurchaseDate || new Date().toISOString().split('T')[0]), // Convert string to Date object
         imageUrl: imageUrl || null,
         // Default to 8 if tokenReward is missing (updated from 5)
