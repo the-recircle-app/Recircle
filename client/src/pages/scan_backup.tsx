@@ -680,24 +680,36 @@ const ScanReceipt = () => {
       console.log("Using store ID:", storeIdToUse);
       
       // In test mode, use a fixed test user ID (102) when not connected
-      console.log("📝 Form submission - data.amount:", data.amount, "aiAnalysis:", aiAnalysis);
+      console.log("📝 Form submission - data.amount:", data.amount);
+      console.log("📝 aiAnalysis object:", aiAnalysis);
+      console.log("📝 aiAnalysis.totalAmount:", aiAnalysis?.totalAmount);
+      console.log("📝 aiAnalysis.estimatedReward:", aiAnalysis?.estimatedReward);
       
       // CRITICAL FIX: Use totalAmount from AI analysis, not form data.amount
-      // Form data.amount is getting corrupted somehow with estimatedReward value
-      const correctAmount = aiAnalysis?.totalAmount || data.amount;
-      console.log("🔧 OVERRIDE: Using aiAnalysis.totalAmount:", correctAmount, "instead of data.amount:", data.amount);
+      // The form field gets the reward estimate (8.5) instead of receipt dollar amount (26.67)
+      const correctAmount = aiAnalysis?.totalAmount !== undefined && aiAnalysis?.totalAmount !== null 
+        ? aiAnalysis.totalAmount 
+        : data.amount;
+      
+      console.log("🔧 FINAL AMOUNT DECISION:");
+      console.log("   - Form data.amount:", data.amount);
+      console.log("   - AI totalAmount:", aiAnalysis?.totalAmount);
+      console.log("   - Using correctAmount:", correctAmount);
       
       const testReceiptData = {
         storeId: storeIdToUse,
         userId: userId || 102, // Use 102 as the test user ID when not connected
-        amount: correctAmount, // Use AI-extracted dollar amount, not form value
+        amount: correctAmount, // Use AI-validated receipt dollar amount
         purchaseDate: new Date(data.purchaseDate).toISOString(),
         imageUrl: `receipt-image-url-test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         tokenReward: aiAnalysis?.estimatedReward || 8, // Updated default from 5 to 8
         // Add test mode flag for the server
         isTestMode: true
       };
-      console.log("📤 Submitting receipt with amount:", testReceiptData.amount);
+      console.log("📤 FINAL SUBMISSION DATA:");
+      console.log("   - amount:", testReceiptData.amount);
+      console.log("   - tokenReward:", testReceiptData.tokenReward);
+      console.log("   - Full object:", testReceiptData);
       
       console.log("Submitting test receipt with data:", testReceiptData);
       
