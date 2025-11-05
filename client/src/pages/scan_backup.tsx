@@ -445,9 +445,11 @@ const ScanReceipt = () => {
       setAiAnalysis(data);
       console.log("AI Analysis result:", data);
       
-      // The useEffect will handle setting the form values from aiAnalysis state
-      // Do NOT set form values here to avoid overwriting correct totalAmount with estimatedReward
+      // CRITICAL: The useEffect will handle setting form values from aiAnalysis state
+      // Do NOT set form.setValue("amount") here - it would overwrite totalAmount with estimatedReward
       console.log("🔍 AI Analysis - totalAmount:", data.totalAmount, "estimatedReward:", data.estimatedReward);
+      
+      // Force cache bust - v2
       
       if (data.purchaseDate) {
         form.setValue("purchaseDate", data.purchaseDate);
