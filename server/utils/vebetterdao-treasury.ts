@@ -13,6 +13,20 @@ import { makeSponsoringDecision, formatSponsoringMessage, type SponsoringDecisio
 // Your REAL VeBetterDAO App ID (already registered!)
 const RECIRCLE_APP_ID = process.env.APP_ID || '0x90178ff5f95f31644b5e21b11ba6e173ea0d9b9595e675cb84593c0d2df730c1';
 
+// X2EarnRewardsPool contract ABI for simple distributeReward method (4 parameters)
+const DISTRIBUTE_REWARD_ABI = {
+  "inputs": [
+    {"internalType": "bytes32", "name": "appId", "type": "bytes32"},
+    {"internalType": "uint256", "name": "amount", "type": "uint256"},
+    {"internalType": "address", "name": "receiver", "type": "address"},
+    {"internalType": "string", "name": "proof", "type": "string"}
+  ],
+  "name": "distributeReward",
+  "outputs": [],
+  "stateMutability": "nonpayable",
+  "type": "function"
+};
+
 // X2EarnRewardsPool contract ABI for distributeRewardWithProof method
 const DISTRIBUTE_REWARD_WITH_PROOF_ABI = {
   "inputs": [
