@@ -2604,6 +2604,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             });
         }
         
+        // DEBUG: Log what we're sending back to client
+        log(`Validation response - totalAmount: ${analysisResult.totalAmount}, estimatedReward: ${Math.round(estimatedReward * 10) / 10}`, "receipts");
+        
         // Standard response for non-thrift stores
         return res.json({
           ...analysisResult,

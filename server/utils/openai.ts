@@ -121,16 +121,16 @@ CONSERVATIVE FRAUD CHECK:
 - Legitimate digital receipts should have normal confidence scores
 - Focus on protecting legitimate users over catching edge cases
 
-PRIMARY FOCUS - SUSTAINABLE TRANSPORTATION (Higher Rewards):
-- RIDESHARE SERVICES: Uber, Lyft, Waymo digital receipts are sustainable transportation (confidence 0.95+, reward: 5-8 B3TR)
-- ELECTRIC VEHICLE RENTALS: Enterprise, Hertz, Zipcar, Turo electric vehicle rentals (look for "Electric", "EV", "Tesla", "Prius", "Hybrid") (confidence 0.90+, reward: 6-8 B3TR)
-- PUBLIC TRANSIT: Bus, train, subway, metro receipts are sustainable transportation (confidence 0.95+, reward: 3-5 B3TR)
+PRIMARY FOCUS - SUSTAINABLE TRANSPORTATION:
+- RIDESHARE SERVICES: Uber, Lyft, Waymo digital receipts are sustainable transportation (confidence 0.95+)
+- ELECTRIC VEHICLE RENTALS: Enterprise, Hertz, Zipcar, Turo electric vehicle rentals (look for "Electric", "EV", "Tesla", "Prius", "Hybrid") (confidence 0.90+)
+- PUBLIC TRANSIT: Bus, train, subway, metro receipts are sustainable transportation (confidence 0.95+)
 
-SECONDARY FOCUS - CIRCULAR ECONOMY (Standard Rewards):
-- THRIFT STORES: Goodwill, Salvation Army always sustainable (confidence 0.95+, reward: 2-5 B3TR)
-- PRE-OWNED ITEMS: GameStop pre-owned games (look for "PRE-OWNED", "USED", or SKU "930/00") (confidence 0.85+, reward: 2-4 B3TR)
-- USED BOOK STORES: Must explicitly show used/pre-owned books (confidence 0.80+, reward: 1-3 B3TR)
-- ONLINE SECONDHAND: ThriftBooks, Better World Books, AbeBooks, Biblio are sustainable (confidence 0.90+, reward: 2-4 B3TR)
+SECONDARY FOCUS - CIRCULAR ECONOMY:
+- THRIFT STORES: Goodwill, Salvation Army always sustainable (confidence 0.95+)
+- PRE-OWNED ITEMS: GameStop pre-owned games (look for "PRE-OWNED", "USED", or SKU "930/00") (confidence 0.85+)
+- USED BOOK STORES: Must explicitly show used/pre-owned books (confidence 0.80+)
+- ONLINE SECONDHAND: ThriftBooks, Better World Books, AbeBooks, Biblio are sustainable (confidence 0.90+)
 
 CONFIDENCE GUIDELINES (Conservative Approach):
 - 0.9-1.0: Clear evidence of sustainability AND legitimate receipt (approve automatically)
