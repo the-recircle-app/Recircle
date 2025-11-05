@@ -446,7 +446,9 @@ const ScanReceipt = () => {
       console.log("AI Analysis result:", data);
       
       // Update form with values from AI analysis
+      console.log("🔍 AI Analysis - totalAmount:", data.totalAmount, "estimatedReward:", data.estimatedReward);
       if (data.totalAmount) {
+        console.log("✅ Setting form amount to totalAmount:", data.totalAmount);
         form.setValue("amount", data.totalAmount);
       }
       
@@ -679,6 +681,7 @@ const ScanReceipt = () => {
       console.log("Using store ID:", storeIdToUse);
       
       // In test mode, use a fixed test user ID (102) when not connected
+      console.log("📝 Form submission - data.amount:", data.amount, "aiAnalysis:", aiAnalysis);
       const testReceiptData = {
         storeId: storeIdToUse,
         userId: userId || 102, // Use 102 as the test user ID when not connected
@@ -689,6 +692,7 @@ const ScanReceipt = () => {
         // Add test mode flag for the server
         isTestMode: true
       };
+      console.log("📤 Submitting receipt with amount:", testReceiptData.amount);
       
       console.log("Submitting test receipt with data:", testReceiptData);
       
