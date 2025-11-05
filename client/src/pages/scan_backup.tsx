@@ -681,10 +681,16 @@ const ScanReceipt = () => {
       
       // In test mode, use a fixed test user ID (102) when not connected
       console.log("📝 Form submission - data.amount:", data.amount, "aiAnalysis:", aiAnalysis);
+      
+      // CRITICAL FIX: Use totalAmount from AI analysis, not form data.amount
+      // Form data.amount is getting corrupted somehow with estimatedReward value
+      const correctAmount = aiAnalysis?.totalAmount || data.amount;
+      console.log("🔧 OVERRIDE: Using aiAnalysis.totalAmount:", correctAmount, "instead of data.amount:", data.amount);
+      
       const testReceiptData = {
         storeId: storeIdToUse,
         userId: userId || 102, // Use 102 as the test user ID when not connected
-        amount: data.amount,
+        amount: correctAmount, // Use AI-extracted dollar amount, not form value
         purchaseDate: new Date(data.purchaseDate).toISOString(),
         imageUrl: `receipt-image-url-test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         tokenReward: aiAnalysis?.estimatedReward || 8, // Updated default from 5 to 8
