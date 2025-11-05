@@ -276,6 +276,13 @@ const ScanReceipt = () => {
         throw new Error("User not connected");
       }
       
+      // CRITICAL: Validate wallet address before submission
+      if (!address || address.length < 10) {
+        console.error("[SUBMISSION] Invalid wallet address:", address);
+        throw new Error("Wallet address not available. Please reconnect your wallet.");
+      }
+      console.log("[SUBMISSION] Using wallet address:", address);
+      
       // Calculate reward based on AI analysis if available, or use the server-side calculation
       let tokenReward: number | undefined = undefined;
       
@@ -660,6 +667,16 @@ const ScanReceipt = () => {
     }
     
     if (isTestMode) {
+      // CRITICAL: Validate wallet address before test mode submission
+      if (!address || address.length < 10) {
+        toast({
+          title: "Wallet Not Available",
+          description: "Please reconnect your wallet before submitting receipts.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
       toast({
         title: "Test Mode",
         description: "Submitting receipt to the database",
