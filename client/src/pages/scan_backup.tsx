@@ -1595,7 +1595,9 @@ Thank you for riding!`;
                             step="0.01"
                             min="0.01"
                             className="pl-7"
-                            placeholder="0.00" 
+                            placeholder="0.00"
+                            readOnly={aiAnalysis !== null}
+                            disabled={aiAnalysis !== null}
                           />
                         </FormControl>
                       </div>
