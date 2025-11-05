@@ -8,6 +8,11 @@ ReCircle is a mobile-only blockchain-powered rewards platform designed to incent
 - VeWorld wallet required for blockchain interactions and B3TR token management
 - Desktop browsers are blocked with a download page directing users to VeWorld mobile app
 
+## Recent Changes
+
+### November 5, 2025
+- **Fixed AI Receipt Amount Bug**: OpenAI was confusing `totalAmount` (receipt dollar amount) with B3TR reward amount. Updated prompts to explicitly clarify that `totalAmount` should extract the USD dollar amount from the receipt (e.g., $26.67), not the estimated reward (e.g., 8.5 B3TR). This fixes incorrect CO2 calculations and proof strings.
+
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 

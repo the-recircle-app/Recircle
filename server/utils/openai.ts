@@ -152,7 +152,7 @@ Your response must be in JSON format. Respond with this JSON schema:
   "isSustainableStore": boolean,
   "storeName": string or null,
   "purchaseDate": string (YYYY-MM-DD) or null,
-  "totalAmount": number or null,
+  "totalAmount": number or null (IMPORTANT: Extract the DOLLAR AMOUNT from the receipt in USD - NOT the reward amount. Example: if receipt shows $26.67, put 26.67 here),
   "confidence": number,
   "purchaseCategory": string or null,
   "sustainabilityReasons": [strings],
@@ -178,7 +178,7 @@ Your response must be in JSON format. Respond with this JSON schema:
           content: [
             {
               type: "text",
-              text: "Analyze this receipt for sustainable transportation or circular economy purchases. Use CONSERVATIVE fraud detection - only flag obviously fraudulent receipts with multiple clear indicators. Digital receipts from Uber/Lyft/rideshare are legitimate. High-quality business receipts are legitimate. PRIORITIZE: rideshare services (Uber/Lyft), electric vehicle rentals, public transit. SECONDARY: thrift stores, pre-owned items. Extract: service name, date, amount, payment method. When in doubt about fraud, use manual review rather than rejection. Respond in JSON format."
+              text: "Analyze this receipt for sustainable transportation or circular economy purchases. Use CONSERVATIVE fraud detection - only flag obviously fraudulent receipts with multiple clear indicators. Digital receipts from Uber/Lyft/rideshare are legitimate. High-quality business receipts are legitimate. PRIORITIZE: rideshare services (Uber/Lyft), electric vehicle rentals, public transit. SECONDARY: thrift stores, pre-owned items. Extract: service name, date, DOLLAR AMOUNT FROM RECEIPT (in USD, not the reward amount), payment method. When in doubt about fraud, use manual review rather than rejection. Respond in JSON format."
             },
             {
               type: "image_url",
