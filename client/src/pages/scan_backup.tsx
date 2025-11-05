@@ -276,12 +276,6 @@ const ScanReceipt = () => {
         throw new Error("User not connected");
       }
       
-      // CRITICAL: Validate wallet address before submission
-      if (!address || address.length < 10) {
-        console.error("[SUBMISSION] Invalid wallet address:", address);
-        throw new Error("Wallet address not available. Please reconnect your wallet.");
-      }
-      console.log("[SUBMISSION] Using wallet address:", address);
       
       // Calculate reward based on AI analysis if available, or use the server-side calculation
       let tokenReward: number | undefined = undefined;
@@ -319,7 +313,6 @@ const ScanReceipt = () => {
       const receiptData = {
         storeId: storeId,
         userId: userId,
-        walletAddress: address, // CRITICAL: Include actual wallet address for blockchain distribution
         amount: data.amount,
         purchaseDate: new Date(data.purchaseDate).toISOString(),
         imageUrl: capturedImage?.file.name || "receipt-image-url", // Use actual file name
@@ -667,16 +660,6 @@ const ScanReceipt = () => {
     }
     
     if (isTestMode) {
-      // CRITICAL: Validate wallet address before test mode submission
-      if (!address || address.length < 10) {
-        toast({
-          title: "Wallet Not Available",
-          description: "Please reconnect your wallet before submitting receipts.",
-          variant: "destructive"
-        });
-        return;
-      }
-      
       toast({
         title: "Test Mode",
         description: "Submitting receipt to the database",
@@ -699,7 +682,6 @@ const ScanReceipt = () => {
       const testReceiptData = {
         storeId: storeIdToUse,
         userId: userId || 102, // Use 102 as the test user ID when not connected
-        walletAddress: address, // CRITICAL: Include actual wallet address for blockchain distribution
         amount: data.amount,
         purchaseDate: new Date(data.purchaseDate).toISOString(),
         imageUrl: `receipt-image-url-test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,

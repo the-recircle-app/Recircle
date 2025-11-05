@@ -187,21 +187,12 @@ export async function distributeTreasuryReward(
     console.log(`🏛️ Treasury Contract: ${config.contracts.x2earnRewardsPool}`);
     console.log(`🪙 B3TR Token: ${config.contracts.b3trToken}`);
     
-    // Calculate CO2 savings for this receipt
-    const co2SavingsGrams = calculateCO2Savings(category, receiptAmount);
-    console.log(`🌍 Estimated CO2 savings: ${co2SavingsGrams}g (${(co2SavingsGrams / 1000).toFixed(2)}kg)`);
-    
-    // Create the distributeRewardWithProof function call data for user
-    // This shows properly in VeChain explorer with proof and impact data!
-    const userFunctionCall = encodeFunctionCall(DISTRIBUTE_REWARD_WITH_PROOF_ABI, [
+    // SIMPLE VERSION: Use basic distributeReward (4 parameters only)
+    const userFunctionCall = encodeFunctionCall(DISTRIBUTE_REWARD_ABI, [
       RECIRCLE_APP_ID,           // bytes32 appId  
       (BigInt(Math.round(userAmount)) * BigInt('1000000000000000000')).toString(), // uint256 amount (convert to wei)
       userAddress,               // address receiver
-      ['text'],                  // string[] proofTypes
-      [`Receipt ID: ${receiptProof}`], // string[] proofValues
-      ['carbon'],                // string[] impactCodes (VeBetterDAO standard)
-      [co2SavingsGrams.toString()], // uint256[] impactValues (in grams)
-      `${category} receipt - $${receiptAmount} - ${userAmount} B3TR reward` // string description
+      receiptProof               // string proof
     ]);
     
     console.log(`📋 User Distribution Call Data: ${userFunctionCall}`);
@@ -264,16 +255,12 @@ export async function distributeTreasuryReward(
       
       const appFundAddress = process.env.APP_FUND_WALLET || '0x119761865b79bea9e7924edaa630942322ca09d1';
       
-      // Use distributeRewardWithProof for app fund too (30% portion)
-      const appFunctionCall = encodeFunctionCall(DISTRIBUTE_REWARD_WITH_PROOF_ABI, [
+      // SIMPLE VERSION: Use basic distributeReward for app fund (4 parameters only)
+      const appFunctionCall = encodeFunctionCall(DISTRIBUTE_REWARD_ABI, [
         RECIRCLE_APP_ID,           // bytes32 appId  
         (BigInt(Math.round(appAmount)) * BigInt('1000000000000000000')).toString(), // uint256 amount (convert to wei)
         appFundAddress,            // address receiver (app fund wallet)
-        ['text'],                  // string[] proofTypes
-        [`Receipt ID: ${receiptProof} (App Fund 30%)`], // string[] proofValues
-        ['carbon'],                // string[] impactCodes
-        [co2SavingsGrams.toString()], // uint256[] impactValues (same CO2 savings)
-        `${category} receipt - App Fund 30% - ${appAmount} B3TR` // string description
+        `${receiptProof} - App Fund 30%` // string proof
       ]);
       
       // Create app fund VeBetterDAO treasury transaction with dynamic chain tag
