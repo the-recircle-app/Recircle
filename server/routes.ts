@@ -3340,8 +3340,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         imageUrl: imageUrl || null,
         // Default to 8 if tokenReward is missing (updated from 5)
         tokenReward: tokenReward ? parseFloat(String(tokenReward)) : 8,
-        // Always use standardized category 're-use item' regardless of store type
-        category: 're-use item', // Standardized category for all receipts
+        // Use actual category from request (ride_share, public_transit, ev_rental, etc.)
+        category: req.body.category || 're-use item', // Use category from request, fallback to 're-use item'
         needsManualReview: needsManualReview // Use the properly calculated value (with test mode override)
       };
       
