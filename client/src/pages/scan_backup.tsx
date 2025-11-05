@@ -66,7 +66,7 @@ type ReceiptFormValues = z.infer<typeof receiptFormSchema>;
 
 const ScanReceipt = () => {
   const [, setLocation] = useLocation();
-  const { userId, isConnected, refreshTokenBalance, tokenBalance } = useWallet();
+  const { userId, address, isConnected, refreshTokenBalance, tokenBalance } = useWallet();
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState<ScanStep>(ScanStep.CAMERA);
   const [capturedImage, setCapturedImage] = useState<{file: File, dataUrl: string} | null>(null);
@@ -312,6 +312,7 @@ const ScanReceipt = () => {
       const receiptData = {
         storeId: storeId,
         userId: userId,
+        walletAddress: address, // CRITICAL: Include actual wallet address for blockchain distribution
         amount: data.amount,
         purchaseDate: new Date(data.purchaseDate).toISOString(),
         imageUrl: capturedImage?.file.name || "receipt-image-url", // Use actual file name
@@ -681,6 +682,7 @@ const ScanReceipt = () => {
       const testReceiptData = {
         storeId: storeIdToUse,
         userId: userId || 102, // Use 102 as the test user ID when not connected
+        walletAddress: address, // CRITICAL: Include actual wallet address for blockchain distribution
         amount: data.amount,
         purchaseDate: new Date(data.purchaseDate).toISOString(),
         imageUrl: `receipt-image-url-test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
