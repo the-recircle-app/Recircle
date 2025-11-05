@@ -3742,11 +3742,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 console.log(`[BLOCKCHAIN] 🏛️ EXECUTING VEBETTERDAO TREASURY DISTRIBUTION`);
                 console.log(`[BLOCKCHAIN] Distributing ${totalRewards} B3TR to ${targetWallet} via VeBetterDAO treasury`);
                 
-                // Use VeBetterDAO treasury system - tokens come from X2EarnRewardsPool, not wallet transfers
+                // Use VeBetterDAO treasury system WITH SUSTAINABILITY PROOF - tokens come from X2EarnRewardsPool, CO2 tracked!
                 distributionResult = await distributeTreasuryRewardWithSponsoring(
                   targetWallet,
                   totalRewards,
-                  `Receipt ID: ${newReceipt.id}, User: ${initialUserData.id}`
+                  `Receipt ID: ${newReceipt.id}, User: ${initialUserData.id}`,
+                  newReceipt.category, // Pass transportation category for CO2 calculation
+                  newReceipt.amount    // Pass receipt amount for distance estimate
                 );
               } else {
                 console.log(`[BLOCKCHAIN] 🚀 EXECUTING DIRECT B3TR DISTRIBUTION (fallback)`);
@@ -3792,6 +3794,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
                     console.log(`[BLOCKCHAIN] 🔄 Updating transaction amount: ${finalReward} → ${actualUserAmount} B3TR (70% after split)`);
                     await storage.updateTransactionAmount(receiptTransaction.id, actualUserAmount);
                     console.log(`[BLOCKCHAIN] ✅ Transaction amount updated to reflect actual distribution`);
+                  }
+                  
+                  // 🌍 Save CO2 savings to receipt record for historical tracking
+                  if (distributionResult.co2SavingsGrams && newReceipt.id) {
+                    console.log(`[BLOCKCHAIN] 🌍 Saving CO2 savings to receipt: ${distributionResult.co2SavingsGrams}g`);
+                    await storage.updateReceiptCO2Savings(newReceipt.id, distributionResult.co2SavingsGrams);
+                    console.log(`[BLOCKCHAIN] ✅ CO2 savings recorded in database`);
                   }
                 }
               } else {

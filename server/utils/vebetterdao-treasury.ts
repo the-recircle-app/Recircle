@@ -13,15 +13,19 @@ import { makeSponsoringDecision, formatSponsoringMessage, type SponsoringDecisio
 // Your REAL VeBetterDAO App ID (already registered!)
 const RECIRCLE_APP_ID = process.env.APP_ID || '0x90178ff5f95f31644b5e21b11ba6e173ea0d9b9595e675cb84593c0d2df730c1';
 
-// X2EarnRewardsPool contract ABI for distributeReward method
-const DISTRIBUTE_REWARD_ABI = {
+// X2EarnRewardsPool contract ABI for distributeRewardWithProof method
+const DISTRIBUTE_REWARD_WITH_PROOF_ABI = {
   "inputs": [
     {"internalType": "bytes32", "name": "appId", "type": "bytes32"},
     {"internalType": "uint256", "name": "amount", "type": "uint256"},
-    {"internalType": "address", "name": "recipient", "type": "address"},
-    {"internalType": "string", "name": "proof", "type": "string"}
+    {"internalType": "address", "name": "receiver", "type": "address"},
+    {"internalType": "string[]", "name": "proofTypes", "type": "string[]"},
+    {"internalType": "string[]", "name": "proofValues", "type": "string[]"},
+    {"internalType": "string[]", "name": "impactCodes", "type": "string[]"},
+    {"internalType": "uint256[]", "name": "impactValues", "type": "uint256[]"},
+    {"internalType": "string", "name": "description", "type": "string"}
   ],
-  "name": "distributeReward",
+  "name": "distributeRewardWithProof",
   "outputs": [],
   "stateMutability": "nonpayable",
   "type": "function"
@@ -46,11 +50,48 @@ interface TreasuryDistributionResult {
   appTxHash?: string;
   userAmount?: number;
   appAmount?: number;
+  co2SavingsGrams?: number;
   error?: string;
-  method: 'treasury-distributeReward';
+  method: 'treasury-distributeRewardWithProof';
   timestamp: string;
   sponsoring?: SponsoringDecision;
   sponsoringMessage?: string;
+}
+
+// CO2 emission factors (grams per mile)
+const CO2_FACTORS = {
+  PERSONAL_CAR: 404, // Average personal car
+  RIDESHARE_POOLED: 145, // Pooled rideshare
+  PUBLIC_TRANSIT: 82, // Bus/rail average
+  EV_RENTAL: 202, // Electric vehicle
+  // Savings calculations
+  RIDESHARE_SAVINGS: 259, // 404 - 145 = savings from choosing pooled rideshare over personal car
+  TRANSIT_SAVINGS: 322, // 404 - 82 = savings from choosing public transit over personal car
+  EV_SAVINGS: 202, // 404 - 202 = savings from choosing EV over personal car
+};
+
+/**
+ * Calculate CO2 savings based on transportation category and receipt amount
+ * Assumes receipt amount correlates with distance traveled
+ */
+function calculateCO2Savings(category: string, receiptAmount: number): number {
+  // Conservative estimate: $1 ≈ 1 mile for rideshare/transit
+  const estimatedMiles = receiptAmount;
+  
+  switch (category.toLowerCase()) {
+    case 'rideshare':
+    case 'ride_share':
+      return Math.round(estimatedMiles * CO2_FACTORS.RIDESHARE_SAVINGS);
+    case 'public_transit':
+    case 'transit':
+      return Math.round(estimatedMiles * CO2_FACTORS.TRANSIT_SAVINGS);
+    case 'ev_rental':
+    case 'ev':
+      return Math.round(estimatedMiles * CO2_FACTORS.EV_SAVINGS);
+    default:
+      // Default to transit savings for generic "transportation"
+      return Math.round(estimatedMiles * CO2_FACTORS.TRANSIT_SAVINGS);
+  }
 }
 
 /**
@@ -61,7 +102,9 @@ interface TreasuryDistributionResult {
 export async function distributeTreasuryRewardWithSponsoring(
   userAddress: string,
   totalAmount: number,
-  receiptProof: string = ''
+  receiptProof: string = '',
+  category: string = 'transportation',
+  receiptAmount: number = 0
 ): Promise<TreasuryDistributionResult> {
   console.log(`🏛️ SMART VeBetterDAO Treasury Distribution: ${totalAmount} B3TR to ${userAddress}`);
   
@@ -74,7 +117,7 @@ export async function distributeTreasuryRewardWithSponsoring(
   console.log(`💬 User Message: ${sponsoringMessage}`);
   
   try {
-    const result = await distributeTreasuryReward(userAddress, totalAmount, receiptProof);
+    const result = await distributeTreasuryReward(userAddress, totalAmount, receiptProof, category, receiptAmount);
     
     // Add sponsoring information to result
     result.sponsoring = sponsoringDecision;
@@ -87,7 +130,7 @@ export async function distributeTreasuryRewardWithSponsoring(
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
-      method: 'treasury-distributeReward',
+      method: 'treasury-distributeRewardWithProof',
       timestamp: new Date().toISOString(),
       sponsoring: sponsoringDecision,
       sponsoringMessage
@@ -96,16 +139,20 @@ export async function distributeTreasuryRewardWithSponsoring(
 }
 
 /**
- * Distributes B3TR tokens using REAL VeBetterDAO treasury system
+ * Distributes B3TR tokens using REAL VeBetterDAO treasury system WITH SUSTAINABILITY PROOFS
  * Tokens come from X2EarnRewardsPool contract, not personal wallet
+ * Now includes CO2 impact tracking that shows in VeChain explorer!
  */
 export async function distributeTreasuryReward(
   userAddress: string,
   totalAmount: number,
-  receiptProof: string = ''
+  receiptProof: string = '',
+  category: string = 'transportation',
+  receiptAmount: number = 0
 ): Promise<TreasuryDistributionResult> {
-  console.log(`🏛️ REAL VeBetterDAO Treasury Distribution: ${totalAmount} B3TR to ${userAddress}`);
+  console.log(`🏛️ REAL VeBetterDAO Treasury Distribution WITH PROOF: ${totalAmount} B3TR to ${userAddress}`);
   console.log(`🆔 Using registered App ID: ${RECIRCLE_APP_ID}`);
+  console.log(`🌱 Category: ${category}, Receipt Amount: $${receiptAmount}`);
   
   try {
     // Calculate distribution (70% user, 30% app fund)
@@ -140,20 +187,21 @@ export async function distributeTreasuryReward(
     console.log(`🏛️ Treasury Contract: ${config.contracts.x2earnRewardsPool}`);
     console.log(`🪙 B3TR Token: ${config.contracts.b3trToken}`);
     
-    // Create the distributeReward function call data for user
-    // Use SIMPLE proof format - the structured format breaks VeWorld recognition!
-    const userProof = JSON.stringify({
-      receiptId: receiptProof,
-      transportationType: "sustainable_transportation", 
-      timestamp: new Date().toISOString(),
-      userReward: userAmount
-    });
+    // Calculate CO2 savings for this receipt
+    const co2SavingsGrams = calculateCO2Savings(category, receiptAmount);
+    console.log(`🌍 Estimated CO2 savings: ${co2SavingsGrams}g (${(co2SavingsGrams / 1000).toFixed(2)}kg)`);
     
-    const userFunctionCall = encodeFunctionCall(DISTRIBUTE_REWARD_ABI, [
+    // Create the distributeRewardWithProof function call data for user
+    // This shows properly in VeChain explorer with proof and impact data!
+    const userFunctionCall = encodeFunctionCall(DISTRIBUTE_REWARD_WITH_PROOF_ABI, [
       RECIRCLE_APP_ID,           // bytes32 appId  
       (BigInt(Math.round(userAmount)) * BigInt('1000000000000000000')).toString(), // uint256 amount (convert to wei)
-      userAddress,               // address recipient
-      userProof                  // string proof
+      userAddress,               // address receiver
+      ['text'],                  // string[] proofTypes
+      [`Receipt ID: ${receiptProof}`], // string[] proofValues
+      ['carbon'],                // string[] impactCodes (VeBetterDAO standard)
+      [co2SavingsGrams.toString()], // uint256[] impactValues (in grams)
+      `${category} receipt - $${receiptAmount} - ${userAmount} B3TR reward` // string description
     ]);
     
     console.log(`📋 User Distribution Call Data: ${userFunctionCall}`);
@@ -216,19 +264,16 @@ export async function distributeTreasuryReward(
       
       const appFundAddress = process.env.APP_FUND_WALLET || '0x119761865b79bea9e7924edaa630942322ca09d1';
       
-      // Use SIMPLE proof format for app fund too
-      const appProof = JSON.stringify({
-        receiptId: receiptProof,
-        transportationType: "sustainable_transportation", 
-        timestamp: new Date().toISOString(),
-        appFundReward: appAmount
-      });
-      
-      const appFunctionCall = encodeFunctionCall(DISTRIBUTE_REWARD_ABI, [
+      // Use distributeRewardWithProof for app fund too (30% portion)
+      const appFunctionCall = encodeFunctionCall(DISTRIBUTE_REWARD_WITH_PROOF_ABI, [
         RECIRCLE_APP_ID,           // bytes32 appId  
         (BigInt(Math.round(appAmount)) * BigInt('1000000000000000000')).toString(), // uint256 amount (convert to wei)
-        appFundAddress,            // address recipient (app fund wallet)
-        appProof                   // string proof
+        appFundAddress,            // address receiver (app fund wallet)
+        ['text'],                  // string[] proofTypes
+        [`Receipt ID: ${receiptProof} (App Fund 30%)`], // string[] proofValues
+        ['carbon'],                // string[] impactCodes
+        [co2SavingsGrams.toString()], // uint256[] impactValues (same CO2 savings)
+        `${category} receipt - App Fund 30% - ${appAmount} B3TR` // string description
       ]);
       
       // Create app fund VeBetterDAO treasury transaction with dynamic chain tag
@@ -276,6 +321,7 @@ export async function distributeTreasuryReward(
     console.log(`✅ COMPLETE VeBetterDAO Treasury Distribution to VeChain Network!`);
     console.log(`   User TX: ${userTxHash} (${userAmount} B3TR from VeBetterDAO treasury)`);
     console.log(`   App Fund TX: ${appTxHash} (${appAmount} B3TR from VeBetterDAO treasury)`);
+    console.log(`   🌍 CO2 Impact: ${co2SavingsGrams}g (${(co2SavingsGrams / 1000).toFixed(2)}kg) carbon savings tracked on-chain`);
     console.log(`   Network: VeChain Testnet (REAL BLOCKCHAIN)`);
     console.log(`   Security: BOTH transactions use official VeBetterDAO treasury, not personal wallet`);
     
@@ -285,7 +331,8 @@ export async function distributeTreasuryReward(
       appTxHash,
       userAmount,
       appAmount,
-      method: 'treasury-distributeReward',
+      co2SavingsGrams,
+      method: 'treasury-distributeRewardWithProof',
       timestamp: new Date().toISOString()
     };
     
@@ -294,7 +341,7 @@ export async function distributeTreasuryReward(
     return {
       success: false,
       error: error.message,
-      method: 'treasury-distributeReward',
+      method: 'treasury-distributeRewardWithProof',
       timestamp: new Date().toISOString()
     };
   }

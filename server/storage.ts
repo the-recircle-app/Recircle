@@ -664,6 +664,20 @@ export class MemStorage implements IStorage {
     }
   }
 
+  async updateReceiptCO2Savings(receiptId: number, co2SavingsGrams: number): Promise<boolean> {
+    const receipt = this.receipts.get(receiptId);
+    if (receipt) {
+      console.log(`[MEMORY] Updating receipt ${receiptId} CO2 savings: ${co2SavingsGrams}g`);
+      (receipt as any).co2SavingsGrams = co2SavingsGrams;
+      this.receipts.set(receiptId, receipt);
+      console.log(`[MEMORY] ✅ Receipt ${receiptId} CO2 savings updated successfully`);
+      return true;
+    } else {
+      console.log(`[MEMORY] ⚠️ Receipt ${receiptId} not found for CO2 update`);
+      return false;
+    }
+  }
+
   async deleteTransaction(id: number): Promise<boolean> {
     const success = this.transactions.delete(id);
     return success;
@@ -1001,6 +1015,27 @@ export class PgStorage implements IStorage {
       }
     } catch (error) {
       console.error(`[DB] ❌ Failed to update transaction ${transactionId} amount:`, error);
+      return false;
+    }
+  }
+
+  async updateReceiptCO2Savings(receiptId: number, co2SavingsGrams: number): Promise<boolean> {
+    try {
+      console.log(`[DB] Updating receipt ${receiptId} CO2 savings to ${co2SavingsGrams}g`);
+      const result = await db.update(receipts)
+        .set({ co2SavingsGrams: co2SavingsGrams })
+        .where(eq(receipts.id, receiptId))
+        .returning();
+      
+      if (result.length > 0) {
+        console.log(`[DB] ✅ Receipt ${receiptId} CO2 savings updated successfully`);
+        return true;
+      } else {
+        console.log(`[DB] ⚠️ Receipt ${receiptId} not found for CO2 update`);
+        return false;
+      }
+    } catch (error) {
+      console.error(`[DB] ❌ Failed to update receipt ${receiptId} CO2 savings:`, error);
       return false;
     }
   }

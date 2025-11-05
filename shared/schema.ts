@@ -71,6 +71,7 @@ export const receipts = pgTable("receipts", {
   category: text("category").notNull().default("transportation"), // transportation, rideshare, public_transit, ev_rental
   verified: boolean("verified").default(false),
   tokenReward: doublePrecision("token_reward").notNull(),
+  co2SavingsGrams: integer("co2_savings_grams"), // Estimated CO2 savings in grams for this sustainable transportation choice
   needsManualReview: boolean("needs_manual_review").default(false), // Flag to indicate if receipt needs manual review
   hasImage: boolean("has_image").default(false), // Indicates if receipt has associated image
   createdAt: timestamp("created_at").defaultNow(),
