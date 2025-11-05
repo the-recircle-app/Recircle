@@ -201,12 +201,20 @@ export async function distributeTreasuryReward(
     console.log(`🏛️ Treasury Contract: ${config.contracts.x2earnRewardsPool}`);
     console.log(`🪙 B3TR Token: ${config.contracts.b3trToken}`);
     
+    // Calculate CO2 savings for sustainability tracking
+    const co2SavingsGrams = calculateCO2Savings(category, receiptAmount);
+    const co2SavingsKg = (co2SavingsGrams / 1000).toFixed(2);
+    console.log(`🌍 Estimated CO2 savings: ${co2SavingsGrams}g (${co2SavingsKg}kg)`);
+    
+    // Enhanced proof string with sustainability information
+    const enhancedProof = `${receiptProof} - ${category} - $${receiptAmount.toFixed(2)} - Saved ${co2SavingsKg}kg CO2`;
+    
     // SIMPLE VERSION: Use basic distributeReward (4 parameters only)
     const userFunctionCall = encodeFunctionCall(DISTRIBUTE_REWARD_ABI, [
       RECIRCLE_APP_ID,           // bytes32 appId  
       (BigInt(Math.round(userAmount)) * BigInt('1000000000000000000')).toString(), // uint256 amount (convert to wei)
       userAddress,               // address receiver
-      receiptProof               // string proof
+      enhancedProof              // string proof with sustainability info
     ]);
     
     console.log(`📋 User Distribution Call Data: ${userFunctionCall}`);
@@ -274,7 +282,7 @@ export async function distributeTreasuryReward(
         RECIRCLE_APP_ID,           // bytes32 appId  
         (BigInt(Math.round(appAmount)) * BigInt('1000000000000000000')).toString(), // uint256 amount (convert to wei)
         appFundAddress,            // address receiver (app fund wallet)
-        `${receiptProof} - App Fund 30%` // string proof
+        `${enhancedProof} - App Fund 30%` // string proof with sustainability info
       ]);
       
       // Create app fund VeBetterDAO treasury transaction with dynamic chain tag
