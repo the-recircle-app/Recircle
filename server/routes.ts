@@ -3829,7 +3829,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   totalRewards,
                   `Receipt ID: ${newReceipt.id}, User: ${initialUserData.id}`,
                   newReceipt.category, // Pass transportation category for CO2 calculation
-                  newReceipt.amount    // Pass receipt amount for distance estimate
+                  correctAmount        // Pass VALIDATED receipt amount from cache (not database value)
                 );
               } else {
                 console.log(`[BLOCKCHAIN] 🚀 EXECUTING DIRECT B3TR DISTRIBUTION (fallback)`);
