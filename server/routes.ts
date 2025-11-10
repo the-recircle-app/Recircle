@@ -2633,6 +2633,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Save validation result to cache and get token
         const userId = req.body.userId;
         let validationToken = null;
+        console.log('[DEBUG] About to create validation token for userId:', userId);
         if (userId) {
           validationToken = saveValidationResult(userId, {
             storeName: analysisResult.storeName,

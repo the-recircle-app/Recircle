@@ -98,7 +98,8 @@ export const imageValidation = {
       testMode?: boolean; 
       testType?: TestReceiptType;
       imageName?: string;
-      purchaseDate?: string;  
+      purchaseDate?: string;
+      userId?: number;  
     }
   ): Promise<ReceiptAnalysisResult> {
     try {
@@ -110,6 +111,11 @@ export const imageValidation = {
         image: base64Image,
         imageName: imageFile.name
       };
+      
+      // Add userId if provided (critical for validation token generation)
+      if (options?.userId) {
+        requestData.userId = options.userId;
+      }
       
       // Add purchase date if manually entered
       if (options?.purchaseDate) {

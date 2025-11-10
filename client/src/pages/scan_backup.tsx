@@ -435,11 +435,13 @@ const ScanReceipt = () => {
         return await imageValidation.analyzeReceiptWithAI(file, {
           testMode: true,
           testType: testReceiptType,
-          purchaseDate: manualPurchaseDate // Pass the manually entered date for validation
+          purchaseDate: manualPurchaseDate, // Pass the manually entered date for validation
+          userId: userId ? Number(userId) : undefined // Pass userId for validation token generation
         });
       }
       return await imageValidation.analyzeReceiptWithAI(file, {
-        purchaseDate: manualPurchaseDate // Also pass the date in normal mode
+        purchaseDate: manualPurchaseDate, // Also pass the date in normal mode
+        userId: userId ? Number(userId) : undefined // Pass userId for validation token generation
       });
     },
     onSuccess: (data) => {
