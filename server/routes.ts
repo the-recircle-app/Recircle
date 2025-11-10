@@ -2653,6 +2653,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         
         // Standard response for non-thrift stores
+        console.log(`🔍 [SERVER-DEBUG] Sending validation response with validationToken: ${validationToken || 'NULL'}, totalAmount: $${analysisResult.totalAmount}`);
         return res.json({
           ...analysisResult,
           isAcceptable,
@@ -2922,6 +2923,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/receipts", receiptSubmissionRateLimit, async (req: Request, res: Response) => {
     try {
       console.log("Receipt submission received:", req.body);
+      console.log(`🔍 [SERVER-DEBUG] Client sent validationToken: ${req.body.validationToken || 'MISSING/NULL'}`);
+      console.log(`🔍 [SERVER-DEBUG] Client sent amount: ${req.body.amount}`);
       
       // Check if this is coming from test mode
       const isTestMode = process.env.NODE_ENV === 'development' && req.body.isTestMode === true;
