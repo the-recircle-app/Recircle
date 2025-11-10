@@ -22,6 +22,7 @@ export interface ReceiptAnalysisResult {
   timeoutFallback?: boolean; // Flag to indicate if timeout fallback was used
   sentForManualReview?: boolean; // Flag to indicate if the receipt was sent for manual review
   needsManualReview?: boolean; // Flag to indicate if receipt needs manual review
+  validationToken?: string; // Server-issued token to retrieve cached validation data
   paymentMethod?: {
     method: string;
     cardLastFour: string | null;

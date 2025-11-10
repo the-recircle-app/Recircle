@@ -48,6 +48,7 @@ export interface ReceiptAnalysisResult {
   estimatedReward?: number; // Estimated reward amount
   sentForManualReview?: boolean; // Flag to indicate if receipt was sent for manual review
   needsManualReview?: boolean; // Flag to indicate if receipt needs manual review
+  validationToken?: string; // Server-issued token to retrieve cached validation data
   
   // Pre-owned item detection
   containsPreOwnedItems: boolean;
