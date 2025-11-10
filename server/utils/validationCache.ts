@@ -128,9 +128,13 @@ export function getRecentValidationByUserId(userId: number): CachedValidationRes
     const cached = validationCache.get<CachedValidationResult>(key);
     
     if (cached) {
-      console.log(`[VALIDATION-CACHE] 🔍 Checking key: ${key}, userId: ${cached.userId}, timestamp: ${cached.timestamp}, age: ${Math.round((Date.now() - cached.timestamp) / 1000)}s`);
+      console.log(`[VALIDATION-CACHE] 🔍 Checking key: ${key}, userId: ${cached.userId} (type: ${typeof cached.userId}), timestamp: ${cached.timestamp}, age: ${Math.round((Date.now() - cached.timestamp) / 1000)}s`);
       
-      if (cached.userId === userId) {
+      // CRITICAL FIX: Convert both to numbers to avoid type mismatch (string vs number)
+      const cachedUserId = Number(cached.userId);
+      const targetUserId = Number(userId);
+      
+      if (cachedUserId === targetUserId) {
         validationCount++;
         console.log(`[VALIDATION-CACHE] 🔍 Match found for user ${userId}! Amount: $${cached.totalAmount}, age: ${Math.round((Date.now() - cached.timestamp) / 1000)}s`);
         
@@ -138,6 +142,8 @@ export function getRecentValidationByUserId(userId: number): CachedValidationRes
           mostRecentValidation = cached;
           mostRecentTimestamp = cached.timestamp;
         }
+      } else {
+        console.log(`[VALIDATION-CACHE] ❌ No match: ${cachedUserId} !== ${targetUserId}`);
       }
     }
   }
