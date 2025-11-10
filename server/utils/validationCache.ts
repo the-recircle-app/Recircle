@@ -117,24 +117,35 @@ export function getRecentValidationByUserId(userId: number): CachedValidationRes
   const allKeys = validationCache.keys();
   const fiveMinutesAgo = Date.now() - (5 * 60 * 1000); // 5 minutes
   
+  console.log(`[VALIDATION-CACHE] 🔍 Searching cache for user ${userId}. Total cache keys: ${allKeys.length}`);
+  
   let mostRecentValidation: CachedValidationResult | null = null;
   let mostRecentTimestamp = 0;
+  let validationCount = 0;
   
   // Search through all cached validations for this user
   for (const key of allKeys) {
     const cached = validationCache.get<CachedValidationResult>(key);
     
-    if (cached && 
-        cached.userId === userId && 
-        cached.timestamp > fiveMinutesAgo &&
-        cached.timestamp > mostRecentTimestamp) {
-      mostRecentValidation = cached;
-      mostRecentTimestamp = cached.timestamp;
+    if (cached) {
+      console.log(`[VALIDATION-CACHE] 🔍 Checking key: ${key}, userId: ${cached.userId}, timestamp: ${cached.timestamp}, age: ${Math.round((Date.now() - cached.timestamp) / 1000)}s`);
+      
+      if (cached.userId === userId) {
+        validationCount++;
+        console.log(`[VALIDATION-CACHE] 🔍 Match found for user ${userId}! Amount: $${cached.totalAmount}, age: ${Math.round((Date.now() - cached.timestamp) / 1000)}s`);
+        
+        if (cached.timestamp > fiveMinutesAgo && cached.timestamp > mostRecentTimestamp) {
+          mostRecentValidation = cached;
+          mostRecentTimestamp = cached.timestamp;
+        }
+      }
     }
   }
   
+  console.log(`[VALIDATION-CACHE] 🔍 Found ${validationCount} validation(s) for user ${userId}`);
+  
   if (mostRecentValidation) {
-    console.log(`[VALIDATION-CACHE] 🔄 Found recent validation for user ${userId} (${Math.round((Date.now() - mostRecentTimestamp) / 1000)}s ago), totalAmount: $${mostRecentValidation.totalAmount}`);
+    console.log(`[VALIDATION-CACHE] ✅ Using most recent validation: $${mostRecentValidation.totalAmount} (${Math.round((Date.now() - mostRecentTimestamp) / 1000)}s ago)`);
     // Don't delete it - let it expire naturally in case of retries
     return mostRecentValidation;
   } else {
