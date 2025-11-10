@@ -2967,8 +2967,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         } else {
           console.log(`[VALIDATION-CACHE] ⚠️ Token not found or expired - falling back to client amount: $${amount}`);
         }
+      } else if (userId) {
+        // FALLBACK: If no token provided (e.g., browser cache issue), try to find recent validation by userId
+        console.log(`[VALIDATION-CACHE] ℹ️ No validation token provided - attempting userId fallback for user ${userId}`);
+        const { getRecentValidationByUserId } = await import('./utils/validationCache.js');
+        cachedValidation = getRecentValidationByUserId(userId);
+        
+        if (cachedValidation) {
+          console.log(`[VALIDATION-CACHE] ✅ FALLBACK SUCCESS: Found recent validation for user ${userId}`);
+          console.log(`[VALIDATION-CACHE] Client submitted amount: $${amount}`);
+          console.log(`[VALIDATION-CACHE] Server cached totalAmount: $${cachedValidation.totalAmount}`);
+          
+          // Use the server's validated amount instead of client-submitted
+          finalAmount = cachedValidation.totalAmount;
+          
+          console.log(`[VALIDATION-CACHE] 🎯 FINAL DECISION: Using $${finalAmount} (from server userId fallback)`);
+        } else {
+          console.log(`[VALIDATION-CACHE] ⚠️ No recent validation found - using client amount: $${amount}`);
+        }
       } else {
-        console.log(`[VALIDATION-CACHE] ℹ️ No validation token provided - using client amount: $${amount}`);
+        console.log(`[VALIDATION-CACHE] ℹ️ No validation token and no userId - using client amount: $${amount}`);
       }
       
       // Check daily limit but allow bypass for B3TR wallet testing

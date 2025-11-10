@@ -110,6 +110,40 @@ export function getAndDeleteValidationResult(
 }
 
 /**
+ * Get the most recent validation result for a user (fallback when token is missing)
+ * Returns null if no recent validation found (within 5 minutes)
+ */
+export function getRecentValidationByUserId(userId: number): CachedValidationResult | null {
+  const allKeys = validationCache.keys();
+  const fiveMinutesAgo = Date.now() - (5 * 60 * 1000); // 5 minutes
+  
+  let mostRecentValidation: CachedValidationResult | null = null;
+  let mostRecentTimestamp = 0;
+  
+  // Search through all cached validations for this user
+  for (const key of allKeys) {
+    const cached = validationCache.get<CachedValidationResult>(key);
+    
+    if (cached && 
+        cached.userId === userId && 
+        cached.timestamp > fiveMinutesAgo &&
+        cached.timestamp > mostRecentTimestamp) {
+      mostRecentValidation = cached;
+      mostRecentTimestamp = cached.timestamp;
+    }
+  }
+  
+  if (mostRecentValidation) {
+    console.log(`[VALIDATION-CACHE] 🔄 Found recent validation for user ${userId} (${Math.round((Date.now() - mostRecentTimestamp) / 1000)}s ago), totalAmount: $${mostRecentValidation.totalAmount}`);
+    // Don't delete it - let it expire naturally in case of retries
+    return mostRecentValidation;
+  } else {
+    console.log(`[VALIDATION-CACHE] ℹ️ No recent validation found for user ${userId} within 5 minutes`);
+    return null;
+  }
+}
+
+/**
  * Get cache statistics for debugging
  */
 export function getCacheStats() {
