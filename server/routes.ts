@@ -85,6 +85,7 @@ import { distributeSoloB3TR, isSoloNodeAvailable, testSoloB3TR } from "./utils/s
 import { distributeTreasuryReward, distributeTreasuryRewardWithSponsoring, checkTreasuryFunds, verifyDistributorAuthorization } from "./utils/vebetterdao-treasury";
 import { getSoloB3TRBalance } from "./utils/solo-b3tr-real";
 import { PierreContractsService } from "./utils/pierre-contracts-service";
+import { saveValidationResult, getAndDeleteValidationResult } from "./utils/validationCache";
 
 
 // VeChain addresses for creator wallet and app sustainability fund
@@ -2581,6 +2582,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (isKnownThriftStore && confidenceScore >= 0.7) {
             log(`⚠️ CRITICAL OVERRIDE: Forcing bypass of manual review for Goodwill/thrift store. Original confidence: ${confidenceScore}`, "receipts");
             
+            // Save validation result to cache and get token
+            const userId = req.body.userId;
+            let validationToken = null;
+            if (userId) {
+              validationToken = saveValidationResult(userId, {
+                storeName: analysisResult.storeName,
+                storeId: analysisResult.storeId || null,
+                totalAmount: analysisResult.totalAmount,
+                estimatedReward: Math.round(estimatedReward * 10) / 10,
+                purchaseDate: analysisResult.purchaseDate,
+                category: analysisResult.sustainableCategory || analysisResult.purchaseCategory || 're-use item',
+                containsPreOwnedItems: analysisResult.containsPreOwnedItems,
+                paymentMethod: analysisResult.paymentMethod,
+                cardLastFour: analysisResult.paymentMethod?.cardLastFour,
+                isAcceptable,
+                needsManualReview: false,
+                reasons: analysisResult.reasons || [],
+                confidenceScore
+              });
+            }
+            
             // Create a new response with no manual review flags
             return res.json({
                 ...analysisResult,
@@ -2600,12 +2622,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 sentForManualReview: false,
                 needsManualReview: false,
                 timeoutFallback: false, // Override any timeout fallback from previous analysis
+                validationToken, // Include validation token for server-side amount verification
                 ...debugInfo
             });
         }
         
         // DEBUG: Log what we're sending back to client
         log(`Validation response - totalAmount: ${analysisResult.totalAmount}, estimatedReward: ${Math.round(estimatedReward * 10) / 10}`, "receipts");
+        
+        // Save validation result to cache and get token
+        const userId = req.body.userId;
+        let validationToken = null;
+        if (userId) {
+          validationToken = saveValidationResult(userId, {
+            storeName: analysisResult.storeName,
+            storeId: analysisResult.storeId || null,
+            totalAmount: analysisResult.totalAmount,
+            estimatedReward: Math.round(estimatedReward * 10) / 10,
+            purchaseDate: analysisResult.purchaseDate,
+            category: analysisResult.sustainableCategory || analysisResult.purchaseCategory || 're-use item',
+            containsPreOwnedItems: analysisResult.containsPreOwnedItems,
+            paymentMethod: analysisResult.paymentMethod,
+            cardLastFour: analysisResult.paymentMethod?.cardLastFour,
+            isAcceptable,
+            needsManualReview: (manualReviewOverride ? false : (confidenceScore < 0.8)),
+            reasons: analysisResult.reasons || [],
+            confidenceScore
+          });
+        }
         
         // Standard response for non-thrift stores
         return res.json({
@@ -2626,6 +2670,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Skip manual review for thrift stores with reasonable confidence
           sentForManualReview: (manualReviewOverride ? false : (confidenceScore < 0.8)),
           needsManualReview: (manualReviewOverride ? false : (confidenceScore < 0.8)),
+          validationToken, // Include validation token for server-side amount verification
           ...debugInfo // Include debug information if in developer debug mode
         });
       } catch (error) {
@@ -2893,8 +2938,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
         category,
         paymentMethod,
         cardLastFour,
-        containsPreOwnedItems
+        containsPreOwnedItems,
+        validationToken
       } = req.body;
+      
+      // CRITICAL FIX: Use server-cached validation data if available
+      // This ensures we use the AI-validated totalAmount (e.g., $26.67) instead of
+      // potentially corrupted client-submitted amount (e.g., 8.5)
+      let finalAmount = amount;
+      let cachedValidation = null;
+      
+      if (validationToken && userId) {
+        cachedValidation = getAndDeleteValidationResult(validationToken, userId);
+        
+        if (cachedValidation) {
+          console.log(`[VALIDATION-CACHE] ✅ Using cached validation data for user ${userId}`);
+          console.log(`[VALIDATION-CACHE] Client submitted amount: $${amount}`);
+          console.log(`[VALIDATION-CACHE] Server cached totalAmount: $${cachedValidation.totalAmount}`);
+          
+          // Use the server's validated amount instead of client-submitted
+          finalAmount = cachedValidation.totalAmount;
+          
+          console.log(`[VALIDATION-CACHE] 🎯 FINAL DECISION: Using $${finalAmount} (from server cache)`);
+        } else {
+          console.log(`[VALIDATION-CACHE] ⚠️ Token not found or expired - falling back to client amount: $${amount}`);
+        }
+      } else {
+        console.log(`[VALIDATION-CACHE] ℹ️ No validation token provided - using client amount: $${amount}`);
+      }
       
       // Check daily limit but allow bypass for B3TR wallet testing
       if (userId) {
@@ -3335,13 +3406,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Force numeric types for storeId and userId
-      // CRITICAL FIX: Use totalAmount from OpenAI validation instead of client-submitted amount
-      const correctAmount = analysisResult.totalAmount || (typeof amount === 'string' ? parseFloat(amount) : amount);
+      // CRITICAL FIX: Use finalAmount from server-cached validation data
+      // finalAmount is either the cached totalAmount ($26.67) or falls back to client amount
+      const correctAmount = typeof finalAmount === 'string' ? parseFloat(finalAmount) : finalAmount;
       
       const receiptData = {
         storeId: typeof storeId === 'string' ? parseInt(storeId) : storeId, 
         userId: typeof userId === 'string' ? parseInt(userId) : userId, 
-        amount: correctAmount, // Use OpenAI-validated amount, not client-submitted
+        amount: correctAmount, // Use server-cached validated amount
         purchaseDate: new Date(validatedPurchaseDate || new Date().toISOString().split('T')[0]), // Convert string to Date object
         imageUrl: imageUrl || null,
         // Default to 8 if tokenReward is missing (updated from 5)
