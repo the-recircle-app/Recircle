@@ -102,28 +102,11 @@ export async function storeReceiptImage(
   if (isDuplicate) {
     fraudDetection.flags.push('duplicate_image');
     fraudDetection.riskScore += 30;
-    
-    // Return existing image data instead of inserting duplicate
-    const existing = existingImage[0];
-    console.log(`[IMAGE-STORAGE] ⚠️ Duplicate image detected for receipt ${receiptId}, using existing image ${existing.id}`);
-    console.log(`[IMAGE-STORAGE] 🔐 Fraud flags: ${fraudDetection.flags.join(', ')}`);
-    
-    // Update receipt to indicate it has an image
-    await db
-      .update(receipts)
-      .set({ hasImage: true })
-      .where(eq(receipts.id, receiptId));
-    
-    return {
-      imageId: existing.id,
-      imageHash: existing.imageHash,
-      fraudFlags: fraudDetection.flags,
-      isDuplicate: true,
-      viewToken: existing.viewToken // Use existing token
-    };
+    console.log(`[IMAGE-STORAGE] ⚠️ Duplicate image hash detected for receipt ${receiptId} (matches existing image hash)`);
   }
 
-  // Generate secure viewing token (UUID v4) for new image
+  // Always store image with unique viewToken (even if duplicate hash)
+  // Each receipt gets its own image record for proper linking
   const viewToken = crypto.randomUUID();
 
   // Store the new image in database with view token

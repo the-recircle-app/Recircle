@@ -51,7 +51,7 @@ export const receiptImages = pgTable("receipt_images", {
   id: serial("id").primaryKey(),
   receiptId: integer("receipt_id").references(() => receipts.id),
   imageData: text("image_data").notNull(), // Base64 encoded image data
-  imageHash: text("image_hash").notNull().unique(), // SHA-256 hash for duplicate detection
+  imageHash: text("image_hash").notNull(), // SHA-256 hash for duplicate detection (NOT unique - allows same image for multiple receipts)
   mimeType: text("mime_type").notNull(), // image/jpeg, image/png, etc.
   fileSize: integer("file_size").notNull(), // Size in bytes
   viewToken: text("view_token").notNull().unique(), // UUID for secure, shareable viewing without auth
