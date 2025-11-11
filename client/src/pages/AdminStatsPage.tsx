@@ -21,11 +21,44 @@ import {
 } from "lucide-react";
 
 interface AnalyticsStats {
+  // Overall metrics
   totalReceipts: number;
   totalUsers: number;
   totalB3trDistributed: number;
   totalCO2SavedGrams: number;
   totalCO2SavedKg: number;
+  avgReceiptAmount: number;
+  
+  // User engagement
+  dailyActiveUsers: number;
+  weeklyActiveUsers: number;
+  monthlyActiveUsers: number;
+  newUsersThisWeek: number;
+  returningUsers: number;
+  avgReceiptsPerUser: number;
+  
+  // Receipt trends
+  receiptsToday: number;
+  receiptsThisWeek: number;
+  receiptsThisMonth: number;
+  receiptsByCategory: Record<string, number>;
+  needsManualReview: number;
+  autoApproved: number;
+  
+  // Gift cards
+  totalGiftCardOrders: number;
+  totalB3trSpentOnGiftCards: number;
+  giftCardsByProduct: Record<string, number>;
+  
+  // Fraud detection
+  fraudFlagSummary: Record<string, number>;
+  
+  // Top users
+  mostActiveUsers: Array<{
+    id: number;
+    username: string;
+    receiptCount: number;
+  }>;
 }
 
 interface ReceiptData {
@@ -200,6 +233,186 @@ export default function AdminStatsPage() {
               <p className="text-xs text-muted-foreground mt-1">
                 {stats?.totalCO2SavedGrams.toLocaleString()} grams
               </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* User Engagement Section */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-xl">User Engagement</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div>
+                <p className="text-sm text-gray-600">Daily Active</p>
+                <p className="text-2xl font-bold">{stats?.dailyActiveUsers || 0}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Weekly Active</p>
+                <p className="text-2xl font-bold">{stats?.weeklyActiveUsers || 0}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Monthly Active</p>
+                <p className="text-2xl font-bold">{stats?.monthlyActiveUsers || 0}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">New This Week</p>
+                <p className="text-2xl font-bold text-green-600">{stats?.newUsersThisWeek || 0}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Returning Users</p>
+                <p className="text-2xl font-bold">{stats?.returningUsers || 0}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Avg Receipts/User</p>
+                <p className="text-2xl font-bold">{stats?.avgReceiptsPerUser?.toFixed(1) || 0}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Receipt Trends Section */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-xl">Receipt Trends</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <h3 className="font-semibold mb-2">Time Periods</h3>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm">Today</span>
+                    <span className="font-bold">{stats?.receiptsToday || 0}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm">This Week</span>
+                    <span className="font-bold">{stats?.receiptsThisWeek || 0}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm">This Month</span>
+                    <span className="font-bold">{stats?.receiptsThisMonth || 0}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm">Avg Amount</span>
+                    <span className="font-bold">${stats?.avgReceiptAmount?.toFixed(2) || 0}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="font-semibold mb-2">By Category</h3>
+                <div className="space-y-2">
+                  {stats?.receiptsByCategory && Object.entries(stats.receiptsByCategory).map(([category, count]) => (
+                    <div key={category} className="flex justify-between">
+                      <span className="text-sm capitalize">{category.replace('_', ' ')}</span>
+                      <span className="font-bold">{count}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <h3 className="font-semibold mb-2">Review Status</h3>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm">Auto-Approved</span>
+                    <span className="font-bold text-green-600">{stats?.autoApproved || 0}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm">Manual Review</span>
+                    <span className="font-bold text-yellow-600">{stats?.needsManualReview || 0}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Gift Card Analytics */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-xl">Gift Card Redemptions</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <div className="space-y-2 mb-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Total Orders</span>
+                    <span className="text-2xl font-bold">{stats?.totalGiftCardOrders || 0}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">B3TR Spent</span>
+                    <span className="text-2xl font-bold">{stats?.totalB3trSpentOnGiftCards?.toFixed(1) || 0}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="font-semibold mb-2">Popular Gift Cards</h3>
+                <div className="space-y-1">
+                  {stats?.giftCardsByProduct && Object.entries(stats.giftCardsByProduct)
+                    .sort(([,a], [,b]) => b - a)
+                    .slice(0, 5)
+                    .map(([product, count]) => (
+                      <div key={product} className="flex justify-between text-sm">
+                        <span className="truncate">{product}</span>
+                        <span className="font-semibold ml-2">{count}</span>
+                      </div>
+                    ))}
+                  {(!stats?.giftCardsByProduct || Object.keys(stats.giftCardsByProduct).length === 0) && (
+                    <p className="text-sm text-gray-500">No gift card orders yet</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Fraud Detection & Top Users */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-xl">Fraud Flags Summary</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {stats?.fraudFlagSummary && Object.entries(stats.fraudFlagSummary).map(([flag, count]) => (
+                  <div key={flag} className="flex justify-between">
+                    <Badge variant={flag === 'duplicate_image' ? 'destructive' : 'secondary'}>
+                      {flag.replace('_', ' ')}
+                    </Badge>
+                    <span className="font-bold">{count}</span>
+                  </div>
+                ))}
+                {(!stats?.fraudFlagSummary || Object.keys(stats.fraudFlagSummary).length === 0) && (
+                  <p className="text-sm text-gray-500">No fraud flags detected</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-xl">Most Active Users</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {stats?.mostActiveUsers?.map((user, index) => (
+                  <div key={user.id} className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-semibold text-gray-500">#{index + 1}</span>
+                      <span className="text-sm">{user.username}</span>
+                    </div>
+                    <Badge variant="outline">{user.receiptCount} receipts</Badge>
+                  </div>
+                ))}
+                {(!stats?.mostActiveUsers || stats.mostActiveUsers.length === 0) && (
+                  <p className="text-sm text-gray-500">No user data available</p>
+                )}
+              </div>
             </CardContent>
           </Card>
         </div>

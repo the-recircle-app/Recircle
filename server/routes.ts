@@ -51,7 +51,8 @@ import {
   insertReferralSchema,
   giftCardOrders,
   users,
-  receipts
+  receipts,
+  receiptImages
 } from "@shared/schema";
 import { getB3TRPriceUSD, calculateB3TRAmount } from './services/b3trPricing';
 import { getCatalog as getTremendousCatalog, createOrder as createTremendousOrder } from './services/tremendous';
@@ -649,19 +650,95 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ error: 'Admin access required' });
       }
 
-      // Get all receipts and users for stats
-      const allReceipts = await db.select().from(receipts); // Get ALL receipts
+      // Get all data for comprehensive analytics
+      const allReceipts = await db.select().from(receipts);
       const allUsers = await db.select().from(users);
+      const allGiftCardOrders = await db.select().from(giftCardOrders);
+      const allReceiptImages = await db.select().from(receiptImages);
 
-      console.log('[ADMIN-ANALYTICS] All receipts count:', allReceipts.length);
-      console.log('[ADMIN-ANALYTICS] All users count:', allUsers.length);
-      console.log('[ADMIN-ANALYTICS] Sample receipt:', allReceipts[0]);
+      console.log('[ADMIN-ANALYTICS] Data loaded - Receipts:', allReceipts.length, 'Users:', allUsers.length);
 
-      // Calculate total stats
+      // Date helpers
+      const now = new Date();
+      const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+      // === USER ENGAGEMENT METRICS ===
+      const dailyActiveUsers = allUsers.filter(u => 
+        u.lastLoginAt && new Date(u.lastLoginAt) >= oneDayAgo
+      ).length;
+      
+      const weeklyActiveUsers = allUsers.filter(u => 
+        u.lastLoginAt && new Date(u.lastLoginAt) >= oneWeekAgo
+      ).length;
+      
+      const monthlyActiveUsers = allUsers.filter(u => 
+        u.lastLoginAt && new Date(u.lastLoginAt) >= oneMonthAgo
+      ).length;
+
+      const newUsersThisWeek = allUsers.filter(u => 
+        new Date(u.createdAt) >= oneWeekAgo
+      ).length;
+
+      const returningUsers = allUsers.filter(u => {
+        const userReceipts = allReceipts.filter(r => r.userId === u.id);
+        return userReceipts.length > 1;
+      }).length;
+
+      // === RECEIPT ANALYTICS ===
       const totalReceipts = allReceipts.length;
+      const totalB3trDistributed = allReceipts.reduce((sum, r) => sum + (r.tokenReward || 0), 0);
+      const totalCO2Saved = allReceipts.reduce((sum, r) => sum + (r.co2SavingsGrams || 0), 0);
+      const avgReceiptAmount = allReceipts.length > 0 
+        ? allReceipts.reduce((sum, r) => sum + (r.amount || 0), 0) / allReceipts.length 
+        : 0;
+
+      // Receipts by category
+      const receiptsByCategory = allReceipts.reduce((acc, r) => {
+        const category = r.category || 'other';
+        acc[category] = (acc[category] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+
+      // Receipts by time period
+      const receiptsToday = allReceipts.filter(r => new Date(r.createdAt) >= oneDayAgo).length;
+      const receiptsThisWeek = allReceipts.filter(r => new Date(r.createdAt) >= oneWeekAgo).length;
+      const receiptsThisMonth = allReceipts.filter(r => new Date(r.createdAt) >= oneMonthAgo).length;
+
+      // Manual review vs auto-approved
+      const needsManualReview = allReceipts.filter(r => r.needsManualReview).length;
+      const autoApproved = allReceipts.filter(r => !r.needsManualReview).length;
+
+      // === GIFT CARD ANALYTICS ===
+      const totalGiftCardOrders = allGiftCardOrders.length;
+      const totalB3trSpentOnGiftCards = allGiftCardOrders.reduce((sum, o) => sum + (o.b3trAmount || 0), 0);
+      const giftCardsByProduct = allGiftCardOrders.reduce((acc, o) => {
+        const product = o.productName || 'Unknown';
+        acc[product] = (acc[product] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+
+      // === FRAUD DETECTION ===
+      const fraudFlagSummary = allReceiptImages.reduce((acc, img) => {
+        const flags = img.fraudFlags || [];
+        flags.forEach(flag => {
+          acc[flag] = (acc[flag] || 0) + 1;
+        });
+        return acc;
+      }, {} as Record<string, number>);
+
+      // === USER STATS ===
       const totalUsers = allUsers.length;
-      const totalB3trDistributed = allReceipts.reduce((sum: number, r: any) => sum + (r.tokenReward || 0), 0);
-      const totalCO2Saved = allReceipts.reduce((sum: number, r: any) => sum + (r.co2SavingsGrams || 0), 0);
+      const avgReceiptsPerUser = totalUsers > 0 ? totalReceipts / totalUsers : 0;
+      const mostActiveUsers = allUsers
+        .map(u => ({
+          id: u.id,
+          username: u.username,
+          receiptCount: allReceipts.filter(r => r.userId === u.id).length
+        }))
+        .sort((a, b) => b.receiptCount - a.receiptCount)
+        .slice(0, 5);
 
       // Filter receipts based on search and status
       let filteredReceipts = allReceipts;
@@ -717,11 +794,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({
         success: true,
         stats: {
+          // Overall metrics
           totalReceipts,
           totalUsers,
           totalB3trDistributed: Math.round(totalB3trDistributed * 100) / 100,
           totalCO2SavedGrams: totalCO2Saved,
-          totalCO2SavedKg: Math.round(totalCO2Saved / 1000 * 100) / 100
+          totalCO2SavedKg: Math.round(totalCO2Saved / 1000 * 100) / 100,
+          avgReceiptAmount: Math.round(avgReceiptAmount * 100) / 100,
+          
+          // User engagement
+          dailyActiveUsers,
+          weeklyActiveUsers,
+          monthlyActiveUsers,
+          newUsersThisWeek,
+          returningUsers,
+          avgReceiptsPerUser: Math.round(avgReceiptsPerUser * 10) / 10,
+          
+          // Receipt trends
+          receiptsToday,
+          receiptsThisWeek,
+          receiptsThisMonth,
+          receiptsByCategory,
+          needsManualReview,
+          autoApproved,
+          
+          // Gift cards
+          totalGiftCardOrders,
+          totalB3trSpentOnGiftCards: Math.round(totalB3trSpentOnGiftCards * 100) / 100,
+          giftCardsByProduct,
+          
+          // Fraud detection
+          fraudFlagSummary,
+          
+          // Top users
+          mostActiveUsers
         },
         receipts: receiptsWithImages,
         pagination: {
