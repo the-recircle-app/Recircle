@@ -50,6 +50,11 @@ export default function AdminStatsPage() {
   const { userId } = useWallet();
   const limit = 20;
 
+  // Build query URL with parameters
+  const queryUrl = userId 
+    ? `/api/admin/analytics-stats?limit=${limit}&offset=${page * limit}${search ? `&search=${search}` : ''}${statusFilter !== "all" ? `&status=${statusFilter}` : ''}&userId=${userId}`
+    : null;
+
   const { data, isLoading, error } = useQuery<{
     success: boolean;
     stats: AnalyticsStats;
@@ -59,14 +64,8 @@ export default function AdminStatsPage() {
       hasMore: boolean;
     };
   }>({
-    queryKey: ["/api/admin/analytics-stats", { 
-      limit, 
-      offset: page * limit,
-      search: search || undefined,
-      status: statusFilter !== "all" ? statusFilter : undefined,
-      userId: userId || undefined
-    }],
-    enabled: !!userId, // Only query when we have a userId
+    queryKey: [queryUrl],
+    enabled: !!userId && !!queryUrl, // Only query when we have a userId
     refetchInterval: 30000,
     retry: false, // Don't retry auth errors
   });
