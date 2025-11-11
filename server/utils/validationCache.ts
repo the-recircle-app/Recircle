@@ -25,8 +25,6 @@ export interface CachedValidationResult {
   reasons: string[];
   confidenceScore: number;
   timestamp: number;
-  imageData?: string;
-  imageMimeType?: string;
 }
 
 /**
@@ -48,9 +46,7 @@ export function saveValidationResult(
     needsManualReview: boolean;
     reasons: string[];
     confidenceScore: number;
-  },
-  imageData?: string,
-  imageMimeType?: string
+  }
 ): string {
   const validationToken = randomUUID();
   
@@ -70,9 +66,7 @@ export function saveValidationResult(
     needsManualReview: analysisResult.needsManualReview,
     reasons: analysisResult.reasons,
     confidenceScore: analysisResult.confidenceScore,
-    timestamp: Date.now(),
-    imageData,
-    imageMimeType
+    timestamp: Date.now()
   };
   
   const success = validationCache.set(validationToken, cachedData);

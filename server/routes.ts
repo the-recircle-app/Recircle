@@ -398,7 +398,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Receipt Image Viewing Endpoint for Manual Review (from Object Storage)
+  // Receipt Image Viewing Endpoint for Manual Review
   app.get("/api/receipt-image/:receiptId", authRateLimit, requireAuth, requireReceiptAccess, async (req: Request, res: Response) => {
     try {
       const receiptId = parseInt(req.params.receiptId);
@@ -410,19 +410,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Get the receipt image from Object Storage
-      const imageBuffer = await getReceiptImage(receiptId);
+      // Get the receipt image from database
+      const receiptImage = await getReceiptImage(receiptId);
       
-      if (!imageBuffer) {
+      if (!receiptImage) {
         return res.status(404).json({ 
           success: false, 
           message: `No image found for receipt ${receiptId}` 
         });
       }
 
+      // Parse the base64 image data and return as image
+      const base64Data = receiptImage.imageData.replace(/^data:image\/\w+;base64,/, "");
+      const imageBuffer = Buffer.from(base64Data, 'base64');
+      
       // Set appropriate headers
       res.set({
-        'Content-Type': 'image/jpeg',
+        'Content-Type': receiptImage.mimeType || 'image/jpeg',
         'Content-Length': imageBuffer.length.toString(),
         'Cache-Control': 'private, max-age=3600'
       });
