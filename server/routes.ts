@@ -49,7 +49,8 @@ import {
   insertReceiptSchema, 
   insertTransactionSchema,
   insertReferralSchema,
-  giftCardOrders
+  giftCardOrders,
+  users
 } from "@shared/schema";
 import { getB3TRPriceUSD, calculateB3TRAmount } from './services/b3trPricing';
 import { getCatalog as getTremendousCatalog, createOrder as createTremendousOrder } from './services/tremendous';
