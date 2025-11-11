@@ -2922,9 +2922,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Receipt Submission
   app.post("/api/receipts", receiptSubmissionRateLimit, async (req: Request, res: Response) => {
     try {
-      console.log("Receipt submission received:", req.body);
+      // Log receipt submission (excluding large image data)
+      const { image: _image, ...bodyWithoutImage } = req.body;
+      console.log("Receipt submission received:", bodyWithoutImage);
       console.log(`🔍 [SERVER-DEBUG] Client sent validationToken: ${req.body.validationToken || 'MISSING/NULL'}`);
       console.log(`🔍 [SERVER-DEBUG] Client sent amount: ${req.body.amount}`);
+      console.log(`🔍 [SERVER-DEBUG] Image attached: ${!!req.body.image} (${req.body.image ? Math.round(req.body.image.length / 1024) + 'KB' : 'N/A'})`);
       
       // Check if this is coming from test mode
       const isTestMode = process.env.NODE_ENV === 'development' && req.body.isTestMode === true;
