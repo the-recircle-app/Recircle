@@ -22,7 +22,7 @@ export function FloatingAdminButton() {
   return (
     <Button
       onClick={() => navigate('/admin-stats-2025')}
-      className="fixed bottom-6 right-6 rounded-full w-14 h-14 shadow-lg hover:shadow-xl transition-all z-50 bg-purple-600 hover:bg-purple-700"
+      className="fixed top-20 right-6 rounded-full w-14 h-14 shadow-lg hover:shadow-xl transition-all z-50 bg-purple-600 hover:bg-purple-700"
       size="icon"
       title="Admin Dashboard"
     >
