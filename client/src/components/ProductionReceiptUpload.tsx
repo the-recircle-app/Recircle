@@ -20,6 +20,7 @@ interface ValidationResult {
   sentForManualReview: boolean;
   tokenDistributed: boolean;
   txHash?: string;
+  validationToken?: string; // Token for server-side amount verification
   aiValidation: {
     validityScore: number;
     reasoning: string;
@@ -56,8 +57,12 @@ export function ProductionReceiptUpload({
     onUploadStart?.();
 
     try {
-      // Convert file to base64
-      const base64 = await new Promise<string>((resolve, reject) => {
+      // Extract MIME type from file
+      const mimeType = file.type || 'image/jpeg';
+      console.log('[UPLOAD] File MIME type:', mimeType);
+      
+      // Convert file to base64 with data URL
+      const fullBase64 = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => {
           const result = reader.result as string;
@@ -65,13 +70,15 @@ export function ProductionReceiptUpload({
             reject(new Error('Failed to read file'));
             return;
           }
-          const base64Data = result.split(',')[1]; // Remove data:image/jpeg;base64, prefix
-          console.log('[UPLOAD] File converted to base64, size:', base64Data.length, 'chars');
-          resolve(base64Data);
+          console.log('[UPLOAD] File converted to base64 with data URL, size:', result.length, 'chars');
+          resolve(result); // Keep full data URL for submission
         };
         reader.onerror = () => reject(new Error('Failed to read file'));
         reader.readAsDataURL(file);
       });
+      
+      // Extract just the base64 part for validation API (it expects raw base64)
+      const base64Only = fullBase64.split(',')[1];
 
       setUploadProgress(30);
 
@@ -79,11 +86,12 @@ export function ProductionReceiptUpload({
       console.log('[UPLOAD] Request data:', {
         userId,
         walletAddress,
-        imageSize: base64.length,
-        hasBase64: !!base64
+        imageSize: base64Only.length,
+        mimeType,
+        hasBase64: !!base64Only
       });
 
-      // First validate the receipt
+      // First validate the receipt (uses raw base64 without data URL prefix)
       const validationResponse = await fetch('/api/receipts/validate', {
         method: 'POST',
         headers: {
@@ -92,7 +100,7 @@ export function ProductionReceiptUpload({
         body: JSON.stringify({
           userId,
           walletAddress,
-          image: base64,
+          image: base64Only,
           storeHint: 'transportation',
           purchaseDate: new Date().toISOString().split('T')[0],
           amount: 0
@@ -123,11 +131,14 @@ export function ProductionReceiptUpload({
 
       const validationResult: ValidationResult = await validationResponse.json();
       console.log('[UPLOAD] ✅ Validation result:', validationResult);
+      console.log('[UPLOAD] 🔑 Validation token received:', validationResult.validationToken || 'NONE');
       
       // If validation passes and receipt is acceptable, submit it for blockchain distribution
       if (validationResult.isValid && validationResult.estimatedReward > 0) {
         console.log('[UPLOAD] 🚀 Receipt validated successfully - submitting for blockchain distribution...');
         
+        // Include the receipt image in submission for storage and manual review
+        // Use full data URL (with MIME type) so server knows the actual format
         const submissionResponse = await fetch('/api/receipts', {
           method: 'POST',
           headers: {
@@ -141,7 +152,8 @@ export function ProductionReceiptUpload({
             amount: validationResult.estimatedReward || 0,
             purchaseDate: new Date().toISOString().split('T')[0],
             category: validationResult.category || 'ride_share',
-            imageUrl: null,
+            image: fullBase64, // Include full data URL with correct MIME type
+            validationToken: validationResult.validationToken, // Include validation token for server-side verification
             isTestMode: true // Enable for blockchain testing
           }),
         });
