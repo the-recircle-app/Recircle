@@ -50,7 +50,8 @@ import {
   insertTransactionSchema,
   insertReferralSchema,
   giftCardOrders,
-  users
+  users,
+  receipts
 } from "@shared/schema";
 import { getB3TRPriceUSD, calculateB3TRAmount } from './services/b3trPricing';
 import { getCatalog as getTremendousCatalog, createOrder as createTremendousOrder } from './services/tremendous';
@@ -649,7 +650,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Get all receipts and users for stats
-      const allReceipts = await storage.getUserReceipts(0); // Get all receipts
+      const allReceipts = await db.select().from(receipts); // Get ALL receipts
       const allUsers = await db.select().from(users);
 
       console.log('[ADMIN-ANALYTICS] All receipts count:', allReceipts.length);
