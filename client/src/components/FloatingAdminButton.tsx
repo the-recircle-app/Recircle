@@ -8,12 +8,21 @@ export function FloatingAdminButton() {
   const [location, navigate] = useLocation();
   const { userId } = useWallet();
   
-  const { data: user } = useQuery<{ id: number; isAdmin: boolean }>({
+  const { data: user, isLoading, error } = useQuery<{ id: number; isAdmin: boolean }>({
     queryKey: [`/api/users/${userId}`],
     enabled: !!userId,
   });
 
   const isAdminRoute = location.startsWith('/admin');
+  
+  console.log('[ADMIN-BUTTON]', {
+    userId,
+    user,
+    isLoading,
+    error,
+    isAdminRoute,
+    shouldShow: user?.isAdmin && !isAdminRoute
+  });
   
   if (!user?.isAdmin || isAdminRoute) {
     return null;
