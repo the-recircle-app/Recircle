@@ -617,6 +617,94 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin analytics dashboard endpoint
+  app.get("/api/admin/analytics-stats", adminRateLimit, requireAuth, requireAdmin, async (req: Request, res: Response) => {
+    try {
+      const { limit = '50', offset = '0', search, status, sortBy = 'createdAt', sortOrder = 'desc' } = req.query;
+      const limitNum = parseInt(limit as string);
+      const offsetNum = parseInt(offset as string);
+
+      // Get all receipts and users for stats
+      const allReceipts = await storage.getUserReceipts(0); // Get all receipts
+      const allUsers = await db.select().from(users);
+
+      // Calculate total stats
+      const totalReceipts = allReceipts.length;
+      const totalUsers = allUsers.length;
+      const totalB3trDistributed = allReceipts.reduce((sum: number, r: any) => sum + (r.tokenReward || 0), 0);
+      const totalCO2Saved = allReceipts.reduce((sum: number, r: any) => sum + (r.co2SavingsGrams || 0), 0);
+
+      // Filter receipts based on search and status
+      let filteredReceipts = allReceipts;
+      
+      if (search) {
+        const searchLower = (search as string).toLowerCase();
+        filteredReceipts = filteredReceipts.filter((r: any) => 
+          r.storeName?.toLowerCase().includes(searchLower) ||
+          r.userId?.toString().includes(searchLower) ||
+          r.amount?.toString().includes(searchLower)
+        );
+      }
+
+      if (status) {
+        filteredReceipts = filteredReceipts.filter((r: any) => r.status === status);
+      }
+
+      // Sort receipts
+      filteredReceipts.sort((a: any, b: any) => {
+        const aVal = a[sortBy as string];
+        const bVal = b[sortBy as string];
+        if (sortOrder === 'asc') {
+          return aVal > bVal ? 1 : -1;
+        }
+        return aVal < bVal ? 1 : -1;
+      });
+
+      // Paginate
+      const paginatedReceipts = filteredReceipts.slice(offsetNum, offsetNum + limitNum);
+
+      // Add image information to each receipt
+      const receiptsWithImages = await Promise.all(
+        paginatedReceipts.map(async (receipt: any) => {
+          const image = await getReceiptImage(receipt.id);
+          const imageUrl = image 
+            ? `https://${process.env.REPLIT_DEV_DOMAIN || req.get('host') || 'localhost:5000'}/api/receipt-image/${receipt.id}?token=${image.viewToken}`
+            : null;
+          
+          return {
+            ...receipt,
+            hasImage: !!image,
+            fraudFlags: image?.fraudFlags || [],
+            imageUrl,
+            viewToken: image?.viewToken || null,
+            imageHash: image?.imageHash || null
+          };
+        })
+      );
+
+      res.json({
+        success: true,
+        stats: {
+          totalReceipts,
+          totalUsers,
+          totalB3trDistributed: Math.round(totalB3trDistributed * 100) / 100,
+          totalCO2SavedGrams: totalCO2Saved,
+          totalCO2SavedKg: Math.round(totalCO2Saved / 1000 * 100) / 100
+        },
+        receipts: receiptsWithImages,
+        pagination: {
+          total: filteredReceipts.length,
+          limit: limitNum,
+          offset: offsetNum,
+          hasMore: offsetNum + limitNum < filteredReceipts.length
+        }
+      });
+    } catch (error) {
+      console.error('Error getting analytics stats:', error);
+      res.status(500).json({ error: "Failed to get analytics stats" });
+    }
+  });
+
   // Test endpoint for token reward calculations
   app.get("/api/test/rewards", async (req: Request, res: Response) => {
     try {

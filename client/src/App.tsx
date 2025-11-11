@@ -27,6 +27,7 @@ import SendB3TR from "./pages/send";
 import GiftCards from "./pages/gift-cards";
 import LogoShowcase from "./pages/logo-showcase";
 import PendingSubmissionsAdmin from "./pages/admin/pending-submissions";
+import AdminStatsPage from "./pages/AdminStatsPage";
 import TestAutoConnect from "./pages/test-auto-connect";
 import TestWalletConnect from "./pages/test-wallet-connect";
 import DebugWallet from "./pages/debug-wallet";
@@ -99,6 +100,7 @@ function Router() {
       {/* Admin routes */}
       <Route path="/admin/pending-submissions" component={PendingSubmissionsAdmin} />
       <Route path="/admin/debug-tools" component={DebugToolsPage} />
+      <Route path="/admin-stats-2025" component={AdminStatsPage} />
       
       {/* Protected routes - require wallet connection */}
       <Route path="/scan">
