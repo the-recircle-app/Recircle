@@ -561,13 +561,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "No image found for this receipt" });
       }
       
-      // Return image data with fraud detection info
+      // Construct secure image URL with viewToken
+      const imageUrl = `https://${process.env.REPLIT_DEV_DOMAIN || req.get('host') || 'localhost:5000'}/api/receipt-image/${receiptId}?token=${image.viewToken}`;
+      
+      // Return image data with fraud detection info and secure URL
       res.json({
         success: true,
         image: {
           id: image.id,
           receiptId: image.receiptId,
-          imageData: `data:${image.mimeType};base64,${image.imageData}`,
+          imageUrl: imageUrl, // Secure, shareable URL
+          viewToken: image.viewToken, // For manual URL construction
+          imageData: `data:${image.mimeType};base64,${image.imageData}`, // Full base64 data
           fraudFlags: image.fraudFlags,
           fileSize: image.fileSize,
           uploadedAt: image.uploadedAt,
