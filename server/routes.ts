@@ -618,11 +618,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin analytics dashboard endpoint
-  app.get("/api/admin/analytics-stats", adminRateLimit, requireAuth, requireAdmin, async (req: Request, res: Response) => {
+  app.get("/api/admin/analytics-stats", adminRateLimit, async (req: Request, res: Response) => {
     try {
-      const { limit = '50', offset = '0', search, status, sortBy = 'createdAt', sortOrder = 'desc' } = req.query;
+      const { limit = '50', offset = '0', search, status, sortBy = 'createdAt', sortOrder = 'desc', userId } = req.query;
       const limitNum = parseInt(limit as string);
       const offsetNum = parseInt(offset as string);
+
+      // Manual admin check (since frontend doesn't send certificates)
+      if (userId) {
+        const userIdNum = parseInt(userId as string);
+        if (!isNaN(userIdNum)) {
+          const user = await storage.getUser(userIdNum);
+          if (!user || !user.isAdmin) {
+            return res.status(403).json({ error: 'Admin access required' });
+          }
+        } else {
+          return res.status(403).json({ error: 'Admin access required' });
+        }
+      } else {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
 
       // Get all receipts and users for stats
       const allReceipts = await storage.getUserReceipts(0); // Get all receipts

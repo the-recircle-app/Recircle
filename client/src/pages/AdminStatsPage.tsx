@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useWallet } from "../context/WalletContext";
 import { 
   Receipt, 
   Users, 
@@ -46,6 +47,7 @@ export default function AdminStatsPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [page, setPage] = useState(0);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const { userId } = useWallet();
   const limit = 20;
 
   const { data, isLoading, error } = useQuery<{
@@ -61,8 +63,10 @@ export default function AdminStatsPage() {
       limit, 
       offset: page * limit,
       search: search || undefined,
-      status: statusFilter !== "all" ? statusFilter : undefined
+      status: statusFilter !== "all" ? statusFilter : undefined,
+      userId: userId || undefined
     }],
+    enabled: !!userId, // Only query when we have a userId
     refetchInterval: 30000,
     retry: false, // Don't retry auth errors
   });
