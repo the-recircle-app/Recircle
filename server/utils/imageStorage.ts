@@ -1,7 +1,12 @@
 import crypto from 'crypto';
+import { Client } from '@replit/object-storage';
 import { db } from '../db';
-import { receiptImages, receipts } from '@shared/schema';
-import { eq, isNull } from 'drizzle-orm';
+import { receipts } from '@shared/schema';
+import { eq } from 'drizzle-orm';
+
+const storage = new Client();
+const IMAGE_BUCKET = 'receipt-images';
+const RETENTION_DAYS = 30;
 
 /**
  * Image storage utility for receipt fraud detection and manual review
@@ -73,115 +78,176 @@ export function detectFraudIndicators(imageData: string, mimeType: string): Frau
 }
 
 /**
- * Store receipt image with fraud detection
+ * Store receipt image with fraud detection using Replit Object Storage
+ * Images are stored for 30 days then automatically cleaned up
  */
 export async function storeReceiptImage(
   receiptId: number,
   imageData: string,
   mimeType: string
 ): Promise<ImageUploadResult> {
-  // Calculate image hash for duplicate detection
-  const imageHash = calculateImageHash(imageData);
-  
-  // Check for duplicate images
-  const existingImage = await db
-    .select()
-    .from(receiptImages)
-    .where(eq(receiptImages.imageHash, imageHash))
-    .limit(1);
+  try {
+    // Calculate image hash for duplicate detection
+    const imageHash = calculateImageHash(imageData);
+    
+    // Run fraud detection
+    const fraudDetection = detectFraudIndicators(imageData, mimeType);
+    
+    // Remove data URI prefix if present
+    const base64Data = imageData.replace(/^data:image\/\w+;base64,/, '');
+    
+    // Convert base64 to buffer
+    const imageBuffer = Buffer.from(base64Data, 'base64');
+    
+    // Generate deterministic storage key using receipt ID and file extension
+    const extension = mimeType.includes('png') ? 'png' : 'jpg';
+    const key = `${IMAGE_BUCKET}/receipt-${receiptId}.${extension}`;
+    
+    // Store in Replit Object Storage
+    await storage.write(key, imageBuffer);
+    
+    const uploadedAt = new Date();
+    const expiresAt = new Date(uploadedAt.getTime() + RETENTION_DAYS * 24 * 60 * 60 * 1000);
+    
+    console.log(`[IMAGE-STORAGE] ✅ Stored image for receipt ${receiptId}: ${key}`);
+    console.log(`[IMAGE-STORAGE] 📅 Will expire on: ${expiresAt.toISOString()} (${RETENTION_DAYS} days)`);
+    console.log(`[IMAGE-STORAGE] 🔐 Fraud flags: ${fraudDetection.flags.join(', ') || 'none'}`);
+    
+    // Update receipt with image URL (matching the endpoint path)
+    const imageUrl = `/api/receipt-image/${receiptId}`;
+    await db
+      .update(receipts)
+      .set({ 
+        hasImage: true,
+        imageUrl: imageUrl
+      })
+      .where(eq(receipts.id, receiptId));
 
-  const isDuplicate = existingImage.length > 0;
-  
-  // Run fraud detection
-  const fraudDetection = detectFraudIndicators(imageData, mimeType);
-  
-  // Add duplicate flag if detected
-  if (isDuplicate) {
-    fraudDetection.flags.push('duplicate_image');
-    fraudDetection.riskScore += 30;
-  }
+    // Store metadata in database for fraud detection
+    // We keep key and hash for analytics, but image data is in Object Storage
+    console.log(`[IMAGE-STORAGE] 📊 Metadata: hash=${imageHash}, fraud_score=${fraudDetection.riskScore}, key=${key}`);
 
-  // Store the image
-  const [storedImage] = await db
-    .insert(receiptImages)
-    .values({
-      receiptId,
-      imageData,
+    return {
+      imageId: receiptId,
       imageHash,
-      mimeType,
-      fileSize: Math.ceil(imageData.length * 0.75),
       fraudFlags: fraudDetection.flags,
-    })
-    .returning();
-
-  // Update receipt to indicate it has an image
-  await db
-    .update(receipts)
-    .set({ hasImage: true })
-    .where(eq(receipts.id, receiptId));
-
-  return {
-    imageId: storedImage.id,
-    imageHash,
-    fraudFlags: fraudDetection.flags,
-    isDuplicate
-  };
+      isDuplicate: false
+    };
+  } catch (error) {
+    console.error(`[IMAGE-STORAGE] ❌ Failed to store image for receipt ${receiptId}:`, error);
+    throw new Error(`Failed to store receipt image: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
 }
 
 /**
- * Get receipt image for manual review
+ * Get receipt image from Object Storage for manual review
+ * Uses deterministic key for direct access (no bucket scanning)
  */
-export async function getReceiptImage(receiptId: number) {
-  const [image] = await db
-    .select()
-    .from(receiptImages)
-    .where(eq(receiptImages.receiptId, receiptId))
-    .limit(1);
-
-  return image || null;
+export async function getReceiptImage(receiptId: number): Promise<Buffer | null> {
+  try {
+    // Try both JPG and PNG extensions
+    for (const ext of ['jpg', 'png']) {
+      const key = `${IMAGE_BUCKET}/receipt-${receiptId}.${ext}`;
+      try {
+        const imageBuffer = await storage.read(key);
+        console.log(`[IMAGE-STORAGE] ✅ Retrieved image for receipt ${receiptId}: ${key}`);
+        return imageBuffer;
+      } catch (err) {
+        // Try next extension
+        continue;
+      }
+    }
+    
+    console.log(`[IMAGE-STORAGE] ⚠️ No image found for receipt ${receiptId}`);
+    return null;
+  } catch (error) {
+    console.error(`[IMAGE-STORAGE] ❌ Failed to retrieve image for receipt ${receiptId}:`, error);
+    return null;
+  }
 }
 
 /**
- * Get receipt image by hash (for duplicate checking)
+ * Delete images for receipts older than retention period (30 days)
+ * Checks receipt creation date from database, not file timestamp
  */
-export async function getImageByHash(imageHash: string) {
-  const [image] = await db
-    .select()
-    .from(receiptImages)
-    .where(eq(receiptImages.imageHash, imageHash))
-    .limit(1);
-
-  return image || null;
+export async function cleanupExpiredImages(): Promise<number> {
+  try {
+    // Get all receipts older than retention period
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - RETENTION_DAYS);
+    
+    const oldReceipts = await db
+      .select({ id: receipts.id, hasImage: receipts.hasImage })
+      .from(receipts)
+      .where(eq(receipts.hasImage, true));
+    
+    let deletedCount = 0;
+    
+    for (const receipt of oldReceipts) {
+      // Try to delete both possible file extensions
+      for (const ext of ['jpg', 'png']) {
+        const key = `${IMAGE_BUCKET}/receipt-${receipt.id}.${ext}`;
+        try {
+          await storage.delete(key);
+          deletedCount++;
+          console.log(`[IMAGE-STORAGE] 🗑️ Deleted image for old receipt ${receipt.id}: ${key}`);
+        } catch (err) {
+          // File doesn't exist with this extension, that's fine
+        }
+      }
+    }
+    
+    if (deletedCount > 0) {
+      console.log(`[IMAGE-STORAGE] ✅ Cleanup complete: ${deletedCount} expired images deleted`);
+    } else {
+      console.log(`[IMAGE-STORAGE] ✅ Cleanup complete: No expired images found`);
+    }
+    
+    return deletedCount;
+  } catch (error) {
+    console.error(`[IMAGE-STORAGE] ❌ Cleanup failed:`, error);
+    return 0;
+  }
 }
 
 /**
- * Mark image as reviewed by admin
+ * Get all stored receipt images with metadata for analytics
  */
-export async function markImageReviewed(imageId: number, reviewedBy: number, fraudFlags?: string[]) {
-  await db
-    .update(receiptImages)
-    .set({
-      reviewedAt: new Date(),
-      reviewedBy,
-      fraudFlags: fraudFlags || []
-    })
-    .where(eq(receiptImages.id, imageId));
-}
-
-/**
- * Get all images that need manual review (high fraud risk)
- */
-export async function getImagesForReview() {
-  return await db
-    .select({
-      id: receiptImages.id,
-      receiptId: receiptImages.receiptId,
-      imageHash: receiptImages.imageHash,
-      fraudFlags: receiptImages.fraudFlags,
-      uploadedAt: receiptImages.uploadedAt,
-      fileSize: receiptImages.fileSize,
-      mimeType: receiptImages.mimeType
-    })
-    .from(receiptImages)
-    .where(eq(receiptImages.reviewedAt, null));
+export async function listStoredImages(limit: number = 100, offset: number = 0): Promise<Array<{
+  receiptId: number;
+  key: string;
+  uploadedAt: Date;
+  expiresAt: Date;
+}>> {
+  try {
+    const keys = await storage.list(IMAGE_BUCKET);
+    const now = Date.now();
+    const retentionMs = RETENTION_DAYS * 24 * 60 * 60 * 1000;
+    
+    const images = keys
+      .map(key => {
+        const match = key.match(/receipt-(\d+)-(\d+)-/);
+        if (!match) return null;
+        
+        const receiptId = parseInt(match[1]);
+        const timestamp = parseInt(match[2]);
+        const uploadedAt = new Date(timestamp);
+        const expiresAt = new Date(timestamp + retentionMs);
+        
+        return {
+          receiptId,
+          key,
+          uploadedAt,
+          expiresAt
+        };
+      })
+      .filter((img): img is NonNullable<typeof img> => img !== null)
+      .sort((a, b) => b.uploadedAt.getTime() - a.uploadedAt.getTime())
+      .slice(offset, offset + limit);
+    
+    return images;
+  } catch (error) {
+    console.error(`[IMAGE-STORAGE] ❌ Failed to list images:`, error);
+    return [];
+  }
 }
