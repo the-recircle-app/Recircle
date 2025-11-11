@@ -3559,6 +3559,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Store receipt image for fraud detection and manual review
         let receiptViewToken: string | null = null; // For webhook URL
+        let receiptFraudFlags: string[] = []; // For webhook fraud indicators
+        let receiptImageDuplicate: boolean = false; // For webhook duplicate indicator
         if (req.body.image && newReceipt.id) {
           try {
             const base64Data = req.body.image.replace(/^data:image\/\w+;base64,/, "");
@@ -3566,6 +3568,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             
             const imageResult = await storeReceiptImage(newReceipt.id, base64Data, mimeType);
             receiptViewToken = imageResult.viewToken; // Capture token for webhook URL
+            receiptFraudFlags = imageResult.fraudFlags; // Capture fraud flags for webhook
+            receiptImageDuplicate = imageResult.isDuplicate; // Capture duplicate indicator for webhook
             
             log(`Receipt image stored: ID ${imageResult.imageId}, Hash: ${imageResult.imageHash}`, "receipts");
             
@@ -4186,7 +4190,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           storeName: storeInfo?.name || storeName,
           tokenReward: actualUserReward,
           containsPreOwnedItems: containsPreOwnedItems || false,
-          viewToken: receiptViewToken // Include image view token for secure URL
+          viewToken: receiptViewToken, // Include image view token for secure URL
+          fraudFlags: receiptFraudFlags, // Include fraud indicators for Google Sheets
+          isDuplicate: receiptImageDuplicate // Include duplicate indicator
         } as any;
         
         console.log(`[WEBHOOK] 📊 Logging receipt submission to Google Sheets for ${storeName} - Receipt ID: ${newReceipt.id}`);
