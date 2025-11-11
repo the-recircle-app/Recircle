@@ -624,18 +624,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const limitNum = parseInt(limit as string);
       const offsetNum = parseInt(offset as string);
 
+      console.log('[ADMIN-ANALYTICS] Request received - userId:', userId, 'query params:', req.query);
+
       // Manual admin check (since frontend doesn't send certificates)
       if (userId) {
         const userIdNum = parseInt(userId as string);
+        console.log('[ADMIN-ANALYTICS] Checking user ID:', userIdNum);
         if (!isNaN(userIdNum)) {
           const user = await storage.getUser(userIdNum);
+          console.log('[ADMIN-ANALYTICS] User found:', user?.id, 'isAdmin:', user?.isAdmin);
           if (!user || !user.isAdmin) {
+            console.log('[ADMIN-ANALYTICS] ❌ Access denied - user not found or not admin');
             return res.status(403).json({ error: 'Admin access required' });
           }
+          console.log('[ADMIN-ANALYTICS] ✅ Admin access granted for user', userIdNum);
         } else {
+          console.log('[ADMIN-ANALYTICS] ❌ Invalid userId format');
           return res.status(403).json({ error: 'Admin access required' });
         }
       } else {
+        console.log('[ADMIN-ANALYTICS] ❌ No userId provided in query params');
         return res.status(403).json({ error: 'Admin access required' });
       }
 
