@@ -399,7 +399,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Receipt Image Viewing Endpoint for Manual Review
-  app.get("/api/receipt-image/:receiptId", authRateLimit, requireAuth, requireReceiptAccess, async (req: Request, res: Response) => {
+  // NOTE: Public endpoint (no auth) so Google Sheets reviewers can view images via direct links
+  app.get("/api/receipt-image/:receiptId", authRateLimit, async (req: Request, res: Response) => {
     try {
       const receiptId = parseInt(req.params.receiptId);
       

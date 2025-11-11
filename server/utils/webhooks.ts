@@ -657,6 +657,10 @@ export async function logReceiptToGoogleSheets(
       appVersion: '1.0.4', // Updated version to track this key format change
       app_version: '1.0.4', // Updated version to track this key format change
       
+      // Receipt image URL for manual review (public endpoint)
+      imageUrl: receiptData.id ? `https://${process.env.REPLIT_DEV_DOMAIN || 'localhost:5000'}/api/receipt-image/${receiptData.id}` : null,
+      image_url: receiptData.id ? `https://${process.env.REPLIT_DEV_DOMAIN || 'localhost:5000'}/api/receipt-image/${receiptData.id}` : null,
+      
       // For debugging - including essential data but not full objects that might cause issues
       debugHasReceipt: !!receiptData,
       _debug_has_receipt: !!receiptData,
