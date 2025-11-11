@@ -102,12 +102,31 @@ export async function storeReceiptImage(
   if (isDuplicate) {
     fraudDetection.flags.push('duplicate_image');
     fraudDetection.riskScore += 30;
+    
+    // Return existing image data instead of inserting duplicate
+    const existing = existingImage[0];
+    console.log(`[IMAGE-STORAGE] ⚠️ Duplicate image detected for receipt ${receiptId}, using existing image ${existing.id}`);
+    console.log(`[IMAGE-STORAGE] 🔐 Fraud flags: ${fraudDetection.flags.join(', ')}`);
+    
+    // Update receipt to indicate it has an image
+    await db
+      .update(receipts)
+      .set({ hasImage: true })
+      .where(eq(receipts.id, receiptId));
+    
+    return {
+      imageId: existing.id,
+      imageHash: existing.imageHash,
+      fraudFlags: fraudDetection.flags,
+      isDuplicate: true,
+      viewToken: existing.viewToken // Use existing token
+    };
   }
 
-  // Generate secure viewing token (UUID v4)
+  // Generate secure viewing token (UUID v4) for new image
   const viewToken = crypto.randomUUID();
 
-  // Store the image in database with view token
+  // Store the new image in database with view token
   const [storedImage] = await db
     .insert(receiptImages)
     .values({
@@ -135,7 +154,7 @@ export async function storeReceiptImage(
     imageId: storedImage.id,
     imageHash,
     fraudFlags: fraudDetection.flags,
-    isDuplicate,
+    isDuplicate: false,
     viewToken // Return token for URL construction
   };
 }
