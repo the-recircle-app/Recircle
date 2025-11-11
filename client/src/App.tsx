@@ -7,6 +7,7 @@ import { WalletProvider } from "./context/WalletContext";
 import { AchievementProvider } from "./context/AchievementContext";
 
 import { VeChainStateBridge } from "./components/VeChainStateBridge";
+import { FloatingAdminButton } from "./components/FloatingAdminButton";
 import NotFound from "@/pages/not-found";
 import ImpactExplorer from "./pages/impact-explorer";
 import Welcome from "./pages/welcome";
@@ -251,6 +252,7 @@ function App() {
             <Layout>
               <Router />
             </Layout>
+            <FloatingAdminButton />
             <Toaster />
           </TooltipProvider>
         </AchievementProvider>
