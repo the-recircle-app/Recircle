@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,7 +16,8 @@ import {
   AlertTriangle,
   CheckCircle,
   XCircle,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Home
 } from "lucide-react";
 
 interface AnalyticsStats {
@@ -48,6 +50,7 @@ export default function AdminStatsPage() {
   const [page, setPage] = useState(0);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const { userId } = useWallet();
+  const [, setLocation] = useLocation();
   const limit = 20;
 
   // Build query URL with parameters
@@ -137,10 +140,22 @@ export default function AdminStatsPage() {
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="container mx-auto max-w-7xl">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900">ReCircle Analytics Dashboard</h1>
-          <p className="text-gray-600 mt-2">
-            Platform statistics and receipt management
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-bold text-gray-900">ReCircle Analytics Dashboard</h1>
+              <p className="text-gray-600 mt-2">
+                Platform statistics and receipt management
+              </p>
+            </div>
+            <Button 
+              onClick={() => setLocation("/home")}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <Home className="h-4 w-4" />
+              Back to Home
+            </Button>
+          </div>
         </div>
 
         {/* Stats Cards */}

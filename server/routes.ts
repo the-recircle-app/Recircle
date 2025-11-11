@@ -652,6 +652,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const allReceipts = await storage.getUserReceipts(0); // Get all receipts
       const allUsers = await db.select().from(users);
 
+      console.log('[ADMIN-ANALYTICS] All receipts count:', allReceipts.length);
+      console.log('[ADMIN-ANALYTICS] All users count:', allUsers.length);
+      console.log('[ADMIN-ANALYTICS] Sample receipt:', allReceipts[0]);
+
       // Calculate total stats
       const totalReceipts = allReceipts.length;
       const totalUsers = allUsers.length;
@@ -686,6 +690,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Paginate
       const paginatedReceipts = filteredReceipts.slice(offsetNum, offsetNum + limitNum);
+
+      console.log('[ADMIN-ANALYTICS] Filtered receipts count:', filteredReceipts.length);
+      console.log('[ADMIN-ANALYTICS] Paginated receipts count:', paginatedReceipts.length);
 
       // Add image information to each receipt
       const receiptsWithImages = await Promise.all(
