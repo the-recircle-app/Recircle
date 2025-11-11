@@ -134,7 +134,7 @@ import { checkDailyActionLimit, MAX_DAILY_ACTIONS } from "./utils/dailyActions";
 import { logReceiptToGoogleSheets, sendReceiptForManualReview } from "./utils/webhooks";
 import { updateApprovedReceiptStatus } from "./utils/updateWebhooks";
 import { sendReward, convertB3TRToWei, getReceiptProofData } from "./utils/distributeReward-hybrid";
-import { storeReceiptImage, getReceiptImage, calculateImageHash, getImageByHash } from "./utils/imageStorage";
+import { storeReceiptImage, getReceiptImage, getReceiptImageByToken, calculateImageHash, getImageByHash } from "./utils/imageStorage";
 import { z } from "zod";
 import { log } from "./vite";
 
@@ -399,25 +399,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Receipt Image Viewing Endpoint for Manual Review
-  // NOTE: Public endpoint (no auth) so Google Sheets reviewers can view images via direct links
+  // NOTE: Public endpoint (no auth) but requires secure UUID token to prevent enumeration
   app.get("/api/receipt-image/:receiptId", authRateLimit, async (req: Request, res: Response) => {
     try {
       const receiptId = parseInt(req.params.receiptId);
+      const viewToken = req.query.token as string;
       
       if (isNaN(receiptId)) {
-        return res.status(400).json({ 
+        return res.status(404).json({ 
           success: false, 
-          message: "Invalid receipt ID" 
+          message: "Not found" // Don't reveal ID validity without token
         });
       }
 
-      // Get the receipt image from database
-      const receiptImage = await getReceiptImage(receiptId);
+      if (!viewToken) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "Not found" // Don't reveal missing token
+        });
+      }
+
+      // Get the receipt image with token verification (prevents enumeration)
+      const receiptImage = await getReceiptImageByToken(receiptId, viewToken);
       
       if (!receiptImage) {
         return res.status(404).json({ 
           success: false, 
-          message: `No image found for receipt ${receiptId}` 
+          message: "Not found" // Generic message - don't reveal if ID is valid
         });
       }
 
@@ -3457,12 +3465,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log("New receipt created:", newReceipt);
         
         // Store receipt image for fraud detection and manual review
+        let receiptViewToken: string | null = null; // For webhook URL
         if (req.body.image && newReceipt.id) {
           try {
             const base64Data = req.body.image.replace(/^data:image\/\w+;base64,/, "");
             const mimeType = req.body.image.match(/^data:(image\/\w+);base64,/)?.[1] || 'image/jpeg';
             
             const imageResult = await storeReceiptImage(newReceipt.id, base64Data, mimeType);
+            receiptViewToken = imageResult.viewToken; // Capture token for webhook URL
             
             log(`Receipt image stored: ID ${imageResult.imageId}, Hash: ${imageResult.imageHash}`, "receipts");
             
@@ -4082,7 +4092,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ...newReceipt,
           storeName: storeInfo?.name || storeName,
           tokenReward: actualUserReward,
-          containsPreOwnedItems: containsPreOwnedItems || false
+          containsPreOwnedItems: containsPreOwnedItems || false,
+          viewToken: receiptViewToken // Include image view token for secure URL
         } as any;
         
         console.log(`[WEBHOOK] 📊 Logging receipt submission to Google Sheets for ${storeName} - Receipt ID: ${newReceipt.id}`);

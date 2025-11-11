@@ -14,6 +14,7 @@ export interface ImageUploadResult {
   imageHash: string;
   fraudFlags: string[];
   isDuplicate: boolean;
+  viewToken: string; // UUID for secure viewing
 }
 
 export interface FraudDetectionResult {
@@ -103,7 +104,10 @@ export async function storeReceiptImage(
     fraudDetection.riskScore += 30;
   }
 
-  // Store the image in database
+  // Generate secure viewing token (UUID v4)
+  const viewToken = crypto.randomUUID();
+
+  // Store the image in database with view token
   const [storedImage] = await db
     .insert(receiptImages)
     .values({
@@ -112,6 +116,7 @@ export async function storeReceiptImage(
       imageHash,
       mimeType,
       fileSize: Math.ceil(imageData.length * 0.75),
+      viewToken, // Secure token for viewing
       fraudFlags: fraudDetection.flags,
     })
     .returning();
@@ -124,17 +129,39 @@ export async function storeReceiptImage(
   
   console.log(`[IMAGE-STORAGE] ✅ Stored image for receipt ${receiptId} in database`);
   console.log(`[IMAGE-STORAGE] 🔐 Fraud flags: ${fraudDetection.flags.join(', ') || 'none'}`);
+  console.log(`[IMAGE-STORAGE] 🔑 View token generated (first 8 chars): ${viewToken.substring(0, 8)}...`);
 
   return {
     imageId: storedImage.id,
     imageHash,
     fraudFlags: fraudDetection.flags,
-    isDuplicate
+    isDuplicate,
+    viewToken // Return token for URL construction
   };
 }
 
 /**
- * Get receipt image for manual review
+ * Get receipt image for manual review (requires valid token)
+ * This enforces token-based authentication to prevent enumeration attacks
+ */
+export async function getReceiptImageByToken(receiptId: number, viewToken: string) {
+  const [image] = await db
+    .select()
+    .from(receiptImages)
+    .where(eq(receiptImages.receiptId, receiptId))
+    .limit(1);
+
+  // Verify token matches (simple string equality - UUIDs are random enough to prevent timing attacks)
+  if (!image || image.viewToken !== viewToken) {
+    return null; // Don't reveal whether ID exists without valid token
+  }
+
+  return image;
+}
+
+/**
+ * Get receipt image for manual review (legacy, use getReceiptImageByToken for security)
+ * @deprecated Use getReceiptImageByToken instead for secure access
  */
 export async function getReceiptImage(receiptId: number) {
   const [image] = await db

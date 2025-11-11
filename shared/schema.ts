@@ -54,6 +54,7 @@ export const receiptImages = pgTable("receipt_images", {
   imageHash: text("image_hash").notNull().unique(), // SHA-256 hash for duplicate detection
   mimeType: text("mime_type").notNull(), // image/jpeg, image/png, etc.
   fileSize: integer("file_size").notNull(), // Size in bytes
+  viewToken: text("view_token").notNull().unique(), // UUID for secure, shareable viewing without auth
   uploadedAt: timestamp("uploaded_at").defaultNow(),
   reviewedAt: timestamp("reviewed_at"), // When manual reviewer viewed this image
   reviewedBy: integer("reviewed_by").references(() => users.id), // Admin who reviewed
