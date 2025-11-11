@@ -48,7 +48,7 @@ export default function AdminStatsPage() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const limit = 20;
 
-  const { data, isLoading } = useQuery<{
+  const { data, isLoading, error } = useQuery<{
     success: boolean;
     stats: AnalyticsStats;
     receipts: ReceiptData[];
@@ -64,6 +64,7 @@ export default function AdminStatsPage() {
       status: statusFilter !== "all" ? statusFilter : undefined
     }],
     refetchInterval: 30000,
+    retry: false, // Don't retry auth errors
   });
 
   const stats = data?.stats;
@@ -103,6 +104,27 @@ export default function AdminStatsPage() {
       <div className="min-h-screen bg-gray-50 p-6">
         <div className="container mx-auto">
           <div className="text-center">Loading analytics...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6">
+        <div className="container mx-auto max-w-2xl">
+          <Card className="mt-20">
+            <CardContent className="p-12 text-center">
+              <AlertTriangle className="h-16 w-16 text-yellow-500 mx-auto mb-4" />
+              <h2 className="text-2xl font-bold mb-4">Admin Authentication Required</h2>
+              <p className="text-gray-600 mb-6">
+                This dashboard requires admin privileges. Please log in with an admin account to view analytics.
+              </p>
+              <p className="text-sm text-gray-500">
+                You need to authenticate with VeWorld wallet and have admin permissions set in the database.
+              </p>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );

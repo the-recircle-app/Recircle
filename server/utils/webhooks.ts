@@ -665,6 +665,10 @@ export async function logReceiptToGoogleSheets(
         ? `https://${process.env.REPLIT_DEV_DOMAIN || 'localhost:5000'}/api/receipt-image/${receiptData.id}?token=${receiptData.viewToken}` 
         : null,
       
+      // Fraud detection flags for manual review
+      fraudFlags: Array.isArray(receiptData.fraudFlags) ? receiptData.fraudFlags.join(', ') : '',
+      fraud_flags: Array.isArray(receiptData.fraudFlags) ? receiptData.fraudFlags.join(', ') : '',
+      
       // For debugging - including essential data but not full objects that might cause issues
       debugHasReceipt: !!receiptData,
       _debug_has_receipt: !!receiptData,
