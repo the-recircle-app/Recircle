@@ -96,7 +96,8 @@ export function getAndDeleteValidationResult(
   }
   
   // Security check: ensure the userId matches
-  if (cachedData.userId !== userId) {
+  // CRITICAL FIX: Convert both to numbers to avoid type mismatch (string vs number)
+  if (Number(cachedData.userId) !== Number(userId)) {
     console.warn(`[VALIDATION-CACHE] User ID mismatch for token ${validationToken}: expected ${cachedData.userId}, got ${userId}`);
     return null;
   }
