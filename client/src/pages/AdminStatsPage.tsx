@@ -182,8 +182,8 @@ export default function AdminStatsPage() {
             </div>
             <Button 
               onClick={() => setLocation("/home")}
-              variant="outline"
-              className="flex items-center gap-2"
+              variant="default"
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
             >
               <Home className="h-4 w-4" />
               Back to Home
