@@ -1,6 +1,6 @@
-import { createContext, useState, useContext, useEffect, ReactNode } from "react";
+import { createContext, useState, useContext, useEffect, ReactNode, useRef } from "react";
 import { vechain } from "../lib/vechain";
-import { apiRequest } from "../lib/queryClient";
+import { apiRequest, queryClient } from "../lib/queryClient";
 import { useToast } from "../hooks/use-toast";
 import type { User } from "../types";
 import ConnectionCelebration from "../components/ConnectionCelebration";
@@ -171,6 +171,41 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
 
     healWalletMismatch();
   }, [kitConnected, account?.address, isConnected]);
+
+  // 🧹 CRITICAL FIX: Clear React Query cache for previous user when userId changes
+  // Prevents stale queries from fetching old user data after wallet switch
+  const previousUserIdRef = useRef<number | null>(null);
+  
+  useEffect(() => {
+    // Skip on initial mount
+    if (previousUserIdRef.current === null && userId === null) {
+      previousUserIdRef.current = userId;
+      return;
+    }
+    
+    // If userId changed, clear all queries for the old user
+    if (previousUserIdRef.current !== null && previousUserIdRef.current !== userId) {
+      const oldUserId = previousUserIdRef.current;
+      console.log(`[WALLET-CACHE] 🧹 Clearing React Query cache for user ${oldUserId} (switching to ${userId})`);
+      
+      // Remove all queries that reference the old userId
+      queryClient.removeQueries({
+        predicate: (query) => {
+          const queryKey = query.queryKey[0];
+          if (typeof queryKey === 'string') {
+            // Check if query key contains the old userId
+            return queryKey.includes(`/api/users/${oldUserId}`);
+          }
+          return false;
+        }
+      });
+      
+      console.log(`[WALLET-CACHE] ✅ Cleared all queries for user ${oldUserId}`);
+    }
+    
+    // Update the ref for next comparison
+    previousUserIdRef.current = userId;
+  }, [userId]);
 
   // URL-triggered reset for mobile browsers
   useEffect(() => {
