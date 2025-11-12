@@ -89,6 +89,8 @@ import { distributeTreasuryReward, distributeTreasuryRewardWithSponsoring, check
 import { getSoloB3TRBalance } from "./utils/solo-b3tr-real";
 import { PierreContractsService } from "./utils/pierre-contracts-service";
 import { saveValidationResult, getAndDeleteValidationResult } from "./utils/validationCache";
+import { checkDailyActionLimit, MAX_DAILY_ACTIONS } from "./utils/dailyActions";
+import { storeReceiptImage, calculateImageHash } from "./utils/imageStorage";
 
 
 // VeChain addresses for creator wallet and app sustainability fund
@@ -1899,6 +1901,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ 
           message: "Missing or invalid image data. Please provide base64 encoded image." 
         });
+      }
+      
+      // 🛡️ FRAUD PROTECTION: Daily limit check
+      const userId = req.body.userId;
+      if (userId) {
+        try {
+          const userTransactions = await storage.getUserTransactions(userId);
+          const dailyCheck = checkDailyActionLimit(userTransactions);
+          
+          if (dailyCheck.limitReached) {
+            log(`[FRAUD-PROTECTION] ❌ Daily limit reached for user ${userId}: ${dailyCheck.actionCount}/${MAX_DAILY_ACTIONS} actions today`, "receipts");
+            return res.status(429).json({
+              error: "Daily receipt limit reached",
+              message: `You've submitted ${dailyCheck.actionCount} receipts today. Our daily limit is ${MAX_DAILY_ACTIONS} receipts to maintain quality and prevent fraud. Try again tomorrow!`,
+              actionCount: dailyCheck.actionCount,
+              maxActions: MAX_DAILY_ACTIONS,
+              limitReached: true
+            });
+          }
+          log(`[FRAUD-PROTECTION] ✅ Daily limit check passed for user ${userId}: ${dailyCheck.actionCount}/${MAX_DAILY_ACTIONS} actions today`, "receipts");
+        } catch (error) {
+          log(`[FRAUD-PROTECTION] ⚠️ Error checking daily limit: ${error instanceof Error ? error.message : String(error)}`, "receipts");
+        }
+      }
+      
+      // 🛡️ FRAUD PROTECTION: Duplicate image detection
+      try {
+        const imageHash = calculateImageHash(image);
+        const existingReceipt = await db
+          .select()
+          .from(receiptImages)
+          .where(eq(receiptImages.imageHash, imageHash))
+          .limit(1);
+        
+        if (existingReceipt.length > 0) {
+          log(`[FRAUD-PROTECTION] ❌ Duplicate image detected! Hash: ${imageHash.substring(0, 16)}...`, "receipts");
+          return res.status(400).json({
+            error: "Duplicate receipt detected",
+            message: "This receipt image has already been submitted. Each receipt can only be submitted once to prevent fraud.",
+            isDuplicate: true
+          });
+        }
+        log(`[FRAUD-PROTECTION] ✅ Image is unique (hash: ${imageHash.substring(0, 16)}...)`, "receipts");
+      } catch (error) {
+        log(`[FRAUD-PROTECTION] ⚠️ Error checking duplicate: ${error instanceof Error ? error.message : String(error)}`, "receipts");
       }
       
       // Special handling for test mode with predefined responses
