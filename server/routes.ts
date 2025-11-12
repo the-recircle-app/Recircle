@@ -3306,16 +3306,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Ensure all required fields have the correct types
-      if (storeId === undefined || userId === undefined || amount === undefined || !purchaseDate) {
+      const walletAddress = req.body.walletAddress;
+      if (storeId === undefined || userId === undefined || amount === undefined || !purchaseDate || !walletAddress) {
         return res.status(400).json({ 
           message: "Missing required fields", 
           details: {
             storeId: storeId === undefined ? "missing" : typeof storeId,
             userId: userId === undefined ? "missing" : typeof userId,
             amount: amount === undefined ? "missing" : typeof amount,
-            purchaseDate: !purchaseDate ? "missing" : typeof purchaseDate
+            purchaseDate: !purchaseDate ? "missing" : typeof purchaseDate,
+            walletAddress: !walletAddress ? "missing" : typeof walletAddress
           }
         });
+      }
+      
+      // 🔐 CRITICAL SECURITY: Verify userId matches walletAddress to prevent token theft
+      const submittedWalletAddress = req.body.walletAddress;
+      if (userId && submittedWalletAddress) {
+        try {
+          const user = await storage.getUser(Number(userId));
+          if (!user) {
+            console.error(`[SECURITY] ❌ User ${userId} not found in database`);
+            return res.status(404).json({
+              message: "User not found",
+              details: "Invalid user ID"
+            });
+          }
+          
+          // Compare wallet addresses (case-insensitive)
+          if (user.walletAddress?.toLowerCase() !== submittedWalletAddress.toLowerCase()) {
+            console.error(`[SECURITY] ❌ WALLET MISMATCH DETECTED!`);
+            console.error(`[SECURITY]    User ${userId} in DB has wallet: ${user.walletAddress}`);
+            console.error(`[SECURITY]    Client submitted wallet: ${submittedWalletAddress}`);
+            console.error(`[SECURITY]    BLOCKING submission to prevent token theft`);
+            return res.status(403).json({
+              message: "Security error: Wallet address mismatch",
+              details: "The submitted wallet address does not match your account. Please reconnect your wallet."
+            });
+          }
+          
+          console.log(`[SECURITY] ✅ Wallet verification passed for user ${userId}: ${submittedWalletAddress}`);
+        } catch (error) {
+          console.error(`[SECURITY] ❌ Error verifying wallet address:`, error);
+          return res.status(500).json({
+            message: "Failed to verify wallet address",
+            details: "Please try again"
+          });
+        }
       }
       
       // Check if the receipt date is too old (more than 3 days old) and automatically correct it if needed

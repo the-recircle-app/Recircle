@@ -71,7 +71,7 @@ type ReceiptFormValues = z.infer<typeof receiptFormSchema>;
 const ScanReceipt = () => {
   const [, setLocation] = useLocation();
   const { goHome } = useSmartNavigation();
-  const { userId, isConnected, refreshTokenBalance, tokenBalance } = useWallet();
+  const { userId, address, isConnected, refreshTokenBalance, tokenBalance } = useWallet();
   const { toast } = useToast();
 
   // Fetch user data to get streak count
@@ -138,10 +138,10 @@ const ScanReceipt = () => {
           {/* Upload Step */}
           {currentStep === ScanStep.CAMERA && (
             <div>
-              {isConnected ? (
+              {isConnected && userId && address ? (
                 <ProductionReceiptUpload
-                  userId={userId?.toString() || "102"}
-                  walletAddress={userId?.toString() || "0x7567d83b7b8d80addcb281a71d54fc7b3364ffed"}
+                  userId={userId.toString()}
+                  walletAddress={address}
                   onValidationComplete={async (result) => {
                     console.log("[SCAN] Production validation complete:", result);
                     if (result.tokenDistributed) {
