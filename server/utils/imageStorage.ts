@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import { db } from '../db';
 import { receiptImages, receipts } from '@shared/schema';
-import { eq, lt } from 'drizzle-orm';
+import { eq, lt, isNull } from 'drizzle-orm';
 
 const RETENTION_DAYS = 30;
 
@@ -250,5 +250,5 @@ export async function getImagesForReview() {
       mimeType: receiptImages.mimeType
     })
     .from(receiptImages)
-    .where(eq(receiptImages.reviewedAt, null));
+    .where(isNull(receiptImages.reviewedAt));
 }
