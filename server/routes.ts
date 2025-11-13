@@ -1913,6 +1913,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (dailyCheck.limitReached) {
             log(`[FRAUD-PROTECTION] ❌ Daily limit reached for user ${userId}: ${dailyCheck.actionCount}/${MAX_DAILY_ACTIONS} actions today`, "receipts");
             return res.status(429).json({
+              code: "DAILY_LIMIT_REACHED",
               error: "Daily receipt limit reached",
               message: `You've submitted ${dailyCheck.actionCount} receipts today. Our daily limit is ${MAX_DAILY_ACTIONS} receipts to maintain quality and prevent fraud. Try again tomorrow!`,
               actionCount: dailyCheck.actionCount,
@@ -1938,6 +1939,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (existingReceipt.length > 0) {
           log(`[FRAUD-PROTECTION] ❌ Duplicate image detected! Hash: ${imageHash.substring(0, 16)}...`, "receipts");
           return res.status(400).json({
+            code: "DUPLICATE_IMAGE",
             error: "Duplicate receipt detected",
             message: "This receipt image has already been submitted. Each receipt can only be submitted once to prevent fraud.",
             isDuplicate: true

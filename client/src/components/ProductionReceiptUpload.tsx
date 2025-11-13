@@ -111,21 +111,40 @@ export function ProductionReceiptUpload({
       console.log('[UPLOAD] 📨 Validation response status:', validationResponse.status);
 
       if (!validationResponse.ok) {
+        // Clone the response so we can try reading it in multiple formats
+        const errorResponseClone = validationResponse.clone();
+        
         try {
           const errorData = await validationResponse.json();
           console.error('[UPLOAD] ❌ Validation error response:', errorData);
           
           // Handle specific error codes with user-friendly messages
-          if (errorData.code === 'DATE_TOO_OLD') {
-            throw new Error(`Receipt is too old: ${errorData.message}`);
+          if (errorData.code === 'DAILY_LIMIT_REACHED') {
+            throw new Error(errorData.message || 'You have reached your daily limit of 3 receipts. Please try again tomorrow.');
+          } else if (errorData.code === 'DUPLICATE_IMAGE') {
+            throw new Error(errorData.message || 'This receipt image has already been submitted. Please upload a different receipt.');
+          } else if (errorData.code === 'DATE_TOO_OLD') {
+            throw new Error(errorData.message || 'Receipt is too old to be accepted.');
           } else {
             throw new Error(errorData.message || `Validation failed (${validationResponse.status})`);
           }
         } catch (parseError) {
-          // Fallback to text if JSON parsing fails
-          const errorText = await validationResponse.text();
-          console.error('[UPLOAD] ❌ Could not parse error response as JSON:', parseError);
-          throw new Error(`Validation Error ${validationResponse.status}: ${errorText}`);
+          // If this is an intentional error we threw above, rethrow it unchanged
+          if (parseError instanceof Error && parseError.message && 
+              !parseError.message.includes('JSON') && 
+              !parseError.message.includes('parse')) {
+            throw parseError;
+          }
+          
+          // Otherwise, fallback to text parsing for genuine JSON parse failures
+          try {
+            const errorText = await errorResponseClone.text();
+            console.error('[UPLOAD] ❌ Could not parse error response as JSON:', parseError);
+            throw new Error(errorText || `Validation failed with status ${validationResponse.status}`);
+          } catch (textError) {
+            // If we can't read the response at all, show a generic error
+            throw new Error(`Validation failed with status ${validationResponse.status}`);
+          }
         }
       }
 
