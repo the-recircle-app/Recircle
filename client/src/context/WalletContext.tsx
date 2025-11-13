@@ -172,84 +172,82 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     healWalletMismatch();
   }, [kitConnected, account?.address, isConnected]);
 
-  // 🧹 CRITICAL FIX: Clear React Query cache for previous user when userId changes
-  // Prevents stale queries from fetching old user data after wallet switch
+  // 🧹 CRITICAL FIX: Clear React Query cache IMMEDIATELY on mount to prevent stale queries
+  // This runs BEFORE components mount and create queries, solving the race condition
   const previousUserIdRef = useRef<number | null>(null);
   const hasRunInitialCleanupRef = useRef(false);
   
   useEffect(() => {
-    // On first connection with userId, clear ALL other user queries (one-time cleanup)
-    if (userId !== null && !hasRunInitialCleanupRef.current) {
-      console.log(`[WALLET-CACHE] 🧹 Initial cleanup: Clearing all user queries except current user ${userId}`);
+    // STAGE 1: On initial mount, immediately clear ALL stale user queries
+    // This happens BEFORE localStorage userId is used, preventing race condition
+    if (!hasRunInitialCleanupRef.current) {
+      const storedUserId = localStorage.getItem('userId');
+      const currentUserId = userId || (storedUserId ? parseInt(storedUserId, 10) : null);
       
-      const allQueries = queryClient.getQueryCache().getAll();
-      const otherUserQueries = allQueries.filter(query => {
-        const queryKey = query.queryKey[0];
-        if (typeof queryKey === 'string' && queryKey.includes('/api/users/')) {
-          // Keep queries for the current user, remove all others
-          return !queryKey.includes(`/api/users/${userId}`);
-        }
-        return false;
-      });
+      console.log(`[WALLET-CACHE] 🧹 Initial cleanup starting - current user: ${currentUserId}`);
       
-      console.log(`[WALLET-CACHE] Found ${otherUserQueries.length} queries for other users:`, 
-        otherUserQueries.map(q => q.queryKey[0]));
-      
-      // Remove all other user queries
-      queryClient.removeQueries({
+      // CANCEL all active user queries first (stops fetching)
+      queryClient.cancelQueries({
         predicate: (query) => {
           const queryKey = query.queryKey[0];
-          if (typeof queryKey === 'string' && queryKey.includes('/api/users/')) {
-            return !queryKey.includes(`/api/users/${userId}`);
-          }
-          return false;
+          return typeof queryKey === 'string' && queryKey.includes('/api/users/');
         }
       });
       
-      console.log(`[WALLET-CACHE] ✅ Initial cleanup complete - removed ${otherUserQueries.length} stale user queries`);
+      // Then REMOVE all user queries except current user
+      if (currentUserId !== null) {
+        const allQueries = queryClient.getQueryCache().getAll();
+        const otherUserQueries = allQueries.filter(query => {
+          const queryKey = query.queryKey[0];
+          if (typeof queryKey === 'string' && queryKey.includes('/api/users/')) {
+            return !queryKey.includes(`/api/users/${currentUserId}`);
+          }
+          return false;
+        });
+        
+        console.log(`[WALLET-CACHE] Found ${otherUserQueries.length} queries for other users:`, 
+          otherUserQueries.map(q => q.queryKey[0]));
+        
+        queryClient.removeQueries({
+          predicate: (query) => {
+            const queryKey = query.queryKey[0];
+            if (typeof queryKey === 'string' && queryKey.includes('/api/users/')) {
+              return !queryKey.includes(`/api/users/${currentUserId}`);
+            }
+            return false;
+          }
+        });
+        
+        console.log(`[WALLET-CACHE] ✅ Initial cleanup complete - removed ${otherUserQueries.length} stale user queries`);
+      }
+      
       hasRunInitialCleanupRef.current = true;
     }
     
-    // Skip on initial mount if both are null
-    if (previousUserIdRef.current === null && userId === null) {
-      previousUserIdRef.current = userId;
-      return;
-    }
-    
-    // If userId changed, clear all queries for the old user
-    if (previousUserIdRef.current !== null && previousUserIdRef.current !== userId) {
+    // STAGE 2: When userId changes (wallet switch), clean up old user
+    if (previousUserIdRef.current !== null && previousUserIdRef.current !== userId && userId !== null) {
       const oldUserId = previousUserIdRef.current;
-      console.log(`[WALLET-CACHE] 🧹 User switch detected: Clearing React Query cache for user ${oldUserId} (switching to ${userId})`);
+      console.log(`[WALLET-CACHE] 🧹 User switch detected: ${oldUserId} → ${userId}`);
       
-      // Get all queries before removal for debugging
-      const allQueries = queryClient.getQueryCache().getAll();
-      const oldUserQueries = allQueries.filter(query => {
-        const queryKey = query.queryKey[0];
-        return typeof queryKey === 'string' && queryKey.includes(`/api/users/${oldUserId}`);
-      });
-      
-      console.log(`[WALLET-CACHE] Found ${oldUserQueries.length} queries for user ${oldUserId}:`, 
-        oldUserQueries.map(q => q.queryKey[0]));
-      
-      // Remove all queries that reference the old userId
-      queryClient.removeQueries({
+      // CANCEL old user queries first (critical!)
+      queryClient.cancelQueries({
         predicate: (query) => {
           const queryKey = query.queryKey[0];
-          if (typeof queryKey === 'string') {
-            // Check if query key contains the old userId
-            return queryKey.includes(`/api/users/${oldUserId}`);
-          }
-          return false;
+          return typeof queryKey === 'string' && queryKey.includes(`/api/users/${oldUserId}`);
         }
       });
       
-      console.log(`[WALLET-CACHE] ✅ Cleared ${oldUserQueries.length} queries for user ${oldUserId}`);
+      // Then REMOVE them
+      queryClient.removeQueries({
+        predicate: (query) => {
+          const queryKey = query.queryKey[0];
+          return typeof queryKey === 'string' && queryKey.includes(`/api/users/${oldUserId}`);
+        }
+      });
       
-      // Reset the initial cleanup flag so it runs again for the new user
-      hasRunInitialCleanupRef.current = false;
+      console.log(`[WALLET-CACHE] ✅ Cleaned up user ${oldUserId} queries`);
     }
     
-    // Update the ref for next comparison
     previousUserIdRef.current = userId;
   }, [userId]);
 
@@ -332,18 +330,55 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       console.log('[WALLET] Attempting to recover wallet connection for address:', address);
       setIsConnecting(true);
       
-      // Fetch user data from the API
+      // 🔥 STAGE 1: CLEAR STATE FIRST (before fetching new user)
+      const oldUserId = userId;
+      console.log(`[WALLET] Stage 1: Clearing old user ${oldUserId} before connecting to ${address}`);
+      
+      // Set userId to null FIRST to disable all queries
+      setUserId(null);
+      setIsConnected(false);
+      
+      // Cancel all active user queries
+      if (oldUserId !== null) {
+        await queryClient.cancelQueries({
+          predicate: (query) => {
+            const queryKey = query.queryKey[0];
+            return typeof queryKey === 'string' && queryKey.includes('/api/users/');
+          }
+        });
+        
+        // Remove old user queries
+        queryClient.removeQueries({
+          predicate: (query) => {
+            const queryKey = query.queryKey[0];
+            return typeof queryKey === 'string' && queryKey.includes(`/api/users/${oldUserId}`);
+          }
+        });
+        
+        console.log(`[WALLET] ✅ Canceled and removed queries for user ${oldUserId}`);
+      }
+      
+      // Clear localStorage
+      localStorage.removeItem("userId");
+      localStorage.removeItem("walletAddress");
+      
+      // 🔥 STAGE 2: FETCH NEW USER DATA
+      console.log(`[WALLET] Stage 2: Fetching user data for ${address}`);
       const response = await fetch(`/api/users/wallet/${address}`, {
         credentials: "include",
       });
       
       if (response.ok) {
         const userData: User = await response.json();
+        
+        // 🔥 STAGE 3: SET NEW USER (only after verification succeeds)
+        console.log(`[WALLET] Stage 3: Setting new user ${userData.id}`);
         setAddress(address);
         setTokenBalance(userData.tokenBalance);
         setUserId(userData.id);
         setIsConnected(true);
-        // Keep localStorage in sync after recovery/heal
+        
+        // Update localStorage AFTER state is set
         localStorage.setItem("walletAddress", address);
         localStorage.setItem("userId", userData.id.toString());
         
@@ -360,6 +395,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       } else {
         // If user doesn't exist, create a new one
         if (response.status === 404) {
+          console.log(`[WALLET] Stage 2b: User not found - creating new user for ${address}`);
           const username = `user_${Math.random().toString(36).substring(2, 10)}`;
           const newUser = await apiRequest("POST", "/api/users", {
             username,
@@ -369,11 +405,15 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
           
           if (newUser.ok) {
             const userData: User = await newUser.json();
+            
+            // 🔥 STAGE 3: SET NEW USER (only after creation succeeds)
+            console.log(`[WALLET] Stage 3: Setting new user ${userData.id}`);
             setAddress(address);
             setTokenBalance(userData.tokenBalance);
             setUserId(userData.id);
             setIsConnected(true);
-            // Keep localStorage in sync after recovery/heal
+            
+            // Update localStorage AFTER state is set
             localStorage.setItem("walletAddress", address);
             localStorage.setItem("userId", userData.id.toString());
             
