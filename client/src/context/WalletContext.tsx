@@ -38,7 +38,7 @@ const WalletContext = createContext<WalletContextType>({
 export const useWallet = () => useContext(WalletContext);
 
 export const WalletProvider = ({ children }: { children: ReactNode }) => {
-  const [address, setAddress] = useState<string>("");
+  // 🔥 CRITICAL: Remove local address state - use VeChain Kit as single source of truth
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [tokenBalance, setTokenBalance] = useState<number>(0);
@@ -50,127 +50,65 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
   // VeChain Kit hooks for live wallet state and proper disconnect
   const { disconnect: kitDisconnect, account } = useVeChainKitWallet();
   const kitConnected = !!account; // Kit is connected if account exists
+  
+  // 🔥 SINGLE SOURCE OF TRUTH: Derive address from VeChain Kit account
+  const address = account?.address || "";
+  
+  // 🔥 Track latest Kit address AND userId to prevent race conditions
+  const latestKitAddressRef = useRef<string | null>(null);
+  const lastUserIdRef = useRef<number | null>(null);
+  latestKitAddressRef.current = account?.address || null;
+  
+  // 🔥 CRITICAL: Only update ref when userId is non-null (preserves across disconnect)
+  if (userId !== null) {
+    lastUserIdRef.current = userId;
+  }
 
-  // Check for stored wallet address on load with safety checks and VeChainKit coordination
+  // 🔥 WALLET RECOVERY: Use VeChain Kit as single source of truth for address
+  // Only recover user data when Kit provides a live wallet address
   useEffect(() => {
-    const storedAddress = localStorage.getItem("walletAddress");
-    const storedUserId = localStorage.getItem("userId");
-    
-    // Enhanced recovery logic with VeChain Kit coordination
-    if (storedAddress) {
-      console.log("[WALLET] Found stored address:", storedAddress);
-      // If Kit is already connected to a different address, skip initial recovery
-      // The mismatch-heal effect will handle the correction
-      if (kitConnected && account?.address && account.address.toLowerCase() !== storedAddress.toLowerCase()) {
-        console.log("[WALLET] Kit connected to different address - skipping stale recovery");
-      } else {
-        console.log("[WALLET] Attempting recovery for stored address");
-        recoverWalletConnection(storedAddress);
-      }
-    } else if (storedUserId) {
-      // If we have a user ID but no wallet address, don't set as connected
-      const userIdNum = parseInt(storedUserId);
-      if (!isNaN(userIdNum)) {
-        console.log("[WALLET] Found stored userId but no wallet address - requiring wallet connection");
-        setUserId(userIdNum);
-        setIsConnected(false); // Keep disconnected until real wallet connects
-        // Clear the stored userId since we need a proper wallet connection
-        localStorage.removeItem("userId");
-      }
-    } else {
-      // Check if VeChainKit might have storage that could be restored
-      const vechainKitStorageKeys = [
-        'vechain-kit-account',
-        '@vechain/dapp-kit',
-        'privy:token',
-        'privy:refresh_token',
-        'dappkit-connected',
-        'veworld-connected'
-      ];
+    if (!account?.address) {
+      // Kit disconnected or no account - clear all state
+      console.log("[WALLET-RECOVERY] Kit account is null - clearing wallet state");
       
-      const hasVeChainKitStorage = vechainKitStorageKeys.some(key => 
-        localStorage.getItem(key) || sessionStorage.getItem(key)
-      );
+      // 🔥 CRITICAL: Use ref to get last userId (persists even after setUserId(null))
+      const oldUserId = lastUserIdRef.current;
       
-      if (hasVeChainKitStorage) {
-        console.log("[WALLET] No stored wallet address but VeChainKit storage found - waiting for kit restoration...");
-        // Don't clear anything yet - give VeChainKitSessionRestorer a chance to restore
-        setUserId(null);
-        setIsConnected(false);
-      } else {
-        // No storage anywhere - safe to start fresh
-        console.log("[WALLET] No stored wallet found - requiring real wallet connection");
-        setUserId(null);
-        setIsConnected(false);
-        // Clear any existing localStorage data for clean state
-        localStorage.removeItem("walletAddress");
-        localStorage.removeItem("userId");
-        localStorage.removeItem("connectedWallet");
-      }
-    }
-    
-    // Legacy fallback block - now disabled
-    if (false && featureFlags.useDefaultUser) {
-      // Development fallback - disabled to force real wallet connections
-      console.log("[DEV] Development fallback disabled - requiring real wallet");
-    } else if (false) {
-      // Production - no default user, require wallet connection
-      console.log("[WALLET TEST] No user ID found, requiring real wallet connection");
-      setUserId(null);
-      setIsConnected(false);
-      // Clear any existing localStorage data for clean testing
-      localStorage.removeItem("walletAddress");
-      localStorage.removeItem("userId");
-      localStorage.removeItem("connectedWallet");
-    }
-  }, []);
-
-  // PROVIDER AUTHORITY: Auto-heal wallet address mismatches
-  // Make VeChain Kit provider the source of truth over localStorage
-  useEffect(() => {
-    const healWalletMismatch = async () => {
-      // Only proceed if VeChain Kit is connected and has an account
-      if (!kitConnected || !account?.address) {
-        return;
-      }
-
-      const liveAddress = account.address.toLowerCase();
-      const storedAddress = localStorage.getItem("walletAddress")?.toLowerCase();
-      
-      console.log('[WALLET-HEAL] Checking address mismatch:', {
-        liveAddress,
-        storedAddress,
-        connected: kitConnected,
-        mismatch: liveAddress !== storedAddress
-      });
-
-      // If addresses don't match, auto-heal by clearing stale data and using live address
-      if (storedAddress && liveAddress !== storedAddress) {
-        console.log('[WALLET-HEAL] ⚠️ Address mismatch detected - auto-healing with live provider address');
-        
-        // Clear stale localStorage data
-        localStorage.removeItem("walletAddress");
-        localStorage.removeItem("userId");
-        localStorage.removeItem("connectedWallet");
-        
-        // Use live provider address as source of truth
-        console.log('[WALLET-HEAL] ✅ Using live VeWorld address:', account.address);
-        await recoverWalletConnection(account.address);
-        
-        toast({
-          title: "Wallet Fixed! 🎯",
-          description: "Updated to use your current VeWorld wallet address",
-          variant: "default"
+      // Clear React Query cache for old user
+      if (oldUserId !== null) {
+        console.log(`[WALLET-RECOVERY] Clearing React Query cache for user ${oldUserId}`);
+        queryClient.cancelQueries({
+          predicate: (query) => {
+            const queryKey = query.queryKey[0];
+            return typeof queryKey === 'string' && queryKey.includes(`/api/users/${oldUserId}`);
+          }
         });
-      } else if (kitConnected && !isConnected && liveAddress) {
-        // Kit is connected but our context isn't - sync up
-        console.log('[WALLET-HEAL] Syncing with connected VeChain Kit wallet');
-        await recoverWalletConnection(account.address);
+        queryClient.removeQueries({
+          predicate: (query) => {
+            const queryKey = query.queryKey[0];
+            return typeof queryKey === 'string' && queryKey.includes(`/api/users/${oldUserId}`);
+          }
+        });
+        console.log(`[WALLET-RECOVERY] ✅ Cleared cache for user ${oldUserId}`);
       }
-    };
+      
+      // Clear all state
+      setUserId(null);
+      setTokenBalance(0);
+      setIsConnected(false);
+      localStorage.removeItem("userId");
+      
+      return;
+    }
+    
+    const liveAddress = account.address;
+    console.log(`[WALLET-RECOVERY] VeChain Kit account found: ${liveAddress}`);
+    
+    // Recover user data for this LIVE address (not localStorage address!)
+    recoverWalletConnection(liveAddress);
+  }, [account?.address]); // Trigger when Kit's address changes
 
-    healWalletMismatch();
-  }, [kitConnected, account?.address, isConnected]);
+  // No more healWalletMismatch - Kit account recovery handles everything
 
   // 🧹 CRITICAL FIX: Clear React Query cache IMMEDIATELY on mount to prevent stale queries
   // This runs BEFORE components mount and create queries, solving the race condition
@@ -303,8 +241,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
         }
       }
       
-      // Step 4: Clear component state
-      setAddress("");
+      // Step 4: Clear component state (address auto-clears when Kit disconnects)
       setTokenBalance(0);
       setUserId(null);
       setIsConnected(false);
@@ -371,15 +308,19 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       if (response.ok) {
         const userData: User = await response.json();
         
-        // 🔥 STAGE 3: SET NEW USER (only after verification succeeds)
-        console.log(`[WALLET] Stage 3: Setting new user ${userData.id}`);
-        setAddress(address);
+        // 🔥 RACE CONDITION GUARD: Only set state if Kit address hasn't changed
+        if (latestKitAddressRef.current?.toLowerCase() !== address.toLowerCase()) {
+          console.log(`[WALLET] ⚠️ Kit address changed during recovery (${address} → ${latestKitAddressRef.current}) - aborting state write`);
+          return;
+        }
+        
+        // 🔥 STAGE 3: SET NEW USER (only after verification succeeds AND address still matches)
+        console.log(`[WALLET] Stage 3: Setting new user ${userData.id} with kit address: ${address}`);
         setTokenBalance(userData.tokenBalance);
         setUserId(userData.id);
         setIsConnected(true);
         
-        // Update localStorage AFTER state is set
-        localStorage.setItem("walletAddress", address);
+        // Update localStorage (wallet address comes from Kit, only cache userId)
         localStorage.setItem("userId", userData.id.toString());
         
         // CRITICAL: Refresh balance from blockchain after connection
@@ -406,15 +347,19 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
           if (newUser.ok) {
             const userData: User = await newUser.json();
             
-            // 🔥 STAGE 3: SET NEW USER (only after creation succeeds)
-            console.log(`[WALLET] Stage 3: Setting new user ${userData.id}`);
-            setAddress(address);
+            // 🔥 RACE CONDITION GUARD: Only set state if Kit address hasn't changed
+            if (latestKitAddressRef.current?.toLowerCase() !== address.toLowerCase()) {
+              console.log(`[WALLET] ⚠️ Kit address changed during new user creation (${address} → ${latestKitAddressRef.current}) - aborting state write`);
+              return;
+            }
+            
+            // 🔥 STAGE 3: SET NEW USER (only after creation succeeds AND address still matches)
+            console.log(`[WALLET] Stage 3: Setting new user ${userData.id} with kit address: ${address}`);
             setTokenBalance(userData.tokenBalance);
             setUserId(userData.id);
             setIsConnected(true);
             
-            // Update localStorage AFTER state is set
-            localStorage.setItem("walletAddress", address);
+            // Update localStorage (wallet address comes from Kit, only cache userId)
             localStorage.setItem("userId", userData.id.toString());
             
             // CRITICAL: Refresh balance from blockchain after new user creation
@@ -438,8 +383,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       console.error("Error recovering wallet connection:", error);
       localStorage.removeItem("walletAddress");
       localStorage.removeItem("userId");
-      // Clear state but don't show error toast - user can try reconnecting
-      setAddress("");
+      // Clear state but don't show error toast (address auto-clears when Kit disconnects)
       setTokenBalance(0);
       setUserId(null);
       setIsConnected(false);
@@ -556,13 +500,13 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
         throw new Error("Failed to fetch or create user");
       }
       
-      setAddress(walletInfo.address);
+      // Address is now derived from Kit's account (no setAddress needed)
+      console.log(`[WALLET] User ${userData.id} connected with kit address: ${address}`);
       setTokenBalance(userData.tokenBalance);
       setUserId(userData.id);
       setIsConnected(true);
       
-      // Save connection in localStorage with multiple keys for reliability
-      localStorage.setItem("walletAddress", walletInfo.address);
+      // Save connection in localStorage (wallet address comes from Kit, only cache userId and type)
       localStorage.setItem("connectedWallet", walletType);
       localStorage.setItem("userId", userData.id.toString());
       
@@ -662,8 +606,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
         console.log("Vechain disconnect failed, but continuing with local disconnect");
       }
       
-      // Clear all state, regardless of whether the VeChain disconnect succeeded
-      setAddress("");
+      // Clear all state (address auto-clears when Kit disconnects)
       setTokenBalance(0);
       setUserId(null);
       setIsConnected(false);
