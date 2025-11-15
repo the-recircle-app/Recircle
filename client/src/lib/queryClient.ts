@@ -48,15 +48,29 @@ export const getQueryFn: <T>(options: {
   async ({ queryKey }) => {
     const url = queryKey[0] as string;
     
-    // 🔥 GLOBAL QUERY GATE: Block all /api/users/ queries when no verified userId
+    // 🔥 GLOBAL QUERY GATE: Block all /api/users/:id queries that don't match verified userId
     // This prevents components from fetching stale user data during wallet switches
     if (url.includes('/api/users/')) {
+      // Block if no verified user
       if (currentVerifiedUserId === null) {
         console.log(`[QUERY-CLIENT] ⛔ Blocking query ${url} - no verified userId`);
-        // Return promise that never resolves - keeps query in loading state
         return new Promise(() => {});
       }
-      console.log(`[QUERY-CLIENT] ✅ Allowing query ${url} - verified userId: ${currentVerifiedUserId}`);
+      
+      // 🔥 CRITICAL FIX: Extract userId from URL and verify it matches verified userId
+      // Matches patterns: /api/users/26, /api/users/27/receipts, /api/users/27/transactions, etc.
+      const userIdMatch = url.match(/\/api\/users\/(\d+)/);
+      if (userIdMatch) {
+        const requestedUserId = parseInt(userIdMatch[1]);
+        
+        if (requestedUserId !== currentVerifiedUserId) {
+          console.log(`[QUERY-CLIENT] ⛔ BLOCKING STALE QUERY ${url} - requested user ${requestedUserId} doesn't match verified user ${currentVerifiedUserId}`);
+          // Return promise that never resolves - keeps query in loading state
+          return new Promise(() => {});
+        }
+        
+        console.log(`[QUERY-CLIENT] ✅ Allowing query ${url} - matches verified userId: ${currentVerifiedUserId}`);
+      }
     }
     
     const res = await fetch(url, {
