@@ -1,5 +1,18 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
+// 🔥 GLOBAL WALLET STATE: Track current verified userId to block stale queries
+// This is set by WalletContext and checked by ALL user queries
+let currentVerifiedUserId: number | null = null;
+
+export function setVerifiedUserId(userId: number | null) {
+  console.log(`[QUERY-CLIENT] Setting verified userId: ${userId}`);
+  currentVerifiedUserId = userId;
+}
+
+export function getVerifiedUserId(): number | null {
+  return currentVerifiedUserId;
+}
+
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     const text = (await res.text()) || res.statusText;
@@ -33,7 +46,20 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const res = await fetch(queryKey[0] as string, {
+    const url = queryKey[0] as string;
+    
+    // 🔥 GLOBAL QUERY GATE: Block all /api/users/ queries when no verified userId
+    // This prevents components from fetching stale user data during wallet switches
+    if (url.includes('/api/users/')) {
+      if (currentVerifiedUserId === null) {
+        console.log(`[QUERY-CLIENT] ⛔ Blocking query ${url} - no verified userId`);
+        // Return promise that never resolves - keeps query in loading state
+        return new Promise(() => {});
+      }
+      console.log(`[QUERY-CLIENT] ✅ Allowing query ${url} - verified userId: ${currentVerifiedUserId}`);
+    }
+    
+    const res = await fetch(url, {
       credentials: "include",
     });
 

@@ -1,6 +1,6 @@
 import { createContext, useState, useContext, useEffect, ReactNode, useRef } from "react";
 import { vechain } from "../lib/vechain";
-import { apiRequest, queryClient } from "../lib/queryClient";
+import { apiRequest, queryClient, setVerifiedUserId } from "../lib/queryClient";
 import { useToast } from "../hooks/use-toast";
 import type { User } from "../types";
 import ConnectionCelebration from "../components/ConnectionCelebration";
@@ -97,6 +97,8 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       setUserId(null);
       setTokenBalance(0);
       setIsConnected(false);
+      // 🔥 CRITICAL: Clear global verified userId to block ALL user queries
+      setVerifiedUserId(null);
       // No userId in localStorage anymore
       
       return;
@@ -113,6 +115,8 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       console.log(`[WALLET-RECOVERY] Clearing userId ${currentUserId} during verification to block stale queries`);
       setUserId(null);
       setIsConnected(false);
+      // 🔥 GLOBAL: Clear verified userId to block ALL user queries during verification
+      setVerifiedUserId(null);
     }
     
     // Recover user data for this LIVE address (not localStorage address!)
@@ -415,6 +419,8 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
         setTokenBalance(userData.tokenBalance);
         setUserId(userData.id);
         setIsConnected(true);
+        // 🔥 GLOBAL: Set verified userId to ENABLE all user queries
+        setVerifiedUserId(userData.id);
         
         // 🔥 NO LONGER CACHE userId - Kit address is the only source of truth
         // This prevents stale userId from being used after wallet switch
@@ -454,6 +460,8 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
             setTokenBalance(userData.tokenBalance);
             setUserId(userData.id);
             setIsConnected(true);
+            // 🔥 GLOBAL: Set verified userId to ENABLE all user queries
+            setVerifiedUserId(userData.id);
             
             // 🔥 NO LONGER CACHE userId - Kit address is the only source of truth
             // This prevents stale userId from being used after wallet switch
@@ -600,6 +608,8 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       setTokenBalance(userData.tokenBalance);
       setUserId(userData.id);
       setIsConnected(true);
+      // 🔥 GLOBAL: Set verified userId to ENABLE all user queries
+      setVerifiedUserId(userData.id);
       
       // 🔥 NO LONGER CACHE userId - Kit address is the only source of truth
       localStorage.setItem("connectedWallet", walletType);
