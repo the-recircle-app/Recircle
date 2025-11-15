@@ -43,16 +43,17 @@ function AchievementProvider({ children }: { children: ReactNode }) {
     }
   }, [location]);
   
-  // Get receipts data for current user or test user 102
+  // 🔥 CRITICAL FIX: Only fetch data when userId is verified (no fallback to test user)
+  // This prevents fetching stale user data during wallet switches
   const { data: receipts = [] } = useQuery<Receipt[]>({
-    queryKey: [`/api/users/${userId || 102}/receipts`],
-    enabled: !!userId || true, // Always enable for test user
+    queryKey: [`/api/users/${userId}/receipts`],
+    enabled: Boolean(userId), // ONLY enable when userId exists
   });
 
-  // Get transactions data for current user or test user 102
+  // 🔥 CRITICAL FIX: Only fetch data when userId is verified (no fallback to test user)
   const { data: transactions = [] } = useQuery<Transaction[]>({
-    queryKey: [`/api/users/${userId || 102}/transactions`],
-    enabled: !!userId || true, // Always enable for test user
+    queryKey: [`/api/users/${userId}/transactions`],
+    enabled: Boolean(userId), // ONLY enable when userId exists
   });
   
   // Function to calculate achievement progress

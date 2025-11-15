@@ -22,6 +22,12 @@ const TokenBalanceRefresher: React.FC<TokenBalanceRefresherProps> = ({ userId, c
 
   // Check the server for balance updates periodically
   useEffect(() => {
+    // 🔥 CRITICAL FIX: Don't poll if userId is missing or invalid
+    if (!userId) {
+      console.log('[TOKEN-REFRESHER] Skipping balance check - no userId');
+      return;
+    }
+    
     // Skip initial check immediately on mount to avoid
     // unnecessary notifications when the component first loads
     if (isInitialCheck) {
@@ -29,11 +35,20 @@ const TokenBalanceRefresher: React.FC<TokenBalanceRefresherProps> = ({ userId, c
       return;
     }
 
+    // 🔥 Capture userId at effect creation to detect changes
+    const capturedUserId = userId;
+
     // Function to check server balance
     const checkServerBalance = async () => {
+      // 🔥 CRITICAL: Bail out if userId changed since this interval was created
+      if (capturedUserId !== userId) {
+        console.log(`[TOKEN-REFRESHER] UserId changed from ${capturedUserId} to ${userId} - skipping stale check`);
+        return;
+      }
+      
       try {
         // Fetch the latest user data from the server
-        const response = await fetch(`/api/users/${userId}`);
+        const response = await fetch(`/api/users/${capturedUserId}`);
         if (!response.ok) return;
         
         const userData = await response.json();
@@ -73,8 +88,11 @@ const TokenBalanceRefresher: React.FC<TokenBalanceRefresherProps> = ({ userId, c
     // Setup periodic checking
     const intervalId = setInterval(checkServerBalance, 5000);
     
-    // Cleanup interval on unmount
-    return () => clearInterval(intervalId);
+    // Cleanup interval on unmount OR when userId changes
+    return () => {
+      console.log(`[TOKEN-REFRESHER] Cleaning up interval for userId ${capturedUserId}`);
+      clearInterval(intervalId);
+    };
   }, [userId, currentBalance, toast, isInitialCheck]);
 
   // Show balance info only when an update is detected

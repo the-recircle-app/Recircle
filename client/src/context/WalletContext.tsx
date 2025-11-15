@@ -104,6 +104,16 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     
     const liveAddress = account.address;
     console.log(`[WALLET-RECOVERY] VeChain Kit account found: ${liveAddress}`);
+    console.log(`[WALLET-RECOVERY] Current userId in state: ${userId}`);
+    
+    // 🔥 CRITICAL: Clear userId IMMEDIATELY to block queries during verification
+    // This prevents components from using stale userId while we verify Kit address
+    const currentUserId = userId;
+    if (currentUserId !== null) {
+      console.log(`[WALLET-RECOVERY] Clearing userId ${currentUserId} during verification to block stale queries`);
+      setUserId(null);
+      setIsConnected(false);
+    }
     
     // Recover user data for this LIVE address (not localStorage address!)
     recoverWalletConnection(liveAddress);
