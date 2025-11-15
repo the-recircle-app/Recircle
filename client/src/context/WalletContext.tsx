@@ -45,6 +45,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
   const [userId, setUserId] = useState<number | null>(null);
   const [connecting, setConnecting] = useState<boolean>(false);
   const [showCelebration, setShowCelebration] = useState<boolean>(false);
+  const [isVerifyingWallet, setIsVerifyingWallet] = useState<boolean>(false); // Block queries during verification
   const { toast } = useToast();
   
   // VeChain Kit hooks for live wallet state and proper disconnect
@@ -205,7 +206,20 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
         console.log('[WALLET-RESUME] App resumed - re-verifying wallet connection');
         console.log(`[WALLET-RESUME] Kit address: ${account.address}, Current userId: ${userId}`);
         
+        // 🔥 BLOCK QUERIES IMMEDIATELY: Set userId to null to prevent stale fetches
+        const currentUserId = userId;
+        setUserId(null);
+        setIsVerifyingWallet(true);
+        
         try {
+          // Cancel all in-flight user queries immediately
+          await queryClient.cancelQueries({
+            predicate: (query) => {
+              const queryKey = query.queryKey[0];
+              return typeof queryKey === 'string' && queryKey.includes('/api/users/');
+            }
+          });
+          
           // Re-fetch user by wallet address to verify it matches
           const response = await fetch(`/api/users/wallet/${account.address}`, {
             credentials: "include",
@@ -214,50 +228,56 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
           if (response.ok) {
             const userData: User = await response.json();
             
-            // If userId doesn't match, we have a mismatch - clear and reconnect
-            if (userData.id !== userId) {
-              console.error(`[WALLET-RESUME] ⚠️ MISMATCH DETECTED! Kit shows ${account.address} (user ${userData.id}) but state has userId ${userId}`);
-              console.log('[WALLET-RESUME] Forcing reconnection with correct user...');
+            // If userId doesn't match, we have a mismatch - force full reconnection
+            if (userData.id !== currentUserId) {
+              console.error(`[WALLET-RESUME] ⚠️ MISMATCH DETECTED! Kit shows ${account.address} (user ${userData.id}) but state had userId ${currentUserId}`);
+              console.log('[WALLET-RESUME] Forcing full reconnection with correct user...');
               
-              // Clear stale queries immediately before reconnection
-              await queryClient.cancelQueries({
+              // Remove old user queries
+              queryClient.removeQueries({
                 predicate: (query) => {
                   const queryKey = query.queryKey[0];
-                  return typeof queryKey === 'string' && queryKey.includes('/api/users/');
+                  return typeof queryKey === 'string' && queryKey.includes(`/api/users/${currentUserId}`);
                 }
               });
               
-              // Reconnect with correct wallet
+              // Full reconnection (will set userId back after fetching correct user)
+              setIsVerifyingWallet(false);
               recoverWalletConnection(account.address);
             } else {
+              // Verified - wallet matches, restore userId
               console.log(`[WALLET-RESUME] ✅ Wallet verified - userId ${userData.id} matches Kit address ${account.address}`);
+              setUserId(currentUserId);
+              setIsVerifyingWallet(false);
             }
           } else {
             // ANY non-200 response (404, 500, etc.) means we must re-verify
             console.error(`[WALLET-RESUME] ⚠️ Wallet verification failed (HTTP ${response.status}) - forcing reconnection to fix state`);
             
-            // Clear stale queries immediately
-            await queryClient.cancelQueries({
+            // Remove old user queries
+            queryClient.removeQueries({
               predicate: (query) => {
                 const queryKey = query.queryKey[0];
-                return typeof queryKey === 'string' && queryKey.includes('/api/users/');
+                return typeof queryKey === 'string' && queryKey.includes(`/api/users/${currentUserId}`);
               }
             });
             
-            // Always reconnect to ensure correct wallet state (handles 404 new wallets too)
+            // Always reconnect (handles 404 new wallets too)
+            setIsVerifyingWallet(false);
             recoverWalletConnection(account.address);
           }
         } catch (error) {
           console.error('[WALLET-RESUME] Failed to verify wallet - forcing reconnection:', error);
           
           // On error, always reconnect to be safe
-          await queryClient.cancelQueries({
+          queryClient.removeQueries({
             predicate: (query) => {
               const queryKey = query.queryKey[0];
-              return typeof queryKey === 'string' && queryKey.includes('/api/users/');
+              return typeof queryKey === 'string' && queryKey.includes(`/api/users/${currentUserId}`);
             }
           });
           
+          setIsVerifyingWallet(false);
           recoverWalletConnection(account.address);
         }
       }
