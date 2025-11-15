@@ -198,6 +198,75 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
+  // 🔥 CRITICAL: Re-verify wallet on page visibility change (app resume from background)
+  useEffect(() => {
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState === 'visible' && account?.address && userId !== null) {
+        console.log('[WALLET-RESUME] App resumed - re-verifying wallet connection');
+        console.log(`[WALLET-RESUME] Kit address: ${account.address}, Current userId: ${userId}`);
+        
+        try {
+          // Re-fetch user by wallet address to verify it matches
+          const response = await fetch(`/api/users/wallet/${account.address}`, {
+            credentials: "include",
+          });
+          
+          if (response.ok) {
+            const userData: User = await response.json();
+            
+            // If userId doesn't match, we have a mismatch - clear and reconnect
+            if (userData.id !== userId) {
+              console.error(`[WALLET-RESUME] ⚠️ MISMATCH DETECTED! Kit shows ${account.address} (user ${userData.id}) but state has userId ${userId}`);
+              console.log('[WALLET-RESUME] Forcing reconnection with correct user...');
+              
+              // Clear stale queries immediately before reconnection
+              await queryClient.cancelQueries({
+                predicate: (query) => {
+                  const queryKey = query.queryKey[0];
+                  return typeof queryKey === 'string' && queryKey.includes('/api/users/');
+                }
+              });
+              
+              // Reconnect with correct wallet
+              recoverWalletConnection(account.address);
+            } else {
+              console.log(`[WALLET-RESUME] ✅ Wallet verified - userId ${userData.id} matches Kit address ${account.address}`);
+            }
+          } else {
+            // ANY non-200 response (404, 500, etc.) means we must re-verify
+            console.error(`[WALLET-RESUME] ⚠️ Wallet verification failed (HTTP ${response.status}) - forcing reconnection to fix state`);
+            
+            // Clear stale queries immediately
+            await queryClient.cancelQueries({
+              predicate: (query) => {
+                const queryKey = query.queryKey[0];
+                return typeof queryKey === 'string' && queryKey.includes('/api/users/');
+              }
+            });
+            
+            // Always reconnect to ensure correct wallet state (handles 404 new wallets too)
+            recoverWalletConnection(account.address);
+          }
+        } catch (error) {
+          console.error('[WALLET-RESUME] Failed to verify wallet - forcing reconnection:', error);
+          
+          // On error, always reconnect to be safe
+          await queryClient.cancelQueries({
+            predicate: (query) => {
+              const queryKey = query.queryKey[0];
+              return typeof queryKey === 'string' && queryKey.includes('/api/users/');
+            }
+          });
+          
+          recoverWalletConnection(account.address);
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [account?.address, userId]);
+
   // Mobile-safe hard reset function for cache/storage issues
   const hardResetDappStorage = async () => {
     try {
