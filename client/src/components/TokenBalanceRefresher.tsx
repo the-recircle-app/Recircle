@@ -3,6 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle, ArrowUpCircle, CheckCircle2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { getVerifiedUserId } from '@/lib/queryClient';
 
 interface TokenBalanceRefresherProps {
   userId: number;
@@ -40,11 +41,22 @@ const TokenBalanceRefresher: React.FC<TokenBalanceRefresherProps> = ({ userId, c
 
     // Function to check server balance
     const checkServerBalance = async () => {
-      // 🔥 CRITICAL: Bail out if userId changed since this interval was created
+      // 🔥 CRITICAL: Check GLOBAL verified userId to prevent polling stale wallets
+      const verifiedUserId = getVerifiedUserId();
+      
+      // Block poll if no verified user OR verified user doesn't match captured user
+      if (verifiedUserId === null || verifiedUserId !== capturedUserId) {
+        console.log(`[TOKEN-REFRESHER] ⛔ Skipping poll - verifiedUserId: ${verifiedUserId}, capturedUserId: ${capturedUserId}`);
+        return;
+      }
+      
+      // Additional check: Bail out if userId prop changed
       if (capturedUserId !== userId) {
         console.log(`[TOKEN-REFRESHER] UserId changed from ${capturedUserId} to ${userId} - skipping stale check`);
         return;
       }
+      
+      console.log(`[TOKEN-REFRESHER] ✅ Polling balance for verified user ${verifiedUserId}`);
       
       try {
         // Fetch the latest user data from the server
