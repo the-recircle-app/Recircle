@@ -55,6 +55,12 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
   // 🔥 SINGLE SOURCE OF TRUTH: Derive address from VeChain Kit account
   const address = account?.address || "";
   
+  // 🔥 NUCLEAR OPTION: Clear ALL React Query cache on mount to prevent any stale data
+  useEffect(() => {
+    console.log('[WALLET] Clearing ALL React Query cache on mount');
+    queryClient.clear();
+  }, []); // Only on mount
+
   // 🔥 Track latest Kit address AND userId to prevent race conditions
   const latestKitAddressRef = useRef<string | null>(null);
   const lastUserIdRef = useRef<number | null>(null);
