@@ -55,8 +55,15 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
   // 🔥 SINGLE SOURCE OF TRUTH: Derive address from VeChain Kit account
   const address = account?.address || "";
   
-  // 🔥 NUCLEAR OPTION: Clear ALL React Query cache on mount to prevent any stale data
+  // 🔥 CLEANUP: Remove any stale localStorage userId from dev tools
   useEffect(() => {
+    console.log('[WALLET] Checking for stale localStorage userId...');
+    const storedUserId = localStorage.getItem('userId');
+    if (storedUserId) {
+      console.log(`[WALLET] ⚠️ Removing stale localStorage userId: ${storedUserId} (dev tools artifact)`);
+      localStorage.removeItem('userId');
+    }
+    
     console.log('[WALLET] Clearing ALL React Query cache on mount');
     queryClient.clear();
   }, []); // Only on mount
