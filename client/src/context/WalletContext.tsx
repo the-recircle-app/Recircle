@@ -97,7 +97,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       setUserId(null);
       setTokenBalance(0);
       setIsConnected(false);
-      localStorage.removeItem("userId");
+      // No userId in localStorage anymore
       
       return;
     }
@@ -118,10 +118,9 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
   
   useEffect(() => {
     // STAGE 1: On initial mount, immediately clear ALL stale user queries
-    // This happens BEFORE localStorage userId is used, preventing race condition
     if (!hasRunInitialCleanupRef.current) {
-      const storedUserId = localStorage.getItem('userId');
-      const currentUserId = userId || (storedUserId ? parseInt(storedUserId, 10) : null);
+      // No more localStorage userId - only use state
+      const currentUserId = userId;
       
       console.log(`[WALLET-CACHE] 🧹 Initial cleanup starting - current user: ${currentUserId}`);
       
@@ -384,9 +383,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
         console.log(`[WALLET] ✅ Canceled and removed queries for user ${oldUserId}`);
       }
       
-      // Clear localStorage
-      localStorage.removeItem("userId");
-      localStorage.removeItem("walletAddress");
+      // No userId in localStorage anymore - Kit address is sole source of truth
       
       // 🔥 STAGE 2: FETCH NEW USER DATA
       console.log(`[WALLET] Stage 2: Fetching user data for ${address}`);
@@ -409,8 +406,8 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
         setUserId(userData.id);
         setIsConnected(true);
         
-        // Update localStorage (wallet address comes from Kit, only cache userId)
-        localStorage.setItem("userId", userData.id.toString());
+        // 🔥 NO LONGER CACHE userId - Kit address is the only source of truth
+        // This prevents stale userId from being used after wallet switch
         
         // CRITICAL: Refresh balance from blockchain after connection
         console.log("🔄 Connection successful - refreshing balance from blockchain...");
@@ -448,8 +445,8 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
             setUserId(userData.id);
             setIsConnected(true);
             
-            // Update localStorage (wallet address comes from Kit, only cache userId)
-            localStorage.setItem("userId", userData.id.toString());
+            // 🔥 NO LONGER CACHE userId - Kit address is the only source of truth
+            // This prevents stale userId from being used after wallet switch
             
             // CRITICAL: Refresh balance from blockchain after new user creation
             console.log("🔄 New user created - refreshing balance from blockchain...");
@@ -470,8 +467,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       }
     } catch (error) {
       console.error("Error recovering wallet connection:", error);
-      localStorage.removeItem("walletAddress");
-      localStorage.removeItem("userId");
+      // 🔥 No userId in localStorage - Kit address is sole source of truth
       // Clear state but don't show error toast (address auto-clears when Kit disconnects)
       setTokenBalance(0);
       setUserId(null);
@@ -595,9 +591,8 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       setUserId(userData.id);
       setIsConnected(true);
       
-      // Save connection in localStorage (wallet address comes from Kit, only cache userId and type)
+      // 🔥 NO LONGER CACHE userId - Kit address is the only source of truth
       localStorage.setItem("connectedWallet", walletType);
-      localStorage.setItem("userId", userData.id.toString());
       
       // Show celebration only once per session to prevent loops
       if (!options.skipCelebration && !sessionStorage.getItem('celebrationShown')) {
@@ -642,9 +637,8 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       }
       
       // Clear all wallet connection data from localStorage
-      localStorage.removeItem("walletAddress");
+      // 🔥 No userId in localStorage anymore - Kit address is sole source of truth
       localStorage.removeItem("connectedWallet");
-      localStorage.removeItem("userId");
       localStorage.removeItem("veworld-connected");
       localStorage.removeItem("veworld-address");
       
