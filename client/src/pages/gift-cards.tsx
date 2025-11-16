@@ -1,7 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useWallet } from "../context/WalletContext";
-import { useWallet as useVeChainKitWallet } from "@vechain/vechain-kit";
 import Header from "../components/Header";
 import BottomNavigation from "../components/BottomNavigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,8 +32,9 @@ interface GiftCardProduct {
 }
 
 export default function GiftCards() {
+  // 🔥 FIX: Use ONLY WalletContext (single source of truth)
+  // DO NOT call useVeChainKitWallet() - it creates duplicate wallet connections
   const { userId, tokenBalance, isConnected, address: walletAddress } = useWallet();
-  const { account } = useVeChainKitWallet();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -234,7 +234,7 @@ export default function GiftCards() {
       return;
     }
 
-    if (!account?.address) {
+    if (!walletAddress) {
       toast({
         title: "⚠️ Wallet Not Connected",
         description: "Please connect your VeWorld wallet to continue",
@@ -285,7 +285,7 @@ export default function GiftCards() {
     
     // Simulate blockchain verification delay before calling purchase API
     setTimeout(() => {
-      if (selectedProduct && amount && email && account?.address) {
+      if (selectedProduct && amount && email && walletAddress) {
         const amountNum = parseFloat(amount);
         purchaseMutation.mutate({
           productId: selectedProduct.id,
@@ -294,7 +294,7 @@ export default function GiftCards() {
           currency: 'USD',
           email: email.trim().toLowerCase(),
           txHash: txId,
-          connectedWallet: account.address,
+          connectedWallet: walletAddress,
         });
       }
     }, 1500);
@@ -678,7 +678,7 @@ export default function GiftCards() {
                   amount: calculateB3TRCost(parseFloat(amount || '0')).toString(),
                   recipientAddress: '0x119761865b79bea9e7924edaa630942322ca09d1',
                   userAddress: walletAddress,
-                  accountAddress: account?.address,
+                  accountAddress: walletAddress,
                   hasConnex: !!window.connex,
                 });
                 return (

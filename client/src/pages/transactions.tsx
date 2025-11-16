@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useWallet } from "../context/WalletContext";
-import { useWallet as useVeChainKitWallet } from "@vechain/vechain-kit";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,12 +34,11 @@ interface BlockchainTransaction {
 
 const TransactionExplorer = () => {
   const { userId, address, isConnected, tokenBalance, refreshTokenBalance } = useWallet();
-  const { account: kitAccount } = useVeChainKitWallet();
   const { toast } = useToast();
 
-  // CRITICAL FIX: Use VeChain Kit's account address for display (EOA for VeWorld)
-  // This is what the home page WalletButton uses internally
-  const displayAddress = kitAccount?.address || address;
+  // 🔥 FIX: Use ONLY address from WalletContext (single source of truth)
+  // DO NOT call useVeChainKitWallet() - it can return a different account!
+  const displayAddress = address;
 
   // Helper function for safe short address display
   const formatShortAddress = (addr?: string) => {

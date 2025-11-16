@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useWallet } from '@/context/WalletContext';
-import { useWallet as useVeChainKitWallet } from '@vechain/vechain-kit';
 import { DirectB3TRTransfer } from '@/components/DirectB3TRTransfer';
 import LiveB3TRBalance from '@/components/LiveB3TRBalance';
 import { Button } from '@/components/ui/button';
@@ -14,8 +13,9 @@ import TokenIcon from '@/components/TokenIcon';
 import { Link } from 'wouter';
 
 export default function SendB3TR() {
+  // 🔥 FIX: Use ONLY WalletContext (single source of truth)
+  // DO NOT call useVeChainKitWallet() - it creates duplicate wallet connections
   const { isConnected, address: walletAddress } = useWallet();
-  const { account } = useVeChainKitWallet();
   const { toast } = useToast();
   const [recipientAddress, setRecipientAddress] = useState('');
   const [amount, setAmount] = useState('');
@@ -198,7 +198,7 @@ export default function SendB3TR() {
           <DirectB3TRTransfer
             recipientAddress={recipientAddress}
             amount={amount}
-            userAddress={walletAddress || account?.address || ''}
+            userAddress={walletAddress || ''}
             onSuccess={handleSuccess}
             onError={handleError}
           >

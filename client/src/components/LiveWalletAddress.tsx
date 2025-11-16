@@ -1,10 +1,10 @@
 import React from 'react';
-import { useWallet as useVeChainKitWallet } from '@vechain/vechain-kit';
+import { useWallet } from '../context/WalletContext';
 import { vechain } from '../lib/vechain';
 
 /**
- * LiveWalletAddress - Gets real wallet address directly from VeChainKit
- * This ensures the address never gets stale like WalletContext.address can
+ * LiveWalletAddress - Gets wallet address from WalletContext (single source of truth)
+ * 🔥 FIX: No longer calls useVeChainKitWallet() to avoid duplicate wallet connections
  */
 interface LiveWalletAddressProps {
   fallbackAddress?: string;
@@ -12,17 +12,17 @@ interface LiveWalletAddressProps {
 }
 
 export default function LiveWalletAddress({ fallbackAddress = '', formatted = true }: LiveWalletAddressProps) {
-  const { account } = useVeChainKitWallet();
+  const { address } = useWallet();
   
-  // Use live VeChainKit address or fallback
-  const currentAddress = account?.address || fallbackAddress;
+  // Use WalletContext address or fallback
+  const currentAddress = address || fallbackAddress;
   
   // Format address if requested
   const displayAddress = formatted && currentAddress ? 
     vechain.formatAddress(currentAddress) : 
     currentAddress;
 
-  console.log(`[LIVE-ADDRESS] VeChainKit: ${account?.address}, Fallback: ${fallbackAddress}, Display: ${displayAddress}`);
+  console.log(`[LIVE-ADDRESS] WalletContext: ${address}, Fallback: ${fallbackAddress}, Display: ${displayAddress}`);
   
   return <span>{displayAddress}</span>;
 }
