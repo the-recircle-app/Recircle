@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useWallet as useVeChainKitWallet } from '@vechain/vechain-kit';
+import { useWallet } from '../context/WalletContext';
 import { getVeChainConfig } from '../../../shared/vechain-config';
 
 /**
  * LiveB3TRBalance - Gets real B3TR balance directly from blockchain
  * Network-aware: automatically uses mainnet or testnet based on VECHAIN_NETWORK env var
+ * 
+ * 🔥 CRITICAL: Uses WalletContext instead of useVeChainKitWallet to prevent duplicate hook instances
  */
 interface LiveB3TRBalanceProps {
   fallbackBalance?: number;
@@ -12,12 +14,12 @@ interface LiveB3TRBalanceProps {
 }
 
 export default function LiveB3TRBalance({ fallbackBalance = 0, onBalanceChange }: LiveB3TRBalanceProps) {
-  const { account } = useVeChainKitWallet();
+  const { address } = useWallet();
   const [liveBalance, setLiveBalance] = useState<number>(fallbackBalance);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (!account?.address) {
+    if (!address) {
       setLiveBalance(fallbackBalance);
       return;
     }
@@ -31,12 +33,12 @@ export default function LiveB3TRBalance({ fallbackBalance = 0, onBalanceChange }
         const RPC_URL = config.thorEndpoints[0];
         const B3TR_CONTRACT = config.contracts.b3trToken;
         
-        console.log(`[LIVE-BALANCE] Fetching ${config.network.toUpperCase()} B3TR balance for ${account.address}`);
+        console.log(`[LIVE-BALANCE] Fetching ${config.network.toUpperCase()} B3TR balance for ${address}`);
         console.log(`[LIVE-BALANCE] RPC: ${RPC_URL}, Contract: ${B3TR_CONTRACT}`);
         
         // Call balanceOf function on B3TR contract
         const balanceOfSignature = '0x70a08231'; // balanceOf(address)
-        const paddedAddress = account.address.slice(2).padStart(64, '0');
+        const paddedAddress = address.slice(2).padStart(64, '0');
         
         const response = await fetch(`${RPC_URL}/accounts/${B3TR_CONTRACT}`, {
           method: 'POST',
@@ -44,7 +46,7 @@ export default function LiveB3TRBalance({ fallbackBalance = 0, onBalanceChange }
           body: JSON.stringify({
             value: '0x0',
             data: balanceOfSignature + paddedAddress,
-            caller: account.address
+            caller: address
           })
         });
         
@@ -86,7 +88,7 @@ export default function LiveB3TRBalance({ fallbackBalance = 0, onBalanceChange }
     const interval = setInterval(fetchLiveBalance, 10000);
     
     return () => clearInterval(interval);
-  }, [account?.address, fallbackBalance, onBalanceChange]);
+  }, [address, fallbackBalance, onBalanceChange]);
 
   return (
     <span className={isLoading ? 'opacity-50' : ''}>
