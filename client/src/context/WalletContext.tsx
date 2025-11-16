@@ -247,6 +247,9 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
           });
           
           // Re-fetch user by wallet address to verify it matches
+          console.log(`[WALLET-RESUME] 🔍 About to verify with address: ${account.address}`);
+          console.log(`[WALLET-RESUME] 🔍 localStorage.walletAddress: ${localStorage.getItem('walletAddress')}`);
+          
           const response = await fetch(`/api/users/wallet/${account.address}`, {
             credentials: "include",
           });
@@ -414,6 +417,10 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       
       // 🔥 STAGE 2: FETCH NEW USER DATA
       console.log(`[WALLET] Stage 2: Fetching user data for ${address}`);
+      console.log(`[WALLET] 🔍 Kit account.address: ${account?.address}`);
+      console.log(`[WALLET] 🔍 Derived address variable: ${address}`);
+      console.log(`[WALLET] 🔍 localStorage.walletAddress: ${localStorage.getItem('walletAddress')}`);
+      
       const response = await fetch(`/api/users/wallet/${address}`, {
         credentials: "include",
       });
