@@ -10,6 +10,9 @@ ReCircle is a mobile-only blockchain-powered rewards platform designed to incent
 
 ## Recent Changes
 
+### November 16, 2025
+- **Treasury Depletion UX**: Added friendly messaging when VeBetterDAO treasury runs out of B3TR tokens. Instead of generic errors, users see encouraging messages celebrating the app's popularity and prompting them to vote for ReCircle on VeBetterDAO. Backend detects "Insufficient treasury funds" errors and passes `treasuryDepleted: true` flag to frontend, which displays custom positive messaging.
+
 ### November 5, 2025
 - **Fixed AI Receipt Amount Bug**: OpenAI was confusing `totalAmount` (receipt dollar amount) with B3TR reward amount. Updated prompts to explicitly clarify that `totalAmount` should extract the USD dollar amount from the receipt (e.g., $26.67), not the estimated reward (e.g., 8.5 B3TR). This fixes incorrect CO2 calculations and proof strings.
 
