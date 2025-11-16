@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
-import { useWallet, useSendTransaction } from '@vechain/vechain-kit';
+import { useSendTransaction } from '@vechain/vechain-kit';
+import { useWallet } from '@/context/WalletContext';
 import { Interface } from '@ethersproject/abi';
 import { parseUnits } from '@ethersproject/units';
 import { getVeChainConfig } from '@/../../shared/vechain-config';
@@ -45,7 +46,7 @@ export function DirectB3TRTransfer({
   onError,
   children 
 }: DirectB3TRTransferProps) {
-  const { account } = useWallet();
+  const { address: account } = useWallet();
   const [processedError, setProcessedError] = useState<TransactionError | null>(null);
   const [transactionState, setTransactionState] = useState<'idle' | 'preparing' | 'signing' | 'sending' | 'confirming' | 'success' | 'error'>('idle');
   
@@ -90,7 +91,7 @@ export function DirectB3TRTransfer({
     isTransactionPending,
     error: txError,
   } = useSendTransaction({
-    signerAccountAddress: userAddress || account?.address || '',
+    signerAccountAddress: userAddress || account || '',
   });
 
   // Process VeChain Kit errors
@@ -120,7 +121,7 @@ export function DirectB3TRTransfer({
 
   // Wrapper function for sending (following official docs pattern)
   const handleSendTransfer = useCallback(async () => {
-    if (!userAddress && !account?.address) {
+    if (!userAddress && !account) {
       const error = new Error('No wallet address available') as TransactionError;
       error.type = 'technical';
       setProcessedError(error);
@@ -145,7 +146,7 @@ export function DirectB3TRTransfer({
       console.log('[DIRECT-B3TR] 🚀 Sending via VeChain Kit useSendTransaction hook:', {
         clauses,
         userAddress,
-        accountAddress: account?.address,
+        accountAddress: account,
         walletConnected: !!account
       });
       
@@ -165,7 +166,7 @@ export function DirectB3TRTransfer({
       
       if (onError) onError(processedErr);
     }
-  }, [userAddress, account?.address, clauses, sendTransaction, processError, onError]);
+  }, [userAddress, account, clauses, sendTransaction, processError, onError]);
 
   // Update state based on VeChain Kit status (following official docs pattern)
   useEffect(() => {

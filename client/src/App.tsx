@@ -244,7 +244,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <WalletProvider>
         <VeChainKitSessionRestorer />
-        <SmartAccountManager />
+        {/* <SmartAccountManager /> */} {/* Disabled - VeWorld-only app doesn't need smart account management */}
         <VeChainStateBridge />
         <VeChainKitAuthBridge />
         <AchievementProvider>

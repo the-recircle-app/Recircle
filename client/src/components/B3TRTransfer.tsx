@@ -1,5 +1,5 @@
 import { useMemo, useEffect, useState } from 'react';
-import { useWallet } from '@vechain/vechain-kit';
+import { useWallet } from '@/context/WalletContext';
 import { Interface } from '@ethersproject/abi';
 import { parseUnits } from '@ethersproject/units';
 
@@ -44,23 +44,23 @@ export function B3TRTransfer({
   onError,
   children 
 }: B3TRTransferProps) {
-  const { account } = useWallet();
+  const { address: account } = useWallet();
   const [vthoBalance, setVthoBalance] = useState<string | null>(null);
   const [transactionState, setTransactionState] = useState<'idle' | 'preparing' | 'signing' | 'sending' | 'confirming' | 'success' | 'error'>('idle');
   const [processedError, setProcessedError] = useState<TransactionError | null>(null);
   
   useEffect(() => {
     async function checkVTHOBalance() {
-      if (!account?.address) return;
+      if (!account) return;
       
       try {
-        const response = await fetch(`/api/vtho-balance/${account.address}`);
+        const response = await fetch(`/api/vtho-balance/${account}`);
         if (response.ok) {
           const data = await response.json();
           setVthoBalance(data.vtho);
           
           console.log('[FEE-DELEGATION] VTHO Balance Check:', {
-            address: account.address,
+            address: account,
             vthoBalance: data.vtho,
             willUseDelegation: parseFloat(data.vtho) < 10 ? 'YES - VeChain Energy VIP-191' : 'NO - User pays own gas',
             threshold: '10 VTHO'
@@ -72,7 +72,7 @@ export function B3TRTransfer({
     }
     
     checkVTHOBalance();
-  }, [account?.address]);
+  }, [account]);
   
   const [txReceipt, setTxReceipt] = useState<any>(null);
   const [isTransactionPending, setIsTransactionPending] = useState(false);
@@ -132,7 +132,7 @@ export function B3TRTransfer({
       throw new Error('VeWorld wallet not detected. Please ensure you are using the VeWorld app.');
     }
     
-    if (!account?.address || clauses.length === 0) {
+    if (!account || clauses.length === 0) {
       throw new Error('Invalid transaction parameters');
     }
     
@@ -143,7 +143,7 @@ export function B3TRTransfer({
       
       // Use Connex directly for VeWorld mobile compatibility
       const tx = window.connex.vendor.sign('tx', clauses)
-        .signer(account.address)
+        .signer(account)
         .comment(`Transfer ${amount} B3TR tokens to ${recipientAddress}`);
       
       const result = await tx.request();
@@ -261,8 +261,8 @@ export function B3TRTransfer({
   
   const sendTransfer = async () => {
     console.log('[B3TR-TRANSFER] sendTransfer called!', {
-      hasAccount: !!account?.address,
-      account: account?.address,
+      hasAccount: !!account,
+      account: account,
       hasConnexNow: !!window.connex,
       connexVersion: window.connex?.version,
       recipientAddress,
@@ -274,7 +274,7 @@ export function B3TRTransfer({
     setTransactionState('preparing');
     setProcessedError(null);
     
-    if (!account?.address) {
+    if (!account) {
       const noAccountError = new Error('No wallet connected. Please connect your VeWorld wallet first') as TransactionError;
       noAccountError.type = 'technical';
       console.error('[B3TR-TRANSFER]', noAccountError);
@@ -331,7 +331,7 @@ export function B3TRTransfer({
     const willDelegate = vthoBalance && parseFloat(vthoBalance) < 10;
     
     console.log('[B3TR-TRANSFER] 🚀 Initiating B3TR Transfer:', {
-      from: account.address,
+      from: account,
       to: recipientAddress,
       amount: `${amount} B3TR`,
       vthoBalance: vthoBalance || 'checking...',
