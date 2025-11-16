@@ -20,6 +20,14 @@ import { useToast } from '@/hooks/use-toast';
  * - Upgrade prompts for V1 smart accounts
  */
 export default function SmartAccountManager() {
+  // 🔥 CRITICAL FIX: Skip SmartAccountManager ENTIRELY for VeWorld users
+  // VeWorld users have window.connex and should NEVER have their address overridden
+  // This check MUST happen BEFORE calling useVeChainKitWallet() to prevent duplicate hook instances
+  if (typeof window !== 'undefined' && (window as any).connex) {
+    console.log('[SMART-ACCOUNT] Connex detected - this is a VeWorld user, SmartAccountManager disabled');
+    return null;
+  }
+  
   const { account: kitAccount, smartAccount } = useVeChainKitWallet();
   const { address: appAddress, connect: appConnect } = useWallet();
   const { toast } = useToast();
