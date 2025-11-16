@@ -1061,14 +1061,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/users/wallet/:address", async (req: Request, res: Response) => {
     try {
       const { address } = req.params;
+      console.log(`[WALLET-LOOKUP] 🔍 Looking up user by wallet: ${address.slice(0,12)}...`);
       const user = await storage.getUserByWalletAddress(address);
       
       if (!user) {
+        console.log(`[WALLET-LOOKUP] ❌ No user found for wallet: ${address.slice(0,12)}...`);
         return res.status(404).json({ message: "User not found" });
       }
       
+      console.log(`[WALLET-LOOKUP] ✅ Found user ${user.id} (${user.username}) for wallet: ${address.slice(0,12)}...`);
       res.json(user);
     } catch (error) {
+      console.error("[WALLET-LOOKUP] Error:", error);
       res.status(500).json({ message: "Failed to fetch user" });
     }
   });
