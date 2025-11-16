@@ -16,6 +16,14 @@ import { useWallet } from '../context/WalletContext';
  * 4. Let SmartAccountManager handle syncing restored accounts to WalletContext
  */
 export default function VeChainKitSessionRestorer() {
+  // 🔥 CRITICAL FIX: Skip VeChainKitSessionRestorer ENTIRELY for VeWorld users
+  // VeWorld users have window.connex and should NEVER have their address overridden
+  // This check MUST happen BEFORE calling useVeChainKitWallet() to prevent duplicate hook instances
+  if (typeof window !== 'undefined' && (window as any).connex) {
+    console.log('[KIT-RESTORER] Connex detected - this is a VeWorld user, SessionRestorer disabled');
+    return null;
+  }
+  
   const { account: kitAccount, smartAccount } = useVeChainKitWallet();
   const { connect: appConnect } = useWallet();
   const [restorationAttempted, setRestorationAttempted] = useState(false);

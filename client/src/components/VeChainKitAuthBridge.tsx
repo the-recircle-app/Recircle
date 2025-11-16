@@ -11,6 +11,14 @@ import { useLocation } from "wouter";
  * Mounted once at app root to eliminate component-specific routing races.
  */
 export default function VeChainKitAuthBridge() {
+  // 🔥 CRITICAL FIX: Skip VeChainKitAuthBridge ENTIRELY for VeWorld users
+  // VeWorld users have window.connex and should NEVER have their address overridden
+  // This check MUST happen BEFORE calling useVeChainKitWallet() to prevent duplicate hook instances
+  if (typeof window !== 'undefined' && (window as any).connex) {
+    console.log('[AUTH-BRIDGE] Connex detected - this is a VeWorld user, AuthBridge disabled');
+    return null;
+  }
+  
   const { account: kitAccount } = useVeChainKitWallet();
   const { isConnected, disconnect: appDisconnect } = useWallet();
   const [location, setLocation] = useLocation();
