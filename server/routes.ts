@@ -4264,9 +4264,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 }
               } else {
                 console.log(`[BLOCKCHAIN] ❌ Distribution failed: ${distributionResult.error}`);
+                
+                // Check if this is a treasury depletion error
+                const isTreasuryDepleted = distributionResult.error?.includes('Insufficient treasury funds');
+                if (isTreasuryDepleted) {
+                  console.log(`[BLOCKCHAIN] 🏛️ Treasury depleted - will inform user to vote on VeBetterDAO`);
+                  // We'll pass this info in the response
+                  distributionResult.treasuryDepleted = true;
+                }
               }
             } catch (blockchainError) {
               console.error(`[BLOCKCHAIN] ❌ Distribution error:`, blockchainError);
+              
+              // Check if this is a treasury depletion error
+              const errorMsg = blockchainError instanceof Error ? blockchainError.message : String(blockchainError);
+              const isTreasuryDepleted = errorMsg.includes('Insufficient treasury funds');
+              if (isTreasuryDepleted) {
+                console.log(`[BLOCKCHAIN] 🏛️ Treasury depleted - will inform user to vote on VeBetterDAO`);
+                // Create a minimal distributionResult object to pass this info
+                distributionResult = { 
+                  success: false, 
+                  error: errorMsg,
+                  treasuryDepleted: true 
+                };
+              }
             }
           }
         } else {
@@ -4410,7 +4431,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             rewardsDelayed: needsManualReview || false,
             sponsored: distributionResult?.sponsoring?.shouldSponsor || false,
             userVthoBalance: distributionResult?.sponsoring?.userVTHOBalance || null,
-            sponsoringMessage: distributionResult?.sponsoring?.userMessage || null
+            sponsoringMessage: distributionResult?.sponsoring?.userMessage || null,
+            treasuryDepleted: distributionResult?.treasuryDepleted || false,
+            blockchainSuccess: distributionResult?.success || false
           },
           updatedUser
         };
