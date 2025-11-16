@@ -243,10 +243,11 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <WalletProvider>
-        <VeChainKitSessionRestorer />
-        {/* <SmartAccountManager /> */} {/* Disabled - VeWorld-only app doesn't need smart account management */}
+        {/* VeChain Kit components disabled - VeWorld-only app doesn't need smart account/session restore */}
+        {/* <VeChainKitSessionRestorer /> */}
+        {/* <SmartAccountManager /> */}
+        {/* <VeChainKitAuthBridge /> */}
         <VeChainStateBridge />
-        <VeChainKitAuthBridge />
         <AchievementProvider>
           <TooltipProvider>
             <Layout>
