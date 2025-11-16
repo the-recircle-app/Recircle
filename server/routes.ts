@@ -1095,7 +1095,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // For development testing, log detailed user info
       if (process.env.NODE_ENV === 'development') {
-        console.log(`[User API] GET /api/users/${id} - currentStreak: ${updatedUser.currentStreak}, tokenBalance: ${updatedUser.tokenBalance}`);
+        console.log(`[User API] GET /api/users/${id} - wallet: ${updatedUser.walletAddress?.slice(0,12)}..., currentStreak: ${updatedUser.currentStreak}, tokenBalance: ${updatedUser.tokenBalance}`);
       }
       
       // Create a response with a timestamp to help avoid caching issues
