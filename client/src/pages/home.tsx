@@ -96,6 +96,18 @@ const Home = () => {
         return txDate === today;
       }).length : 0;
       
+      console.log('[HOME] Daily Actions Debug:', {
+        today,
+        totalTransactions: Array.isArray(transactions) ? transactions.length : 0,
+        todayActions,
+        transactions: Array.isArray(transactions) ? transactions.map(tx => ({
+          id: tx.id,
+          type: tx.type,
+          createdAt: tx.createdAt,
+          date: tx.createdAt ? new Date(tx.createdAt).toISOString().split('T')[0] : null
+        })) : []
+      });
+      
 
       
       // Only update if values have changed to prevent infinite loop
