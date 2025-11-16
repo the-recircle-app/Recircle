@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useWallet } from "../context/WalletContext";
-import { useWallet as useVeChainKitWallet } from "@vechain/vechain-kit";
 import { Button } from "../components/ui/button";
 import ReCircleLogo from "../components/ReCircleLogo";
 import ReCircleSymbol from "../components/ReCircleSymbol";
@@ -16,10 +15,10 @@ import { Link } from "wouter";
 
 const Home = () => {
   const { userId, isConnected, tokenBalance, refreshTokenBalance, address } = useWallet();
-  const { account: kitAccount } = useVeChainKitWallet();
   
-  // Use VeChainKit account address first (for VeWorld users), fallback to WalletContext address
-  const displayAddress = kitAccount?.address || address;
+  // 🔥 FIX: Use ONLY the address from WalletContext (single source of truth)
+  // DO NOT call useVeChainKitWallet() here - it can return a different account!
+  const displayAddress = address;
   
   // Gift cards feature flag - defaults to false (disabled/coming soon)
   const giftCardsEnabled = import.meta.env.VITE_GIFT_CARDS_ENABLED === 'true';
