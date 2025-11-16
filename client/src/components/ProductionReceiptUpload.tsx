@@ -123,6 +123,8 @@ export function ProductionReceiptUpload({
             throw new Error(errorData.message || 'You have reached your daily limit of 3 receipts. Please try again tomorrow.');
           } else if (errorData.code === 'DUPLICATE_IMAGE') {
             throw new Error(errorData.message || 'This receipt image has already been submitted. Please upload a different receipt.');
+          } else if (errorData.code === 'TREASURY_DEPLETED') {
+            throw new Error('TREASURY_DEPLETED');
           } else if (errorData.code === 'DATE_TOO_OLD') {
             throw new Error(errorData.message || 'Receipt is too old to be accepted.');
           } else {
@@ -189,8 +191,17 @@ export function ProductionReceiptUpload({
           const submissionResult = await submissionResponse.json();
           console.log('[UPLOAD] ✅ Submission result:', submissionResult);
           
+          // Check if treasury is depleted (blockchain distribution failed due to insufficient funds)
+          const isTreasuryDepleted = submissionResult.rewardInfo?.treasuryDepleted === true;
+          const blockchainSuccess = submissionResult.rewardInfo?.blockchainSuccess === true;
+          
+          if (isTreasuryDepleted) {
+            console.log('[UPLOAD] 🏛️ Treasury depleted - showing friendly message');
+            throw new Error('TREASURY_DEPLETED');
+          }
+          
           // Update validation result with submission data
-          validationResult.tokenDistributed = true;
+          validationResult.tokenDistributed = blockchainSuccess;
           validationResult.actualReward = submissionResult.tokenReward || validationResult.estimatedReward;
           if (submissionResult.txHash) {
             validationResult.txHash = submissionResult.txHash;
@@ -231,16 +242,31 @@ export function ProductionReceiptUpload({
       
       const errorMessage = error instanceof Error ? error.message : 'Please try again with a clear receipt image';
       
-      // Call the onError callback if provided
-      if (onError) {
-        onError(errorMessage);
+      // Check for treasury depletion - show friendly message
+      if (errorMessage === 'TREASURY_DEPLETED') {
+        const friendlyMessage = "🎉 Wow! ReCircle is so popular we've distributed all our B3TR tokens for now! Your receipt was validated successfully. Don't forget to vote for ReCircle on VeBetterDAO to help us get more tokens to distribute. We'll be back soon!";
+        
+        if (onError) {
+          onError(friendlyMessage);
+        } else {
+          toast({
+            title: "Treasury Temporarily Empty",
+            description: friendlyMessage,
+            variant: "default",
+          });
+        }
       } else {
-        // Fallback to toast if no onError callback
-        toast({
-          title: "Upload Failed",
-          description: `Error: ${errorMessage}`,
-          variant: "destructive",
-        });
+        // Call the onError callback if provided
+        if (onError) {
+          onError(errorMessage);
+        } else {
+          // Fallback to toast if no onError callback
+          toast({
+            title: "Upload Failed",
+            description: `Error: ${errorMessage}`,
+            variant: "destructive",
+          });
+        }
       }
     } finally {
       setIsUploading(false);
