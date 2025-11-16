@@ -1,4 +1,5 @@
 import { createContext, useState, useContext, useEffect, ReactNode, useRef } from "react";
+import { useLocation } from "wouter";
 import { vechain } from "../lib/vechain";
 import { apiRequest, queryClient, setVerifiedUserId, getVerifiedUserId } from "../lib/queryClient";
 import { useToast } from "../hooks/use-toast";
@@ -47,6 +48,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
   const [showCelebration, setShowCelebration] = useState<boolean>(false);
   const [isVerifyingWallet, setIsVerifyingWallet] = useState<boolean>(false); // Block queries during verification
   const { toast } = useToast();
+  const [location, setLocation] = useLocation();
   
   // VeChain Kit hooks for live wallet state and proper disconnect
   const { disconnect: kitDisconnect, account } = useVeChainKitWallet();
@@ -54,6 +56,22 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
   
   // 🔥 SINGLE SOURCE OF TRUTH: Derive address from VeChain Kit account
   const address = account?.address || "";
+  
+  // 🔥 AUTO-NAVIGATION: Navigate to /home when wallet connects from welcome page
+  const wasConnectedRef = useRef<boolean>(false);
+  useEffect(() => {
+    const wasConnected = wasConnectedRef.current;
+    const isNowConnected = isConnected;
+    
+    // LOGIN NAVIGATION: App became connected (rising edge) from welcome page
+    if (!wasConnected && isNowConnected && location === '/') {
+      console.log('[WALLET-NAV] Wallet connected - navigating to /home');
+      setLocation('/home');
+    }
+    
+    // Update tracking ref
+    wasConnectedRef.current = isNowConnected;
+  }, [isConnected, location, setLocation]);
   
   // 🔥 CLEANUP: Remove any stale localStorage userId from dev tools
   useEffect(() => {
