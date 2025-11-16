@@ -439,8 +439,16 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
         // This prevents stale userId from being used after wallet switch
         
         // CRITICAL: Refresh balance from blockchain after connection
+        // 🔥 FIX: Capture userId at THIS moment to prevent closure issues
+        const capturedUserId = userData.id;
         console.log("🔄 Connection successful - refreshing balance from blockchain...");
         setTimeout(async () => {
+          // 🔥 CRITICAL: Only refresh if userId hasn't changed since this was scheduled
+          if (capturedUserId !== userId) {
+            console.log(`⛔ Aborting balance refresh - userId changed from ${capturedUserId} to ${userId}`);
+            return;
+          }
+          
           try {
             const liveBalance = await refreshTokenBalance();
             console.log(`✅ Live balance refreshed: ${liveBalance} B3TR`);
@@ -480,8 +488,16 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
             // This prevents stale userId from being used after wallet switch
             
             // CRITICAL: Refresh balance from blockchain after new user creation
+            // 🔥 FIX: Capture userId at THIS moment to prevent closure issues
+            const capturedNewUserId = userData.id;
             console.log("🔄 New user created - refreshing balance from blockchain...");
             setTimeout(async () => {
+              // 🔥 CRITICAL: Only refresh if userId hasn't changed since this was scheduled
+              if (capturedNewUserId !== userId) {
+                console.log(`⛔ Aborting balance refresh - userId changed from ${capturedNewUserId} to ${userId}`);
+                return;
+              }
+              
               try {
                 const liveBalance = await refreshTokenBalance();
                 console.log(`✅ Live balance refreshed for new user: ${liveBalance} B3TR`);
