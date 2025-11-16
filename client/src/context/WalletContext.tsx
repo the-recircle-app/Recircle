@@ -1,6 +1,6 @@
 import { createContext, useState, useContext, useEffect, ReactNode, useRef } from "react";
 import { vechain } from "../lib/vechain";
-import { apiRequest, queryClient, setVerifiedUserId } from "../lib/queryClient";
+import { apiRequest, queryClient, setVerifiedUserId, getVerifiedUserId } from "../lib/queryClient";
 import { useToast } from "../hooks/use-toast";
 import type { User } from "../types";
 import ConnectionCelebration from "../components/ConnectionCelebration";
@@ -759,6 +759,13 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
   // Refresh token balance from the server (with blockchain sync)
   const refreshTokenBalance = async (): Promise<number> => {
     if (!userId || !isConnected) {
+      return tokenBalance;
+    }
+    
+    // 🔥 CRITICAL: Block if userId doesn't match verified userId (prevents stale wallet fetches)
+    const verifiedUserId = getVerifiedUserId();
+    if (verifiedUserId === null || verifiedUserId !== userId) {
+      console.log(`[WALLET] ⛔ Skipping balance refresh - userId ${userId} doesn't match verified userId ${verifiedUserId}`);
       return tokenBalance;
     }
     
