@@ -1061,7 +1061,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/users/wallet/:address", async (req: Request, res: Response) => {
     try {
       const { address } = req.params;
+      
+      // 🔥 ENHANCED LOGGING: Show full stack trace to see caller
+      const stack = new Error().stack;
+      const caller = stack?.split('\n')[2]?.trim() || 'unknown';
+      
       console.log(`[WALLET-LOOKUP] 🔍 Looking up user by wallet: ${address.slice(0,12)}...`);
+      console.log(`[WALLET-LOOKUP] Full wallet address: ${address}`);
+      console.log(`[WALLET-LOOKUP] Request from: ${req.headers.referer || 'unknown'}`);
+      
       const user = await storage.getUserByWalletAddress(address);
       
       if (!user) {
