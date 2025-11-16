@@ -1172,7 +1172,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Debug logs endpoint for VeWorld browser debugging
   app.post("/api/debug-logs", async (req: Request, res: Response) => {
     try {
-      const { logs, walletInfo, deviceInfo, timestamp } = req.body;
+      const { logs, walletInfo, deviceInfo, timestamp, walletContext } = req.body;
       console.log(`\n=== VEWORLD DEBUG LOGS from ${timestamp} ===`);
       console.log(`User Agent: ${deviceInfo?.userAgent || 'unknown'}`);
       console.log(`Platform: ${deviceInfo?.platform || 'unknown'}`);
@@ -1180,6 +1180,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`Wallet Connected: ${walletInfo?.connected || false}`);
       console.log(`Wallet Address: ${walletInfo?.address || 'not connected'}`);
       console.log(`Chain ID: ${walletInfo?.chainId || 'unknown'}`);
+      
+      // 🔥 NEW: Log wallet context details
+      if (walletContext) {
+        console.log(`\n--- WALLET CONTEXT DEBUG ---`);
+        console.log(`Kit account.address: ${walletContext.kitAddress || 'null'}`);
+        console.log(`Derived address var: ${walletContext.derivedAddress || 'null'}`);
+        console.log(`localStorage.walletAddress: ${walletContext.localStorageAddress || 'null'}`);
+        console.log(`Current userId: ${walletContext.userId || 'null'}`);
+        console.log(`----------------------------\n`);
+      }
       
       if (logs && logs.length > 0) {
         console.log(`\n--- Debug Logs (${logs.length} entries) ---`);

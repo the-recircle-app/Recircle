@@ -421,6 +421,26 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       console.log(`[WALLET] 🔍 Derived address variable: ${address}`);
       console.log(`[WALLET] 🔍 localStorage.walletAddress: ${localStorage.getItem('walletAddress')}`);
       
+      // 🔥 Send debug info to server for mobile debugging
+      fetch('/api/debug-logs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          timestamp: new Date().toISOString(),
+          walletContext: {
+            kitAddress: account?.address,
+            derivedAddress: address,
+            localStorageAddress: localStorage.getItem('walletAddress'),
+            userId: userId
+          },
+          logs: [{
+            level: 'info',
+            source: 'WalletContext-recoverConnection',
+            message: `Stage 2: About to fetch user for wallet ${address}`
+          }]
+        })
+      }).catch(e => console.error('Failed to send debug logs:', e));
+      
       const response = await fetch(`/api/users/wallet/${address}`, {
         credentials: "include",
       });
