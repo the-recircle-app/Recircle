@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { useWallet } from '@/context/WalletContext';
 import { useLocation } from 'wouter';
-import { HelpCircle, MessageCircle, RefreshCw, Shield, LogOut, ChevronRight } from 'lucide-react';
+import { HelpCircle, RefreshCw, Shield, LogOut, ChevronRight } from 'lucide-react';
 
 interface SettingsMenuProps {
   isOpen: boolean;
@@ -24,7 +24,6 @@ export function SettingsMenu({ isOpen, onClose }: SettingsMenuProps) {
       title: 'Support',
       items: [
         { icon: HelpCircle, label: 'FAQ', onClick: () => setLocation('/help') },
-        { icon: MessageCircle, label: 'Contact Us', onClick: () => setLocation('/feedback') },
       ]
     },
     {
