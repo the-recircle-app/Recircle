@@ -11,7 +11,7 @@ export default function TermsOfService() {
       <div className="mb-6">
         <Button 
           variant="ghost" 
-          onClick={() => setLocation("/")}
+          onClick={() => setLocation("/home")}
           className="mb-4"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
@@ -62,7 +62,7 @@ export default function TermsOfService() {
       </div>
 
       <div className="mt-8 text-center">
-        <Button onClick={() => setLocation("/")} className="bg-primary">
+        <Button onClick={() => setLocation("/home")} className="bg-primary">
           Got it - Return to ReCircle
         </Button>
       </div>
