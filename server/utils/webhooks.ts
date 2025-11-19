@@ -499,7 +499,8 @@ export async function logReceiptToGoogleSheets(
     sustainableCategory?: string;
     preOwnedKeywordsFound?: string[];
     paymentMethod?: any;
-  }
+  },
+  hostFallback?: string
 ) {
   try {
     // Log webhook invocation details for debugging
@@ -658,11 +659,12 @@ export async function logReceiptToGoogleSheets(
       app_version: '1.0.4', // Updated version to track this key format change
       
       // Receipt image URL for manual review (secure, token-based)
+      // Use production domain in production, dev domain in development with safe fallbacks
       imageUrl: (receiptData.id && receiptData.viewToken) 
-        ? `https://${process.env.REPLIT_DEV_DOMAIN || 'localhost:5000'}/api/receipt-image/${receiptData.id}?token=${receiptData.viewToken}` 
+        ? `https://${process.env.REPLIT_DEPLOYMENT === '1' ? (process.env.REPLIT_DOMAINS?.split(',')[0] || process.env.REPLIT_DEV_DOMAIN || hostFallback || 'localhost:5000') : (process.env.REPLIT_DEV_DOMAIN || hostFallback || 'localhost:5000')}/api/receipt-image/${receiptData.id}?token=${receiptData.viewToken}` 
         : null,
       image_url: (receiptData.id && receiptData.viewToken) 
-        ? `https://${process.env.REPLIT_DEV_DOMAIN || 'localhost:5000'}/api/receipt-image/${receiptData.id}?token=${receiptData.viewToken}` 
+        ? `https://${process.env.REPLIT_DEPLOYMENT === '1' ? (process.env.REPLIT_DOMAINS?.split(',')[0] || process.env.REPLIT_DEV_DOMAIN || hostFallback || 'localhost:5000') : (process.env.REPLIT_DEV_DOMAIN || hostFallback || 'localhost:5000')}/api/receipt-image/${receiptData.id}?token=${receiptData.viewToken}` 
         : null,
       
       // Fraud detection flags for manual review

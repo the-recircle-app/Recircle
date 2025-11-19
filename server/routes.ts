@@ -567,7 +567,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Construct secure image URL with viewToken
-      const imageUrl = `https://${process.env.REPLIT_DEV_DOMAIN || req.get('host') || 'localhost:5000'}/api/receipt-image/${receiptId}?token=${image.viewToken}`;
+      // Use production domain in production, dev domain in development with safe fallbacks
+      const imageUrl = `https://${process.env.REPLIT_DEPLOYMENT === '1' ? (process.env.REPLIT_DOMAINS?.split(',')[0] || process.env.REPLIT_DEV_DOMAIN || req.get('host') || 'localhost:5000') : (process.env.REPLIT_DEV_DOMAIN || req.get('host') || 'localhost:5000')}/api/receipt-image/${receiptId}?token=${image.viewToken}`;
       
       // Return image data with fraud detection info and secure URL
       res.json({
@@ -778,8 +779,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const receiptsWithImages = await Promise.all(
         paginatedReceipts.map(async (receipt: any) => {
           const image = await getReceiptImage(receipt.id);
+          // Use production domain in production, dev domain in development with safe fallbacks
           const imageUrl = image 
-            ? `https://${process.env.REPLIT_DEV_DOMAIN || req.get('host') || 'localhost:5000'}/api/receipt-image/${receipt.id}?token=${image.viewToken}`
+            ? `https://${process.env.REPLIT_DEPLOYMENT === '1' ? (process.env.REPLIT_DOMAINS?.split(',')[0] || process.env.REPLIT_DEV_DOMAIN || req.get('host') || 'localhost:5000') : (process.env.REPLIT_DEV_DOMAIN || req.get('host') || 'localhost:5000')}/api/receipt-image/${receipt.id}?token=${image.viewToken}`
             : null;
           
           return {
@@ -4490,7 +4492,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               userWalletAddress: initialUserData.walletAddress || undefined
             },
             'submission',
-            additionalData
+            additionalData,
+            req.get('host') || undefined // Pass request host for URL fallback
           );
           
           // Set a timeout to ensure the webhook doesn't block API response
