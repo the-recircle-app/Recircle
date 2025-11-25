@@ -3757,6 +3757,97 @@ export async function registerRoutes(app: Express): Promise<Server> {
         log(`Thrift store ${storeNameProvided} detected - Original flags: sentForManualReview=${sentForManualReview}, isTimeoutFallback=${isTimeoutFallback}, aiTestMode=${aiTestMode}`, "receipts");
       }
       
+      // CRITICAL OVERRIDE: Auto-approve well-known rideshare services with high confidence
+      // SECURITY: Only trust server-side AI analysis, NOT client-provided data
+      // This override ONLY applies when:
+      //   1. AI analysis says it's a sustainable transport category (server-side OpenAI result)
+      //   2. Store name from AI matches known rideshare services
+      //   3. Confidence is 0.8 or higher
+      //   4. NOT a food delivery service
+      
+      // ONLY use AI analysis result - DO NOT use client req.body values for security
+      const aiStoreName = (analysisResult.storeName || '').toLowerCase().trim();
+      const aiCategory = (analysisResult.purchaseCategory || analysisResult.sustainableCategory || '').toLowerCase();
+      const aiIsValid = analysisResult.isValid === true;
+      const aiIsSustainable = analysisResult.isSustainableStore === true;
+      
+      // Skip override entirely if we don't have trusted AI analysis
+      const hasValidAIAnalysis = aiStoreName && aiCategory && aiIsValid;
+      
+      if (hasValidAIAnalysis) {
+        // BLOCKLIST: Explicitly exclude food delivery services
+        const isFoodDeliveryService = 
+          aiStoreName.includes('uber eats') ||
+          aiStoreName.includes('ubereats') ||
+          aiStoreName.includes('doordash') ||
+          aiStoreName.includes('grubhub') ||
+          aiStoreName.includes('postmates') ||
+          aiStoreName.includes('deliveroo') ||
+          aiStoreName.includes('instacart') ||
+          aiStoreName.includes('seamless') ||
+          aiCategory === 'food' ||
+          aiCategory === 'food_delivery' ||
+          aiCategory === 'restaurant';
+        
+        // Category must be a sustainable transport category from AI analysis
+        const isAITransportCategory = 
+          aiCategory === 'ride_share' ||
+          aiCategory === 'rideshare' ||
+          aiCategory === 'public_transit' ||
+          aiCategory === 'transit' ||
+          aiCategory === 'ev_rental' ||
+          aiCategory === 'electric_vehicle' ||
+          aiCategory === 'micro_mobility' ||
+          aiCategory === 'transportation';
+        
+        // STRICT: Only EXACT rideshare company names from AI AND must have transport category from AI
+        const isExactRideshareMatch = isAITransportCategory && aiIsSustainable && (
+          aiStoreName === 'uber' || 
+          aiStoreName === 'lyft' || 
+          aiStoreName === 'waymo' ||
+          aiStoreName === 'bolt' ||
+          aiStoreName === 'grab' ||
+          aiStoreName === 'didi' ||
+          aiStoreName === 'ola' ||
+          aiStoreName === 'curb' ||
+          aiStoreName === 'via'
+        );
+        
+        // For transit: REQUIRE the transport category from AI
+        const isTransitWithCategory = isAITransportCategory && aiIsSustainable && (
+          aiStoreName.includes('metro') ||
+          aiStoreName.includes('transit') ||
+          aiStoreName.includes('mta') ||
+          aiStoreName.includes('bart') ||
+          aiStoreName.includes('caltrain') ||
+          aiStoreName.includes('amtrak')
+        );
+        
+        // For EV rentals: REQUIRE the transport category from AI
+        const isEVRentalWithCategory = isAITransportCategory && aiIsSustainable && (
+          aiStoreName.includes('tesla') ||
+          aiStoreName.includes('hertz') ||
+          aiStoreName.includes('zipcar') ||
+          aiStoreName.includes('turo')
+        );
+        
+        // SAFE: All conditions from AI + NOT food delivery
+        const isKnownSustainableTransport = 
+          !isFoodDeliveryService && (
+            isExactRideshareMatch || 
+            isTransitWithCategory || 
+            isEVRentalWithCategory
+          );
+        
+        if (isKnownSustainableTransport && confidenceLevel >= 0.8) {
+          needsManualReview = false;
+          
+          const serviceType = isExactRideshareMatch ? 'rideshare' : isTransitWithCategory ? 'public transit' : 'EV rental';
+          log(`⚠️ CRITICAL OVERRIDE: Forcing bypass of ALL manual reviews for verified ${serviceType} service ${aiStoreName} with confidence ${confidenceLevel}`, "receipts");
+          log(`${serviceType} ${aiStoreName} detected - AI Category: ${aiCategory}, AI Valid: ${aiIsValid}, AI Sustainable: ${aiIsSustainable}`, "receipts");
+        }
+      }
+      
       // ADDITIONAL OVERRIDE: For test mode receipts, conditionally bypass manual review
       // NOW INCLUDING public transit receipts for testing blockchain distribution
       const isFromTestMode = req.body.isTestMode === true || analysisResult.testMode === true;

@@ -318,7 +318,16 @@ export async function distributeTreasuryReward(
       
       if (!appSubmitResponse.ok) {
         const errorText = await appSubmitResponse.text();
-        console.warn(`⚠️ App fund transaction failed: ${appSubmitResponse.status} - ${errorText}`);
+        console.error(`❌ APP FUND TRANSACTION FAILED!`);
+        console.error(`❌ Status: ${appSubmitResponse.status}`);
+        console.error(`❌ Error: ${errorText}`);
+        
+        // Check for common failure reasons
+        if (errorText.toLowerCase().includes('insufficient') || errorText.toLowerCase().includes('balance')) {
+          console.error(`❌ LIKELY CAUSE: Insufficient VTHO (gas) in distributor wallet!`);
+          console.error(`❌ ACTION REQUIRED: Add VTHO to the distributor wallet to enable app fund transactions`);
+        }
+        
         appTxHash = 'failed';
       } else {
         const appSubmitResult = await appSubmitResponse.json();
