@@ -9,13 +9,13 @@ import "./index.css";
 // Conditional gate wrapper - re-evaluates on every route change
 function ConditionalGate({ children }: { children: React.ReactNode }) {
   const [location] = useLocation(); // Reactive - triggers re-render on navigation
-  const adminRoutes = ['/admin-stats-2025', '/admin/debug-tools'];
-  const isAdminRoute = adminRoutes.some(route => location.startsWith(route));
+  const publicRoutes = ['/admin-stats-2025', '/admin/debug-tools', '/foundations'];
+  const isPublicRoute = publicRoutes.some(route => location.startsWith(route));
 
-  console.log('[CONDITIONAL-GATE] Location:', location, 'isAdmin:', isAdminRoute);
+  console.log('[CONDITIONAL-GATE] Location:', location, 'isPublic:', isPublicRoute);
 
-  // Admin routes bypass the VeWorld gate (desktop-accessible)
-  if (isAdminRoute) {
+  // Public routes bypass the VeWorld gate (desktop-accessible)
+  if (isPublicRoute) {
     return <>{children}</>;
   }
 

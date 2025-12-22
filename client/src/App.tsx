@@ -49,6 +49,7 @@ import Debug from "./pages/debug";
 import VeWorldDebugPage from "./pages/VeWorldDebugPage";
 import TermsOfService from "./pages/terms-of-service";
 import SoloSetupPage from "./pages/solo-setup";
+import RecognizingEverydaySustainability from "./pages/foundations/recognizing-everyday-sustainability";
 import { PierreVeBetterDAOTest } from "./pages/pierre-vebetterdao-test";
 import { DebugPage } from "./pages/DebugPage";
 import OfficialVeChainKitTest from "./pages/official-vechain-kit-test";
@@ -102,6 +103,9 @@ function Router() {
       <Route path="/admin/pending-submissions" component={PendingSubmissionsAdmin} />
       <Route path="/admin/debug-tools" component={DebugToolsPage} />
       <Route path="/admin-stats-2025" component={AdminStatsPage} />
+      
+      {/* Public content pages (bypass VeWorld gate) */}
+      <Route path="/foundations/recognizing-everyday-sustainability" component={RecognizingEverydaySustainability} />
       
       {/* Protected routes - require wallet connection */}
       <Route path="/scan">
