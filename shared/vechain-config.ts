@@ -17,6 +17,7 @@ export interface VeChainNetworkConfig {
   contracts: {
     b3trToken: string;
     x2earnRewardsPool: string;
+    vePassport: string;
   };
 }
 
@@ -56,7 +57,8 @@ const NETWORK_CONFIGS: Record<VeChainNetwork, VeChainNetworkConfig> = {
     sponsorUrl: getClientEnvVar('VECHAIN_TESTNET_SPONSOR_URL') || 'https://sponsor-testnet.vechain.energy/by/441',
     contracts: {
       b3trToken: process.env.B3TR_CONTRACT_ADDRESS || '0xbf64cf86894Ee0877C4e7d03936e35Ee8D8b864F',
-      x2earnRewardsPool: process.env.X2EARNREWARDSPOOL_ADDRESS || '0x5F8f86B8D0Fa93cdaE20936d150175dF0205fB38'
+      x2earnRewardsPool: process.env.X2EARNREWARDSPOOL_ADDRESS || '0x5F8f86B8D0Fa93cdaE20936d150175dF0205fB38',
+      vePassport: '' // VePassport not available on testnet - skip check
     }
   },
   mainnet: {
@@ -72,7 +74,8 @@ const NETWORK_CONFIGS: Record<VeChainNetwork, VeChainNetworkConfig> = {
     sponsorUrl: getClientEnvVar('VECHAIN_MAINNET_SPONSOR_URL'),
     contracts: {
       b3trToken: getClientEnvVar('B3TR_CONTRACT_ADDRESS_MAINNET'),
-      x2earnRewardsPool: getClientEnvVar('X2EARNREWARDSPOOL_ADDRESS_MAINNET')
+      x2earnRewardsPool: getClientEnvVar('X2EARNREWARDSPOOL_ADDRESS_MAINNET'),
+      vePassport: '0x35a267671d8EDD607B2056A9a13E7ba7CF53c8b3' // VePassport mainnet contract
     }
   }
 };

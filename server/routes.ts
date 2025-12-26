@@ -140,6 +140,7 @@ import { logReceiptToGoogleSheets, sendReceiptForManualReview } from "./utils/we
 import { updateApprovedReceiptStatus } from "./utils/updateWebhooks";
 import { sendReward, convertB3TRToWei, getReceiptProofData } from "./utils/distributeReward-hybrid";
 import { storeReceiptImage, getReceiptImage, getReceiptImageByToken, calculateImageHash, getImageByHash } from "./utils/imageStorage";
+import { shouldBlockReward } from "./utils/vepassport";
 import { z } from "zod";
 import { log } from "./vite";
 
@@ -4258,7 +4259,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Declare distributionResult in broader scope for access in response
         let distributionResult: any = null;
         
-        if (shouldAwardTokens) {
+        // Use wallet address from database (simple method)
+        const targetWallet = initialUserData.walletAddress;
+        
+        // ===== VEPASSPORT CHECK: Bot/Fraud Protection (BEFORE any rewards) =====
+        // Check if wallet is flagged by VeBetterDAO community BEFORE distributing rewards or updating balances
+        let vePassportBlocked = false;
+        if (shouldAwardTokens && targetWallet) {
+          const vePassportCheck = await shouldBlockReward(targetWallet);
+          
+          if (vePassportCheck.blocked) {
+            console.log(`[VEPASSPORT] ⚠️ Wallet ${targetWallet} blocked from rewards: ${vePassportCheck.reason}`);
+            vePassportBlocked = true;
+            distributionResult = {
+              success: false,
+              error: vePassportCheck.reason,
+              vePassportBlocked: true,
+              vePassportStatus: vePassportCheck.status,
+              userAmount: 0,
+              appAmount: 0
+            };
+          } else if (vePassportCheck.status?.checked) {
+            console.log(`[VEPASSPORT] ✅ Wallet ${targetWallet} passed VePassport check`);
+          }
+        }
+        
+        // Only award tokens if NOT blocked by VePassport
+        if (shouldAwardTokens && !vePassportBlocked) {
           const newBalance = (initialUserData.tokenBalance || 0) + totalRewards;
           console.log(`${isTestModeReceipt ? 'TEST MODE - ' : ''}Updating user balance: ${initialUserData.tokenBalance || 0} + ${totalRewards} = ${newBalance}`);
           await storage.updateUserTokenBalance(
@@ -4269,9 +4296,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // ===== CRITICAL: TRIGGER REAL BLOCKCHAIN DISTRIBUTION =====
           // FORCE EXECUTION - Real B3TR tokens to actual VeWorld wallet
           console.log(`[BLOCKCHAIN] 🚀 FORCED EXECUTION: Distributing ${totalRewards} B3TR to VeWorld wallet`);
-          
-          // Use wallet address from database (simple method)
-          const targetWallet = initialUserData.walletAddress;
           
           console.log(`[BLOCKCHAIN] User wallet: ${targetWallet}`);
           console.log(`[BLOCKCHAIN] User ID: ${initialUserData.id}`);
@@ -4383,8 +4407,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
               }
             }
           }
-        } else {
+        }
+        
+        // Handle case where tokens shouldn't be awarded (manual review needed) OR VePassport blocked
+        if (!shouldAwardTokens) {
           console.log(`NOT updating token balance because receipt needs manual review. Current balance: ${initialUserData.tokenBalance}`);
+        } else if (vePassportBlocked) {
+          console.log(`[VEPASSPORT] NOT updating token balance because wallet is flagged. Current balance: ${initialUserData.tokenBalance}`);
         }
         
         // Track the achievement if it was awarded
@@ -4526,7 +4555,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             userVthoBalance: distributionResult?.sponsoring?.userVTHOBalance || null,
             sponsoringMessage: distributionResult?.sponsoring?.userMessage || null,
             treasuryDepleted: distributionResult?.treasuryDepleted || false,
-            blockchainSuccess: distributionResult?.success || false
+            blockchainSuccess: distributionResult?.success || false,
+            vePassportBlocked: distributionResult?.vePassportBlocked || false,
+            vePassportMessage: distributionResult?.vePassportBlocked 
+              ? "Your wallet has been flagged by the VeBetterDAO community. Please visit VeBetterDAO to learn more about VePassport verification and how to restore your status."
+              : null
           },
           updatedUser
         };
