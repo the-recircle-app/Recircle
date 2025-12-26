@@ -10,6 +10,9 @@ ReCircle is a mobile-only blockchain-powered rewards platform designed to incent
 
 ## Recent Changes
 
+### December 26, 2025
+- **VePassport Bot Signaling Integration**: Integrated VeBetterDAO's VePassport contract for bot detection. Before distributing rewards, the app checks if a wallet has been flagged by the community. Flagged wallets are blocked from receiving rewards with a friendly message. This is a READ-ONLY integration (no endorsement required) that demonstrates commitment to bot protection. The check only runs on mainnet - testnet development is unaffected.
+
 ### November 16, 2025
 - **Treasury Depletion UX**: Added friendly messaging when VeBetterDAO treasury runs out of B3TR tokens. Instead of generic errors, users see encouraging messages celebrating the app's popularity and prompting them to vote for ReCircle on VeBetterDAO. Backend detects "Insufficient treasury funds" errors and passes `treasuryDepleted: true` flag to frontend, which displays custom positive messaging.
 
@@ -48,6 +51,7 @@ Preferred communication style: Simple, everyday language.
 
 ### Key Features
 - **Receipt Validation**: Multi-tier system using OpenAI Vision API (GPT-4o) for content analysis, fraud detection (SHA-256 hashing, duplicate prevention), and auto-approval.
+- **VePassport Integration**: Checks VeBetterDAO's VePassport contract before distributing rewards to block flagged/bot wallets (mainnet only).
 - **Transportation Services Database**: Comprehensive database of sustainable transport options.
 - **Achievement System**: Gamified progression with blockchain-verified milestones and CO₂ savings tracking.
 - **Referral System**: Rewards inviters with B3TR upon invitee's first valid receipt, using referral codes for VeWorld-compatible sharing.
