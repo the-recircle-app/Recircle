@@ -89,9 +89,6 @@ import { distributeTreasuryReward, distributeTreasuryRewardWithSponsoring, check
 import { getSoloB3TRBalance } from "./utils/solo-b3tr-real";
 import { PierreContractsService } from "./utils/pierre-contracts-service";
 import { saveValidationResult, getAndDeleteValidationResult } from "./utils/validationCache";
-import { checkDailyActionLimit, MAX_DAILY_ACTIONS } from "./utils/dailyActions";
-import { storeReceiptImage, calculateImageHash } from "./utils/imageStorage";
-
 
 // VeChain addresses for creator wallet and app sustainability fund
 // These are loaded from environment variables for security and flexibility
@@ -141,6 +138,8 @@ import { updateApprovedReceiptStatus } from "./utils/updateWebhooks";
 import { sendReward, convertB3TRToWei, getReceiptProofData } from "./utils/distributeReward-hybrid";
 import { storeReceiptImage, getReceiptImage, getReceiptImageByToken, calculateImageHash, getImageByHash } from "./utils/imageStorage";
 import { shouldBlockReward } from "./utils/vepassport";
+import { checkBanStatus, shouldBlockReward as shouldBlockByBanList, addToBanList, removeFromBanList, getBannedUsers, getBanHistory } from "./utils/banList";
+import { cleanupOldImages, getStorageStats } from "./utils/imageCleanup";
 import { z } from "zod";
 import { log } from "./vite";
 
@@ -669,21 +668,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
       // === USER ENGAGEMENT METRICS ===
+      // Use lastActivityDate field from schema (updated when users submit receipts or authenticate)
       const dailyActiveUsers = allUsers.filter(u => 
-        u.lastLoginAt && new Date(u.lastLoginAt) >= oneDayAgo
+        u.lastActivityDate && new Date(u.lastActivityDate) >= oneDayAgo
       ).length;
       
       const weeklyActiveUsers = allUsers.filter(u => 
-        u.lastLoginAt && new Date(u.lastLoginAt) >= oneWeekAgo
+        u.lastActivityDate && new Date(u.lastActivityDate) >= oneWeekAgo
       ).length;
       
       const monthlyActiveUsers = allUsers.filter(u => 
-        u.lastLoginAt && new Date(u.lastLoginAt) >= oneMonthAgo
+        u.lastActivityDate && new Date(u.lastActivityDate) >= oneMonthAgo
       ).length;
 
-      const newUsersThisWeek = allUsers.filter(u => 
-        new Date(u.createdAt) >= oneWeekAgo
-      ).length;
+      // Count new users based on their first receipt (since users table doesn't have createdAt)
+      const newUsersThisWeek = allUsers.filter(u => {
+        const userReceipts = allReceipts.filter(r => r.userId === u.id);
+        if (userReceipts.length === 0) return false;
+        const firstReceipt = userReceipts.sort((a, b) => 
+          new Date(a.createdAt!).getTime() - new Date(b.createdAt!).getTime()
+        )[0];
+        return firstReceipt && new Date(firstReceipt.createdAt!) >= oneWeekAgo;
+      }).length;
 
       const returningUsers = allUsers.filter(u => {
         const userReceipts = allReceipts.filter(r => r.userId === u.id);
@@ -4265,7 +4271,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // ===== VEPASSPORT CHECK: Bot/Fraud Protection (BEFORE any rewards) =====
         // Check if wallet is flagged by VeBetterDAO community BEFORE distributing rewards or updating balances
         let vePassportBlocked = false;
+        let internalBanBlocked = false;
+        let requiresManualReviewDueToBan = false;
+        
         if (shouldAwardTokens && targetWallet) {
+          // Check VePassport (ecosystem-wide bot detection)
           const vePassportCheck = await shouldBlockReward(targetWallet);
           
           if (vePassportCheck.blocked) {
@@ -4282,10 +4292,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
           } else if (vePassportCheck.status?.checked) {
             console.log(`[VEPASSPORT] ✅ Wallet ${targetWallet} passed VePassport check`);
           }
+          
+          // Check internal ban list (admin-controlled restrictions)
+          if (!vePassportBlocked) {
+            const banListCheck = await shouldBlockByBanList(targetWallet);
+            
+            if (banListCheck.blocked) {
+              console.log(`[BAN-LIST] ⚠️ Wallet ${targetWallet} blocked by internal ban list: ${banListCheck.reason}`);
+              internalBanBlocked = true;
+              distributionResult = {
+                success: false,
+                error: banListCheck.reason,
+                internalBanBlocked: true,
+                userAmount: 0,
+                appAmount: 0
+              };
+            } else if (banListCheck.requiresManualReview) {
+              console.log(`[BAN-LIST] ⚠️ Wallet ${targetWallet} flagged for manual review (soft ban)`);
+              requiresManualReviewDueToBan = true;
+              // Don't block, but flag for manual review
+              needsManualReview = true;
+            }
+          }
         }
         
-        // Only award tokens if NOT blocked by VePassport
-        if (shouldAwardTokens && !vePassportBlocked) {
+        // Only award tokens if NOT blocked by VePassport or internal ban list
+        if (shouldAwardTokens && !vePassportBlocked && !internalBanBlocked) {
           const newBalance = (initialUserData.tokenBalance || 0) + totalRewards;
           console.log(`${isTestModeReceipt ? 'TEST MODE - ' : ''}Updating user balance: ${initialUserData.tokenBalance || 0} + ${totalRewards} = ${newBalance}`);
           await storage.updateUserTokenBalance(
@@ -5800,6 +5832,133 @@ app.post("/api/treasury/test-distribution", async (req: Request, res: Response) 
         message: "Failed to approve submission",
         error: error instanceof Error ? error.message : 'Unknown error'
       });
+    }
+  });
+
+  // ====== ADMIN BAN LIST MANAGEMENT ======
+  
+  app.get("/api/admin/ban-list", adminRateLimit, requireAuth, requireAdmin, async (req: Request, res: Response) => {
+    try {
+      const includeInactive = req.query.includeInactive === 'true';
+      const bannedUsers = await getBannedUsers(includeInactive);
+      res.json({ 
+        success: true, 
+        count: bannedUsers.length,
+        bannedUsers 
+      });
+    } catch (error) {
+      console.error("Error fetching ban list:", error);
+      res.status(500).json({ error: "Failed to fetch ban list" });
+    }
+  });
+
+  app.post("/api/admin/ban-user", adminRateLimit, requireAuth, requireAdmin, async (req: Request, res: Response) => {
+    try {
+      const { walletAddress, banType, reason } = req.body;
+      const adminWallet = req.headers['x-wallet-address'] as string || 'admin';
+      
+      if (!walletAddress || !reason) {
+        return res.status(400).json({ error: "walletAddress and reason are required" });
+      }
+
+      const validBanType = banType === 'soft' ? 'soft' : 'hard';
+      
+      const ban = await addToBanList(walletAddress, validBanType, reason, adminWallet);
+      
+      console.log(`[ADMIN] User banned: ${walletAddress} (${validBanType}) by ${adminWallet}`);
+      
+      res.json({ 
+        success: true, 
+        message: `User ${walletAddress} has been ${validBanType === 'hard' ? 'blocked' : 'flagged for manual review'}`,
+        ban 
+      });
+    } catch (error) {
+      console.error("Error banning user:", error);
+      res.status(500).json({ error: "Failed to ban user" });
+    }
+  });
+
+  app.post("/api/admin/unban-user", adminRateLimit, requireAuth, requireAdmin, async (req: Request, res: Response) => {
+    try {
+      const { walletAddress } = req.body;
+      
+      if (!walletAddress) {
+        return res.status(400).json({ error: "walletAddress is required" });
+      }
+
+      const removed = await removeFromBanList(walletAddress);
+      
+      if (removed) {
+        console.log(`[ADMIN] User unbanned: ${walletAddress}`);
+        res.json({ 
+          success: true, 
+          message: `User ${walletAddress} has been unbanned` 
+        });
+      } else {
+        res.status(404).json({ 
+          success: false, 
+          message: "User not found in ban list or already unbanned" 
+        });
+      }
+    } catch (error) {
+      console.error("Error unbanning user:", error);
+      res.status(500).json({ error: "Failed to unban user" });
+    }
+  });
+
+  app.get("/api/admin/ban-history/:walletAddress", adminRateLimit, requireAuth, requireAdmin, async (req: Request, res: Response) => {
+    try {
+      const { walletAddress } = req.params;
+      const history = await getBanHistory(walletAddress);
+      res.json({ 
+        success: true, 
+        walletAddress,
+        history 
+      });
+    } catch (error) {
+      console.error("Error fetching ban history:", error);
+      res.status(500).json({ error: "Failed to fetch ban history" });
+    }
+  });
+
+  // ====== ADMIN IMAGE STORAGE MANAGEMENT ======
+  
+  app.get("/api/admin/storage-stats", adminRateLimit, requireAuth, requireAdmin, async (req: Request, res: Response) => {
+    try {
+      const stats = await getStorageStats();
+      res.json({ 
+        success: true, 
+        stats,
+        retentionDays: 30
+      });
+    } catch (error) {
+      console.error("Error fetching storage stats:", error);
+      res.status(500).json({ error: "Failed to fetch storage stats" });
+    }
+  });
+
+  app.post("/api/admin/cleanup-images", adminRateLimit, requireAuth, requireAdmin, async (req: Request, res: Response) => {
+    try {
+      console.log("[ADMIN] Starting image cleanup...");
+      const result = await cleanupOldImages();
+      
+      if (result.success) {
+        console.log(`[ADMIN] Image cleanup completed: ${result.deletedCount} images deleted`);
+        res.json({ 
+          success: true, 
+          message: `Cleaned up ${result.deletedCount} images older than 30 days`,
+          ...result
+        });
+      } else {
+        console.error("[ADMIN] Image cleanup failed:", result.error);
+        res.status(500).json({ 
+          success: false, 
+          error: result.error 
+        });
+      }
+    } catch (error) {
+      console.error("Error during image cleanup:", error);
+      res.status(500).json({ error: "Failed to cleanup images" });
     }
   });
 

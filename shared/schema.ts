@@ -227,4 +227,25 @@ export type ThriftStore = Store;
 export type InsertThriftStore = InsertStore;
 export const thriftStores = sustainableStores;
 
+// Internal ban list for admin-controlled user restrictions
+export const bannedUsers = pgTable("banned_users", {
+  id: serial("id").primaryKey(),
+  walletAddress: text("wallet_address").notNull(),
+  banType: text("ban_type").notNull().default("hard"), // "hard" = blocked entirely, "soft" = manual review only
+  reason: text("reason").notNull(),
+  bannedBy: text("banned_by").notNull(), // Admin wallet who banned
+  bannedAt: timestamp("banned_at").defaultNow(),
+  unbannedAt: timestamp("unbanned_at"), // Set when unbanned
+  isActive: boolean("is_active").default(true).notNull(),
+}, (table) => ({
+  walletIdx: index("banned_users_wallet_idx").on(table.walletAddress),
+  activeIdx: index("banned_users_active_idx").on(table.isActive),
+}));
+
+export const insertBannedUserSchema = createInsertSchema(bannedUsers)
+  .omit({ id: true, bannedAt: true, unbannedAt: true });
+
+export type InsertBannedUser = z.infer<typeof insertBannedUserSchema>;
+export type BannedUser = typeof bannedUsers.$inferSelect;
+
 // Note: Database indexes will be added in a separate migration for production optimization
