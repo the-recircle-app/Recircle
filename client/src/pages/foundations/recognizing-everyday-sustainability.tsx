@@ -200,12 +200,19 @@ export default function RecognizingEverydaySustainability() {
         </article>
 
         <div className="mt-16 pt-8 border-t border-gray-200">
-          <p className="text-sm text-gray-500">
-            ReCircle is a sustainability rewards platform built on VeChain. 
-            <Link href="/">
-              <a className="text-emerald-600 hover:text-emerald-700 ml-1">Learn more</a>
-            </Link>
-          </p>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <p className="text-sm text-gray-500">
+              ReCircle is a sustainability rewards platform built on VeChain.
+            </p>
+            <div className="flex gap-4 text-sm">
+              <Link href="/foundations/verification-safeguards">
+                <a className="text-emerald-600 hover:text-emerald-700">Verification & Safeguards</a>
+              </Link>
+              <Link href="/">
+                <a className="text-emerald-600 hover:text-emerald-700">Learn more</a>
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </div>

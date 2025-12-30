@@ -11,6 +11,7 @@ ReCircle is a mobile-only blockchain-powered rewards platform designed to incent
 ## Recent Changes
 
 ### December 30, 2025
+- **Verification & Safeguards Public Page**: Added public-facing page at /foundations/verification-safeguards explaining ReCircle's verification philosophy and anti-abuse safeguards. Includes Open Graph meta tags for X/Discord link previews. Linked from the other foundations page.
 - **Internal Ban List System**: Added admin-controlled ban system for wallet restrictions. Supports "hard" bans (block rewards entirely) and "soft" bans (force manual review). Admin endpoints: GET /api/admin/ban-list, POST /api/admin/ban-user, POST /api/admin/unban-user, GET /api/admin/ban-history/:wallet. Ban check runs after VePassport, before reward distribution.
 - **Image Storage Cleanup**: Added automated cleanup for receipt images older than 30 days. Admin endpoints: GET /api/admin/storage-stats, POST /api/admin/cleanup-images. Includes storage statistics and retention management.
 - **Fixed Analytics User Engagement Metrics**: Daily/weekly/monthly active user counts now correctly use lastActivityDate instead of non-existent lastLoginAt field. Also fixed newUsersThisWeek calculation to use first receipt date.
