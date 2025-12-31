@@ -55,69 +55,148 @@ export default function VerificationSafeguards() {
           </h1>
 
           <p className="lead text-xl text-gray-600 mb-8">
-            ReCircle is designed to recognize verified sustainable transportation activity while minimizing abuse, farming, and low-quality submissions. This page explains how verification works and the safeguards in place today.
+            ReCircle is designed to recognize verified sustainable transportation activity while minimizing abuse, farming, and low-quality submissions. This page explains how verification works and the safeguards currently in place.
+          </p>
+
+          <p className="text-gray-700 mb-8">
+            Our approach is intentionally conservative: when verification is uncertain or systems fail, rewards are not issued by default.
           </p>
 
           <h2>What ReCircle Supports</h2>
           <p>
-            ReCircle currently supports transportation receipts such as:
+            ReCircle currently supports verified transportation receipts, including:
           </p>
           <ul>
-            <li>Rideshare (e.g., Uber/Lyft)</li>
-            <li>Public transit (bus, rail, etc.)</li>
+            <li>Rideshare</li>
+            <li>Public transportation (bus, rail, light rail)</li>
             <li>EV rentals</li>
             <li>Shared micromobility (scooters, bikes)</li>
           </ul>
           <p>
-            The goal is to recognize choices many people already make, without requiring behavior change or "gamified" activity loops.
+            The goal is to recognize real-world transportation choices people already make, without requiring artificial behavior change, gamified loops, or excessive user friction.
           </p>
 
           <h2>How Verification Works</h2>
           <p>
-            When a receipt is submitted, ReCircle extracts key details such as merchant/service, date, amount, and category. If verification is uncertain, the receipt is routed to manual review rather than being automatically approved. ReCircle is intentionally conservative: if a receipt cannot be verified with sufficient confidence, it is not automatically rewarded.
+            When a receipt is submitted, ReCircle extracts key attributes such as the service or merchant, date, amount, and transportation category.
           </p>
-
-          <h2>Anti-Abuse Safeguards</h2>
           <p>
-            ReCircle uses multiple layers of protection to reduce farming and abuse:
+            Verification is AI-assisted and confidence-based:
           </p>
           <ul>
-            <li>Duplicate and replay prevention (prevents re-submissions and near-duplicates)</li>
-            <li>Conservative limits and throttling to reduce spam patterns</li>
-            <li>Manual review routing for uncertain or suspicious cases</li>
+            <li>Receipts that can be verified with sufficient confidence proceed</li>
+            <li>Receipts that are unclear or inconsistent are routed to manual review</li>
+            <li>Receipts that fail verification are not rewarded</li>
           </ul>
-
-          <h2>Internal Safeguards</h2>
           <p>
-            In addition to ecosystem-level screening, ReCircle maintains app-level safeguards, including internal wallet restrictions that can block rewards or route activity to manual review when patterns indicate abuse. These controls are used conservatively and prioritize verification quality over volume.
+            ReCircle prioritizes verification quality over volume. Unclear submissions are not automatically approved.
           </p>
 
-          <h2>Bot / Bad-Actor Screening</h2>
+          <h2>Anti-Abuse & Farming Protections</h2>
           <p>
-            Where applicable on mainnet, ReCircle checks VeBetterDAO's VePassport signals before rewarding. If a wallet is flagged as a known bad actor, rewards are blocked.
+            ReCircle applies multiple overlapping safeguards to reduce abuse and farming patterns, including:
+          </p>
+          <ul>
+            <li>Duplicate and replay detection to prevent re-submissions</li>
+            <li>Pattern-based checks across receipt attributes</li>
+            <li>Conservative usage limits to reduce high-frequency abuse</li>
+            <li>Submission throttling to deter automated or scripted activity</li>
+          </ul>
+          <p>
+            These controls are designed to deter both obvious and subtle farming without impacting legitimate users.
+          </p>
+
+          <h2>Enforcement & Internal Safeguards</h2>
+          <p>
+            In addition to ecosystem-level screening, ReCircle maintains app-level enforcement controls:
+          </p>
+          <ul>
+            <li>Wallets may be restricted from receiving rewards when patterns indicate abuse</li>
+            <li>Some restrictions fully block rewards; others route activity to manual review</li>
+            <li>Enforcement is applied before reward distribution, not after</li>
+          </ul>
+          <p>
+            Controls are used conservatively and are based on observed behavior over time rather than single events.
+          </p>
+
+          <h2>Bot & Bad-Actor Screening</h2>
+          <p>
+            Where applicable on mainnet, ReCircle checks VeBetterDAO VePassport signals prior to issuing rewards.
+          </p>
+          <ul>
+            <li>Wallets flagged as known bots or bad actors are blocked from receiving rewards</li>
+            <li>These checks supplement, rather than replace, internal safeguards</li>
+          </ul>
+
+          <h2>Manual Review</h2>
+          <p>
+            Certain receipts are intentionally routed to human review, including:
+          </p>
+          <ul>
+            <li>Low-confidence or unclear receipts</li>
+            <li>Receipt formats that vary significantly by region or provider</li>
+            <li>Submissions associated with elevated risk signals</li>
+          </ul>
+          <p>
+            While under review:
+          </p>
+          <ul>
+            <li>Rewards are not issued</li>
+            <li>Approval is required before any distribution occurs</li>
+          </ul>
+          <p>
+            This ensures uncertain cases are handled deliberately rather than automatically.
           </p>
 
           <h2>Transparency & Auditability</h2>
           <p>
-            ReCircle maintains an auditable trail of receipt outcomes and reward history. Operational logging supports investigations and debugging so safeguards can improve over time without relying on guesswork.
+            ReCircle maintains traceability across verification and rewards:
+          </p>
+          <ul>
+            <li>Receipt outcomes are recorded</li>
+            <li>Reward distributions are linked to verified actions</li>
+            <li>Operational logging supports investigation and iteration</li>
+          </ul>
+          <p>
+            This allows safeguards to improve over time without relying on guesswork.
           </p>
 
-          <h2>Data Retention</h2>
+          <h2>Data Retention & Privacy</h2>
           <p>
-            Receipt images are retained for a limited period and automatically cleaned up under a retention policy (currently 30 days), balancing verification needs with responsible data handling.
+            Receipt images are retained only as long as necessary for verification and review, then automatically cleaned up under a defined retention policy.
+          </p>
+          <p>
+            This balances verification needs with responsible data handling.
           </p>
 
           <h2>Reliability & Fail-Safes</h2>
           <p>
-            ReCircle is built with failure modes in mind. If external services time out or network conditions degrade, receipts are routed safely (for example, to manual review) rather than silently failing.
+            ReCircle is built with failure modes in mind:
+          </p>
+          <ul>
+            <li>If external services time out or fail, receipts are not rewarded</li>
+            <li>If network or blockchain operations fail, rewards are not issued</li>
+            <li>Errors are surfaced explicitly rather than silently ignored</li>
+          </ul>
+          <p>
+            The system fails closed: rewards are only issued when verification and processing complete successfully.
           </p>
 
           <h2>Closing</h2>
           <p>
-            The VeBetterDAO ecosystem is strongest when rewards correspond to real activity and users can trust that incentives are not dominated by low-quality or abusive behavior. ReCircle's posture is simple: recognize verified transportation receipts, keep safeguards conservative, and improve controls iteratively as the ecosystem evolves.
+            The VeBetterDAO ecosystem is strongest when rewards correspond to real activity, and users can trust that incentives are not dominated by low-quality or abusive behavior.
           </p>
           <p>
-            If you have feedback on verification quality or safeguards, constructive input is welcome.
+            ReCircle's posture is simple:
+          </p>
+          <ul>
+            <li>Verify conservatively</li>
+            <li>Enforce before rewarding</li>
+            <li>Fail closed on uncertainty</li>
+            <li>Improve safeguards iteratively as real usage grows</li>
+          </ul>
+          <p>
+            Constructive feedback on verification quality or safeguards is welcome.
           </p>
         </article>
 
